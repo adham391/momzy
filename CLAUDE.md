@@ -537,6 +537,13 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 - **Tailwind فقط** — لا CSS مخصص
 - **Mobile First**
 - **لا تسجيل دخول للعملاء** — الشراء والحجز مجهول كلياً
+- **Clean Code** — كل function هدف واحد، لا تتجاوز 150 سطر
+- **تعليقات عربية** — كل section وfunction موثقة
+- **أسماء واضحة** — تصف الوظيفة بالإنجليزي
+- **لا magic numbers** — كل ثابت له اسم
+- **فصل المسؤوليات** — UI / Logic / Data منفصلة
+- **لا كود مكرر** — أي تكرار يصبح component
+- **Types موثقة** — كل interface مشروحة
 
 ---
 
