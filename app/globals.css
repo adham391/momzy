@@ -1,26 +1,144 @@
 @import "tailwindcss";
 
+/* ── توكنات التصميم ─────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --rose: #F2A7B5;
+  --roselt: #F7C4CE;
+  --rosepale: #FEF5F7;
+  --teal: #82C9C4;
+  --teald: #82C9C4;
+  --tealpale: #EFF8F8;
+  --yellow: #F7DF98;
+  --yellowlt: #FEFBF0;
+  --mint: #A8D8D5;
+  --blue: #3B4FCC;
+  --offwh: #FDFAF5;
+  --cream: #F8F4EE;
+  --white: #FFFFFF;
+  --dark: #252220;
+  --mid: #55504C;
+  --light: #9A9490;
+  --bord: rgba(0, 0, 0, 0.08);
+  --r: 14px;
+  --rl: 22px;
 }
 
+/* ── ربط التوكنات بـ Tailwind v4 ─────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* نقاط التجاوب — Mobile First */
+  --breakpoint-sm: 720px;
+  --breakpoint-md: 1040px;
+  --breakpoint-lg: 1240px;
+
+  /* الألوان */
+  --color-rose: var(--rose);
+  --color-roselt: var(--roselt);
+  --color-rosepale: var(--rosepale);
+  --color-teal: var(--teal);
+  --color-teald: var(--teald);
+  --color-tealpale: var(--tealpale);
+  --color-yellow: var(--yellow);
+  --color-yellowlt: var(--yellowlt);
+  --color-mint: var(--mint);
+  --color-blue: var(--blue);
+  --color-offwh: var(--offwh);
+  --color-cream: var(--cream);
+  --color-dark: var(--dark);
+  --color-mid: var(--mid);
+  --color-light: var(--light);
+  --color-bord: var(--bord);
+
+  /* الخطوط */
+  --font-heading: var(--font-amiri);
+  --font-body: var(--font-tajawal);
+  --font-label: var(--font-nunito);
+
+  /* الحواف */
+  --radius-card: var(--r);
+  --radius-card-lg: var(--rl);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── أنماط عامة ──────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--offwh);
+  color: var(--dark);
+  direction: rtl;
+  overflow-x: hidden;
+  font-family: var(--font-body), sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── شريط التمرير المخصص ────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--roselt);
+  border-radius: 2px;
+}
+
+/* ── الأنيميشن ───────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pgIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── أيقونات سوشال الفوتر ───────────────────────────── */
+.footer-social-icon {
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.footer-social-icon:hover {
+  background: rgba(242, 167, 181, 0.15);
+  border-color: var(--rose) !important;
+  color: white !important;
+  transform: scale(1.1) translateY(-2px);
+}
+
+/* ── أنيميشن الطيران للكاردات ────────────────────────── */
+@keyframes float1 {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-10px) rotate(4deg); }
+}
+@keyframes float3 {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes float4 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-12px) rotate(-3deg); }
+}
+@keyframes float5 {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-9px); }
+}
+
+/* ── badge التنبض في TopBar ──────────────────────────── */
+@keyframes pulse-badge {
+  0%   { box-shadow: 0 0 0 0 rgba(242, 167, 181, 0.7); }
+  70%  { box-shadow: 0 0 0 8px rgba(242, 167, 181, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(242, 167, 181, 0); }
 }
