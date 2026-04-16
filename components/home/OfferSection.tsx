@@ -2,6 +2,7 @@ import Link from "next/link";
 import Container from "@/components/ui/Container";
 import { cn } from "@/lib/utils/cn";
 import { OFFER_CARDS } from "@/lib/utils/constants";
+import PolkaDots from "@/components/ui/PolkaDots";
 
 /** ألوان البار العلوي لكل variant */
 const BAR_GRADIENT: Record<string, string> = {
@@ -28,7 +29,7 @@ const LINK_COLOR: Record<string, string> = {
 export default function OfferSection() {
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية LatestSection ─ */
-    <section className="relative" style={{ marginTop: -40, zIndex: 3 }}>
+    <section className="relative reveal-section" style={{ marginTop: -40, zIndex: 3 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <svg
@@ -41,8 +42,10 @@ export default function OfferSection() {
       </svg>
 
       {/* ── محتوى القسم ── */}
-      <div className="bg-offwh" style={{ marginTop: -1, paddingTop: 40, paddingBottom: 80 }}>
-        <Container>
+      <div className="relative overflow-hidden bg-offwh" style={{ marginTop: -1, paddingTop: 40, paddingBottom: 80 }}>
+        {/* نقاط ديكورية متحركة */}
+        <PolkaDots opacity={0.2} count={18} />
+        <Container className="relative z-[2]">
           {/* العنوان المركزي */}
           <div className="text-center mb-7">
             <h2 className="font-heading text-[clamp(28px,3.5vw,46px)] font-bold text-dark">

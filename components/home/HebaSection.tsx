@@ -3,6 +3,7 @@ import SectionLabel from "@/components/ui/SectionLabel";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 import { HEBA_SERVICES } from "@/lib/utils/constants";
+import PolkaDots from "@/components/ui/PolkaDots";
 
 /** تاقات هبة المهنية */
 const HEBA_TAGS = ["ممرضة معتمدة", "مرشدة رضاعة", "مرافقة ولادة"];
@@ -11,7 +12,7 @@ const HEBA_TAGS = ["ممرضة معتمدة", "مرشدة رضاعة", "مراف
 export default function HebaSection() {
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية OfferSection ─ */
-    <section className="relative" style={{ zIndex: 4 }}>
+    <section className="relative reveal-section" style={{ zIndex: 4 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <svg
@@ -25,11 +26,10 @@ export default function HebaSection() {
 
       {/* ── محتوى القسم ── */}
       <div className="relative overflow-hidden bg-cream" style={{ marginTop: -1, paddingTop: 16, paddingBottom: 80 }}>
-        {/* دوائر ديكورية */}
-        <span className="absolute w-[400px] h-[400px] rounded-full bg-rosepale opacity-60 -top-[100px] -end-[100px] pointer-events-none" />
-        <span className="absolute w-[200px] h-[200px] rounded-full bg-tealpale opacity-70 -bottom-[60px] start-[60px] pointer-events-none" />
+        {/* نقاط ديكورية متحركة */}
+        <PolkaDots colors={["#F2A7B5", "#82C9C4", "#F7DF98", "#A8D8D5"]} opacity={0.2} count={18} />
 
-        <Container>
+<Container>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center relative z-[2]">
 
             {/* العمود البصري — الصورة والمعلومات */}

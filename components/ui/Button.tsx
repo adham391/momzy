@@ -13,8 +13,8 @@ interface ButtonProps {
 
 /** أنماط المتغيرات */
 const VARIANT_STYLES: Record<ButtonProps["variant"], string> = {
-  rose: "bg-rose text-white shadow-[0_4px_16px_rgba(217,105,122,0.35)] hover:shadow-[0_8px_24px_rgba(217,105,122,0.45)]",
-  teal: "bg-teal text-white shadow-[0_4px_16px_rgba(79,168,166,0.3)] hover:shadow-[0_8px_24px_rgba(79,168,166,0.4)]",
+  rose:  "bg-rose text-white shadow-[0_4px_16px_rgba(217,105,122,0.35)] hover:shadow-[0_8px_24px_rgba(217,105,122,0.45)]",
+  teal:  "bg-teal text-white shadow-[0_4px_16px_rgba(79,168,166,0.3)] hover:shadow-[0_8px_24px_rgba(79,168,166,0.4)]",
   white: "bg-white text-teal shadow-[0_4px_16px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.16)]",
   "outline-white":
     "border-[2.5px] border-white/50 text-white hover:bg-white/10 hover:border-white",
@@ -24,7 +24,7 @@ const VARIANT_STYLES: Record<ButtonProps["variant"], string> = {
 
 /** الأنماط المشتركة لكل الأزرار */
 const BASE_STYLES =
-  "inline-flex items-center gap-2 px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-200 hover:-translate-y-0.5";
+  "btn-wobble inline-flex items-center gap-2 px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 transition-opacity duration-75 active:opacity-80";
 
 /** زر متعدد الأنماط — يرندر Link أو button حسب الـ props */
 export default function Button({

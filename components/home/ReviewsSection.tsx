@@ -1,6 +1,7 @@
 import Container from "@/components/ui/Container";
 import { cn } from "@/lib/utils/cn";
 import { REVIEWS } from "@/lib/utils/constants";
+import PolkaDots from "@/components/ui/PolkaDots";
 
 /** عدد النجوم في كل تقييم */
 const STARS_COUNT = 5;
@@ -9,7 +10,7 @@ const STARS_COUNT = 5;
 export default function ReviewsSection() {
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية ArticlesSection ─ */
-    <section className="relative" style={{ marginTop: -40, zIndex: 6 }}>
+    <section className="relative reveal-section" style={{ marginTop: -40, zIndex: 6 }}>
 
       {/* ── موجة أعلى القسم — gradient يطابق خلفية القسم ── */}
       <svg
@@ -26,9 +27,8 @@ export default function ReviewsSection() {
         className="relative overflow-hidden bg-gradient-to-b from-[#F5D98E] to-[#FB9AB4]"
         style={{ marginTop: -1, paddingTop: 16, paddingBottom: 60 }}
       >
-        {/* دوائر ديكورية */}
-        <span className="absolute w-[300px] h-[300px] rounded-full bg-white/15 pointer-events-none" style={{ top: 0, left: -60 }} />
-        <span className="absolute w-[200px] h-[200px] rounded-full bg-white/10 -bottom-[60px] start-10 pointer-events-none" />
+        {/* نقاط ديكورية متحركة */}
+        <PolkaDots colors={["#ffffff", "#FEF5F7", "#FEFBF0"]} opacity={0.2} count={14} />
 
         <Container className="relative z-[2]">
           {/* عنوان القسم */}

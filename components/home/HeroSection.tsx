@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PolkaDots from "@/components/ui/PolkaDots";
 
 /** قسم الهيرو — مطابق للـ prototype */
 export default function HeroSection() {
@@ -7,27 +8,9 @@ export default function HeroSection() {
         className="relative overflow-hidden flex items-center"
         style={{ background: "linear-gradient(140deg,#F2A7B5 0%,#FB9AB4 50%,#DC7A8A 100%)", minHeight: 290, zIndex: 1, position: "relative" }}
       >
-        {/* ── الدوائر الديكورية ─────────────────────────── */}
-        {/* hero-deco1 */}
-        <span
-          className="absolute rounded-full pointer-events-none"
-          style={{ width: 110, height: 110, background: "var(--teal)", opacity: 0.85, top: 32, left: "46%", zIndex: 1 }}
-        />
-        {/* hero-deco2 */}
-        <span
-          className="absolute rounded-full pointer-events-none"
-          style={{ width: 160, height: 160, background: "var(--yellow)", opacity: 0.9, bottom: 55, left: 220, zIndex: 1 }}
-        />
-        {/* hero-deco3 */}
-        <span
-          className="absolute rounded-full pointer-events-none"
-          style={{ width: 110, height: 110, background: "#F5D98E", opacity: 0.8, bottom: 20, left: 60, zIndex: 1 }}
-        />
-        {/* hero-deco4 */}
-        <span
-          className="absolute rounded-full pointer-events-none"
-          style={{ width: 340, height: 340, background: "rgba(255,255,255,0.05)", top: -100, left: "35%", zIndex: 0 }}
-        />
+        {/* ── نقاط ديكورية متحركة ── */}
+        <PolkaDots colors={["#ffffff", "#F7DF98", "#A8D8D5"]} opacity={0.18} count={18} />
+
 
         {/* ── محتوى النص ────────────────────────────────── */}
         <div
@@ -71,7 +54,7 @@ export default function HeroSection() {
             <div className="flex gap-[14px] flex-wrap">
               <a
                 href="/services"
-                className="inline-flex items-center font-bold"
+                className="btn-wobble inline-flex items-center font-bold"
                 style={{
                   background: "white",
                   color: "#82C9C4",
@@ -85,7 +68,7 @@ export default function HeroSection() {
               </a>
               <a
                 href="/shop"
-                className="inline-flex items-center font-bold"
+                className="btn-wobble inline-flex items-center font-bold"
                 style={{
                   background: "#82C9C4",
                   color: "white",

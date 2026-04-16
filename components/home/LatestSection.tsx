@@ -2,12 +2,13 @@ import Link from "next/link";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
 import LatestBigCardBody from "./LatestBigCardBody";
+import PolkaDots from "@/components/ui/PolkaDots";
 
 /** قسم آخر التحديثات — أحدث المنتجات */
 export default function LatestSection() {
   return (
     /** ─ الـ section نفسه شفاف — الـ z-index والـ negative margin يخلقان التداخل ─ */
-    <section className="relative" style={{ marginTop: -40, zIndex: 2 }}>
+    <section className="relative reveal-section" style={{ marginTop: -40, zIndex: 2 }}>
 
       {/* ── موجة أعلى القسم — تغطي نهاية الهيرو بلون القسم الحالي ── */}
       <svg
@@ -33,12 +34,8 @@ export default function LatestSection() {
           marginTop: -1,
         }}
       >
-        {/* ── دوائر ديكورية ── */}
-        <span className="absolute w-[300px] h-[300px] rounded-full pointer-events-none" style={{ background: "rgba(242,167,181,0.25)", top: 0, left: -80 }} />
-        <span className="absolute w-[200px] h-[200px] rounded-full pointer-events-none" style={{ background: "rgba(130,201,196,0.22)", top: 0, left: "35%" }} />
-        <span className="absolute w-[140px] h-[140px] rounded-full pointer-events-none" style={{ background: "rgba(247,223,152,0.50)", top: 0, right: -20 }} />
-        <span className="absolute w-[180px] h-[180px] rounded-full pointer-events-none" style={{ background: "rgba(242,167,181,0.18)", bottom: 20, left: "15%" }} />
-        <span className="absolute w-[130px] h-[130px] rounded-full pointer-events-none" style={{ background: "rgba(247,223,152,0.40)", bottom: -30, right: "10%" }} />
+        {/* ── نقاط ديكورية متحركة ── */}
+        <PolkaDots opacity={0.25} count={18} />
 
         <div className="pb-14">
           <Container className="relative z-[2]">
@@ -92,7 +89,7 @@ export default function LatestSection() {
                       <span className="bg-rosepale text-rose text-[10px] font-semibold px-3 py-1 rounded-xl">✦ كميات محدودة</span>
                     </div>
                   </div>
-                  <span className="inline-flex items-center gap-2 bg-rose text-white shadow-[0_4px_16px_rgba(242,167,181,0.45)] px-7 py-3 rounded-full text-[13px] font-bold w-fit transition-all duration-200 group-hover:shadow-[0_8px_24px_rgba(242,167,181,0.55)] group-hover:-translate-y-0.5">
+                  <span className="btn-wobble inline-flex items-center gap-2 bg-rose text-white shadow-[0_4px_16px_rgba(242,167,181,0.45)] px-7 py-3 rounded-full text-[13px] font-bold w-fit transition-all duration-200 group-hover:shadow-[0_8px_24px_rgba(242,167,181,0.55)] group-hover:-translate-y-0.5">
                     اطلبي الآن ←
                   </span>
                 </div>
@@ -117,7 +114,7 @@ export default function LatestSection() {
                   <div className="text-[13px] text-mid leading-[1.65] mb-5">
                     دليل شامل من الوضعيات الصحيحة إلى حل المشكلات الشائعة — تنزيل فوري.
                   </div>
-                  <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-teal transition-all duration-200 group-hover:gap-2.5">
+                  <span className="btn-wobble inline-flex items-center gap-1.5 text-[13px] font-semibold text-teal transition-all duration-200 group-hover:gap-2.5">
                     احصلي عليه ←
                   </span>
                 </div>

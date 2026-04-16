@@ -76,6 +76,20 @@ a {
   color: inherit;
 }
 
+/* ── Active state ──────────────────────────────────── */
+button, a {
+  -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+}
+
+@layer base {
+  button:active,
+  a:active,
+  [role="button"]:active {
+    opacity: 0.8 !important;
+    filter: brightness(0.9) !important;
+  }
+}
+
 /* ── شريط التمرير المخصص ────────────────────────────── */
 ::-webkit-scrollbar {
   width: 4px;
@@ -134,6 +148,42 @@ a {
 @keyframes float5 {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-9px); }
+}
+
+/* ── wobble على الأزرار عند الـ hover ───────────────── */
+@keyframes wobble {
+  0%,  100% { transform: translateX(0%)            }
+  15%       { transform: translateX(-8%) rotate(-3deg) }
+  30%       { transform: translateX(6%)  rotate(2deg)  }
+  45%       { transform: translateX(-4%) rotate(-2deg) }
+  60%       { transform: translateX(3%)  rotate(1deg)  }
+  75%       { transform: translateX(-2%) rotate(-1deg) }
+}
+
+.btn-wobble:hover {
+  animation: wobble 0.6s ease;
+}
+
+/* ── prefers-reduced-motion — إيقاف الأنيميشن للمستخدمين الذين يفضلون ذلك ── */
+@media (prefers-reduced-motion: reduce) {
+  /* إيقاف كل الأنيميشنات */
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* النقاط الديكورية — تظهر ثابتة بدل الـ ping */
+  .animate-ping {
+    animation: none !important;
+    opacity: 0.12 !important;
+    transform: none !important;
+  }
+
+  /* إيقاف wobble على الأزرار */
+  .btn-wobble:hover {
+    animation: none !important;
+  }
 }
 
 /* ── badge التنبض في TopBar ──────────────────────────── */

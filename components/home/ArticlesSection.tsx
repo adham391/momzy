@@ -4,12 +4,13 @@ import SectionLabel from "@/components/ui/SectionLabel";
 import Chip from "@/components/ui/Chip";
 import { cn } from "@/lib/utils/cn";
 import { ARTICLE_PREVIEWS } from "@/lib/utils/constants";
+import PolkaDots from "@/components/ui/PolkaDots";
 
 /** قسم أحدث المقالات */
 export default function ArticlesSection() {
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية HebaSection ─ */
-    <section className="relative" style={{ marginTop: -40, zIndex: 5 }}>
+    <section className="relative reveal-section" style={{ marginTop: -40, zIndex: 5 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <svg
@@ -22,8 +23,11 @@ export default function ArticlesSection() {
       </svg>
 
       {/* ── محتوى القسم ── */}
-      <div className="bg-offwh" style={{ marginTop: -1, paddingTop: 16, paddingBottom: 72 }}>
-        <Container>
+      <div className="relative overflow-hidden bg-offwh" style={{ marginTop: -1, paddingTop: 16, paddingBottom: 72 }}>
+        {/* نقاط ديكورية متحركة */}
+        <PolkaDots opacity={0.2} count={18} />
+
+        <Container className="relative z-[2]">
           {/* عنوان القسم */}
           <div className="flex items-end justify-between mb-10">
             <div>

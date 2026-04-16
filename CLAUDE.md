@@ -1,5 +1,5 @@
 # CLAUDE.md — Momzy Platform
-> آخر تحديث: أبريل 2025
+> آخر تحديث: أبريل 2026
 
 ---
 
@@ -44,8 +44,8 @@
 
 | الطبقة | التقنية |
 |--------|---------|
-| Framework | Next.js 14 App Router |
-| Styling | Tailwind CSS |
+| Framework | Next.js 16 App Router (Turbopack) |
+| Styling | Tailwind CSS v4 |
 | CMS | Sanity Studio v3 |
 | Database | Supabase (PostgreSQL) |
 | Auth | Supabase Auth (admin only) |
@@ -401,46 +401,68 @@ exchange_rate, is_default, is_active, updated_at
 ```
 momzy/
 ├── app/
+│   ├── layout.tsx                  ✅ Root layout — خطوط + dir="rtl"
+│   ├── globals.css                 ✅ Tailwind v4 @theme + design tokens + keyframes
 │   ├── (site)/
-│   │   ├── page.tsx
+│   │   ├── layout.tsx              ✅ Site layout — TopBar + Header + Footer
+│   │   ├── page.tsx                ✅ الصفحة الرئيسية
 │   │   ├── shop/
-│   │   │   ├── page.tsx
-│   │   │   └── [slug]/page.tsx
-│   │   ├── workshops/[slug]/page.tsx
-│   │   ├── services/page.tsx
+│   │   │   ├── page.tsx            ⬜ قيد البناء
+│   │   │   └── [slug]/page.tsx     ⬜ قيد البناء
+│   │   ├── workshops/[slug]/page.tsx ⬜
+│   │   ├── services/page.tsx       ⬜
 │   │   ├── articles/
-│   │   │   ├── page.tsx
-│   │   │   └── [slug]/page.tsx
-│   │   ├── about/page.tsx
-│   │   ├── contact/page.tsx
-│   │   ├── privacy/page.tsx
-│   │   └── terms/page.tsx
-│   ├── (admin)/admin/
-│   │   ├── orders/
-│   │   ├── bookings/
-│   │   └── availability/
+│   │   │   ├── page.tsx            ⬜
+│   │   │   └── [slug]/page.tsx     ⬜
+│   │   ├── about/page.tsx          ⬜
+│   │   ├── contact/page.tsx        ⬜
+│   │   ├── privacy/page.tsx        ⬜
+│   │   └── terms/page.tsx          ⬜
+│   ├── (admin)/admin/              ⬜
 │   └── api/
-│       ├── hyp/webhook/
-│       ├── orders/
-│       ├── bookings/
-│       └── download/[token]/
+│       ├── hyp/webhook/            ⬜
+│       ├── orders/                 ⬜
+│       ├── bookings/               ⬜
+│       └── download/[token]/       ⬜
 ├── components/
-│   ├── layout/       # Header, Footer, TopBar
-│   ├── home/         # Hero, Latest, Offer, Heba, Reviews
-│   ├── shop/         # ProductCard, ProductModal, Cart
-│   ├── booking/      # BookingForm, TimeSlots
-│   └── ui/           # Button, Modal, Toast, Badge
+│   ├── layout/
+│   │   ├── TopBar.tsx              ✅ شريط teal + badge وردي نابض
+│   │   ├── Header.tsx              ✅ لوقو + ناف + سلة
+│   │   ├── MegaMenu.tsx            ✅ قائمة المتجر المنسدلة
+│   │   ├── MobileMenu.tsx          ✅ قائمة موبايل
+│   │   └── Footer.tsx              ✅ 4 أعمدة + سوشال + حقوق
+│   ├── home/
+│   │   ├── HeroSection.tsx         ✅ gradient وردي + دوائر + أزرار CTA
+│   │   ├── LatestSection.tsx       ✅ كاردات منتجات + dot pattern
+│   │   ├── LatestBigCardBody.tsx   ✅ محتوى الكارد الكبير
+│   │   ├── OfferSection.tsx        ✅ 3 كاردات ملونة
+│   │   ├── HebaSection.tsx         ✅ صورة هبة + خدمات
+│   │   ├── ArticlesSection.tsx     ✅ 3 مقالات preview
+│   │   └── ReviewsSection.tsx      ✅ 4 تقييمات gradient
+│   ├── shop/                       ⬜ قيد البناء
+│   ├── booking/                    ⬜ قيد البناء
+│   └── ui/
+│       ├── Button.tsx              ✅
+│       ├── Chip.tsx                ✅
+│       ├── Container.tsx           ✅
+│       └── SectionLabel.tsx        ✅
 ├── lib/
 │   ├── sanity/
+│   │   ├── client.ts               ✅
+│   │   └── image.ts                ✅
 │   ├── supabase/
-│   ├── hyp/
-│   ├── resend/
+│   │   ├── client.ts               ✅
+│   │   └── server.ts               ✅
+│   ├── hyp/                        ⬜
+│   ├── resend/                     ⬜
 │   └── utils/
+│       ├── cn.ts                   ✅
+│       └── constants.ts            ✅ بيانات static للهوم بيج
 ├── sanity/
-│   ├── schemas/
-│   └── studio/
+│   ├── schemas/                    ⬜
+│   └── studio/                     ⬜
 ├── reference/
-│   ├── momzy-prototype.html
+│   ├── momzy-prototype.html        المرجع البصري الإلزامي
 │   └── assets/
 ├── public/
 │   ├── icons/
@@ -490,12 +512,12 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 ## 🚀 ترتيب البناء
 
 ```
-المرحلة 1 — الأساس (الأسبوع 1-2)
-  □ تثبيت المكتبات (Supabase, Sanity, lucide-react)
-  □ إعداد Tailwind بالألوان
-  □ Layout (Header, Footer, TopBar)
-  □ الصفحة الرئيسية
-  □ صفحة المتجر + كاردات
+المرحلة 1 — الأساس ✅ مكتملة
+  ✅ تثبيت المكتبات (Supabase, Sanity, lucide-react)
+  ✅ إعداد Tailwind v4 بالألوان والتوكنات
+  ✅ Layout (TopBar, Header, MegaMenu, MobileMenu, Footer)
+  ✅ الصفحة الرئيسية الكاملة (6 أقسام)
+  □ صفحة المتجر + كاردات  ← الخطوة التالية
 
 المرحلة 2 — المتجر (الأسبوع 2-3)
   □ صفحة منتج مستقلة
@@ -526,6 +548,45 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 
 ---
 
+## 🌊 نمط التصميم — الأقسام المتداخلة
+
+كل قسم في الصفحة الرئيسية يتداخل مع السابق عبر:
+
+```tsx
+// البنية المعيارية لكل section (ما عدا HeroSection)
+<section className="relative" style={{ marginTop: -40, zIndex: N }}>
+
+  {/* موجة علوية — لون القسم الحالي يغطي نهاية القسم السابق */}
+  <svg viewBox="0 0 1440 40" preserveAspectRatio="none"
+       style={{ display: "block", width: "100%", height: 40 }} aria-hidden="true">
+    <path d="M0,20 C480,0 960,0 1440,20 L1440,40 L0,40 Z" fill="SECTION_COLOR" />
+  </svg>
+
+  {/* محتوى القسم — لا background على <section> نفسه */}
+  <div className="bg-SECTION_COLOR" style={{ marginTop: -1, paddingTop: 16, paddingBottom: 60 }}>
+    {/* المحتوى */}
+  </div>
+
+</section>
+```
+
+| القسم | z-index | marginTop | لون الـ wave |
+|-------|---------|-----------|-------------|
+| HeroSection | 1 | — | gradient وردي |
+| LatestSection | 2 | -40px | #F5F0EA |
+| OfferSection | 3 | -40px | #FDFAF5 |
+| HebaSection | 4 | — | #F8F4EE |
+| ArticlesSection | 5 | -40px | #FDFAF5 |
+| ReviewsSection | 6 | -40px | #F5D98E |
+
+**قواعد مهمة:**
+- `<section>` نفسه **بدون background-color** — وإلا يُغطي القسم السابق بحافة حادة
+- الـ background يُوضع فقط على الـ `<div>` الداخلي
+- `marginTop: -1` على الـ div الداخلي لمنع الـ gap بين الـ SVG والـ div
+- الدوائر الديكورية داخل الـ div الداخلي (لا داخل `<section>`)
+
+---
+
 ## 📋 قواعد البرمجة
 
 - **المرجع البصري إلزامي** — اقرأ `reference/momzy-prototype.html` قبل أي component
@@ -534,7 +595,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 - **العربية أولاً** — كل النصوص بالعربية
 - **Server Components** افتراضياً
 - **لا `any`** في TypeScript
-- **Tailwind فقط** — لا CSS مخصص
+- **Tailwind v4** — `@theme inline {}` في globals.css، لا CSS مخصص إلا للـ keyframes
 - **Mobile First**
 - **لا تسجيل دخول للعملاء** — الشراء والحجز مجهول كلياً
 - **Clean Code** — كل function هدف واحد، لا تتجاوز 150 سطر
