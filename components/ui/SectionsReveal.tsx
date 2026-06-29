@@ -6,7 +6,10 @@ import { useEffect } from "react";
 const REVEAL_THRESHOLD = 0.08;
 
 /** مدة أنيميشن الظهور */
-const DURATION = "0.65s";
+const DURATION = "0.55s";
+
+/** easing curve قوي للـ reveal (Emil Kowalski) */
+const EASING = "cubic-bezier(0.23, 1, 0.32, 1)";
 
 /** مقدار الإزاحة الابتدائية للأسفل */
 const OFFSET = "40px";
@@ -37,7 +40,7 @@ export default function SectionsReveal() {
     revealSections.forEach((el) => {
       el.style.opacity    = "0";
       el.style.transform  = `translateY(${OFFSET})`;
-      el.style.transition = `opacity ${DURATION} ease, transform ${DURATION} ease`;
+      el.style.transition = `opacity ${DURATION} ${EASING}, transform ${DURATION} ${EASING}`;
     });
 
     const revealObserver = new IntersectionObserver(

@@ -1,0 +1,67 @@
+/* ─────────────────────────────────────────────────────────
+   أنواع الخدمات — تطابق Sanity schema service
+   كل interface مصمم ليُخزَّن كـ row في Postgres لاحقاً
+   ───────────────────────────────────────────────────────── */
+
+/** نوع الخدمة — يحدد الأيقونة والمكان */
+export type ServiceType = "workshop" | "individual" | "online" | "home";
+
+/** فئة الخدمة — للتقسيم في صفحة /services */
+export type ServiceCategory = "group" | "individual";
+
+/** لون الكارد — من design tokens */
+export type ServiceColor = "rose" | "teal" | "yellow" | "mint";
+
+/* ─────────────────────────────────────────────────────────
+   Service — الواجهة الأساسية
+   ───────────────────────────────────────────────────────── */
+
+export interface Service {
+  /* ── حقول إلزامية ── */
+  /** المعرّف الفريد — first-days-workshop */
+  slug: string;
+  /** اسم الخدمة — "ورشة الأيام الأولى بعد الولادة" */
+  title: string;
+  /** نوع الخدمة */
+  type: ServiceType;
+  /** فئة العرض — group أو individual */
+  category: ServiceCategory;
+  /** المدة — "ساعة ونصف – ساعتين" */
+  duration: string;
+  /** المكان — "الناصرة" / "زوم" / "منزل الأم" */
+  location: string;
+  /** وصف قصير — سطرين للكارد */
+  shortDescription: string;
+  /** لون الكارد */
+  color: ServiceColor;
+
+  /* ── حقول اختيارية ── */
+  /** الفئة العمرية — "0-3 أشهر" */
+  ageRange?: string;
+  /** عدد المشاركين الأقصى — للورشات الجماعية */
+  maxParticipants?: number;
+  /** الوصف الطويل — paragraphs */
+  longDescription?: string[];
+  /** المواضيع التي تُغطّى — bullets */
+  topics?: string[];
+  /** الفوائد — "ما الذي ستتعلمينه" */
+  benefits?: string[];
+  /** صورة الغلاف */
+  coverImage?: string;
+  /** أيقونة صغيرة */
+  icon?: string;
+  /** السعر بالشيكل (اختياري — قد تكون "حسب الطلب") */
+  price?: number;
+  /** ترتيب العرض */
+  order?: number;
+
+  /* ── meta ── */
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** فلاتر اختيارية */
+export interface ServiceFilters {
+  category?: ServiceCategory;
+  type?: ServiceType;
+}

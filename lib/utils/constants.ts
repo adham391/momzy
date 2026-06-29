@@ -97,8 +97,9 @@ export interface MegaCategory {
     badgeBg: string;
     title: string;
     price: string;
+    slug: string;
   };
-  items: { emoji: string; title: string }[];
+  items: { emoji: string; title: string; href: string }[];
   seeAllText: string;
 }
 
@@ -115,7 +116,8 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
       badge: "جديد الآن",
       badgeBg: "bg-gradient-to-br from-rose to-teal",
       title: "صندوق مشوار أم",
-      price: "₪ 280",
+      price: "₪ 549",
+      slug: "/shop/mommy-journey-box",
     },
     items: [],
     seeAllText: "كل المنتجات",
@@ -133,11 +135,12 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
       badgeBg: "bg-teal",
       title: "كتيب الرضاعة الطبيعية",
       price: "₪ 49",
+      slug: "/shop",
     },
     items: [
-      { emoji: "📗", title: "كتيب الرضاعة الطبيعية" },
-      { emoji: "📘", title: "دليل ما بعد الولادة" },
-      { emoji: "📝", title: "يوميات الحمل" },
+      { emoji: "📗", title: "كتيب الرضاعة الطبيعية", href: "/shop" },
+      { emoji: "📘", title: "دليل ما بعد الولادة",    href: "/shop" },
+      { emoji: "📝", title: "يوميات الحمل",           href: "/shop" },
     ],
     seeAllText: "كل الكتيبات",
   },
@@ -154,10 +157,11 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
       badgeBg: "bg-gradient-to-br from-[#C09420] to-[#D4B840]",
       title: "ورشة الحسية",
       price: "₪ 120",
+      slug: "/shop",
     },
     items: [
-      { emoji: "🎥", title: "ورشة الحسية" },
-      { emoji: "🎥", title: "ورشة الحركة" },
+      { emoji: "🎥", title: "ورشة الحسية",  href: "/shop" },
+      { emoji: "🎥", title: "ورشة الحركة",  href: "/shop" },
     ],
     seeAllText: "كل الورشات",
   },
@@ -167,7 +171,7 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
 
 /** واجهة كارد العرض */
 export interface OfferCard {
-  emoji: string;
+  icon: string;
   title: string;
   description: string;
   linkText: string;
@@ -177,7 +181,7 @@ export interface OfferCard {
 
 export const OFFER_CARDS: OfferCard[] = [
   {
-    emoji: "🌸",
+    icon: "/icons/services-icon.png",
     title: "المعرفة المهنية",
     description:
       "خدمات متخصصة من هبة حسن — ممرضة معتمدة ومرشدة رضاعة ومرافقة ولادة بخبرة +1000 أم",
@@ -186,7 +190,7 @@ export const OFFER_CARDS: OfferCard[] = [
     color: "rose",
   },
   {
-    emoji: "📚",
+    icon: "/icons/products-icon.png",
     title: "منتجات مختارة بعناية",
     description:
       "منتجات ومحتوى تعليمي مبني على أساس علمي — لترافقك في كل خطوة من رحلتك",
@@ -195,7 +199,7 @@ export const OFFER_CARDS: OfferCard[] = [
     color: "teal",
   },
   {
-    emoji: "💬",
+    icon: "/icons/blog-icon.png",
     title: "المجتمع الداعم",
     description:
       "مساحة تجمع الأمهات — لأن بداية الأمومة لحظة مفصلية تستحق الدعم الحقيقي",
@@ -296,7 +300,7 @@ export interface ArticlePreview {
   chipLabel: string;
   chipColor: "rose" | "teal" | "yellow";
   title: string;
-  readTime: string;
+  publishedAt: string;
   imageBg: string;
 }
 
@@ -306,7 +310,7 @@ export const ARTICLE_PREVIEWS: ArticlePreview[] = [
     chipLabel: "رضاعة",
     chipColor: "rose",
     title: "وضعيات الرضاعة الصحيحة للمبتدئات",
-    readTime: "٥ دقائق",
+    publishedAt: "2 نوفمبر, 2025",
     imageBg: "bg-gradient-to-br from-[#fde8ee] to-[#fbd4de]",
   },
   {
@@ -314,7 +318,7 @@ export const ARTICLE_PREVIEWS: ArticlePreview[] = [
     chipLabel: "ما بعد الولادة",
     chipColor: "teal",
     title: "كيف تتعافين بعد الولادة القيصرية",
-    readTime: "٧ دقائق",
+    publishedAt: "1 نوفمبر, 2025",
     imageBg: "bg-gradient-to-br from-[#d8f2f0] to-[#c4eae8]",
   },
   {
@@ -322,7 +326,7 @@ export const ARTICLE_PREVIEWS: ArticlePreview[] = [
     chipLabel: "تطور الطفل",
     chipColor: "yellow",
     title: "المعالم التطورية في الشهر الأول",
-    readTime: "٦ دقائق",
+    publishedAt: "24 أكتوبر, 2025",
     imageBg: "bg-gradient-to-br from-[#fef4d0] to-[#faedc0]",
   },
 ];
@@ -350,8 +354,8 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     title: "روابط مفيدة",
     links: [
       { label: "أسئلة وأجوبة", href: "/faq" },
-      { label: "سياسة الموقع", href: "/privacy" },
-      { label: "سياسة الإرجاع", href: "/returns" },
+      { label: "سياسة الخصوصية", href: "/privacy" },
+      { label: "الشروط والأحكام", href: "/terms" },
       { label: "اتصل بنا", href: "/contact" },
     ],
   },
@@ -362,33 +366,35 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 export interface MobileNavItem {
   label: string;
   href: string;
-  emoji: string;
+  icon: string;
   iconBg: string;
+  hasDropdown?: boolean;
 }
 
 export const MOBILE_NAV_ITEMS: MobileNavItem[] = [
   {
     label: "خدماتنا",
     href: "/services",
-    emoji: "💬",
+    icon: "/icons/services-icon.png",
     iconBg: "bg-gradient-to-br from-[#fde4ec] to-rosepale",
   },
   {
     label: "المتجر",
     href: "/shop",
-    emoji: "🛍️",
+    icon: "/icons/shop-icon.png",
     iconBg: "bg-gradient-to-br from-[#d8f0ee] to-tealpale",
+    hasDropdown: true,
   },
   {
     label: "المقالات",
     href: "/articles",
-    emoji: "📖",
+    icon: "/icons/blog-icon.png",
     iconBg: "bg-gradient-to-br from-[#fff0bb] to-yellowlt",
   },
   {
     label: "عن هبة",
     href: "/about",
-    emoji: "🌸",
+    icon: "/icons/about-icon.png",
     iconBg: "bg-gradient-to-br from-[#e0f4f4] to-tealpale",
   },
 ];

@@ -11,6 +11,9 @@ import MobileMenu from "./MobileMenu";
 /** تأخير إغلاق الميقا منيو بالمللي ثانية */
 const MEGA_CLOSE_DELAY = 150;
 
+// TODO: اللوجو الحالي بألوان صاخبة (وردي/أزرق/أصفر) قد لا يتناسب مع الهوية البصرية الفاخرة
+// لصفحة المنتج (forest/gold). قرار تصميمي مستقبلي: نسخة monochrome أو تحديث شامل للوجو.
+
 /** الهيدر الرئيسي — sticky مع blur و نافبار تفاعلي */
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -43,7 +46,7 @@ export default function Header() {
     <>
       <header
         className={cn(
-          "sticky top-0 z-[500] bg-offwh/95 backdrop-blur-[20px] border-b border-black/[.07] transition-shadow duration-300",
+          "sticky top-0 z-[860] bg-offwh/95 backdrop-blur-[20px] border-b border-black/[.07] transition-shadow duration-300",
           scrolled && "shadow-[0_4px_28px_rgba(0,0,0,0.07)]"
         )}
         style={{ height: HEADER_HEIGHT }}
@@ -80,7 +83,7 @@ export default function Header() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-semibold text-mid transition-all duration-150 border-[1.5px] border-transparent",
+                      "flex items-center gap-2 px-4 py-2 rounded-[10px] text-[12px] md:text-[14px] font-semibold text-mid [transition:background-color_150ms_ease,border-color_150ms_ease,box-shadow_150ms_ease,color_150ms_ease] border-[1.5px] border-transparent",
                       `hover:${item.hoverBorder} hover:${item.hoverBg} hover:shadow-[0_2px_10px_rgba(0,0,0,0.06)] hover:text-dark`
                     )}
                   >
@@ -118,19 +121,19 @@ export default function Header() {
           >
             <span
               className={cn(
-                "block w-[22px] h-[2.5px] bg-dark rounded-sm transition-all duration-300",
+                "block w-[22px] h-[2.5px] bg-dark rounded-sm [transition:transform_300ms_cubic-bezier(0.23,1,0.32,1),opacity_300ms_ease]",
                 isMenuOpen && "translate-y-[7.5px] rotate-45"
               )}
             />
             <span
               className={cn(
-                "block w-[22px] h-[2.5px] bg-dark rounded-sm transition-all duration-300",
+                "block w-[22px] h-[2.5px] bg-dark rounded-sm [transition:transform_300ms_cubic-bezier(0.23,1,0.32,1),opacity_300ms_ease]",
                 isMenuOpen && "opacity-0 scale-x-0"
               )}
             />
             <span
               className={cn(
-                "block w-[22px] h-[2.5px] bg-dark rounded-sm transition-all duration-300",
+                "block w-[22px] h-[2.5px] bg-dark rounded-sm [transition:transform_300ms_cubic-bezier(0.23,1,0.32,1),opacity_300ms_ease]",
                 isMenuOpen && "-translate-y-[7.5px] -rotate-45"
               )}
             />

@@ -2,31 +2,36 @@
 
 import { useState } from "react";
 
-/** النص القصير للوصف */
-const SHORT_DESC =
-  "تجربة متكاملة صُمّمت بعناية لتكون إلى جانبكِ في مرحلة ما بعد الولادة...";
+interface LatestBigCardBodyProps {
+  description?: string;
+}
 
-/** النص الكامل للوصف */
-const FULL_DESC =
-  "تجربة متكاملة صُمّمت بعناية لتكون إلى جانبكِ في مرحلة ما بعد الولادة، حيث تتداخل المشاعر مع المسؤولية، وتحتاجين إلى دعم حقيقي يتجاوز النصائح التقليدية. لا يقدّم هذا الصندوق منتجات فحسب، بل يقدّم حضورًا ثابتًا يرافقكِ في تفاصيل يومك، ويمنحكِ وضوحًا وطمأنينة في كل قرار.";
+/** حد الأحرف للنص المختصر */
+const SHORT_LIMIT = 80;
 
-/** وصف الكارد الكبير مع زر توسيع/طي */
-export default function LatestBigCardBody() {
+/** وصف الكارد الكبير مع زر توسيع/طي — النص من Sanity */
+export default function LatestBigCardBody({ description }: LatestBigCardBodyProps) {
   const [expanded, setExpanded] = useState(false);
 
+  const text      = description ?? "";
+  const isLong    = text.length > SHORT_LIMIT;
+  const shortText = isLong ? text.slice(0, SHORT_LIMIT).trimEnd() + "..." : text;
+
   return (
-    <div className="text-[13px] text-mid leading-[1.7] mb-5">
-      <span>{expanded ? FULL_DESC : SHORT_DESC}</span>{" "}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setExpanded((prev) => !prev);
-        }}
-        className="text-teal font-bold cursor-pointer text-[13px] me-1"
-      >
-        {expanded ? "← أقل" : "اقرئي المزيد ←"}
-      </button>
+    <div className="text-[13px] md:text-[15px] text-mid leading-[1.7] mb-5">
+      <span>{expanded ? text : shortText}</span>{" "}
+      {isLong && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded((prev) => !prev);
+          }}
+          className="text-teal font-bold cursor-pointer text-[13px] md:text-[15px] me-1"
+        >
+          {expanded ? "← أقل" : "اقرئي المزيد ←"}
+        </button>
+      )}
     </div>
   );
 }

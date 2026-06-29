@@ -6,6 +6,7 @@ interface PolkaDotsProps {
   colors?: string[];
   opacity?: number;
   count?: number;
+  duration?: string;
 }
 
 /** بيانات كل نقطة — مواضع ثابتة لضمان التوافق مع SSR */
@@ -42,6 +43,7 @@ export default function PolkaDots({
   colors = DEFAULT_COLORS,
   opacity = 0.3,
   count = 18,
+  duration = "2.5s",
 }: PolkaDotsProps) {
   const dots = DOT_PRESETS.slice(0, Math.min(count, DOT_PRESETS.length));
 
@@ -62,7 +64,7 @@ export default function PolkaDots({
             background: colors[i % colors.length],
             opacity,
             animationDelay: dot.delay,
-            animationDuration: "2.5s",
+            animationDuration: duration,
           }}
         />
       ))}

@@ -20,7 +20,7 @@ export default function Chip({ children, variant, className }: ChipProps) {
   return (
     <span
       className={cn(
-        "inline-block px-3 py-1 rounded-xl font-label text-[10px] font-bold tracking-wider uppercase",
+        "inline-block px-3 py-1 rounded-xl font-label text-[10px] md:text-[12px] font-bold tracking-wider uppercase",
         VARIANT_STYLES[variant],
         className
       )}

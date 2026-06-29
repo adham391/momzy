@@ -5,6 +5,8 @@ interface SectionLabelProps {
   children: React.ReactNode;
   color: "rose" | "teal" | "yellow";
   centered?: boolean;
+  noDash?: boolean;
+  className?: string;
 }
 
 /** ألوان العنوان والشريط */
@@ -19,22 +21,21 @@ export default function SectionLabel({
   children,
   color,
   centered = false,
+  noDash = false,
+  className,
 }: SectionLabelProps) {
-  const { text, bar } = COLOR_MAP[color];
+  const { text } = COLOR_MAP[color];
 
   return (
-    <div
+    <p
       className={cn(
         "font-label text-base font-bold tracking-[3px] uppercase flex items-center gap-2 mb-3",
         text,
-        centered && "justify-center"
+        centered && "justify-center",
+        className
       )}
     >
-      {/* الشريط الملون — يختفي عند التوسيط */}
-      {!centered && (
-        <span className={cn("w-[22px] h-[2.5px] rounded-sm", bar)} />
-      )}
-      <span>{children}</span>
-    </div>
+      <span>{noDash ? children : `- ${children} -`}</span>
+    </p>
   );
 }

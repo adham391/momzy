@@ -21,6 +21,11 @@
   --bord: rgba(0, 0, 0, 0.08);
   --r: 14px;
   --rl: 22px;
+
+  /* ── Easing curves (Emil Kowalski) ───────────────────── */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-modal:  cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* ── ربط التوكنات بـ Tailwind v4 ─────────────────────── */
@@ -56,6 +61,7 @@
   /* الحواف */
   --radius-card: var(--r);
   --radius-card-lg: var(--rl);
+
 }
 
 /* ── أنماط عامة ──────────────────────────────────────── */
@@ -76,7 +82,7 @@ a {
   color: inherit;
 }
 
-/* ── Active state ──────────────────────────────────── */
+/* ── Active state — scale feedback (Emil Kowalski) ──── */
 button, a {
   -webkit-tap-highlight-color: rgba(0,0,0,0.1);
 }
@@ -85,9 +91,38 @@ button, a {
   button:active,
   a:active,
   [role="button"]:active {
-    opacity: 0.8 !important;
-    filter: brightness(0.9) !important;
+    transform: scale(0.97) !important;
+    transition: transform 100ms ease-out !important;
   }
+}
+
+/* ── سلم الطباعة السائل — Fluid Typography Scale ─────── */
+/* يُعرَّف هنا مباشرةً لضمان التوافق مع Tailwind v4      */
+@layer utilities {
+  /* display: hero الرئيسية — 34px موبايل → 54px ديسكتوب */
+  .text-display  { font-size: clamp(34px, 5vw, 54px);  }
+  /* h1: عنوان الصفحة — 28px → 48px                      */
+  .text-h1       { font-size: clamp(28px, 4vw, 48px);   }
+  /* h2: عنوان القسم — 24px → 38px                       */
+  .text-h2       { font-size: clamp(24px, 3vw, 38px);   }
+  /* h3: عنوان فرعي / بطاقة كبيرة — 20px → 30px          */
+  .text-h3       { font-size: clamp(20px, 2.4vw, 30px); }
+  /* h4: عنوان كارد — 16px → 22px                        */
+  .text-h4       { font-size: clamp(19px, 1.6vw, 22px); }
+  /* body: نص أساسي — 14px → 17px                        */
+  .text-body     { font-size: clamp(14px, 1.2vw, 17px); }
+  /* body-sm: نص ثانوي — 13px → 15px                     */
+  .text-body-sm  { font-size: clamp(15px, 1vw, 15px);   }
+  /* label: شارات وchips — 12px ثابت                     */
+  .text-label    { font-size: 12px;                      }
+  /* micro: تسميات صغيرة — 11px ثابت                     */
+  .text-micro    { font-size: 11px;                      }
+  /* btn: أزرار — 14px → 15px                            */
+  .text-btn      { font-size: clamp(14px, 1.2vw, 15px); }
+  /* price: سعر — 22px → 26px                            */
+  .text-price    { font-size: clamp(22px, 2vw, 26px); }
+  /* price-lg: سعر كبير — 24px → 34px                    */
+  .text-price-lg { font-size: clamp(24px, 2.4vw, 34px); }
 }
 
 /* ── شريط التمرير المخصص ────────────────────────────── */
@@ -119,13 +154,16 @@ button, a {
 /* ── أيقونات سوشال الفوتر ───────────────────────────── */
 .footer-social-icon {
   background: rgba(255, 255, 255, 0.05);
-  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+  transition: background 200ms var(--ease-out), border-color 200ms ease, color 200ms ease, transform 200ms var(--ease-out);
 }
-.footer-social-icon:hover {
-  background: rgba(242, 167, 181, 0.15);
-  border-color: var(--rose) !important;
-  color: white !important;
-  transform: scale(1.1) translateY(-2px);
+
+@media (hover: hover) and (pointer: fine) {
+  .footer-social-icon:hover {
+    background: rgba(242, 167, 181, 0.15);
+    border-color: var(--rose) !important;
+    color: white !important;
+    transform: scale(1.08) translateY(-2px);
+  }
 }
 
 /* ── أنيميشن الطيران للكاردات ────────────────────────── */
@@ -150,38 +188,66 @@ button, a {
   50%       { transform: translateY(-9px); }
 }
 
-/* ── wobble على الأزرار عند الـ hover ───────────────── */
+/* ── wobble — فقط على أزرار CTA (Emil: لا wobble على كل رابط) ── */
 @keyframes wobble {
-  0%,  100% { transform: translateX(0%)            }
-  15%       { transform: translateX(-8%) rotate(-3deg) }
-  30%       { transform: translateX(6%)  rotate(2deg)  }
-  45%       { transform: translateX(-4%) rotate(-2deg) }
-  60%       { transform: translateX(3%)  rotate(1deg)  }
-  75%       { transform: translateX(-2%) rotate(-1deg) }
+  0%,  100% { transform: translateX(0%)                  }
+  15%       { transform: translateX(-2%) rotate(-0.8deg)  }
+  30%       { transform: translateX(1.5%) rotate(0.5deg)  }
+  45%       { transform: translateX(-1%) rotate(-0.4deg)  }
+  60%       { transform: translateX(0.8%) rotate(0.3deg)  }
+  75%       { transform: translateX(-0.5%) rotate(-0.2deg)}
 }
 
-.btn-wobble:hover {
-  animation: wobble 0.6s ease;
+@keyframes wobble-light {
+  0%,  100% { transform: translateX(0%)                  }
+  20%       { transform: translateX(-2%) rotate(-0.8deg)  }
+  40%       { transform: translateX(1.5%) rotate(0.5deg)  }
+  60%       { transform: translateX(-1%) rotate(-0.3deg)  }
+  80%       { transform: translateX(0.5%) rotate(0.2deg)  }
 }
 
-/* ── prefers-reduced-motion — إيقاف الأنيميشن للمستخدمين الذين يفضلون ذلك ── */
+/* على الأجهزة التي تدعم hover حقيقي فقط (لا موبايل) */
+@media (hover: hover) and (pointer: fine) {
+  .btn-wobble:hover {
+    animation: wobble 0.35s var(--ease-out);
+  }
+  .btn-wobble-light:hover {
+    animation: wobble-light 0.3s var(--ease-out);
+  }
+}
+
+/* ── prefers-reduced-motion (Emil: أبقِ opacity/color، احذف الحركة) ── */
 @media (prefers-reduced-motion: reduce) {
-  /* إيقاف كل الأنيميشنات */
+  /* إيقاف الأنيميشنات الحركية */
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
   }
 
-  /* النقاط الديكورية — تظهر ثابتة بدل الـ ping */
+  /* إبقاء transitions للـ opacity و color فقط (تساعد الفهم) */
+  *, *::before, *::after {
+    transition-property: opacity, color, background-color, border-color, box-shadow !important;
+    transition-duration: 150ms !important;
+    transition-timing-function: ease !important;
+  }
+
+  /* لا scale على الضغط */
+  button:active,
+  a:active,
+  [role="button"]:active {
+    transform: none !important;
+  }
+
+  /* النقاط الديكورية — ثابتة */
   .animate-ping {
     animation: none !important;
     opacity: 0.12 !important;
     transform: none !important;
   }
 
-  /* إيقاف wobble على الأزرار */
-  .btn-wobble:hover {
+  /* لا wobble */
+  .btn-wobble:hover,
+  .btn-wobble-light:hover {
     animation: none !important;
   }
 }
@@ -191,4 +257,81 @@ button, a {
   0%   { box-shadow: 0 0 0 0 rgba(242, 167, 181, 0.7); }
   70%  { box-shadow: 0 0 0 8px rgba(242, 167, 181, 0); }
   100% { box-shadow: 0 0 0 0 rgba(242, 167, 181, 0); }
+}
+
+@keyframes pulse-badge-yellow {
+  0%   { box-shadow: 0 0 0 0 rgba(247, 223, 152, 0.8); }
+  70%  { box-shadow: 0 0 0 8px rgba(247, 223, 152, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(247, 223, 152, 0); }
+}
+
+/* ── خلفيات كاردات المنتجات pi1–pi6 ─────────────────── */
+.pi1 { background: linear-gradient(140deg, #fde8ee, #fbd4de); }
+.pi2 { background: linear-gradient(140deg, #d8f2f0, #c4eae8); }
+.pi3 { background: linear-gradient(140deg, #fef4d0, #faedc0); }
+.pi4 { background: linear-gradient(140deg, #fde4f0, #fcd0e8); }
+.pi5 { background: linear-gradient(140deg, #d4f0ee, #c0e8e4); }
+.pi6 { background: linear-gradient(140deg, #feeec4, #fae4a8); }
+
+/* ── Toast — ظهور من الأسفل ─────────────────────────── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── backdrop fade ──────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── ticker — نسخة واحدة تدخل من اليمين وتخرج من اليسار ─── */
+/* paddingLeft: 100vw على العنصر يجعل المحتوى يبدأ من حافة اليمين */
+/* translateX(-100%) يحرّك العنصر بكامل عرضه لليسار */
+@keyframes ticker-single {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+/* ── إخفاء التوب بار عند فتح MobileMenu (Apple/Nike pattern) ─── */
+body[data-menu-open] [data-topbar] {
+  display: none;
+}
+
+/* ── قفل scroll الصفحة عند فتح المينيو ─── */
+body[data-menu-open] {
+  overflow: hidden;
+}
+
+/* ── stagger كاردات (Emil Kowalski) ─────────────────── */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── دخول الهيرو المتدرّج — staggered reveal احترافي ──── */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.hero-rise {
+  animation: hero-rise 0.7s var(--ease-out) both;
+}
+
+/* ── MobileMenu entrance — slide من اليمين (RTL) ─────── */
+@keyframes mobile-menu-in {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+.mobile-menu-enter {
+  animation: mobile-menu-in 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+.mobile-menu-item {
+  animation: mobile-menu-in 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* ── MegaMenu entrance ───────────────────────────────── */
+.mega-menu-enter {
+  animation: dropIn 0.22s cubic-bezier(0.23, 1, 0.32, 1) both;
+  transform-origin: top center;
 }

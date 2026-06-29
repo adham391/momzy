@@ -24,7 +24,7 @@ const VARIANT_STYLES: Record<ButtonProps["variant"], string> = {
 
 /** الأنماط المشتركة لكل الأزرار */
 const BASE_STYLES =
-  "btn-wobble inline-flex items-center gap-2 px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 transition-opacity duration-75 active:opacity-80";
+  "btn-wobble inline-flex items-center gap-2 px-7 py-3 rounded-full text-[13px] md:text-[16px] font-bold cursor-pointer hover:-translate-y-0.5 [transition:transform_160ms_ease-out,box-shadow_200ms_ease-out,opacity_75ms_ease]";
 
 /** زر متعدد الأنماط — يرندر Link أو button حسب الـ props */
 export default function Button({

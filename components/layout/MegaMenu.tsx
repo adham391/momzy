@@ -21,7 +21,7 @@ export default function MegaMenu({ onMouseEnter, onMouseLeave }: MegaMenuProps) 
     <div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="absolute top-[calc(100%+10px)] end-0 bg-white rounded-[22px] border-[1.5px] border-bord shadow-[0_16px_48px_rgba(0,0,0,0.12)] min-w-[520px] z-[600] overflow-hidden flex animate-[dropIn_0.18s_ease_both]"
+      className="mega-menu-enter absolute top-[calc(100%+10px)] end-0 bg-white rounded-[22px] border-[1.5px] border-bord shadow-[0_16px_48px_rgba(0,0,0,0.12)] min-w-[520px] z-[600] overflow-hidden flex"
     >
       {/* عمود الكاتيقوريز */}
       <div className="w-[180px] shrink-0 border-s border-bord py-3 bg-offwh">
@@ -30,7 +30,7 @@ export default function MegaMenu({ onMouseEnter, onMouseLeave }: MegaMenuProps) 
             key={cat.id}
             onMouseEnter={() => setActiveId(cat.id)}
             className={cn(
-              "flex items-center gap-2.5 px-[18px] py-3 text-sm font-semibold text-mid cursor-pointer transition-all duration-150 relative",
+              "flex items-center gap-2.5 px-[18px] py-3 text-sm font-semibold text-mid cursor-pointer [transition:background-color_150ms_ease,color_150ms_ease] relative",
               activeId === cat.id && "bg-white text-teal"
             )}
           >
@@ -50,9 +50,9 @@ export default function MegaMenu({ onMouseEnter, onMouseLeave }: MegaMenuProps) 
       <div className="flex-1 p-5 flex flex-col gap-3">
         {/* المنتج المميز */}
         <Link
-          href="/shop"
+          href={active.featured.slug}
           className={cn(
-            "flex items-center gap-3.5 p-4 rounded-[14px] border-[1.5px] cursor-pointer transition-all duration-200 hover:-translate-x-[3px]",
+            "flex items-center gap-3.5 p-4 rounded-[14px] border-[1.5px] cursor-pointer [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1),box-shadow_200ms_ease] hover:-translate-x-[3px]",
             active.featuredBg,
             active.featuredBorderColor
           )}
@@ -80,8 +80,8 @@ export default function MegaMenu({ onMouseEnter, onMouseLeave }: MegaMenuProps) 
             {active.items.map((item, i) => (
               <Link
                 key={i}
-                href="/shop"
-                className="flex items-center gap-2.5 px-3 py-2.5 rounded-[14px] text-[13px] text-mid cursor-pointer transition-all duration-150 border border-transparent hover:bg-tealpale hover:text-teal hover:border-[rgba(130,201,196,0.2)]"
+                href={item.href}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-[14px] text-[13px] text-mid cursor-pointer [transition:background-color_150ms_ease,color_150ms_ease,border-color_150ms_ease] border border-transparent hover:bg-tealpale hover:text-teal hover:border-[rgba(130,201,196,0.2)]"
               >
                 <span className="text-lg w-7 text-center">{item.emoji}</span>
                 {item.title}
@@ -93,7 +93,7 @@ export default function MegaMenu({ onMouseEnter, onMouseLeave }: MegaMenuProps) 
         {/* رابط عرض الكل */}
         <Link
           href="/shop"
-          className="mt-1 text-xs font-bold text-teal flex items-center gap-1.5 px-3 py-2 rounded-[14px] transition-all duration-200 hover:gap-2.5 cursor-pointer"
+          className="mt-1 text-xs font-bold text-teal flex items-center gap-1.5 px-3 py-2 rounded-[14px] [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1),background-color_150ms_ease] hover:gap-2.5 cursor-pointer"
         >
           {active.seeAllText} ←
         </Link>
