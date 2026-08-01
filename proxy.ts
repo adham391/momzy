@@ -39,18 +39,36 @@ function isBlocked(country: string, region: string): boolean {
   return false;
 }
 
-/** بيانات الموقع الجغرافي — يضيفها Vercel/Edge في runtime لكنها غير مُعرّفة في types */
+/** بيانات الموقع الجغرافي — يحقنها الـ runtime (Edge) في request.geo، غير مُعرّفة في types */
 interface GeoInfo {
   country?: string;
   region?: string;
 }
 
+/**
+ * بلد ومنطقة الزائر (ISO 3166-1 / 3166-2).
+ * منذ Next.js 16 يعمل Proxy على Node.js runtime افتراضيًا، فلم يعد
+ * `request.geo` مضمونًا — لذا نقرأ ترويسات Vercel للموقع الجغرافي
+ * (متاحة على Edge وNode معًا)، ونُبقي request.geo كاحتياط.
+ */
+function getGeo(request: NextRequest): { country: string; region: string } {
+  const injected = (request as NextRequest & { geo?: GeoInfo }).geo;
+  if (injected?.country) {
+    return {
+      country: injected.country.toUpperCase(),
+      region: (injected.region ?? "").toUpperCase(),
+    };
+  }
+  const h = request.headers;
+  return {
+    country: (h.get("x-vercel-ip-country") ?? "").toUpperCase(),
+    region: (h.get("x-vercel-ip-country-region") ?? "").toUpperCase(),
+  };
+}
+
 export async function proxy(request: NextRequest) {
   /* ── 1. الحجب الجغرافي (أولاً) ── */
-  /* النوع غير معرّف في NextRequest الحديث، لكن Vercel يحقنه في runtime */
-  const geo = (request as NextRequest & { geo?: GeoInfo }).geo;
-  const country = geo?.country ?? "";
-  const region  = geo?.region  ?? "";
+  const { country, region } = getGeo(request);
 
   if (country && isBlocked(country, region)) {
     return NextResponse.redirect(new URL("/not-available", request.url));
