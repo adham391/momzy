@@ -45,7 +45,7 @@ interface GeoInfo {
   region?: string;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   /* ── 1. الحجب الجغرافي (أولاً) ── */
   /* النوع غير معرّف في NextRequest الحديث، لكن Vercel يحقنه في runtime */
   const geo = (request as NextRequest & { geo?: GeoInfo }).geo;
