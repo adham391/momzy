@@ -9,7 +9,10 @@
       "Bash(npx next:*)",
       "Bash(curl -s http://localhost:3001)",
       "Bash(npm install:*)",
-      "WebFetch(domain:www.peekstoree.com)"
+      "WebFetch(domain:www.peekstoree.com)",
+      "PowerShell($out = npx tsc --noEmit 2>&1 | Out-String; $lines = $out -split \"`n\" | Where-Object { $_ -match \"error TS\" }; \"TOTAL error lines: $\\($lines.Count\\)\"; \"--- all errors ---\"; $lines | ForEach-Object { $_.Trim\\(\\) })",
+      "PowerShell($out = npx tsc --noEmit 2>&1 | Out-String; $lines = $out -split \"`n\" | Where-Object { $_ -match \"error TS\" }; \"TOTAL error lines: $\\($lines.Count\\)\"; $lines | ForEach-Object { $_.Trim\\(\\) })",
+      "PowerShell($out = npx tsc --noEmit 2>&1 | Out-String; $lines = $out -split \"`n\" | Where-Object { $_ -match \"error TS\" }; \"TOTAL: $\\($lines.Count\\)\"; $lines | ForEach-Object { $_.Trim\\(\\) })"
     ]
   }
 }

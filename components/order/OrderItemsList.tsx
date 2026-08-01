@@ -92,9 +92,6 @@ export default function OrderItemsList({ items }: OrderItemsListProps) {
                       <span className="font-bold">العنوان:</span> {[item.gift.recipientAddress, item.gift.recipientCity].filter(Boolean).join(", ")}
                     </div>
                   )}
-                  {item.gift.deliveryDate && (
-                    <div><span className="font-bold">تاريخ التوصيل:</span> {item.gift.deliveryDate}</div>
-                  )}
                 </div>
                 {item.gift.message && (
                   <div

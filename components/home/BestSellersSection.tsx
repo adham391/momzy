@@ -5,10 +5,11 @@ import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
 import ProductCard from "@/components/shop/ProductCard";
 import { getProducts } from "@/lib/products/getProducts";
+import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** قسم "الأكثر مبيعاً" — شبكة منتجات بشارة ترتيب (مثل متاجر الأمومة العصرية) */
-export default async function BestSellersSection() {
-  const products = (await getProducts()).slice(0, 4);
+export default async function BestSellersSection({ content }: { content: HomePageContent }) {
+  const products = (await getProducts({ inStockOnly: true })).slice(0, 4);
 
   // لا تعرض القسم إذا لا توجد منتجات
   if (products.length === 0) return null;
@@ -43,9 +44,9 @@ export default async function BestSellersSection() {
           {/* ── عنوان القسم ── */}
           <div className="flex items-end justify-between mb-7">
             <div>
-              <SectionLabel color="teal">الأكثر طلبًا</SectionLabel>
+              <SectionLabel color="teal">{content.bestSellersLabel}</SectionLabel>
               <h2 className="font-heading text-h2 font-bold text-dark">
-                الأكثر <span className="text-rose">مبيعاً</span>
+                {content.bestSellersTitle}
               </h2>
             </div>
             <Link
@@ -56,8 +57,18 @@ export default async function BestSellersSection() {
             </Link>
           </div>
 
-          {/* ── شبكة المنتجات — عمودان على الموبايل (أسلوب المتاجر) ── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+          {/* ── شبكة المنتجات — تتوسّط عند قلة المنتجات، عمودان على الموبايل ── */}
+          <div
+            className={
+              products.length === 1
+                ? "grid grid-cols-1 max-w-[320px] mx-auto"
+                : products.length === 2
+                ? "grid grid-cols-2 gap-3 sm:gap-4 max-w-[680px] mx-auto"
+                : products.length === 3
+                ? "grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 max-w-[1000px] mx-auto"
+                : "grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5"
+            }
+          >
             {products.map((product, idx) => (
               <div key={product.slug} className="relative h-full">
                 {/* شارة الترتيب — الأكثر مبيعاً */}

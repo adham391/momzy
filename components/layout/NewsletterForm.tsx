@@ -14,11 +14,19 @@ export default function NewsletterForm() {
     setStatus("loading");
 
     try {
-      // TODO: ربط بـ /api/newsletter لاحقاً (يسجّل في Supabase newsletter_subscribers)
-      await new Promise((r) => setTimeout(r, 700));
-      setStatus("success");
-      setEmail("");
-      setTimeout(() => setStatus("idle"), 4000);
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "footer" }),
+      });
+      const data = (await res.json()) as { success: boolean };
+      if (data.success) {
+        setStatus("success");
+        setEmail("");
+        setTimeout(() => setStatus("idle"), 4000);
+      } else {
+        setStatus("error");
+      }
     } catch {
       setStatus("error");
     }

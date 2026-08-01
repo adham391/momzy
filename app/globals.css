@@ -318,6 +318,15 @@ body[data-menu-open] {
   animation: hero-rise 0.7s var(--ease-out) both;
 }
 
+/* ── انتقال مراحل الشراء (التوصيل ↔ الدفع) — دخول ناعم ─── */
+@keyframes checkout-step-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.checkout-step-in {
+  animation: checkout-step-in 0.3s var(--ease-out) both;
+}
+
 /* ── MobileMenu entrance — slide من اليمين (RTL) ─────── */
 @keyframes mobile-menu-in {
   from { opacity: 0; transform: translateX(-30px); }

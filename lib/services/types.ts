@@ -12,6 +12,12 @@ export type ServiceCategory = "group" | "individual";
 /** لون الكارد — من design tokens */
 export type ServiceColor = "rose" | "teal" | "yellow" | "mint";
 
+/** سؤال شائع عن الخدمة */
+export interface ServiceFAQ {
+  question: string;
+  answer: string;
+}
+
 /* ─────────────────────────────────────────────────────────
    Service — الواجهة الأساسية
    ───────────────────────────────────────────────────────── */
@@ -36,8 +42,12 @@ export interface Service {
   color: ServiceColor;
 
   /* ── حقول اختيارية ── */
-  /** الفئة العمرية — "0-3 أشهر" */
+  /** الفئة العمرية للعرض — "0-3 أشهر" (نص حر بكلمات هبة) */
   ageRange?: string;
+  /** أصغر عمر بالأشهر — يُفعّل التحقق التلقائي عند التسجيل */
+  ageMinMonths?: number;
+  /** أكبر عمر بالأشهر — يُفعّل التحقق التلقائي عند التسجيل */
+  ageMaxMonths?: number;
   /** عدد المشاركين الأقصى — للورشات الجماعية */
   maxParticipants?: number;
   /** الوصف الطويل — paragraphs */
@@ -46,6 +56,8 @@ export interface Service {
   topics?: string[];
   /** الفوائد — "ما الذي ستتعلمينه" */
   benefits?: string[];
+  /** الأسئلة الشائعة — يظهر القسم فقط إن وُجدت */
+  faqs?: ServiceFAQ[];
   /** صورة الغلاف */
   coverImage?: string;
   /** أيقونة صغيرة */

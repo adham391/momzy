@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getServices } from "@/lib/services/getServices";
+import { getAvailableSeatsBySlug } from "@/lib/db/bookings";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -10,12 +11,19 @@ import SectionsReveal from "@/components/ui/SectionsReveal";
 
 export const metadata: Metadata = {
   title: "الخدمات | Momzy",
-  description: "ورشات ولقاءات فردية مع هبة حسن — ممرضة معتمدة ومرشدة رضاعة. احجزي موعدك مباشرة عبر واتساب.",
+  description: "ورشات ولقاءات فردية مع هبة حسن — ممرضة معتمدة ومرشدة رضاعة. سجّلي إلكترونيًا واحجزي مقعدكِ فورًا.",
 };
 
-/** صفحة الخدمات — بدون هيرو، رأس مدمج + بطاقات رفيعة + حجز واتساب */
+/** المقاعد تتغيّر مع كل تسجيل — تحديث كل دقيقة */
+export const revalidate = 60;
+
+/** صفحة الخدمات — رأس مدمج + بطاقات + تسجيل إلكتروني مباشر */
 export default async function ServicesPage() {
-  const [allServices, settings] = await Promise.all([getServices(), getSiteSettings()]);
+  const [allServices, settings, seatsBySlug] = await Promise.all([
+    getServices(),
+    getSiteSettings(),
+    getAvailableSeatsBySlug(),
+  ]);
   const whatsappNumber = settings.contact.whatsappNumber;
 
   const groupServices      = allServices.filter((s) => s.category === "group");
@@ -44,7 +52,7 @@ export default async function ServicesPage() {
             className="mx-auto text-mid leading-[1.85]"
             style={{ maxWidth: 560, fontSize: "clamp(14px, 1.5vw, 16px)" }}
           >
-            ورشات جماعية ولقاءات فردية مع هبة حسن — اختاري الخدمة المناسبة واحجزي موعدك مباشرة عبر واتساب.
+            ورشات جماعية ولقاءات فردية مع هبة حسن — اختاري الخدمة المناسبة وسجّلي مقعدكِ إلكترونيًا في دقيقة.
           </p>
         </Container>
       </header>
@@ -60,6 +68,7 @@ export default async function ServicesPage() {
         waveColor="var(--offwh)"
         zIndex={2}
         whatsappNumber={whatsappNumber}
+        seatsBySlug={seatsBySlug}
       />
 
       {/* قسم اللقاءات الفردية — zIndex 3 */}
@@ -73,6 +82,7 @@ export default async function ServicesPage() {
         waveColor="var(--cream)"
         zIndex={3}
         whatsappNumber={whatsappNumber}
+        seatsBySlug={seatsBySlug}
       />
 
       {/* CTA نهائي — zIndex 4 */}

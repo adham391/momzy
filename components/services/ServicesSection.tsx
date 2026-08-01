@@ -22,8 +22,10 @@ interface ServicesSectionProps {
   waveColor?: string;
   /** z-index للتداخل مع القسم السابق */
   zIndex?: number;
-  /** رقم واتساب هبة — يُمرَّر لكل كارد للحجز */
+  /** رقم واتساب هبة — يُمرَّر لكل كارد للاستفسار */
   whatsappNumber?: string;
+  /** المقاعد المتبقية لكل خدمة (slug → عدد) — لعرض «بقي N مقاعد» */
+  seatsBySlug?: Record<string, number>;
 }
 
 /**
@@ -41,6 +43,7 @@ export default function ServicesSection({
   waveColor = "var(--offwh)",
   zIndex = 2,
   whatsappNumber,
+  seatsBySlug,
 }: ServicesSectionProps) {
   if (services.length === 0) return null;
 
@@ -87,7 +90,11 @@ export default function ServicesSection({
                   animation: `card-in 0.45s cubic-bezier(0.23, 1, 0.32, 1) ${index * 80}ms both`,
                 }}
               >
-                <ServiceCard service={service} whatsappNumber={whatsappNumber} />
+                <ServiceCard
+                  service={service}
+                  whatsappNumber={whatsappNumber}
+                  seatsLeft={seatsBySlug?.[service.slug]}
+                />
               </div>
             ))}
           </div>

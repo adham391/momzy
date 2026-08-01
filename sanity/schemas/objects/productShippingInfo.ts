@@ -10,7 +10,7 @@ export const productShippingInfo = defineType({
       name: "estimatedDays",
       title: "مدة التوصيل",
       type: "string",
-      placeholder: "مثال: 3-5 أيام عمل",
+      placeholder: "مثال: حتى 7 أيام عمل",
     }),
     defineField({
       name: "freeShipping",

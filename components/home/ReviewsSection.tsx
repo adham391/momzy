@@ -4,6 +4,7 @@ import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
 import { getReviews } from "@/lib/reviews/getReviews";
 import type { ReviewColor } from "@/lib/reviews/types";
+import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** خريطة لون الأفاتار → CSS class */
 const AVATAR_BG: Record<ReviewColor, string> = {
@@ -14,7 +15,7 @@ const AVATAR_BG: Record<ReviewColor, string> = {
 };
 
 /** قسم تقييمات الأمهات — يقرأ من Sanity مع fallback إلى seed */
-export default async function ReviewsSection() {
+export default async function ReviewsSection({ content }: { content: HomePageContent }) {
   const reviews = await getReviews();
   if (reviews.length === 0) return null;
 
@@ -41,10 +42,10 @@ export default async function ReviewsSection() {
           {/* عنوان القسم */}
           <div className="text-center mb-[52px]">
             <div className="flex justify-center">
-              <SectionLabel color="teal" centered>تجارب حقيقية</SectionLabel>
+              <SectionLabel color="teal" centered>{content.reviewsLabel}</SectionLabel>
             </div>
             <h2 className="font-heading text-h2 font-bold text-dark">
-              ماذا قالت <span className="text-rose italic">الأمهات؟</span>
+              {content.reviewsTitle}
             </h2>
             {useCarousel && (
               <p className="text-body-sm mt-3" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>

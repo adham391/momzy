@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { cn } from "@/lib/utils/cn";
 
-type Size = "card" | "hero" | "gallery" | "story" | "testimonial";
+type Size = "card" | "hero" | "gallery" | "story" | "testimonial" | "thumb";
 
 interface ProductImagePlaceholderProps {
   src?: string;

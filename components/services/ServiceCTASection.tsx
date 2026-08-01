@@ -8,6 +8,7 @@ import SectionLabel from "@/components/ui/SectionLabel";
 import PolkaDots from "@/components/ui/PolkaDots";
 import BookingModal from "./BookingModal";
 import type { ServiceColor } from "@/lib/services/types";
+import type { AgeGate } from "@/lib/utils/age";
 
 /** خريطة الألوان حسب لون الكارد */
 const COLOR_SCHEME: Record<ServiceColor, {
@@ -59,10 +60,15 @@ const COLOR_SCHEME: Record<ServiceColor, {
 
 interface ServiceCTASectionProps {
   serviceTitle: string;
+  serviceSlug?: string;
   color?: ServiceColor;
   heading?: React.ReactNode;
   subheading?: string;
   whatsappNumber?: string;
+  /** الفئة العمرية للورشة — تُمرَّر لنموذج التسجيل */
+  ageGate?: AgeGate;
+  /** ترتيب التداخل — يزداد مع عدد الأقسام قبله في الصفحة */
+  zIndex?: number;
 }
 
 /**
@@ -71,10 +77,13 @@ interface ServiceCTASectionProps {
  */
 export default function ServiceCTASection({
   serviceTitle,
+  serviceSlug,
   color = "rose",
   heading = "جاهزة للخطوة التالية؟",
-  subheading = "احجزي مكانك الآن — سنتواصل معك خلال 24 ساعة لتأكيد التفاصيل.",
+  subheading = "سجّلي مكانك الآن — مقعدكِ يُحجز فورًا، ويصلكِ التأكيد على بريدكِ.",
   whatsappNumber,
+  ageGate,
+  zIndex = 5,
 }: ServiceCTASectionProps) {
   const [open, setOpen] = useState(false);
   const c = COLOR_SCHEME[color];
@@ -88,7 +97,7 @@ export default function ServiceCTASection({
     <>
       <section
         className="relative overflow-hidden"
-        style={{ marginTop: -60, zIndex: 5 }}
+        style={{ marginTop: -60, zIndex }}
       >
         <SectionWave fill={c.wave} />
 
@@ -176,7 +185,7 @@ export default function ServiceCTASection({
                   minWidth: 240,
                 }}
               >
-                <span>احجزي الآن</span>
+                <span>سجّلي الآن</span>
                 <span style={{ fontSize: "1.2em" }}>←</span>
               </button>
 
@@ -246,6 +255,8 @@ export default function ServiceCTASection({
         open={open}
         onClose={() => setOpen(false)}
         serviceTitle={serviceTitle}
+        serviceSlug={serviceSlug}
+        ageGate={ageGate}
       />
     </>
   );

@@ -5,19 +5,20 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
-import { MOBILE_NAV_ITEMS, MEGA_CATEGORIES } from "@/lib/utils/constants";
-import { HEADER_HEIGHT } from "@/lib/utils/constants";
+import { MOBILE_NAV_ITEMS, HEADER_HEIGHT } from "@/lib/utils/constants";
+import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import type { Product } from "@/lib/products/types";
 
 /** خصائص القائمة المتنقلة */
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  products?: Product[];
 }
 
 /** قائمة الموبايل — overlay كامل الشاشة مع CTA + footer */
-export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMenuProps) {
   const [shopOpen, setShopOpen] = useState(false);
-  const [activeCatId, setActiveCatId] = useState(MEGA_CATEGORIES[0].id);
 
   /** الموقع الفعلي لأسفل الهيدر (TopBar + Header) */
   const [menuTop, setMenuTop] = useState<number>(HEADER_HEIGHT);
@@ -58,7 +59,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
   if (!isOpen) return null;
 
-  const activeCat = MEGA_CATEGORIES.find((c) => c.id === activeCatId)!;
+  const shopItems = products.slice(0, 4);
 
   return createPortal(
     <div
@@ -109,66 +110,36 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
                 {shopOpen && (
                   <div className="mt-2 rounded-[14px] border-[1.5px] border-bord bg-white overflow-hidden">
-                    <div className="flex border-b border-bord">
-                      {MEGA_CATEGORIES.map((cat) => (
-                        <button
-                          key={cat.id}
-                          onClick={() => setActiveCatId(cat.id)}
-                          className={cn(
-                            "flex-1 flex flex-col items-center gap-1 py-3 text-[11px] font-semibold [transition:color_150ms_ease,border-color_150ms_ease]",
-                            activeCatId === cat.id
-                              ? "text-teal border-b-2 border-teal -mb-[1px]"
-                              : "text-light"
-                          )}
-                        >
-                          <span className={cn("w-7 h-7 rounded-lg flex items-center justify-center", cat.iconBg)}>
-                            <Image src={cat.icon} alt={cat.label} width={22} height={22} className="object-contain" />
-                          </span>
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="p-4 flex flex-col gap-2">
-                      <Link
-                        href={activeCat.featured.slug}
-                        onClick={onClose}
-                        className={cn(
-                          "flex items-center gap-3 p-3 rounded-[12px] border-[1.5px] [transition:background-color_200ms_ease,border-color_200ms_ease]",
-                          activeCat.featuredBg,
-                          activeCat.featuredBorderColor
-                        )}
-                      >
-                        <span className="w-11 h-11 rounded-[10px] flex items-center justify-center text-[24px] shrink-0">
-                          {activeCat.featured.emoji}
-                        </span>
-                        <div>
-                          <span className={cn("font-label text-[9px] font-extrabold tracking-wider uppercase text-white px-2 py-[3px] rounded-[8px] inline-block mb-0.5", activeCat.featured.badgeBg)}>
-                            {activeCat.featured.badge}
-                          </span>
-                          <div className="text-[13px] font-bold text-dark">{activeCat.featured.title}</div>
-                          <div className="font-label text-[13px] font-extrabold text-teal">{activeCat.featured.price}</div>
-                        </div>
-                      </Link>
-
-                      {activeCat.items.map((it, i) => (
-                        <Link
-                          key={i}
-                          href={it.href}
-                          onClick={onClose}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-[13px] text-mid border border-transparent hover:bg-tealpale hover:text-teal [transition:background-color_150ms_ease,color_150ms_ease,border-color_150ms_ease]"
-                        >
-                          <span className="text-base w-6 text-center">{it.emoji}</span>
-                          {it.title}
-                        </Link>
-                      ))}
+                    <div className="p-3 flex flex-col gap-2">
+                      {shopItems.length > 0 ? (
+                        shopItems.map((p) => (
+                          <Link
+                            key={p.slug}
+                            href={`/shop/${p.slug}`}
+                            onClick={onClose}
+                            className="flex items-center gap-3 p-2.5 rounded-[12px] border border-transparent [transition:background-color_160ms_ease,border-color_160ms_ease] hover:bg-rosepale hover:border-[rgba(242,167,181,0.28)]"
+                          >
+                            {/* صورة المنتج الحقيقية */}
+                            <span className="relative rounded-[10px] overflow-hidden shrink-0" style={{ width: 56, height: 56, background: "var(--offwh)" }}>
+                              <ProductImagePlaceholder src={p.mainImage} alt={p.title} size="thumb" objectFit="cover" />
+                            </span>
+                            <div className="min-w-0">
+                              <div className="font-label uppercase text-[9px] tracking-[1px] text-light mb-0.5 truncate">{p.category}</div>
+                              <div className="font-heading font-bold text-dark text-[13px] leading-snug line-clamp-2">{p.title}</div>
+                              <div className="font-label font-extrabold text-[14px]" style={{ color: "var(--rose)" }}>₪{p.price}</div>
+                            </div>
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-mid text-[13px]">قريباً منتجات جديدة ✦</div>
+                      )}
 
                       <Link
                         href="/shop"
                         onClick={onClose}
                         className="text-xs font-bold text-teal flex items-center gap-1.5 px-3 py-2 rounded-[10px] hover:gap-2.5 [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1)]"
                       >
-                        {activeCat.seeAllText} ←
+                        كل المنتجات ←
                       </Link>
                     </div>
                   </div>

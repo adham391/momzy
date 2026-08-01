@@ -7,31 +7,88 @@ import { useCart } from "@/lib/store/cart";
 import CheckoutForm from "@/components/checkout/CheckoutForm";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import CheckoutUpsell from "@/components/checkout/CheckoutUpsell";
+import CheckoutSteps from "@/components/checkout/CheckoutSteps";
+import TrustBadges from "@/components/checkout/TrustBadges";
+import EmbeddedPayment from "@/components/checkout/EmbeddedPayment";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
+import type { ShippingConfig } from "@/lib/shipping";
 
-/** حاوية صفحة إتمام الشراء — تتحقق من وجود منتجات في السلة */
-export default function CheckoutClient() {
+type Step = "delivery" | "payment";
+
+/**
+ * حاوية إتمام الشراء — تدفّق **مرحلي على صفحة واحدة**:
+ *   ① التوصيل (النموذج) ← ② الدفع (iframe مدمج) — بلا انتقال صفحات.
+ * الطلب يُنشأ عند الانتقال للدفع (قياسي)، والرابط يُزامَن بـ ?order= ليصمد التحديث.
+ */
+export default function CheckoutClient({ shipping }: { shipping: ShippingConfig }) {
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  const [step, setStep]         = useState<Step>("delivery");
+  const [orderId, setOrderId]   = useState<string | null>(null);
 
   const items  = useCart((s) => s.items);
   const router = useRouter();
 
-  /* إعادة التوجيه إذا كانت السلة فارغة */
+  /* hydration + استعادة مرحلة الدفع من الرابط عند التحديث (?order=) */
   useEffect(() => {
-    if (hydrated && items.length === 0) {
+    setHydrated(true);
+    const o = new URLSearchParams(window.location.search).get("order");
+    if (o) {
+      setOrderId(o);
+      setStep("payment");
+    }
+  }, []);
+
+  /* سلة فارغة → المتجر (في مرحلة التوصيل فقط — بعد إنشاء الطلب لا يهم) */
+  useEffect(() => {
+    if (hydrated && step === "delivery" && items.length === 0) {
       router.replace("/shop");
     }
-  }, [hydrated, items.length, router]);
+  }, [hydrated, step, items.length, router]);
 
-  if (!hydrated || items.length === 0) {
+  /** الانتقال لمرحلة الدفع بعد إنشاء الطلب — يُزامن الرابط بلا إعادة تحميل */
+  function goToPayment(id: string) {
+    setOrderId(id);
+    setStep("payment");
+    window.history.replaceState(null, "", `/checkout?order=${id}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /** الرجوع لتعديل بيانات التوصيل */
+  function backToDelivery() {
+    setStep("delivery");
+    window.history.replaceState(null, "", "/checkout");
+  }
+
+  if (!hydrated || (step === "delivery" && items.length === 0)) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-light text-[15px]">جارٍ التحميل...</div>
       </div>
     );
   }
+
+  const isPayment = step === "payment";
+
+  /** قسم الخطوة (نموذج أو دفع) — key لإعادة تشغيل أنيميشن الدخول عند التبديل */
+  const stepSection = (
+    <div key={step} className="checkout-step-in">
+      {isPayment && orderId ? (
+        <EmbeddedPayment id={orderId} onEdit={backToDelivery} />
+      ) : (
+        <CheckoutForm shipping={shipping} onProceedToPayment={goToPayment} />
+      )}
+    </div>
+  );
+
+  const summaryAside = (
+    <>
+      <OrderSummary shipping={shipping} readOnly={isPayment} />
+      <div className="mt-5">
+        <TrustBadges />
+      </div>
+    </>
+  );
 
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh", paddingBottom: 80 }}>
@@ -51,41 +108,42 @@ export default function CheckoutClient() {
             <span>›</span>
             <Link href="/shop" className="hover:text-teal transition-colors">المتجر</Link>
             <span>›</span>
-            <span className="text-mid">إتمام الشراء</span>
+            <span className="text-mid">{isPayment ? "الدفع الآمن" : "إتمام الشراء"}</span>
           </nav>
-          <h1
-            className="font-heading font-bold text-h1 mb-2"
-            style={{ color: "var(--dark)" }}
-          >
-            إتمام الشراء
+          <h1 className="font-heading font-bold text-h1 mb-2" style={{ color: "var(--dark)" }}>
+            {isPayment ? "الدفع الآمن" : "إتمام الشراء"}
           </h1>
           <p className="font-body text-[15px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            أكملي بياناتك وسيصلك طلبك خلال 5 أيام عمل
+            {isPayment
+              ? "أدخلي بيانات بطاقتك بأمان لإتمام طلبك"
+              : "أكملي بياناتك وسيصلك طلبك خلال 7 أيام عمل"}
           </p>
         </Container>
         <PageHeaderWave fillColor="var(--offwh)" />
       </div>
 
-      {/* ── المحتوى الرئيسي ── */}
+      {/* ── شريط التقدّم ── */}
       <Container>
         <div className="mt-8">
-          {/* Desktop: عمودان */}
-          <div className="hidden md:grid gap-8" style={{ gridTemplateColumns: "1fr 380px" }}>
-            <CheckoutForm />
-            <div style={{ position: "sticky", top: 96, alignSelf: "start" }}>
-              <OrderSummary />
-            </div>
-          </div>
-
-          {/* Mobile: عمود واحد */}
-          <div className="flex flex-col gap-6 md:hidden">
-            <OrderSummary />
-            <CheckoutForm />
-          </div>
-
-          {/* منتجات مقترحة */}
-          <CheckoutUpsell />
+          <CheckoutSteps current={isPayment ? 2 : 1} />
         </div>
+      </Container>
+
+      {/* ── المحتوى — شبكة واحدة متجاوبة (نسخة واحدة من كل قسم) ── */}
+      <Container>
+        <div className="mt-8 grid gap-8 grid-cols-1 md:[grid-template-columns:1fr_380px]">
+          {/* الملخّص + الثقة — أول على الموبايل، العمود الأيسر (track 2) الملتصق على الديسكتوب */}
+          <div className="md:order-2 md:sticky md:top-24 md:self-start">{summaryAside}</div>
+          {/* الخطوة (نموذج ↔ دفع) — أخير على الموبايل، العمود الأيمن (track 1) على الديسكتوب */}
+          <div className="md:order-1">{stepSection}</div>
+        </div>
+
+        {/* منتجات مقترحة — مرحلة التوصيل فقط */}
+        {!isPayment && (
+          <div className="mt-8">
+            <CheckoutUpsell />
+          </div>
+        )}
       </Container>
     </div>
   );

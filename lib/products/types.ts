@@ -125,6 +125,8 @@ export interface Product {
   faqs?: ProductFAQ[];
 
   /* ── meta ── */
+  /** معرّف Sanity (_id) — يُستخدم للتعديل من لوحة الأدمن */
+  id?: string;
   createdAt?: string;
   updatedAt?: string;
 }

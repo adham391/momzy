@@ -1,8 +1,10 @@
 import type { OrderCustomer } from "@/lib/utils/orders";
 
 interface OrderInfoCardProps {
-  customer: OrderCustomer;
-  notes?:   string;
+  customer:    OrderCustomer;
+  notes?:      string;
+  building?:   string;
+  postalCode?: string;
 }
 
 /** سطر معلومة (label + value) */
@@ -26,7 +28,7 @@ function InfoRow({ label, value, ltr }: { label: string; value: string; ltr?: bo
 }
 
 /** كاردا بيانات العميل وعنوان التوصيل */
-export default function OrderInfoCard({ customer, notes }: OrderInfoCardProps) {
+export default function OrderInfoCard({ customer, notes, building, postalCode }: OrderInfoCardProps) {
   const cardStyle = {
     background: "white",
     border: "1.5px solid var(--bord)",
@@ -62,7 +64,13 @@ export default function OrderInfoCard({ customer, notes }: OrderInfoCardProps) {
         </h3>
         <div className="flex flex-col gap-3">
           <InfoRow label="البلدة"  value={customer.city} />
+          {postalCode && postalCode.trim().length > 0 && (
+            <InfoRow label="الرمز البريدي" value={postalCode} ltr />
+          )}
           <InfoRow label="العنوان" value={customer.address} />
+          {building && building.trim().length > 0 && (
+            <InfoRow label="طابق / شقة / مدخل" value={building} />
+          )}
           {notes && notes.trim().length > 0 && (
             <InfoRow label="ملاحظات" value={notes} />
           )}

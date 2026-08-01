@@ -103,11 +103,6 @@ export default function CartItemRow({ item }: CartItemRowProps) {
               &ldquo;{item.gift.message}&rdquo;
             </p>
           )}
-          {item.gift?.deliveryDate && (
-            <p className="text-[11px] mt-0.5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-              📅 {item.gift.deliveryDate}
-            </p>
-          )}
         </div>
       ) : (
         /* ── زر "جعلها هدية" — للعناصر العادية ── */

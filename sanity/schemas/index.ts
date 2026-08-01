@@ -15,6 +15,9 @@ import { product }       from "./product";
 import { siteSettings }  from "./siteSettings";
 import { service }       from "./service";
 import { review }        from "./review";
+import { homePage }      from "./homePage";
+import { aboutPage }     from "./aboutPage";
+import { article }       from "./article";
 
 /**
  * تجميع كل Sanity schemas
@@ -36,4 +39,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   siteSettings,
   service,
   review,
+  homePage,
+  aboutPage,
+  article,
 ];

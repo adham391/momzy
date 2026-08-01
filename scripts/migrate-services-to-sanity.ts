@@ -6,8 +6,13 @@
  * - الصور لن تُرفع تلقائياً — هبة ترفعها يدوياً من Studio
  * - idempotent: يستخدم _id ثابت = "service-{slug}"
  *
+ * ⚠️ Sanity هو مصدر الحقيقة بعد أول تشغيل — فالخدمة الموجودة **لا تُلمس**
+ *    كي لا تُمحى تعديلات هبة وصورها. الاستبدال الكامل يحتاج --force صراحةً
+ *    (وحتى معه تُحفظ الصور المرفوعة).
+ *
  * تشغيل:
- *   npx tsx scripts/migrate-services-to-sanity.ts
+ *   npx tsx scripts/migrate-services-to-sanity.ts            # آمن — يضيف الناقص فقط
+ *   npx tsx scripts/migrate-services-to-sanity.ts --force    # يستبدل النص من seed
  *
  * متطلبات في .env.local:
  *   NEXT_PUBLIC_SANITY_PROJECT_ID=xxxx
@@ -44,11 +49,20 @@ function toSanityDocument(service: Service) {
     duration:         service.duration,
     location:         service.location,
     ageRange:         service.ageRange,
+    ageMinMonths:     service.ageMinMonths,
+    ageMaxMonths:     service.ageMaxMonths,
     maxParticipants:  service.maxParticipants,
     shortDescription: service.shortDescription,
     longDescription:  service.longDescription,
     topics:           service.topics,
     benefits:         service.benefits,
+    // عناصر مصفوفة Sanity تحتاج _key + _type (وإلا لا تُحرَّر في Studio)
+    faqs:             service.faqs?.map((f, i) => ({
+      _type: "productFAQ",
+      _key: `faq${i}`,
+      question: f.question,
+      answer: f.answer,
+    })),
     color:            service.color,
     price:            service.price,
     order:            service.order,
@@ -71,15 +85,38 @@ async function migrate() {
     process.exit(1);
   }
 
-  const results = { success: 0, failed: 0 };
+  const force = process.argv.includes("--force");
+  const results = { created: 0, replaced: 0, skipped: 0, failed: 0 };
 
   for (const service of SEED_SERVICES) {
+    const doc = toSanityDocument(service);
     try {
-      console.log(`⏳ جاري رفع: "${service.title}" (${service.slug})...`);
-      const doc = toSanityDocument(service);
-      await client.createOrReplace(doc);
-      console.log(`  ✅ تم: ${service.title}`);
-      results.success++;
+      // هل الخدمة موجودة في Sanity؟ (مع صورها المرفوعة)
+      const existing = await client.fetch<{ coverImage?: unknown; icon?: unknown } | null>(
+        `*[_id == $id][0]{coverImage, icon}`,
+        { id: doc._id }
+      );
+
+      if (existing && !force) {
+        console.log(`⏭️  موجودة — تُركت كما هي: ${service.title}`);
+        results.skipped++;
+        continue;
+      }
+
+      if (existing) {
+        // استبدال صريح — لكن نحتفظ بالصور المرفوعة من Studio
+        await client.createOrReplace({
+          ...doc,
+          ...(existing.coverImage ? { coverImage: existing.coverImage } : {}),
+          ...(existing.icon ? { icon: existing.icon } : {}),
+        });
+        console.log(`  ♻️  استُبدلت (الصور محفوظة): ${service.title}`);
+        results.replaced++;
+      } else {
+        await client.create(doc);
+        console.log(`  ✅ أُضيفت: ${service.title}`);
+        results.created++;
+      }
     } catch (err) {
       console.error(`  ❌ فشل: ${service.title}`, err);
       results.failed++;
@@ -87,8 +124,10 @@ async function migrate() {
   }
 
   console.log("\n─────────────────────────────────────────");
-  console.log(`✅ نجح:   ${results.success} خدمة`);
-  if (results.failed > 0) console.log(`❌ فشل:   ${results.failed} خدمة`);
+  if (results.created)  console.log(`✅ أُضيفت:   ${results.created} خدمة`);
+  if (results.replaced) console.log(`♻️  استُبدلت: ${results.replaced} خدمة`);
+  if (results.skipped)  console.log(`⏭️  تُركت:    ${results.skipped} خدمة (موجودة — استخدمي --force للاستبدال)`);
+  if (results.failed)   console.log(`❌ فشل:      ${results.failed} خدمة`);
   console.log("─────────────────────────────────────────");
   console.log("\n📌 تذكير: الصور لم تُرفع تلقائياً.");
   console.log("   افتحي Studio وارفعي صور الغلاف لكل خدمة.\n");

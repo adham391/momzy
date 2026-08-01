@@ -118,7 +118,35 @@ export const service = defineType({
       name: "ageRange",
       title: "الفئة العمرية (اختياري)",
       type: "string",
+      description: "نص للعرض فقط — بكلماتك أنتِ",
       placeholder: "مثال: 0-3 أشهر",
+    }),
+
+    defineField({
+      name: "ageMinMonths",
+      title: "أصغر عمر بالأشهر (اختياري)",
+      type: "number",
+      description:
+        "لمنع تسجيل طفل خارج الفئة تلقائياً. اتركيه فارغاً إن لم تكن الورشة محدودة العمر (مثل ورشات الحوامل).",
+      validation: (r) => r.min(0).integer(),
+    }),
+
+    defineField({
+      name: "ageMaxMonths",
+      title: "أكبر عمر بالأشهر (اختياري)",
+      type: "number",
+      description: "مثال: ورشة 0-3 أشهر ⇒ أصغر عمر 0 · أكبر عمر 3",
+      validation: (r) =>
+        r
+          .min(0)
+          .integer()
+          .custom((max, ctx) => {
+            const min = (ctx.parent as { ageMinMonths?: number })?.ageMinMonths;
+            if (typeof max === "number" && typeof min === "number" && max < min) {
+              return "أكبر عمر يجب أن يكون أكبر من أصغر عمر";
+            }
+            return true;
+          }),
     }),
 
     defineField({
@@ -160,6 +188,15 @@ export const service = defineType({
       type: "array",
       of: [{ type: "string" }],
       description: "النتائج/الفوائد — كل سطر يظهر كـ bullet",
+    }),
+
+    defineField({
+      name: "faqs",
+      title: "الأسئلة الشائعة (اختياري)",
+      type: "array",
+      // نفس كائن أسئلة المنتج — بنية واحدة (سؤال + جواب) لا تُكرَّر
+      of: [{ type: "productFAQ" }],
+      description: "تظهر كقسم قابل للطي في صفحة الورشة. اتركيه فارغًا فلا يظهر القسم.",
     }),
 
     // ─── الصور والتصميم ───────────────────────────────────────────

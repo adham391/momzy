@@ -18,7 +18,7 @@ const MESSAGE_MAX = 200;
 
 /**
  * نموذج خيارات الهدية — يظهر على صفحة المنتج قبل أزرار الشراء
- * يسمح للمُهدية بإدخال رسالة + تفاصيل المستلِمة + تاريخ التوصيل
+ * يسمح للمُهدية بإدخال رسالة + تفاصيل المستلِمة
  */
 export default function GiftOptionsForm({
   value,
@@ -31,9 +31,6 @@ export default function GiftOptionsForm({
   function update<K extends keyof GiftOptions>(key: K, val: GiftOptions[K]) {
     onChange({ ...value, [key]: val });
   }
-
-  /** حد أدنى = اليوم */
-  const minDate = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="mb-6">
@@ -56,7 +53,7 @@ export default function GiftOptionsForm({
             🎁 هذه الطلبية هدية
           </div>
           <div className="text-[12px] mt-0.5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            رسالة شخصية + شحن مباشر للمستلِمة + اختيار تاريخ التوصيل
+            رسالة شخصية + شحن مباشر للمستلِمة
           </div>
         </div>
       </label>
@@ -138,24 +135,6 @@ export default function GiftOptionsForm({
               className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
               style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
             />
-          </div>
-
-          {/* تاريخ التوصيل */}
-          <div>
-            <label className="block font-label font-bold text-[13px] mb-1.5" style={{ color: "var(--dark)" }}>
-              📅 تاريخ التوصيل المرغوب
-            </label>
-            <input
-              type="date"
-              value={value.deliveryDate ?? ""}
-              min={minDate}
-              onChange={(e) => update("deliveryDate", e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
-              style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
-            />
-            <p className="text-[11px] mt-1.5" style={{ color: "var(--light)", fontFamily: "'Tajawal', sans-serif" }}>
-              💡 سنبذل قصارى جهدنا للوصول في التاريخ المختار. التاريخ الفعلي حسب توفّر شركة الشحن.
-            </p>
           </div>
         </div>
       )}

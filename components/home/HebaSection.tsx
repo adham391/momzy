@@ -2,6 +2,8 @@ import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import SectionLabel from "@/components/ui/SectionLabel";
 import SectionWave from "@/components/ui/SectionWave";
+import MomzyText from "@/components/ui/MomzyText";
+import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** شهادات هبة المهنية مع ألوان النقطة */
 const HEBA_TAGS = [
@@ -11,7 +13,7 @@ const HEBA_TAGS = [
 ];
 
 /** قسم هبة حسن — مؤسِّسة Momzy (تصميم editorial فاخر) */
-export default function HebaSection() {
+export default function HebaSection({ content }: { content: HomePageContent }) {
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية قسم الأكثر مبيعاً ─ */
     <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 4 }}>
@@ -42,7 +44,7 @@ export default function HebaSection() {
 
               {/* eyebrow — نفس أسلوب باقي الأقسام */}
               <div className="flex justify-center md:justify-start">
-                <SectionLabel color="teal">مؤسِّسة Momzy</SectionLabel>
+                <SectionLabel color="teal">{content.hebaLabel}</SectionLabel>
               </div>
 
               {/* العنوان مع علامة اقتباس ديكورية */}
@@ -55,19 +57,21 @@ export default function HebaSection() {
                   ❝
                 </span>
                 <h2 className="font-heading font-bold text-dark relative" style={{ fontSize: "clamp(28px, 3.6vw, 44px)", lineHeight: 1.25 }}>
-                  القلب النابض
+                  {content.hebaHeadingLine1}
                   <br />
-                  وراء <span className="text-rose italic">Momzy</span>
+                  <MomzyText text={content.hebaHeadingLine2} />
                 </h2>
               </div>
 
               {/* السيرة — فقرة واحدة على الموبايل، اثنتان على الديسكتوب */}
               <p className="text-body leading-[1.9] text-mid mt-4 md:mt-5 mb-5 md:mb-3.5">
-                ممرضة شغوفة بالأمومة، رحلتها مع أكثر من ألف أم منحتها فهماً عميقاً لما تحتاجه كل أم — هبة لا تقدّم معلومات فقط، بل حضوراً إنسانياً حقيقياً.
+                {content.hebaBio[0]}
               </p>
-              <p className="hidden md:block text-body leading-[1.9] text-mid mb-6">
-                من أول نبضة قلب حتى الخطوة الأولى لطفلك، هبة بجانبك بعلمٍ وحبٍّ وشغف.
-              </p>
+              {content.hebaBio[1] && (
+                <p className="hidden md:block text-body leading-[1.9] text-mid mb-6">
+                  {content.hebaBio[1]}
+                </p>
+              )}
 
               {/* شارات الاعتماد */}
               <div className="flex gap-2 flex-wrap justify-center md:justify-start mb-4 md:mb-6">
@@ -85,7 +89,7 @@ export default function HebaSection() {
 
               {/* التوقيع */}
               <div className="flex items-center gap-3 justify-center md:justify-start mb-5 md:mb-7">
-                <span className="font-heading italic text-rose" style={{ fontSize: 30, lineHeight: 1 }}>هبة حسن</span>
+                <span className="font-heading italic text-rose" style={{ fontSize: 30, lineHeight: 1 }}>{content.hebaSignature}</span>
                 <span style={{ width: 38, height: 1.5, background: "var(--roselt)" }} />
                 <span className="font-label uppercase text-light" style={{ fontSize: 10, letterSpacing: "2px" }}>Heba Hasan</span>
               </div>
@@ -126,7 +130,7 @@ export default function HebaSection() {
                   style={{
                     aspectRatio: "4 / 5",
                     borderRadius: "150px 150px 32px 32px",
-                    backgroundImage: "url('/images/heba.jpg')",
+                    backgroundImage: `url('${content.heroImage}')`,
                     backgroundPosition: "center 12%",
                   }}
                 >
@@ -154,11 +158,8 @@ export default function HebaSection() {
                     boxShadow: "0 16px 40px rgba(0,0,0,0.14)",
                   }}
                 >
-                  <span className="font-heading font-bold" style={{ color: "var(--rose)", fontSize: 30, lineHeight: 1 }}>+1000</span>
-                  <span className="leading-tight text-start">
-                    <span className="block font-bold text-dark" style={{ fontSize: 13.5 }}>أمّ</span>
-                    <span className="block text-mid" style={{ fontSize: 11.5 }}>رافقتهنّ هبة</span>
-                  </span>
+                  <span className="font-heading font-bold" style={{ color: "var(--rose)", fontSize: 30, lineHeight: 1 }}>{content.hebaStat.number}</span>
+                  <span className="text-start leading-tight text-mid" style={{ fontSize: 12.5, maxWidth: 92 }}>{content.hebaStat.label}</span>
                 </div>
               </div>
             </div>

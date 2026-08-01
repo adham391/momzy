@@ -17,7 +17,7 @@ interface ProductHeroProps {
 
 /** عناوين شاعرية مخصصة لمنتجات معيّنة */
 const HERO_TAGLINES: Record<string, string> = {
-  "mommy-journey-box": "مش بس صندوق، جواتو حضن",
+  "mommy-journey-box": "ليس مجرّد صندوق، بل حِضن",
 };
 
 /* ── helpers للفيديو ─────────────────────────────────────────── */
@@ -101,18 +101,19 @@ export default function ProductHero({ product }: ProductHeroProps) {
     (product.shippingInfo?.freeShipping
       ? "شحن مجاني لكل البلاد"
       : product.shippingInfo?.estimatedDays
-      ? `توصيل خلال ${product.shippingInfo.estimatedDays}`
+      ? `التوصيل ${product.shippingInfo.estimatedDays}`
       : "شحن سريع لكل البلاد");
 
   return (
     <section
-      className="relative overflow-hidden"
+      className="relative overflow-hidden pt-4 pb-[72px] md:pt-6 md:pb-24"
       style={{
         background: "linear-gradient(160deg, white 0%, var(--rosepale) 60%, var(--cream) 100%)",
-        paddingTop: 24,
-        paddingBottom: 64,
       }}
     >
+      {/* توهّج فاخر خلف منطقة الصورة */}
+      <div aria-hidden className="absolute pointer-events-none hidden md:block" style={{ width: 420, height: 420, borderRadius: "50%", background: "radial-gradient(circle, rgba(242,167,181,0.30), transparent 70%)", top: 40, insetInlineEnd: "8%", filter: "blur(30px)" }} />
+
       <Container>
         {/* Breadcrumb */}
         <nav
@@ -187,9 +188,8 @@ export default function ProductHero({ product }: ProductHeroProps) {
 
               {/* Main media area — موبايل: عرض كامل / ديسكتوب: ارتفاع مقيّد */}
               <div
-                className="relative rounded-[20px] overflow-hidden order-1 md:order-2 w-full md:w-auto md:h-[min(72vh,640px)]"
+                className="relative rounded-[20px] overflow-hidden order-1 md:order-2 w-full md:w-auto aspect-[4/5] md:aspect-auto md:h-[min(72vh,640px)]"
                 style={{
-                  aspectRatio: "9/16",
                   border: "1.5px solid var(--bord)",
                   boxShadow: "0 16px 48px rgba(0,0,0,0.08)",
                   background: "white",
@@ -326,7 +326,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
 
             {/* الوصف القصير */}
             <p
-              className="leading-[1.85] mb-6"
+              className="leading-[1.8] mb-4"
               style={{
                 fontSize: "clamp(15px, 1.2vw, 17px)",
                 color: "var(--mid)",
@@ -338,7 +338,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
 
             {/* بلوك السعر */}
             <div
-              className="rounded-[18px] p-5 mb-5 flex items-center justify-between flex-wrap gap-3"
+              className="rounded-[18px] p-4 mb-4 flex items-center justify-between flex-wrap gap-3"
               style={{
                 background: "white",
                 border: "1.5px solid var(--bord)",
@@ -385,7 +385,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
             </div>
 
             {/* خيارات الهدية */}
-            <div className="mb-5">
+            <div className="mb-4">
               <GiftOptionsForm
                 enabled={giftEnabled}
                 onToggle={setGiftEnabled}
@@ -435,7 +435,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
               <div className="flex items-center gap-2">
                 <TruckIcon />
                 <span className="font-label font-semibold text-[13px]" style={{ color: "var(--mid)" }}>
-                  توصيل خلال <span style={{ color: "var(--dark)", fontWeight: 700 }}>5 أيام</span>
+                  توصيل حتى <span style={{ color: "var(--dark)", fontWeight: 700 }}>7 أيام</span>
                 </span>
               </div>
             </div>
@@ -451,7 +451,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                 color: "var(--dark)",
                 border: "none",
                 borderRadius: 50,
-                padding: "20px 28px",
+                padding: "16px 26px",
                 cursor: "pointer",
                 boxShadow: "0 10px 28px rgba(242,167,181,0.55)",
               }}
@@ -462,7 +462,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
             {/* CTA ثانوي — مخفّف */}
             <button
               onClick={handleAddToCart}
-              className="w-full font-label font-semibold text-[14px] mb-5 [transition:color_180ms_ease] hover:underline"
+              className="w-full font-label font-semibold text-[14px] mb-4 [transition:color_180ms_ease] hover:underline"
               style={{
                 background: "transparent",
                 color: "var(--mid)",

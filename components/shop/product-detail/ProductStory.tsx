@@ -11,7 +11,7 @@ interface ProductStoryProps {
 /** قسم القصة — "من قلب هبة" */
 export default function ProductStory({ story }: ProductStoryProps) {
   return (
-    <section style={{ background: "#FDFAF5", padding: "28px 0 clamp(80px, 10vw, 120px)" }}>
+    <section style={{ background: "#FDFAF5", padding: "20px 0 clamp(68px, 6vw, 88px)" }}>
       <Container>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-10 items-center">
@@ -57,7 +57,7 @@ export default function ProductStory({ story }: ProductStoryProps) {
                 className="inline-block font-label font-bold text-[14px] mt-3 transition-opacity hover:opacity-80"
                 style={{ color: "var(--rose)", borderBottom: "1px solid rgba(242,167,181,0.4)", paddingBottom: 2 }}
               >
-                اعرفي أكتر عن Momzy ←
+                اعرفي أكثر عن Momzy ←
               </Link>
             </div>
           </div>

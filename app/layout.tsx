@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Amiri, Tajawal, Nunito } from "next/font/google";
 import "./globals.css";
+import PageTracker from "@/components/analytics/PageTracker";
+import TrackingScripts from "@/components/analytics/TrackingScripts";
 
 /* ── الخطوط ──────────────────────────────────────────── */
 const amiri = Amiri({
@@ -44,7 +46,11 @@ export default function RootLayout({
       className={`${amiri.variable} ${tajawal.variable} ${nunito.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-body min-h-screen">{children}</body>
+      <body className="font-body min-h-screen">
+        {children}
+        <PageTracker />
+        <TrackingScripts />
+      </body>
     </html>
   );
 }

@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { formatDateTime } from "@/lib/utils/format";
 
 interface OrderHeaderProps {
   orderNumber: string;
   createdAt:   string;
+  /** هل اكتمل الطلب (مدفوع أو تدفّق يدوي)؟ false = بانتظار دفع HYP */
+  paid?:       boolean;
 }
 
-/** هيدر صفحة التأكيد — أيقونة نجاح + رقم الطلب + التاريخ */
-export default function OrderHeader({ orderNumber, createdAt }: OrderHeaderProps) {
+/** هيدر صفحة التأكيد — أيقونة الحالة + رقم الطلب + التاريخ */
+export default function OrderHeader({ orderNumber, createdAt, paid = true }: OrderHeaderProps) {
   const [copied, setCopied] = useState(false);
 
   /** نسخ رقم الطلب إلى الحافظة */
@@ -24,13 +27,7 @@ export default function OrderHeader({ orderNumber, createdAt }: OrderHeaderProps
   }
 
   /** تنسيق التاريخ بالعربية مع أرقام لاتينية */
-  const formattedDate = new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
-    year:   "numeric",
-    month:  "long",
-    day:    "numeric",
-    hour:   "2-digit",
-    minute: "2-digit",
-  }).format(new Date(createdAt));
+  const formattedDate = formatDateTime(createdAt);
 
   return (
     <div
@@ -42,30 +39,37 @@ export default function OrderHeader({ orderNumber, createdAt }: OrderHeaderProps
         boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
       }}
     >
-      {/* دائرة الأيقونة */}
+      {/* دائرة الأيقونة — نجاح (✓ teal) أو بانتظار الدفع (⏱ أصفر) */}
       <div
         className="mx-auto rounded-full flex items-center justify-center mb-5"
         style={{
           width: 80,
           height: 80,
-          background: "var(--tealpale)",
+          background: paid ? "var(--tealpale)" : "var(--yellow)",
         }}
       >
-        <Image
-          src="/icons/correct-icon.png"
-          alt="تم"
-          width={48}
-          height={48}
-          className="object-contain"
-        />
+        {paid ? (
+          <Image
+            src="/icons/correct-icon.png"
+            alt="تم"
+            width={48}
+            height={48}
+            className="object-contain"
+          />
+        ) : (
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--dark)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="بانتظار الدفع">
+            <circle cx="12" cy="12" r="9" />
+            <polyline points="12 7 12 12 15.5 14" />
+          </svg>
+        )}
       </div>
 
-      {/* عنوان النجاح */}
+      {/* العنوان — حسب حالة الدفع */}
       <h1 className="font-heading font-bold text-dark text-h2 mb-2">
-        تم تأكيد طلبكِ بنجاح
+        {paid ? "تم تأكيد طلبكِ بنجاح" : "طلبكِ محفوظ — بانتظار الدفع"}
       </h1>
       <p className="font-label text-[14px] text-mid mb-6">
-        شكراً لثقتكِ بـ Momzy
+        {paid ? "شكراً لثقتكِ بـ Momzy" : "أكملي الدفع الآمن بالأسفل لتأكيد طلبكِ"}
       </p>
 
       {/* رقم الطلب — قابل للنسخ */}

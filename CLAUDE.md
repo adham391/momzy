@@ -1,5 +1,5 @@
 # CLAUDE.md — Momzy Platform
-> آخر تحديث: أبريل 2026 — Sanity CMS ✅
+> آخر تحديث: يوليو 2026 — Sanity CMS ✅ · لوحة أدمن `/admin` + Supabase backend ✅
 
 ---
 
@@ -53,7 +53,7 @@
 | Database | Supabase (PostgreSQL) |
 | Auth | Supabase Auth (admin only) |
 | Email | Resend |
-| WhatsApp (هبة) | WhatsApp Business API / Twilio |
+| WhatsApp (هبة) | Meta WhatsApp Cloud API (إشعارات هبة) |
 | Payments | HYP API (إسرائيل/فلسطين) |
 | Hosting | Vercel |
 | Analytics | Meta Pixel + Google Analytics 4 + GTM |
@@ -488,7 +488,7 @@ momzy/
 │   │       ├── ProductHero.tsx             ✅ Hero — صورة + tagline + سعر gold + CTAs forest/gold + 3 trust signals ديناميكية
 │   │       ├── ProductGallery.tsx          ✅ Grid 2/3 cols + lightbox + دعم فيديو (videoUrl أول عنصر)
 │   │       ├── ProductShortDescription.tsx ✅ نص شاعري وسط ivory
-│   │       ├── ProductContents.tsx         ✅ "كل قطعة جمعناها إلك" — Grid بطاقات
+│   │       ├── ProductContents.tsx         ✅ "كل قطعةٍ جمعناها لكِ" — Grid بطاقات (client)، كل بطاقة تعرض سطرين + زر «المزيد/أقل» خاص بها (items-start فلا يمدّ توسّعُها الصفَّ)
 │   │       ├── ProductStory.tsx            ✅ "من قلب هبة" — صورة دائرية + نص
 │   │       ├── ProductGiftTargets.tsx      ✅ "لمين هاي الهدية؟" — 3 بطاقات للمُهدي
 │   │       ├── ProductLongDescription.tsx  ✅ longDescription أو specifications أو fallback
@@ -497,10 +497,17 @@ momzy/
 │   │       ├── ProductFinalCTA.tsx         ✅ خلفية forest dark + CTA ذهبي
 │   │       └── ProductStickyMobileCTA.tsx  ✅ Sticky bar للجوال — يظهر بعد scroll 600px
 │   ├── checkout/
-│   │   ├── CheckoutClient.tsx      ✅ حاوية صفحة الدفع — تحقق من السلة + redirect
-│   │   ├── CheckoutForm.tsx        ✅ نموذج التوصيل + redirect لـ /order/[id] بعد الإرسال
+│   │   ├── CheckoutClient.tsx      ✅ تدفّق مرحلي سلس (صفحة واحدة): التوصيل ↔ الدفع بلا انتقال + مزامنة ?order=
+│   │   ├── CheckoutSteps.tsx       ✅ شريط تقدّم: التوصيل ← الدفع ← التأكيد (يُستخدم في /checkout و /order)
+│   │   ├── CheckoutForm.tsx        ✅ نموذج التوصيل — onProceedToPayment (سلس) أو redirect /order/[id] (يدوي)
+│   │   ├── EmbeddedPayment.tsx     ✅ iframe صفحة دفع HYP داخل الموقع + حالة تحميل + رجوع لتعديل التوصيل
+│   │   ├── TrustBadges.tsx         ✅ شارات الثقة — Visa/Mastercard/HYP + تشفير SSL
 │   │   ├── CheckoutUpsell.tsx     ✅ منتجات مقترحة أسفل صفحة الدفع
-│   │   └── OrderSummary.tsx        ✅ ملخص الطلب — عناصر + شحن + إجمالي
+│   │   └── OrderSummary.tsx        ✅ ملخص الطلب — عناصر + شحن + إجمالي (readOnly في مرحلة الدفع)
+│   ├── booking/
+│   │   ├── BookingHeader.tsx       ✅ حالة التسجيل — مؤكَّد/بانتظار الدفع/ملغى
+│   │   ├── BookingDetailsCard.tsx  ✅ الورشة + «كيف أحضر؟» (يُكشف بعد الدفع) + بيانات المسجِّلة
+│   │   └── BookingSummary.tsx      ✅ ملخّص جانبي وقت الدفع — نظير OrderSummary (بلا كشف الرابط/العنوان)
 │   ├── order/
 │   │   ├── OrderConfirmationClient.tsx ✅ حاوية صفحة التأكيد — loading/notFound/loaded
 │   │   ├── OrderHeader.tsx         ✅ أيقونة نجاح + رقم الطلب (نسخ) + التاريخ
@@ -523,7 +530,7 @@ momzy/
 ├── lib/
 │   ├── products/
 │   │   ├── types.ts                ✅ Product + ProductContent + ProductStory + ProductGiftTarget + ProductTestimonial + ProductFAQ + ProductShippingInfo + ProductSpecification + ProductFilters + ProductSort
-│   │   ├── seed.ts                 ✅ SEED_PRODUCTS — مشوار أم (كامل) + مصاصة + قنينة (fallback في dev)
+│   │   ├── seed.ts                 ✅ SEED_PRODUCTS — صندوق مشوار أم فقط (fallback في dev)
 │   │   ├── getProduct.ts           ✅ async getProduct(slug) — Sanity أولاً، seed fallback في dev
 │   │   └── getProducts.ts          ✅ async getProducts(filters?) + getProductCategories() — Sanity أولاً، seed fallback
 │   ├── sanity/
@@ -587,17 +594,19 @@ NEXT_PUBLIC_SANITY_PROJECT_ID=
 NEXT_PUBLIC_SANITY_DATASET=production
 SANITY_API_TOKEN=
 
-# HYP Payment
-HYP_MERCHANT_ID=
-HYP_API_KEY=
-HYP_WEBHOOK_SECRET=
+# HYP Payment — صفحة الدفع المستضافة (pay.hyp.co.il)
+HYP_MASOF=      # رقم الترمينال (Masof)
+HYP_KEY=        # مفتاح API (KEY)
+HYP_PASSP=      # كلمة مرور API (PassP)
 
 # Resend
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=noreply@momzyworld.com
 
-# WhatsApp
-WHATSAPP_API_TOKEN=
+# WhatsApp (Meta Cloud API)
+WHATSAPP_PHONE_NUMBER_ID=
+WHATSAPP_ACCESS_TOKEN=
+WHATSAPP_TEMPLATE_NAME=momzy_notification
 HEBA_WHATSAPP_NUMBER=+972XXXXXXXXX
 
 # Analytics
@@ -611,21 +620,67 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 
 ---
 
+## 🛠️ لوحة الأدمن (`/admin`) — مبنية بالكامل ✅
+
+> واجهة إدارة كاملة لهبة تدير كل شيء بدون مبرمج. محمية بـ **Supabase Auth + جدول `admins` بأدوار**.
+
+**البنية:** `app/admin/(panel)/` (سايدبار داكن يمين RTL، خلفية cream) + `app/admin/login/` (خارج الـ shell). الحماية في `middleware.ts` (بعد الحجب الجغرافي: `getUser` → غير مسجّل ⇒ `/admin/login`) + تفويض "أدمن نشط" في `(panel)/layout.tsx`. الخروج = server action (`app/admin/actions.ts`).
+
+| الصفحة | الوظيفة |
+|--------|---------|
+| `/admin` | Dashboard — مبيعات (يوم/أسبوع/شهر) + تنبيهات + آخر الطلبات/الحجوزات |
+| `/admin/orders` + `/[id]` | فلاتر + بحث + تغيير حالة (+سجل) + رقم تتبّع + ملاحظات داخلية |
+| `/admin/bookings` + `/availability` | فتحات إتاحة + تأكيد/إلغاء + تذكير واتساب (منع الحجز المزدوج ذرّيًا) |
+| `/admin/products` | تعديل السعر/المخزون/الإظهار — `sanityWriteClient.patch()` |
+| `/admin/coupons` | CRUD كوبونات + تفعيل/إيقاف + إحصائيات |
+| `/admin/customers` | مُجمَّعون من الطلبات (بحث + إجمالي الإنفاق) |
+| `/admin/settings` | تشغيلية (Supabase `settings`) + محتوى (Sanity `siteSettings`) |
+| `/admin/analytics` | مصادر UTM + مبيعات حسب المصدر + أفضل المنتجات + رسم 30 يوم (SVG) + معدل تحويل + مولّد UTM |
+
+**طبقة البيانات:** `lib/db/` (`orders`, `bookings`, `coupons`, `customers`, `settings`, `analytics`, `dashboard`) — كلها عبر service-role (`lib/supabase/admin.ts`)؛ RLS يقفل anon. التتبّع: `lib/analytics/track.ts` (عميل) → `POST /api/track` → `analytics_events`.
+
+**Supabase:** migrations `supabase/migrations/0001→0010` (مُطبَّقة). إنشاء الأدمن: `npm run seed:admins` · تنظيف بيانات الاختبار: `npm run clear:test`.
+
+---
+
 ## ⚠️ حلول مؤقتة — يجب تغييرها قبل الإطلاق
 
-> هذه الحلول تعمل في مرحلة التطوير لكنها **غير صالحة للإنتاج**.
+> بعد بناء لوحة الأدمن + Supabase backend (المراحل 0–5)، حُلّت معظم النقاط.
 
-| الملف | الحل المؤقت | البديل النهائي |
-|-------|------------|----------------|
-| `lib/utils/orders.ts` | حفظ الطلبات في `localStorage` | POST `/api/orders` → Supabase `orders` table |
-| `lib/utils/orders.ts` | رقم الطلب بـ `crypto.randomUUID()` | `SERIAL` أو `sequence` في Supabase يُولَّد server-side |
-| `components/checkout/CheckoutForm.tsx` | محاكاة الإرسال بـ `setTimeout(1500ms)` | POST حقيقي لـ HYP API → redirect لصفحة دفع |
-| `components/checkout/OrderSummary.tsx` | الكوبون دائماً "غير صحيح" | POST `/api/coupons/validate` → Supabase `coupons` table |
-| `lib/products/seed.ts` | Fallback في dev إذا Sanity فارغ — المحتوى الحقيقي يُرفع من Sanity Studio | رفع منتجات حقيقية من Studio — seed يصبح للاختبار فقط |
-| `components/shop/ProductImagePlaceholder.tsx` | صور gradient + رمز Momzy | استبدال بـ `next/image` على ملفات في `public/images/products/{slug}/` |
-| `components/shop/product-detail/ProductTestimonials.tsx` | 3 شهادات placeholder | جلب من Supabase `reviews` table بحسب `product_id` |
-| `components/layout/NewsletterForm.tsx` | محاكاة اشتراك بـ `setTimeout(700ms)` | POST `/api/newsletter` → Supabase `newsletter_subscribers` table |
-| `lib/store/cart.ts` (gift items) | بيانات الهدية تُحفظ مع كل عنصر في `localStorage` فقط | حفظها في Supabase `orders` كـ JSONB column + إيميل تلقائي للمستلِمة |
+### ✅ مُنجَز
+- الطلبات تُحفظ في Supabase (`orders` + `order_items`) عبر `POST /api/orders` — لا `localStorage`.
+- رقم الطلب/الحجز server-side (`sequence`: `MZ-` / `BK-`).
+- الكوبونات فعّالة: `POST /api/coupons/validate` + إعادة تحقّق موثوق في `createOrder` + عدّاد استخدام.
+- checkout يستدعي API حقيقيًا (بلا `setTimeout`)؛ الشحن يُقرأ من `settings`.
+- صفحة التأكيد `/order/[id]` تقرأ من Supabase بالـ **UUID** (غير قابل للتخمين).
+- بيانات الهدية تُحفظ JSONB في `order_items.gift`.
+- النشرة البريدية فعّالة (`/api/newsletter` → جدول `newsletter_subscribers`).
+- إيميلات تأكيد الطلب والحجز تلقائية عبر Resend (للعميل + إشعار لهبة).
+- **الدفع بـ HYP مُدمج ومُختبَر end-to-end** على ترمينال الاختبار (SIGN مقبول + صفحة الدفع تُعرض بالمبلغ الصحيح + VERIFY): `lib/hyp/client.ts` (SIGN/VERIFY) + `POST /api/orders` يولّد رابط الدفع + `CheckoutForm` → **مرحلة الدفع في نفس الصفحة** (تدفّق مرحلي سلس عبر `CheckoutClient`: التوصيل ↔ `EmbeddedPayment` بلا انتقال، شريط تقدّم `CheckoutSteps` + ملخّص readOnly + شارات ثقة، والرابط يُزامَن `?order=`) — صفحة HYP في **iframe داخل الموقع** (العميلة لا تغادر Momzy، يبقى الامتثال SAQ A؛ مصدره `/api/hyp/retry`؛ `/checkout/pay/[id]` صفحة استرداد مستقلة) + `/api/hyp/callback` يتحقّق ويُعلّم الطلب مدفوعًا ثم **يخرج من الـ iframe** للنافذة الأعلى (`window.top`). صفحة `/order/[id]` تعرض حالة **"بانتظار الدفع"** (لا نجاح كاذب) مع زر إتمام الدفع حين لا يكتمل. **مشروط بوجود المفاتيح** — بدونها يبقى التدفّق اليدوي الحالي (الطلب `pending` → صفحة التأكيد مباشرة).
+- **المخزون يُخصم تلقائيًا في Sanity مع كل طلب** (`lib/products/stock.ts`) — ذرّي عبر `dec()`، يُثبّت على 0 ويُخفي المنتج (`inStock=false`) عند النفاد، ويُرجَع تلقائيًا عند إلغاء الطلب (`updateOrderStatus`). المنتجات بلا `stockQuantity` (رقمية) تُتخطّى.
+- **تسجيل الورشات إلكترونيًا** (بديل واتساب): زر «سجّلي الآن» في بطاقة الخدمة يفتح نموذج التسجيل → المقعد يُحجز **ذرّيًا** (`book_slot`) → **دفع HYP مدمج** → صفحة `/booking/[id]`. التأكيد (إيميل/واتساب) يُرسل **بعد نجاح الدفع فقط**، و**رابط اللقاء (زوم) أو المكان يُكشف بعد الدفع** لا قبله (يُضبط لكل جلسة من `/admin/bookings/availability`). عند اكتمال المقاعد يتحوّل النموذج تلقائيًا لـ**قائمة انتظار** (`waitlist` + إدارة في `/admin/bookings/waitlist`)، والبطاقة تعرض «بقي N مقاعد / اكتمل العدد». واتساب صار للاستفسار فقط.
+  **الفئة العمرية** (`lib/utils/age.ts`): حقلا `ageMinMonths`/`ageMaxMonths` في Sanity يُفعّلان بوّابة عمرية لكل ورشة على حدة — تُسأل الأم عن **تاريخ ميلاد طفلها (أو الموعد المتوقّع)** ويُحسب عمره **يوم الجلسة** لا يوم التسجيل، ويُمنع التسجيل خارج الفئة. التحقق مُطبَّق في `createBooking` (سيرفر) لا في الواجهة فقط، ويسبق حجز المقعد فلا يتسرّب مقعد على محاولة مرفوضة. الحقلان فارغان ⇒ لا سؤال ولا تحقّق (ورشات الحوامل). عمر الطفل يظهر لهبة في `/admin/bookings` وفي إيميل الحجز.
+  **تجربة الدفع موحّدة مع المتجر:** صفحة `/booking/[id]` تتبدّل بالمرحلة تمامًا كـ`/checkout`+`/order` — قبل الدفع: عنوان «الدفع الآمن» + شريط تقدّم (التسجيل ← الدفع ← التأكيد) + عمودان (الدفع المدمج + `BookingSummary` ملتصق + `TrustBadges`)؛ وبعده: عنوان «تأكيد التسجيل» + الشريط على المرحلة 3 + إيصال بعمود واحد. عنوان التبويب يتبع المرحلة عبر `generateMetadata`. الملخّص **لا يكشف** رابط اللقاء/العنوان قبل الدفع — نوع الحضور فقط.
+  **الورشة الجماعية:** عدّة أمهات على نفس الجلسة حتى السعة (لا قيد `unique` على `availability_id`) — كل أم تسجّل نفسها بمقعد واحد.
+
+  **مدخل تسجيل واحد:** كل أزرار التسجيل في الموقع (هيرو الورشة · CTA النهائي · الشريط الثابت على الجوال · بطاقة الخدمة في `/services`) تفتح **`BookingModal`** — لا قسم مواعيد منفصل في الصفحة (حُذف `UpcomingSessions` لأنه كان مدخلًا ثانيًا مكرّرًا). اختيار الموعد يتم داخل النموذج عبر **`SessionCalendar`** (نسخة `compact`): الأيام التي فيها جلسات مميّزة، والماضية معطّلة؛ وعند اختيار يوم تظهر **ساعاته** مع المقاعد المتبقية و💻أونلاين/📍حضوري والسعر. التنقّل بين الأشهر يختار تلقائيًا أول يوم فيه جلسات.
+  `/api/availability` يعيد `totalUpcoming` كي يميّز النموذج **«لا مواعيد مجدولة»** عن **«المقاعد مكتملة»** — وكلتاهما تقودان لقائمة الانتظار برسالة صحيحة. ونصّ كل أزرار التسجيل موحّد: **«سجّلي الآن»**.
+  **أقسام صفحة الورشة:** هيرو ← المحتوى ← **`ServiceAboutHeba`** (تعريف بهبة يقرأ من `aboutPage` نفسه — لا نسخة ثانية من سيرتها) ← **`ServiceFAQ`** (شرطي — يظهر فقط إن أضافت هبة أسئلة في حقل `faqs`) ← CTA ← خدمات مقترحة. تسلسل `zIndex` للموجات: 3 ← 4 ← 5 ← 6 ← 7 (`ServiceCTASection` يستقبل `zIndex` لأنه يُستخدم في صفحتين).
+  **`components/ui/FAQAccordion.tsx`** — أكورديون مشترك بين صفحة المنتج وصفحة الورشة (استُخرج من `ProductFAQ` بدل نسخه)؛ كل صفحة تغلّفه بقسمها ولونها. كائن Sanity `productFAQ` مُعاد استخدامه لحقل `faqs` في الخدمة — بنية واحدة (سؤال + جواب).
+- **إشعارات هبة عبر واتساب** (Meta Cloud API — `lib/whatsapp/`) — رسالة قالب فورية عند كل طلب/حجز، تُرسَل بعد الرد (best-effort)، مشروطة بإعداد Meta + رقم هبة (`settings.whatsapp_number`). رابط `wa.me` اليدوي يبقى احتياطيًا. الرقم يُقرأ من `/admin/settings`.
+
+### ⬜ متبقٍ قبل الإطلاق
+
+> 📋 **القائمة الكاملة خطوة بخطوة (حسابات · مفاتيح · محتوى · اختبار نهائي):** [`LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md)
+
+| الميزة | المتبقّي |
+|--------|----------|
+| تفعيل الدفع | أضيفي `HYP_MASOF/KEY/PASSP` **الحقيقية** في `.env.local` (المفاتيح مُعدّة فارغة بالأسماء الصحيحة) + اضبطي عنوان العودة في بوابة HYP → `{SITE}/api/hyp/callback`. الكود مُختبَر ✅ — يُفعَّل تلقائيًا بمجرّد وجود المفاتيح. |
+| تفعيل واتساب | أضيفي `WHATSAPP_PHONE_NUMBER_ID` + `WHATSAPP_ACCESS_TOKEN` في `.env.local` + أنشئي قالب `momzy_notification` (4 بارامترات) واعتمديه في Meta + رقم هبة في `/admin/settings`. الكود مُختبَر ✅ (Graph API يقبل الطلب) — يُفعَّل تلقائيًا بمجرّد وجود المفاتيح. |
+| `ProductTestimonials.tsx` | ربط بـ Supabase `reviews` بدل placeholders |
+| `ProductImagePlaceholder.tsx` | صور حقيقية (الحالي gradient احتياطي) |
+| Pixel/GA4/GTM | إضافة الـ IDs في `.env.local` (السكربتات مبنية ومشروطة — صامتة بدونها) |
+| إيميل الهدية | إشعار تلقائي للمستلِمة عند طلب هدية |
 
 ---
 

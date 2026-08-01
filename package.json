@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate:seed": "tsx scripts/migrate-seed-to-sanity.ts"
+    "migrate:seed": "tsx scripts/migrate-seed-to-sanity.ts",
+    "seed:admins": "tsx scripts/seed-admins.ts",
+    "clear:test": "tsx scripts/clear-test-data.ts"
   },
   "dependencies": {
     "@sanity/client": "^7.20.0",

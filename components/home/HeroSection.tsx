@@ -1,13 +1,8 @@
 import Link from "next/link";
 import PolkaDots from "@/components/ui/PolkaDots";
 import Container from "@/components/ui/Container";
-
-/** نقاط "كل ما تحتاجينه في Momzy" — داخل الهيرو */
-const HERO_POINTS = [
-  "استشارات ومرافقة ولادة من هبة",
-  "منتجات ومحتوى تعليمي موثوق",
-  "مجتمع داعم يرافقك بكل خطوة",
-];
+import MomzyText from "@/components/ui/MomzyText";
+import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** أيقونة سهم لليسار (RTL) للأزرار */
 function ArrowLeft() {
@@ -22,7 +17,7 @@ function ArrowLeft() {
  * قسم الهيرو — صورة هبة على اليسار (ديسكتوب) + محتوى احترافي على اليمين.
  * الصورة في: public/images/heba.jpg
  */
-export default function HeroSection() {
+export default function HeroSection({ content }: { content: HomePageContent }) {
   return (
     <section
       className="relative overflow-hidden min-h-[500px] md:min-h-0"
@@ -36,7 +31,7 @@ export default function HeroSection() {
         className="absolute inset-y-0 left-0 hidden md:block"
         style={{
           width: "68%",
-          backgroundImage: "url('/images/heba.jpg')",
+          backgroundImage: `url('${content.heroImage}')`,
           backgroundSize: "cover",
           backgroundPosition: "center 8%",
           backgroundRepeat: "no-repeat",
@@ -99,7 +94,7 @@ export default function HeroSection() {
                 className="rounded-[26px] overflow-hidden border-[5px] border-white bg-cover"
                 style={{
                   aspectRatio: "4 / 5",
-                  backgroundImage: "url('/images/heba.jpg')",
+                  backgroundImage: `url('${content.heroImage}')`,
                   backgroundPosition: "center 10%",
                   boxShadow: "0 18px 44px rgba(0,0,0,0.24)",
                 }}
@@ -149,9 +144,9 @@ export default function HeroSection() {
                 animationDelay: "0.15s",
               }}
             >
-              نرافقك من الحمل
+              {content.heroTagline}
               <br className="hidden sm:block" />
-              <span style={{ color: "var(--yellow)" }}> حتى السنوات الأولى</span>
+              <span style={{ color: "var(--yellow)" }}> {content.heroTaglineAccent}</span>
             </h1>
 
             {/* ── وصف قصير ── */}
@@ -165,9 +160,7 @@ export default function HeroSection() {
                 animationDelay: "0.28s",
               }}
             >
-              تأسست <strong style={{ color: "white" }}>Momzy</strong> على يد{" "}
-              <strong style={{ color: "white" }}>هبة حسن</strong> — رافقت أكثر من{" "}
-              <span style={{ color: "var(--yellow)", fontWeight: 700 }}>1000 أم</span> برحلتها.
+              <MomzyText text={content.heroIntro} highlightClassName="text-yellow italic font-semibold" />
             </p>
 
             {/* ── نقاط القيمة ── */}
@@ -175,9 +168,9 @@ export default function HeroSection() {
               className="hero-rise inline-flex flex-col gap-2.5 mb-7"
               style={{ animationDelay: "0.4s" }}
             >
-              {HERO_POINTS.map((text) => (
+              {content.heroPoints.map((text, i) => (
                 <li
-                  key={text}
+                  key={i}
                   className="flex items-center gap-2.5 font-medium"
                   style={{ color: "rgba(255,255,255,0.97)", fontSize: "clamp(13.5px, 1.4vw, 15px)" }}
                 >

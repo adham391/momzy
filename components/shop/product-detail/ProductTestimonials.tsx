@@ -9,9 +9,9 @@ interface ProductTestimonialsProps {
 
 export default function ProductTestimonials({ items }: ProductTestimonialsProps) {
   return (
-    <section style={{ background: "#F5F0EA", padding: "28px 0 clamp(80px, 10vw, 120px)" }}>
+    <section style={{ background: "#F5F0EA", padding: "20px 0 clamp(68px, 6vw, 88px)" }}>
       <Container>
-        <div className="mb-12 text-center">
+        <div className="mb-6 md:mb-12 text-center">
           <SectionLabel color="teal" centered>شهادات</SectionLabel>
           <h2
             className="text-h2 font-heading font-bold"
@@ -37,7 +37,7 @@ export default function ProductTestimonials({ items }: ProductTestimonialsProps)
 function TestimonialCard({ item }: { item: ProductTestimonial }) {
   return (
     <div
-      className="rounded-[20px] p-7 flex flex-col relative overflow-hidden"
+      className="rounded-[20px] p-5 flex flex-col relative overflow-hidden"
       style={{
         background: "var(--rosepale)",
         border: "1.5px solid rgba(242,167,181,0.20)",

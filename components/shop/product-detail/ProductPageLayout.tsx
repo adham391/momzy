@@ -7,7 +7,6 @@ import ProductShortDescription from "./ProductShortDescription";
 import ProductContents from "./ProductContents";
 import ProductStory from "./ProductStory";
 import ProductGiftTargets from "./ProductGiftTargets";
-import ProductGiftOccasions from "./ProductGiftOccasions";
 import ProductLongDescription from "./ProductLongDescription";
 import ProductTestimonials from "./ProductTestimonials";
 import ProductFAQ from "./ProductFAQ";
@@ -28,7 +27,6 @@ const WAVES = {
   contents:     "#F8F4EE",   // = ProductContents bg: var(--cream) #F8F4EE
   story:        "#FDFAF5",   // = ProductStory bg: offwh (تغيير من tealpale لإزالة الأزرق)
   giftTargets:  "#FEF5F7",   // = ProductGiftTargets bg: var(--rosepale) #FEF5F7
-  giftOccasions:"#F8F4EE",   // = ProductGiftOccasions bg: var(--cream) #F8F4EE
   longDesc:     "#FDFAF5",   // = ProductLongDescription bg: #FDFAF5 — wave مرئي من rosepale
   testimonials: "#F5F0EA",   // = ProductTestimonials bg: #F5F0EA
   faq:          "#F8F4EE",   // = ProductFAQ bg: var(--cream) #F8F4EE
@@ -91,14 +89,6 @@ export default async function ProductPageLayout({ product }: ProductPageLayoutPr
           </div>
         </div>
       )}
-
-      {/* 7. Gift Occasions — متى تُهدي Momzy؟ */}
-      <div className="relative" style={{ marginTop: -60, zIndex: 7 }}>
-        <SectionWave fill={WAVES.giftOccasions} />
-        <div style={{ marginTop: -1 }}>
-          <ProductGiftOccasions />
-        </div>
-      </div>
 
       {/* 8. Long Description */}
       <div className="relative" style={{ marginTop: -60, zIndex: 8 }}>

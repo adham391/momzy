@@ -7,6 +7,7 @@ import { sanityFetch } from "@/lib/sanity/client";
  * المكونات تتلقى نفس string paths — لا تغيير في الـ UI layer
  */
 const PRODUCT_FIELDS = `{
+  "id":            _id,
   "slug":          slug.current,
   title,
   description,

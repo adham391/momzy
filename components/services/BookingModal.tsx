@@ -1,26 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
+import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
+import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
 
 interface BookingModalProps {
   open: boolean;
   onClose: () => void;
-  /** اسم الخدمة المختارة — يُمرَّر إلى /api/contact كـ subject */
+  /** اسم الخدمة — يظهر في الهيدر */
   serviceTitle: string;
+  /** slug الخدمة — لجلب المواعيد المتاحة. بدونه (أو بلا مواعيد) → نموذج تواصل */
+  serviceSlug?: string;
+  /** جلسة مُختارة مسبقًا — يفتح النموذج عليها مباشرة (من قسم «الجلسات القادمة») */
+  preselectedSlotId?: string;
+  /** يفتح خطوة قائمة الانتظار مباشرة (كل الجلسات مكتملة) */
+  forceWaitlist?: boolean;
+  /** الفئة العمرية للورشة — وجود حدّ رقمي يُفعّل سؤال تاريخ ميلاد الطفل والتحقق منه */
+  ageGate?: AgeGate;
 }
 
-/** بيانات نموذج الحجز */
+interface Slot {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  price: number;
+  capacity?: number;
+  booked_count?: number;
+  meeting_link?: string | null;
+  location?: string | null;
+}
+
+/** تحويل فتحة إلى شكل الرزنامة */
+function toCalendarSession(s: Slot): CalendarSession {
+  return {
+    id: s.id,
+    date: s.date,
+    startTime: s.start_time,
+    endTime: s.end_time,
+    price: s.price,
+    seatsLeft: Math.max(0, (s.capacity ?? 1) - (s.booked_count ?? 0)),
+    isOnline: Boolean(s.meeting_link),
+    location: s.location ?? null,
+  };
+}
+
 interface BookingFormData {
-  name:    string;
-  email:   string;
-  phone:   string;
+  name: string;
+  email: string;
+  phone: string;
   message: string;
+  /** تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */
+  babyBirthDate: string;
 }
 
-type FormStatus = "idle" | "submitting" | "success" | "error";
+const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", message: "", babyBirthDate: "" };
 
-/** نمط حقل الإدخال */
+/**
+ * الخطوات: تحميل المواعيد ← اختيار موعد ← بيانات ← (انتقال لصفحة التأكيد/الدفع)
+ * وعند اكتمال المقاعد ← قائمة انتظار · وبلا slug ← تواصل (احتياطي)
+ */
+type Step = "loading" | "slots" | "form" | "contact" | "waitlist" | "success";
+type SubmitStatus = "idle" | "submitting" | "error";
+
 const inputBase: React.CSSProperties = {
   width: "100%",
   borderRadius: 12,
@@ -45,100 +89,229 @@ const labelStyle: React.CSSProperties = {
   fontFamily: "'Nunito', sans-serif",
 };
 
-/**
- * Modal بنموذج حجز بسيط — يفتح من زر "احجزي الآن"
- * يرسل عبر POST /api/contact مع subject = "حجز خدمة: {serviceTitle}"
- * Portal لتجنب z-index conflicts
- */
-export default function BookingModal({ open, onClose, serviceTitle }: BookingModalProps) {
-  const [form, setForm] = useState<BookingFormData>({
-    name: "", email: "", phone: "", message: "",
-  });
-  const [status, setStatus]           = useState<FormStatus>("idle");
-  const [focused, setFocused]         = useState<string | null>(null);
-  /** mounted: هل المكوّن في الـ DOM | visible: حالة الـ animation */
-  const [mounted, setMounted]         = useState(false);
-  const [visible, setVisible]         = useState(false);
+function formatSlotDate(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00");
+  return `⁦${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}⁩`;
+}
 
+const formatTime = (t: string) => t.slice(0, 5); // "10:00:00" → "10:00"
+
+/**
+ * Modal الحجز — يجلب المواعيد المتاحة للخدمة ويتيح حجز موعد فعلي.
+ * إن لم توجد مواعيد (أو بلا slug) يسقط لنموذج تواصل (سنتواصل معك).
+ */
+export default function BookingModal({
+  open,
+  onClose,
+  serviceTitle,
+  serviceSlug,
+  preselectedSlotId,
+  forceWaitlist,
+  ageGate,
+}: BookingModalProps) {
+  const router = useRouter();
+  const [step, setStep] = useState<Step>("loading");
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [selected, setSelected] = useState<Slot | null>(null);
+  const [form, setForm] = useState<BookingFormData>(EMPTY_FORM);
+  const [status, setStatus] = useState<SubmitStatus>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  /** نوع شاشة النجاح — الحجز الفعلي ينتقل لصفحة التأكيد بدل هذه الشاشة */
+  const [successKind, setSuccessKind] = useState<"contact" | "waitlist">("contact");
+  const [focused, setFocused] = useState<string | null>(null);
+  /** لا جلسات مجدولة إطلاقًا (لا «مكتملة») — يغيّر نص خطوة الانتظار */
+  const [noSessionsAtAll, setNoSessionsAtAll] = useState(false);
+
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  /** جلب المواعيد عند الفتح */
+  const loadSlots = useCallback(async () => {
+    if (!serviceSlug) {
+      setStep("contact");
+      return;
+    }
+    // كل الجلسات مكتملة → قائمة الانتظار مباشرة (بلا جلب مواعيد)
+    if (forceWaitlist) {
+      setStep("waitlist");
+      return;
+    }
+    setStep("loading");
+    try {
+      const res = await fetch(`/api/availability?service=${encodeURIComponent(serviceSlug)}`);
+      const data = (await res.json()) as { slots: Slot[]; totalUpcoming?: number };
+      // لا مواعيد أصلاً ≠ مواعيد مكتملة — رسالتان مختلفتان في خطوة الانتظار
+      setNoSessionsAtAll((data.totalUpcoming ?? 0) === 0);
+      if (data.slots && data.slots.length > 0) {
+        setSlots(data.slots);
+        // جلسة مُختارة من صفحة الورشة → للنموذج مباشرة (تخطّي اختيار الموعد)
+        const pre = preselectedSlotId ? data.slots.find((s) => s.id === preselectedSlotId) : undefined;
+        if (pre) {
+          setSelected(pre);
+          setStep("form");
+        } else {
+          setStep("slots");
+        }
+      } else {
+        setStep("waitlist"); // لا مقاعد متاحة (مكتملة أو لا جلسات) → قائمة انتظار
+      }
+    } catch {
+      setStep("contact");
+    }
+  }, [serviceSlug, preselectedSlotId, forceWaitlist]);
+
+  /* فتح/إغلاق + أنيميشن */
   useEffect(() => {
     if (open) {
       setMounted(true);
       const id = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(id);
-    } else {
-      setVisible(false);
-      const timer = setTimeout(() => setMounted(false), 200);
-      return () => clearTimeout(timer);
     }
+    setVisible(false);
+    const timer = setTimeout(() => setMounted(false), 200);
+    return () => clearTimeout(timer);
   }, [open]);
 
-  /** Reset عند الإغلاق */
+  /* إعادة الضبط عند الفتح + جلب المواعيد */
   useEffect(() => {
-    if (!open) {
+    if (open) {
       setStatus("idle");
-      setForm({ name: "", email: "", phone: "", message: "" });
+      setSelected(null);
+      setForm(EMPTY_FORM);
+      setErrorMsg("");
+      loadSlots();
     }
-  }, [open]);
+  }, [open, loadSlots]);
 
-  /** إغلاق بـ Escape */
+  /* Escape + قفل scroll */
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
   }, [open, onClose]);
-
-  /** منع scroll على body */
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
 
   if (!mounted) return null;
 
-  /** التحقق الأساسي */
-  const isValid =
+  /** الفئة العمرية — تُسأل في خطوة الحجز الفعلي فقط (لا في التواصل/الانتظار) */
+  const needsBabyAge = step === "form" && hasAgeGate(ageGate);
+  /** تحقّق العمر **يوم الجلسة** — null قبل إدخال التاريخ */
+  const ageCheck =
+    needsBabyAge && ageGate && selected && form.babyBirthDate
+      ? checkBabyAge(form.babyBirthDate, selected.date, ageGate)
+      : null;
+
+  const contactValid =
     form.name.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) &&
     form.phone.trim().length >= 8;
 
-  /** إرسال */
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!isValid) return;
+  const isValid = contactValid && (!needsBabyAge || ageCheck?.ok === true);
 
+  const borderFor = (field: string) => (focused === field ? "var(--teal)" : "var(--bord)");
+
+  /** حجز الموعد المختار */
+  async function submitBooking(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isValid || !selected) return;
     setStatus("submitting");
+    setErrorMsg("");
     try {
-      const res = await fetch("/api/contact", {
-        method:  "POST",
+      const res = await fetch("/api/bookings", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          name:    form.name,
-          email:   form.email,
-          phone:   form.phone,
-          subject: `حجز خدمة: ${serviceTitle}`,
-          message: form.message || `طلب حجز خدمة "${serviceTitle}"`,
+        body: JSON.stringify({
+          slotId: selected.id,
+          customer: { name: form.name, email: form.email, phone: form.phone },
+          notes: form.message,
+          babyBirthDate: form.babyBirthDate || null,
         }),
       });
-
-      const json = await res.json() as { success: boolean };
-      setStatus(json.success ? "success" : "error");
+      const data = await res.json();
+      if (res.ok) {
+        // لصفحة تأكيد التسجيل — هناك يتم الدفع إن كانت الورشة مدفوعة
+        router.push(`/booking/${data.id}`);
+      } else {
+        // الموعد امتلأ → أعد تحميل المواعيد
+        setErrorMsg(data.error ?? "تعذّر الحجز");
+        setStatus("idle");
+        if (res.status === 409) {
+          setSelected(null);
+          loadSlots();
+        }
+      }
     } catch {
       setStatus("error");
     }
   }
 
-  function borderFor(field: string) {
-    return focused === field ? "var(--teal)" : "var(--bord)";
+  /** نموذج التواصل الاحتياطي (لا مواعيد) */
+  async function submitContact(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isValid) return;
+    setStatus("submitting");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          subject: `حجز خدمة: ${serviceTitle}`,
+          message: form.message || `طلب حجز خدمة "${serviceTitle}"`,
+        }),
+      });
+      const json = (await res.json()) as { success: boolean };
+      if (json.success) {
+        setSuccessKind("contact");
+        setStep("success");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  /** الانضمام لقائمة الانتظار — عند اكتمال المقاعد أو غياب الجلسات */
+  async function submitWaitlist(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isValid || !serviceSlug) return;
+    setStatus("submitting");
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          serviceSlug,
+          serviceName: serviceTitle,
+          notes: form.message,
+        }),
+      });
+      const json = (await res.json()) as { success: boolean; error?: string };
+      if (json.success) {
+        setSuccessKind("waitlist");
+        setStep("success");
+      } else {
+        setErrorMsg(json.error ?? "تعذّر التسجيل، حاولي مجددًا");
+        setStatus("idle");
+      }
+    } catch {
+      setStatus("error");
+    }
   }
 
   return createPortal(
-    <div
-      className="fixed inset-0 flex items-center justify-center"
-      style={{ zIndex: 9999, padding: "16px" }}
-      dir="rtl"
-    >
-      {/* الستارة — enter 220ms / exit 160ms */}
+    <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9999, padding: 16 }} dir="rtl">
       <div
         className="absolute inset-0"
         style={{
@@ -150,7 +323,6 @@ export default function BookingModal({ open, onClose, serviceTitle }: BookingMod
         onClick={onClose}
       />
 
-      {/* نافذة الـ modal — enter 280ms ease-out / exit 180ms ease-in */}
       <div
         className="relative w-full rounded-[24px] overflow-y-auto"
         style={{
@@ -161,7 +333,7 @@ export default function BookingModal({ open, onClose, serviceTitle }: BookingMod
           opacity: visible ? 1 : 0,
           transform: visible ? "scale(1)" : "scale(0.95)",
           transition: visible
-            ? "opacity 280ms cubic-bezier(0.23, 1, 0.32, 1), transform 280ms cubic-bezier(0.23, 1, 0.32, 1)"
+            ? "opacity 280ms cubic-bezier(0.23,1,0.32,1), transform 280ms cubic-bezier(0.23,1,0.32,1)"
             : "opacity 180ms ease-in, transform 180ms ease-in",
         }}
       >
@@ -175,169 +347,204 @@ export default function BookingModal({ open, onClose, serviceTitle }: BookingMod
           }}
         >
           <div>
-            <p
-              className="font-label font-bold text-[11px] mb-1"
-              style={{ color: "var(--teal)", letterSpacing: "2.5px", textTransform: "uppercase" }}
-            >
-              طلب حجز
+            <p className="font-label font-bold text-[11px] mb-1" style={{ color: "var(--teal)", letterSpacing: "2.5px", textTransform: "uppercase" }}>
+              {step === "success" ? "تم" : step === "waitlist" ? "قائمة الانتظار" : "احجزي موعدك"}
             </p>
             <h2 className="font-heading font-bold text-[20px]" style={{ color: "var(--dark)" }}>
               {serviceTitle}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ color: "var(--mid)", fontSize: 18, background: "var(--bord)" }}
-            aria-label="إغلاق"
-          >
+          <button onClick={onClose} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ color: "var(--mid)", fontSize: 18, background: "var(--bord)" }} aria-label="إغلاق">
             ✕
           </button>
         </div>
 
-        {/* المحتوى */}
-        {status === "success" ? (
-          /* شاشة النجاح — تظهر بـ fade-in لطيف */
-          <div
-            className="px-7 py-12 text-center"
-            style={{ animation: "card-in 0.4s cubic-bezier(0.23, 1, 0.32, 1) both" }}
-          >
-            <div
-              style={{
-                width: 72, height: 72, borderRadius: "50%",
-                background: "var(--tealpale)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                margin: "0 auto 20px",
-                fontSize: 32,
-              }}
-            >
-              ✓
-            </div>
-            <h3 className="font-heading font-bold text-[20px] mb-3" style={{ color: "var(--dark)" }}>
-              طلبك وصل!
-            </h3>
-            <p className="text-[14px] leading-[1.85] mb-6" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-              سنتواصل معك خلال 24 ساعة لتأكيد الحجز وترتيب التفاصيل.
+        {/* ── تحميل ── */}
+        {step === "loading" && (
+          <div className="px-7 py-16 text-center">
+            <p className="text-[14px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+              جارٍ تحميل المواعيد المتاحة...
             </p>
-            <button
-              onClick={onClose}
-              className="font-label font-bold text-[14px] px-8 py-3 rounded-full transition-opacity hover:opacity-85"
-              style={{ background: "var(--teal)", color: "white" }}
-            >
-              إغلاق
-            </button>
           </div>
-        ) : (
-          /* blur على الفورم عند الإرسال — Emil: blur يخفي التحولات غير السلسة */
+        )}
+
+        {/* ── اختيار موعد ── */}
+        {step === "slots" && (
+          <div className="px-7 py-6">
+            <p className="text-[14px] leading-[1.85] mb-5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+              اختاري الموعد المناسب لكِ:
+            </p>
+            <SessionCalendar
+              compact
+              sessions={slots.map(toCalendarSession)}
+              onPick={(id) => {
+                const slot = slots.find((s) => s.id === id);
+                if (slot) {
+                  setSelected(slot);
+                  setStep("form");
+                }
+              }}
+            />
+            {errorMsg && (
+              <p className="text-center text-[13px] mt-4 rounded-[10px] py-2 px-3" style={{ background: "#FEF5F7", color: "var(--rose)" }}>
+                {errorMsg}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ── بيانات الحجز أو التواصل ── */}
+        {(step === "form" || step === "contact" || step === "waitlist") && (
           <form
-            onSubmit={handleSubmit}
+            onSubmit={
+              step === "form" ? submitBooking : step === "waitlist" ? submitWaitlist : submitContact
+            }
             noValidate
             className="px-7 py-7"
             style={{
-              filter: status === "submitting" ? "blur(1.5px)" : "blur(0px)",
+              filter: status === "submitting" ? "blur(1.5px)" : "none",
               opacity: status === "submitting" ? 0.65 : 1,
               transition: "filter 200ms ease, opacity 200ms ease",
               pointerEvents: status === "submitting" ? "none" : "auto",
             }}
           >
-            <p
-              className="text-[14px] leading-[1.85] mb-6"
-              style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}
-            >
-              املئي بياناتك وسنتواصل معك خلال 24 ساعة لتأكيد الحجز.
-            </p>
+            {step === "form" && selected ? (
+              <div className="flex items-center justify-between mb-5 rounded-xl px-4 py-3" style={{ background: "var(--tealpale)" }}>
+                <span className="text-[13px] font-bold" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
+                  {formatSlotDate(selected.date)} · {formatTime(selected.start_time)}
+                </span>
+                <button type="button" onClick={() => setStep("slots")} className="text-[12px] font-bold" style={{ color: "var(--teal)" }}>
+                  تغيير
+                </button>
+              </div>
+            ) : step === "waitlist" ? (
+              <div className="rounded-xl px-4 py-3.5 mb-5" style={{ background: "var(--yellowlt)", border: "1.5px solid var(--yellow)" }}>
+                <p className="text-[13.5px] font-bold mb-1" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
+                  {noSessionsAtAll ? "لا مواعيد مجدولة حاليًا" : "المقاعد مكتملة حاليًا"}
+                </p>
+                <p className="text-[13px] leading-[1.8]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+                  {noSessionsAtAll
+                    ? "سجّلي في قائمة الانتظار ونُعلمكِ فور فتح دورة جديدة."
+                    : "سجّلي في قائمة الانتظار ونُعلمكِ فور توفّر مقعد أو فتح دورة جديدة."}
+                </p>
+              </div>
+            ) : (
+              <p className="text-[14px] leading-[1.85] mb-6" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+                املئي بياناتك وسنتواصل معك خلال 24 ساعة لتأكيد الحجز.
+              </p>
+            )}
 
             <div className="flex flex-col gap-4">
-              {/* الاسم */}
               <div>
                 <label style={labelStyle}>الاسم الكامل *</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="اسمك الكامل"
-                  autoComplete="name"
-                  style={{ ...inputBase, border: `1.5px solid ${borderFor("name")}` }}
-                  onFocus={() => setFocused("name")}
-                  onBlur={() => setFocused(null)}
-                />
+                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="اسمك الكامل" autoComplete="name"
+                  style={{ ...inputBase, border: `1.5px solid ${borderFor("name")}` }} onFocus={() => setFocused("name")} onBlur={() => setFocused(null)} />
               </div>
-
-              {/* الإيميل + الهاتف */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label style={labelStyle}>البريد الإلكتروني *</label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="example@email.com"
-                    autoComplete="email"
-                    dir="ltr"
-                    style={{ ...inputBase, border: `1.5px solid ${borderFor("email")}`, textAlign: "right" }}
-                    onFocus={() => setFocused("email")}
-                    onBlur={() => setFocused(null)}
-                  />
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="example@email.com" autoComplete="email" dir="ltr"
+                    style={{ ...inputBase, border: `1.5px solid ${borderFor("email")}`, textAlign: "right" }} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} />
                 </div>
                 <div>
                   <label style={labelStyle}>رقم الواتساب *</label>
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    placeholder="+972 5X-XXXXXXX"
-                    autoComplete="tel"
-                    dir="ltr"
-                    style={{ ...inputBase, border: `1.5px solid ${borderFor("phone")}`, textAlign: "right" }}
-                    onFocus={() => setFocused("phone")}
-                    onBlur={() => setFocused(null)}
-                  />
+                  <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+972 5X-XXXXXXX" autoComplete="tel" dir="ltr"
+                    style={{ ...inputBase, border: `1.5px solid ${borderFor("phone")}`, textAlign: "right" }} onFocus={() => setFocused("phone")} onBlur={() => setFocused(null)} />
                 </div>
               </div>
+              {/* تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */}
+              {needsBabyAge && (
+                <div>
+                  <label style={labelStyle}>تاريخ ميلاد طفلك *</label>
+                  <input
+                    type="date"
+                    value={form.babyBirthDate}
+                    onChange={(e) => setForm({ ...form, babyBirthDate: e.target.value })}
+                    dir="ltr"
+                    style={{
+                      ...inputBase,
+                      border: `1.5px solid ${
+                        ageCheck && !ageCheck.ok ? "var(--rose)" : borderFor("baby")
+                      }`,
+                      textAlign: "right",
+                    }}
+                    onFocus={() => setFocused("baby")}
+                    onBlur={() => setFocused(null)}
+                  />
+                  <p
+                    className="text-[11.5px] leading-[1.7] mt-1.5"
+                    style={{
+                      color:
+                        ageCheck && !ageCheck.ok
+                          ? "var(--rose)"
+                          : ageCheck?.ok
+                            ? "var(--teal)"
+                            : "var(--light)",
+                      fontFamily: "'Tajawal', sans-serif",
+                    }}
+                  >
+                    {ageCheck && !ageCheck.ok
+                      ? ageCheck.message
+                      : ageCheck?.ok && ageCheck.months !== null
+                        ? `عمر طفلكِ يوم الورشة: ${monthsLabel(ageCheck.months)} ✓`
+                        : `هذه الورشة مخصّصة لـ${ageGate ? ageRangeText(ageGate) : ""} — وإن كنتِ حاملاً أدخلي الموعد المتوقّع.`}
+                  </p>
+                </div>
+              )}
 
-              {/* رسالة اختيارية */}
               <div>
                 <label style={labelStyle}>ملاحظات إضافية (اختياري)</label>
-                <textarea
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder="عمر طفلك، أسئلة محددة، توقيت مفضل..."
-                  rows={4}
-                  style={{ ...inputBase, border: `1.5px solid ${borderFor("message")}`, resize: "none" }}
-                  onFocus={() => setFocused("message")}
-                  onBlur={() => setFocused(null)}
-                />
+                <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder={needsBabyAge ? "أسئلة محددة، ملاحظات صحية..." : "عمر طفلك، أسئلة محددة..."} rows={3}
+                  style={{ ...inputBase, border: `1.5px solid ${borderFor("message")}`, resize: "none" }} onFocus={() => setFocused("message")} onBlur={() => setFocused(null)} />
               </div>
             </div>
 
-            {/* خطأ */}
-            {status === "error" && (
-              <div
-                className="text-center text-[13px] mt-5 mb-1 rounded-[10px] py-2 px-3"
-                style={{ background: "#FEF5F7", color: "var(--rose)", border: "1px solid var(--roselt)" }}
-              >
-                حدث خطأ، يرجى المحاولة مجدداً
+            {(status === "error" || errorMsg) && (
+              <div className="text-center text-[13px] mt-5 rounded-[10px] py-2 px-3" style={{ background: "#FEF5F7", color: "var(--rose)", border: "1px solid var(--roselt)" }}>
+                {errorMsg || "حدث خطأ، يرجى المحاولة مجدداً"}
               </div>
             )}
 
-            {/* زر الإرسال */}
-            <button
-              type="submit"
-              disabled={!isValid || status === "submitting"}
-              className="w-full font-label font-bold text-white text-[16px] mt-6 [transition:background-color_200ms_ease,box-shadow_200ms_ease,transform_160ms_ease-out]"
+            <button type="submit" disabled={!isValid || status === "submitting"}
+              className="w-full font-label font-bold text-white text-[16px] mt-6 active:scale-[0.98] [transition:transform_160ms_ease-out,background-color_200ms_ease]"
               style={{
                 background: isValid ? "var(--rose)" : "var(--light)",
-                border: "none",
-                borderRadius: 50,
-                padding: "15px",
+                border: "none", borderRadius: 50, padding: 15,
                 cursor: !isValid || status === "submitting" ? "not-allowed" : "pointer",
                 boxShadow: isValid ? "0 6px 20px rgba(242,167,181,0.4)" : "none",
                 opacity: status === "submitting" ? 0.8 : 1,
-              }}
-            >
-              {status === "submitting" ? "جارٍ الإرسال..." : "إرسال طلب الحجز ←"}
+              }}>
+              {status === "submitting"
+                ? "جارٍ الإرسال..."
+                : step === "form"
+                  ? selected && selected.price > 0
+                    ? `المتابعة للدفع — ₪${selected.price} ←`
+                    : "تأكيد التسجيل ←"
+                  : step === "waitlist"
+                    ? "انضمي لقائمة الانتظار ←"
+                    : "إرسال طلب الحجز ←"}
             </button>
           </form>
+        )}
+
+        {/* ── نجاح ── */}
+        {step === "success" && (
+          <div className="px-7 py-12 text-center" style={{ animation: "card-in 0.4s cubic-bezier(0.23,1,0.32,1) both" }}>
+            <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--tealpale)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 32 }}>
+              ✓
+            </div>
+            <h3 className="font-heading font-bold text-[20px] mb-3" style={{ color: "var(--dark)" }}>
+              {successKind === "waitlist" ? "سجّلناكِ في قائمة الانتظار 🌸" : "طلبكِ وصل!"}
+            </h3>
+            <p className="text-[14px] leading-[1.85] mb-6" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+              {successKind === "waitlist"
+                ? "سنُعلمكِ فور توفّر مقعد أو فتح دورة جديدة."
+                : "سنتواصل معك خلال 24 ساعة لتأكيد الموعد وترتيب التفاصيل."}
+            </p>
+            <button onClick={onClose} className="font-label font-bold text-[14px] px-8 py-3 rounded-full transition-opacity hover:opacity-85" style={{ background: "var(--teal)", color: "white" }}>
+              إغلاق
+            </button>
+          </div>
         )}
       </div>
     </div>,

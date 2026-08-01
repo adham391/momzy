@@ -1,103 +1,97 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils/cn";
-import { MEGA_CATEGORIES, type MegaCategory } from "@/lib/utils/constants";
+import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import type { Product } from "@/lib/products/types";
 
 /** خصائص الميقا منيو */
 interface MegaMenuProps {
+  products?: Product[];
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }
 
-/** الميقا منيو — dropdown المتجر مع كاتيقوريز وpreview */
-export default function MegaMenu({ onMouseEnter, onMouseLeave }: MegaMenuProps) {
-  const [activeId, setActiveId] = useState(MEGA_CATEGORIES[0].id);
-  const active = MEGA_CATEGORIES.find((c) => c.id === activeId)!;
+/** الميقا منيو — dropdown المتجر بمنتجات حقيقية وصورها */
+export default function MegaMenu({ products = [], onMouseEnter, onMouseLeave }: MegaMenuProps) {
+  const items = products.slice(0, 4);
 
   return (
     <div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className="mega-menu-enter absolute top-[calc(100%+10px)] end-0 bg-white rounded-[22px] border-[1.5px] border-bord shadow-[0_16px_48px_rgba(0,0,0,0.12)] min-w-[520px] z-[600] overflow-hidden flex"
+      className="mega-menu-enter absolute top-[calc(100%+10px)] end-0 bg-white rounded-[22px] border-[1.5px] border-bord shadow-[0_16px_48px_rgba(0,0,0,0.12)] w-[560px] z-[600] overflow-hidden"
     >
-      {/* عمود الكاتيقوريز */}
-      <div className="w-[180px] shrink-0 border-s border-bord py-3 bg-offwh">
-        {MEGA_CATEGORIES.map((cat) => (
-          <div
-            key={cat.id}
-            onMouseEnter={() => setActiveId(cat.id)}
-            className={cn(
-              "flex items-center gap-2.5 px-[18px] py-3 text-sm font-semibold text-mid cursor-pointer [transition:background-color_150ms_ease,color_150ms_ease] relative",
-              activeId === cat.id && "bg-white text-teal"
-            )}
+      {/* ── الرأس ── */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-bord">
+        <div>
+          <span
+            className="font-label font-extrabold uppercase text-[10px] tracking-[2px]"
+            style={{ color: "var(--teal)" }}
           >
-            {/* شريط التنشيط */}
-            {activeId === cat.id && (
-              <span className="absolute start-0 top-1/2 -translate-y-1/2 w-[3px] h-[60%] rounded-sm bg-teal" />
-            )}
-            <span className={cn("w-8 h-8 rounded-lg flex items-center justify-center", cat.iconBg)}>
-              <Image src={cat.icon} alt={cat.label} width={30} height={30} className="object-contain" />
-            </span>
-            {cat.label}
-          </div>
-        ))}
-      </div>
-
-      {/* عمود الـ Preview */}
-      <div className="flex-1 p-5 flex flex-col gap-3">
-        {/* المنتج المميز */}
-        <Link
-          href={active.featured.slug}
-          className={cn(
-            "flex items-center gap-3.5 p-4 rounded-[14px] border-[1.5px] cursor-pointer [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1),box-shadow_200ms_ease] hover:-translate-x-[3px]",
-            active.featuredBg,
-            active.featuredBorderColor
-          )}
-        >
-          <span className="w-14 h-14 rounded-[10px] flex items-center justify-center text-[28px] shrink-0">
-            {active.featured.emoji}
+            متجر Momzy
           </span>
-          <div>
-            <span
-              className={cn(
-                "font-label text-[9px] font-extrabold tracking-wider uppercase text-white px-2.5 py-[3px] rounded-[10px] inline-block mb-1",
-                active.featured.badgeBg
-              )}
-            >
-              {active.featured.badge}
-            </span>
-            <div className="text-sm font-bold text-dark">{active.featured.title}</div>
-            <div className="font-label text-base font-extrabold text-teal">{active.featured.price}</div>
+          <div className="font-heading font-bold text-dark text-[15px] leading-tight mt-0.5">
+            منتجات مختارة بعناية
           </div>
-        </Link>
-
-        {/* قائمة العناصر */}
-        {active.items.length > 0 && (
-          <div className="flex flex-col gap-1.5">
-            {active.items.map((item, i) => (
-              <Link
-                key={i}
-                href={item.href}
-                className="flex items-center gap-2.5 px-3 py-2.5 rounded-[14px] text-[13px] text-mid cursor-pointer [transition:background-color_150ms_ease,color_150ms_ease,border-color_150ms_ease] border border-transparent hover:bg-tealpale hover:text-teal hover:border-[rgba(130,201,196,0.2)]"
-              >
-                <span className="text-lg w-7 text-center">{item.emoji}</span>
-                {item.title}
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* رابط عرض الكل */}
+        </div>
         <Link
           href="/shop"
-          className="mt-1 text-xs font-bold text-teal flex items-center gap-1.5 px-3 py-2 rounded-[14px] [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1),background-color_150ms_ease] hover:gap-2.5 cursor-pointer"
+          className="font-label font-bold text-[13px] text-teal flex items-center gap-1.5 [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1)] hover:gap-2.5"
         >
-          {active.seeAllText} ←
+          كل المنتجات ←
         </Link>
       </div>
+
+      {/* ── شبكة المنتجات الحقيقية ── */}
+      {items.length > 0 ? (
+        <div className="grid grid-cols-2 gap-2 p-3.5">
+          {items.map((p) => (
+            <Link
+              key={p.slug}
+              href={`/shop/${p.slug}`}
+              className="group flex items-center gap-3 p-2.5 rounded-[14px] border border-transparent [transition:background-color_160ms_ease,border-color_160ms_ease,transform_200ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-rosepale hover:border-[rgba(242,167,181,0.28)] hover:-translate-y-[2px]"
+            >
+              {/* صورة المنتج الحقيقية */}
+              <span
+                className="relative rounded-[11px] overflow-hidden shrink-0"
+                style={{ width: 62, height: 62, background: "var(--offwh)" }}
+              >
+                <ProductImagePlaceholder src={p.mainImage} alt={p.title} size="thumb" objectFit="cover" />
+                {p.badge && (
+                  <span
+                    className="absolute top-1 start-1 font-label font-extrabold text-[7px] tracking-[0.5px] uppercase px-1.5 py-[2px] rounded-full"
+                    style={{
+                      background:
+                        p.badgeColor === "teal" ? "var(--teal)" :
+                        p.badgeColor === "yellow" ? "#F7DF98" : "var(--rose)",
+                      color: p.badgeColor === "yellow" ? "var(--dark)" : "white",
+                    }}
+                  >
+                    {p.badge}
+                  </span>
+                )}
+              </span>
+
+              {/* الاسم + السعر */}
+              <div className="min-w-0">
+                <div className="font-label uppercase text-[9px] tracking-[1px] text-light mb-0.5 truncate">
+                  {p.category}
+                </div>
+                <div className="font-heading font-bold text-dark text-[13px] leading-snug line-clamp-2">
+                  {p.title}
+                </div>
+                <div className="font-label font-extrabold text-[14px] mt-0.5" style={{ color: "var(--rose)" }}>
+                  ₪{p.price}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="p-8 text-center text-mid text-[13px] font-body">
+          قريباً منتجات جديدة ✦
+        </div>
+      )}
     </div>
   );
 }

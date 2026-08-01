@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { NAV_ITEMS, HEADER_HEIGHT, LOGO_HEIGHT } from "@/lib/utils/constants";
 import MegaMenu from "./MegaMenu";
 import MobileMenu from "./MobileMenu";
+import type { Product } from "@/lib/products/types";
 
 /** تأخير إغلاق الميقا منيو بالمللي ثانية */
 const MEGA_CLOSE_DELAY = 150;
@@ -15,7 +16,7 @@ const MEGA_CLOSE_DELAY = 150;
 // لصفحة المنتج (forest/gold). قرار تصميمي مستقبلي: نسخة monochrome أو تحديث شامل للوجو.
 
 /** الهيدر الرئيسي — sticky مع blur و نافبار تفاعلي */
-export default function Header() {
+export default function Header({ products = [] }: { products?: Product[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMegaOpen, setIsMegaOpen] = useState(false);
@@ -106,7 +107,7 @@ export default function Header() {
 
                   {/* الميقا منيو */}
                   {isShop && isMegaOpen && (
-                    <MegaMenu onMouseEnter={handleMegaEnter} onMouseLeave={handleMegaLeave} />
+                    <MegaMenu products={products} onMouseEnter={handleMegaEnter} onMouseLeave={handleMegaLeave} />
                   )}
                 </div>
               );
@@ -142,7 +143,7 @@ export default function Header() {
       </header>
 
       {/* قائمة الموبايل */}
-      <MobileMenu isOpen={isMenuOpen} onClose={closeMenu} />
+      <MobileMenu isOpen={isMenuOpen} onClose={closeMenu} products={products} />
     </>
   );
 }

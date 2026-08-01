@@ -4,17 +4,24 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/store/cart";
-import { generateOrderNumber, saveOrder, type Order } from "@/lib/utils/orders";
+import { computeShipping, type ShippingConfig } from "@/lib/shipping";
+import { couponDiscount } from "@/lib/coupons";
+import { getStoredUTM } from "@/lib/analytics/track";
 
 /** واجهة بيانات نموذج الدفع */
 interface FormData {
-  name:    string;
-  email:   string;
-  phone:   string;
-  city:    string;
-  address: string;
-  notes:   string;
+  name:       string;
+  email:      string;
+  phone:      string;
+  city:       string;
+  address:    string;
+  building:   string;
+  postalCode: string;
+  notes:      string;
 }
+
+/** الحقول الإلزامية التي لها قواعد تحقّق (تستثني الاختيارية) */
+type RequiredField = keyof Omit<FormData, "notes" | "building" | "postalCode">;
 
 /** الحالات المحتملة للنموذج */
 type FormStatus = "idle" | "submitting" | "error";
@@ -54,7 +61,7 @@ function FieldError({ msg }: { msg: string }) {
 }
 
 /** قواعد التحقق لكل حقل — طول + محتوى */
-const validators: Record<keyof Omit<FormData, "notes">, (v: string) => string | null> = {
+const validators: Record<RequiredField, (v: string) => string | null> = {
   /** الاسم: حرفان على الأقل، لا أرقام */
   name: (v) => {
     if (v.trim().length < 2) return "الرجاء إدخال الاسم الكامل";
@@ -88,13 +95,21 @@ const validators: Record<keyof Omit<FormData, "notes">, (v: string) => string | 
 };
 
 /** نموذج بيانات العميل + قبول الشروط */
-export default function CheckoutForm() {
+export default function CheckoutForm({
+  shipping,
+  onProceedToPayment,
+}: {
+  shipping: ShippingConfig;
+  /** يُستدعى بعد إنشاء الطلب حين يكون الدفع الإلكتروني مفعّلاً — للانتقال لمرحلة الدفع في نفس الصفحة */
+  onProceedToPayment?: (orderId: string) => void;
+}) {
   const router    = useRouter();
-  const cartItems = useCart((s) => s.items);
-  const getTotal  = useCart((s) => s.getTotal);
+  const cartItems     = useCart((s) => s.items);
+  const getTotal      = useCart((s) => s.getTotal);
+  const appliedCoupon = useCart((s) => s.appliedCoupon);
 
   const [form, setForm] = useState<FormData>({
-    name: "", email: "", phone: "", city: "", address: "", notes: "",
+    name: "", email: "", phone: "", city: "", address: "", building: "", postalCode: "", notes: "",
   });
 
   /** الحقول التي خرج منها المستخدم — لإظهار الأخطاء فقط بعد onBlur */
@@ -106,9 +121,10 @@ export default function CheckoutForm() {
   const [focusedField,    setFocusedField]    = useState<string | null>(null);
   const [status,          setStatus]          = useState<FormStatus>("idle");
 
-  /** حساب الشحن — كل المنتجات فيزيائية الآن (الـ schema الجديد) */
-  const shippingCost = cartItems.length > 0 ? 40 : 0;
-  const grandTotal   = getTotal() + shippingCost;
+  /** حساب الشحن — من إعدادات المتجر (جدول settings) */
+  const shippingCost = computeShipping(getTotal(), cartItems.length, shipping);
+  const discount     = couponDiscount(appliedCoupon, getTotal());
+  const grandTotal   = getTotal() + shippingCost - discount;
 
   /** تحديث حقل واحد */
   function updateField(field: keyof FormData, value: string) {
@@ -122,13 +138,13 @@ export default function CheckoutForm() {
   }
 
   /** خطأ الحقل — يظهر فقط إذا لُمس */
-  function fieldError(field: keyof Omit<FormData, "notes">): string | null {
+  function fieldError(field: RequiredField): string | null {
     if (!touched[field]) return null;
     return validators[field](form[field]);
   }
 
   /** لون حدود الحقل */
-  function borderColor(field: keyof Omit<FormData, "notes">): string {
+  function borderColor(field: RequiredField): string {
     if (fieldError(field)) return "var(--rose)";
     if (focusedField === field) return "var(--teal)";
     return "var(--bord)";
@@ -144,33 +160,42 @@ export default function CheckoutForm() {
     agreedPolicy &&
     agreedTerms;
 
-  /** إرسال الطلب — TODO: ربط بـ HYP API */
+  /** إرسال الطلب — ينشئه في Supabase عبر /api/orders (الدفع الفعلي بـ HYP لاحقاً) */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValid) return;
 
     setStatus("submitting");
     try {
-      /* TODO: POST /api/orders → إنشاء الطلب في Supabase → redirect لـ HYP */
-      await new Promise((r) => setTimeout(r, 1500));
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: {
+            name: form.name, email: form.email, phone: form.phone,
+            city: form.city, address: form.address,
+            building: form.building, postalCode: form.postalCode,
+          },
+          // نرسل slug + الكمية فقط — الأسعار تُحسب على السيرفر
+          items: cartItems.map((i) => ({ slug: i.slug, quantity: i.quantity, gift: i.gift ?? null })),
+          couponCode: appliedCoupon?.code ?? null,
+          hasMarketingConsent: agreedMarketing,
+          notes: form.notes,
+          utm: getStoredUTM(),
+        }),
+      });
 
-      const orderNumber = generateOrderNumber();
-      const order: Order = {
-        orderNumber,
-        createdAt:           new Date().toISOString(),
-        customer:            { name: form.name, email: form.email, phone: form.phone, city: form.city, address: form.address },
-        items:               cartItems,
-        subtotal:            getTotal(),
-        shippingCost,
-        discount:            0,
-        total:               grandTotal,
-        status:              "pending",
-        paymentStatus:       "pending",
-        hasMarketingConsent: agreedMarketing,
-        notes:               form.notes,
-      };
-      saveOrder(order);
-      router.push(`/order/${orderNumber}`);
+      if (!res.ok) throw new Error("order failed");
+
+      const { id, paymentUrl } = (await res.json()) as { id: string; paymentUrl?: string | null };
+      // وجود paymentUrl = HYP مُفعّل → ننتقل لمرحلة الدفع المدمجة في نفس الصفحة (بلا انتقال)؛
+      // وإلا التدفّق اليدوي → صفحة التأكيد مباشرة (الطلب pending)
+      if (paymentUrl && onProceedToPayment) {
+        onProceedToPayment(id);
+      } else {
+        // نُبقي السلة حتى صفحة التأكيد (تُفرَّغ هناك لتجنّب race condition)
+        router.push(`/order/${id}`);
+      }
     } catch {
       setStatus("error");
     }
@@ -248,20 +273,37 @@ export default function CheckoutForm() {
             </div>
           </div>
 
-          {/* البلدة */}
-          <div>
-            <label style={labelStyle}>البلدة *</label>
-            <input
-              type="text"
-              value={form.city}
-              onChange={(e) => updateField("city", e.target.value)}
-              placeholder="اسم البلدة"
-              autoComplete="address-level2"
-              style={{ ...inputBase, border: `1.5px solid ${borderColor("city")}` }}
-              onFocus={() => setFocusedField("city")}
-              onBlur={() => handleBlur("city")}
-            />
-            {fieldError("city") && <FieldError msg={fieldError("city")!} />}
+          {/* البلدة + الرمز البريدي */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label style={labelStyle}>البلدة *</label>
+              <input
+                type="text"
+                value={form.city}
+                onChange={(e) => updateField("city", e.target.value)}
+                placeholder="اسم البلدة"
+                autoComplete="address-level2"
+                style={{ ...inputBase, border: `1.5px solid ${borderColor("city")}` }}
+                onFocus={() => setFocusedField("city")}
+                onBlur={() => handleBlur("city")}
+              />
+              {fieldError("city") && <FieldError msg={fieldError("city")!} />}
+            </div>
+            <div>
+              <label style={labelStyle}>الرمز البريدي (اختياري)</label>
+              <input
+                type="text"
+                value={form.postalCode}
+                onChange={(e) => updateField("postalCode", e.target.value)}
+                placeholder="مثال: 1610001"
+                autoComplete="postal-code"
+                dir="ltr"
+                inputMode="numeric"
+                style={{ ...inputBase, border: `1.5px solid ${focusedField === "postalCode" ? "var(--teal)" : "var(--bord)"}`, textAlign: "right" }}
+                onFocus={() => setFocusedField("postalCode")}
+                onBlur={() => setFocusedField(null)}
+              />
+            </div>
           </div>
 
           {/* العنوان */}
@@ -271,12 +313,26 @@ export default function CheckoutForm() {
               value={form.address}
               onChange={(e) => updateField("address", e.target.value)}
               placeholder="الشارع ورقم البيت"
-              rows={3}
+              rows={2}
               style={{ ...inputBase, border: `1.5px solid ${borderColor("address")}`, resize: "none" }}
               onFocus={() => setFocusedField("address")}
               onBlur={() => handleBlur("address")}
             />
             {fieldError("address") && <FieldError msg={fieldError("address")!} />}
+          </div>
+
+          {/* طابق / شقة / مدخل */}
+          <div>
+            <label style={labelStyle}>طابق / شقة / مدخل (اختياري)</label>
+            <input
+              type="text"
+              value={form.building}
+              onChange={(e) => updateField("building", e.target.value)}
+              placeholder="مثال: طابق 3، شقة 8، مدخل ب"
+              style={{ ...inputBase, border: `1.5px solid ${focusedField === "building" ? "var(--teal)" : "var(--bord)"}` }}
+              onFocus={() => setFocusedField("building")}
+              onBlur={() => setFocusedField(null)}
+            />
           </div>
         </div>
 
@@ -368,7 +424,7 @@ export default function CheckoutForm() {
           <button
             type="submit"
             disabled={!isValid || status === "submitting"}
-            className="w-full font-label font-bold text-white text-[16px] [transition:background-color_200ms_ease,box-shadow_200ms_ease,transform_160ms_ease-out]"
+            className="w-full font-label font-bold text-white text-[16px] active:scale-[0.98] [transition:background-color_200ms_ease,box-shadow_200ms_ease,transform_160ms_ease-out]"
             style={{
               background: isValid ? "var(--rose)" : "var(--light)",
               border: "none",
@@ -380,12 +436,12 @@ export default function CheckoutForm() {
             }}
           >
             {status === "submitting"
-              ? "جارٍ معالجة طلبك..."
-              : `ادفعي الآن — ₪${grandTotal} ←`}
+              ? "جارٍ تجهيز الدفع الآمن…"
+              : `المتابعة للدفع الآمن — ₪${grandTotal} ←`}
           </button>
 
           <p className="text-center text-[12px] text-light mt-3">
-            🔒 دفع آمن ومشفر · ستُحوَّلين لصفحة الدفع الآمن
+            🔒 لن يُخصم أي مبلغ قبل إدخالك بيانات الدفع في الخطوة التالية
           </p>
         </div>
       </div>

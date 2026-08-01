@@ -50,7 +50,7 @@ export default function OrderTotals({ subtotal, shippingCost, discount, total }:
             <div className="font-label text-[14px] text-mid">الشحن</div>
             {shippingCost > 0 && (
               <div className="font-label text-[11px] text-light mt-0.5">
-                توصيل حتى البيت (خلال 5 أيام عمل)
+                توصيل حتى البيت (خلال 7 أيام عمل)
               </div>
             )}
           </div>

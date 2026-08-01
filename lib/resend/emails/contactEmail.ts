@@ -10,7 +10,7 @@ export interface ContactEmailData {
 /** قالب إيميل إشعار رسالة تواصل جديدة — يُرسل لهبة */
 export function contactEmailHtml(data: ContactEmailData): string {
   const { name, email, phone, subject, message } = data;
-  const date = new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
+  const date = new Intl.DateTimeFormat("en-GB", {
     dateStyle: "full",
     timeStyle: "short",
   }).format(new Date());

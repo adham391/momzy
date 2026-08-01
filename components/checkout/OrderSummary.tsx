@@ -4,47 +4,66 @@ import { useState } from "react";
 import Image from "next/image";
 import { useCart } from "@/lib/store/cart";
 import QuantityInput from "@/components/shop/QuantityInput";
+import { computeShipping, type ShippingConfig } from "@/lib/shipping";
+import { couponDiscount } from "@/lib/coupons";
 
 /** حالة الكوبون */
 type CouponStatus = "idle" | "checking" | "valid" | "invalid";
 
-/** ملخص الطلب مع تحكم بالكمية وحقل كوبون */
-export default function OrderSummary() {
+/** ملخص الطلب مع تحكم بالكمية وحقل كوبون. readOnly = عرض فقط (مرحلة الدفع) */
+export default function OrderSummary({ shipping, readOnly = false }: { shipping: ShippingConfig; readOnly?: boolean }) {
   const items          = useCart((s) => s.items);
   const getTotal       = useCart((s) => s.getTotal);
   const updateQuantity = useCart((s) => s.updateQuantity);
   const removeItem     = useCart((s) => s.removeItem);
 
-  const [couponOpen,    setCouponOpen]    = useState(false);
-  const [couponCode,    setCouponCode]    = useState("");
-  const [couponStatus,  setCouponStatus]  = useState<CouponStatus>("idle");
-  const [discount,      setDiscount]      = useState(0);
-  const [couponLabel,   setCouponLabel]   = useState("");
+  const appliedCoupon = useCart((s) => s.appliedCoupon);
+  const setCoupon     = useCart((s) => s.setCoupon);
+
+  const [couponOpen,   setCouponOpen]   = useState(false);
+  const [couponCode,   setCouponCode]   = useState("");
+  const [couponStatus, setCouponStatus] = useState<CouponStatus>("idle");
 
   const total        = getTotal();
-  /* كل العناصر فيزيائية الآن — لاحقاً يمكن إضافة منطق shippingInfo.freeShipping للعناصر */
-  const shippingCost = items.length > 0 ? 40 : 0;
+  const discount     = couponDiscount(appliedCoupon, total);
+  const shippingCost = computeShipping(total, items.length, shipping);
   const grandTotal   = total + shippingCost - discount;
 
-  /** تطبيق الكوبون — TODO: استبدل بـ POST /api/coupons/validate */
+  /** تطبيق الكوبون عبر /api/coupons/validate */
   async function applyCoupon() {
     if (!couponCode.trim()) return;
     setCouponStatus("checking");
-
-    await new Promise((r) => setTimeout(r, 800)); // محاكاة الطلب
-
-    /* TODO: اربط بـ Supabase — جدول coupons */
-    setCouponStatus("invalid");
-    setDiscount(0);
-    setCouponLabel("");
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode, subtotal: total }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCoupon({
+          code: data.code,
+          type: data.type,
+          value: data.value,
+          minOrderAmount: data.minOrderAmount,
+          label: data.label,
+        });
+        setCouponStatus("valid");
+      } else {
+        setCoupon(null);
+        setCouponStatus("invalid");
+      }
+    } catch {
+      setCoupon(null);
+      setCouponStatus("invalid");
+    }
   }
 
   /** إزالة الكوبون */
   function removeCoupon() {
+    setCoupon(null);
     setCouponCode("");
     setCouponStatus("idle");
-    setDiscount(0);
-    setCouponLabel("");
   }
 
   return (
@@ -98,21 +117,25 @@ export default function OrderSummary() {
               <div className="font-label font-semibold text-dark text-[13px] leading-tight truncate mb-2">
                 {item.title}
               </div>
-              <div className="flex items-center gap-2">
-                <QuantityInput
-                  value={item.quantity}
-                  onChange={(q) => updateQuantity(item.id, q)}
-                  size="sm"
-                  min={0}
-                />
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="font-label text-[11px] text-light hover:text-rose transition-colors"
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                >
-                  حذف
-                </button>
-              </div>
+              {readOnly ? (
+                <div className="font-label text-[12px] text-light">الكمية: {item.quantity}</div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <QuantityInput
+                    value={item.quantity}
+                    onChange={(q) => updateQuantity(item.id, q)}
+                    size="sm"
+                    min={0}
+                  />
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="font-label text-[11px] text-light hover:text-rose transition-colors"
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="font-label font-extrabold text-teal text-[15px] shrink-0">
@@ -122,23 +145,26 @@ export default function OrderSummary() {
         ))}
       </div>
 
-      {/* ── حقل الكوبون ── */}
+      {/* ── حقل الكوبون — مخفي في وضع القراءة إلا إن وُجد كوبون مطبّق ── */}
+      {(!readOnly || appliedCoupon) && (
       <div style={{ padding: "14px 22px", borderTop: "1px solid var(--bord)" }}>
 
-        {couponStatus === "valid" ? (
+        {appliedCoupon ? (
           /* كوبون مطبّق */
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-label font-bold text-teal text-[13px]">✓ {couponLabel}</span>
+              <span className="font-label font-bold text-teal text-[13px]">✓ {appliedCoupon.label}</span>
               <span className="font-label text-[12px] text-teal">— خصم ₪{discount}</span>
             </div>
-            <button
-              onClick={removeCoupon}
-              className="font-label text-[12px] text-light hover:text-rose transition-colors"
-              style={{ background: "none", border: "none", cursor: "pointer" }}
-            >
-              إزالة
-            </button>
+            {!readOnly && (
+              <button
+                onClick={removeCoupon}
+                className="font-label text-[12px] text-light hover:text-rose transition-colors"
+                style={{ background: "none", border: "none", cursor: "pointer" }}
+              >
+                إزالة
+              </button>
+            )}
           </div>
         ) : (
           <>
@@ -208,6 +234,7 @@ export default function OrderSummary() {
           </>
         )}
       </div>
+      )}
 
       {/* الأرقام */}
       <div style={{ padding: "12px 22px" }}>
@@ -228,7 +255,7 @@ export default function OrderSummary() {
             <div className="font-label text-[14px] text-mid">الشحن</div>
             {shippingCost > 0 && (
               <div className="font-label text-[11px] text-light mt-0.5">
-                توصيل حتى البيت (خلال 5 أيام عمل)
+                توصيل حتى البيت (خلال 7 أيام عمل)
               </div>
             )}
           </div>

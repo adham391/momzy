@@ -7,6 +7,10 @@ import { getAllServiceSlugs } from "@/lib/sanity/queries/services";
 import { SEED_SERVICES } from "@/lib/services/seed";
 import ServiceDetailHero from "@/components/services/ServiceDetailHero";
 import ServiceDetailContent from "@/components/services/ServiceDetailContent";
+import ServiceAboutHeba from "@/components/services/ServiceAboutHeba";
+import ServiceFAQ from "@/components/services/ServiceFAQ";
+import ServiceStickyCTA from "@/components/services/ServiceStickyCTA";
+import { getUpcomingSlotsForService } from "@/lib/db/bookings";
 import ServiceCTASection from "@/components/services/ServiceCTASection";
 import ServiceCard from "@/components/services/ServiceCard";
 import SectionWave from "@/components/ui/SectionWave";
@@ -55,6 +59,22 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const allInCategory = await getServices({ category: service.category });
   const related       = allInCategory.filter((s) => s.slug !== service.slug).slice(0, 3);
 
+  // الجلسات القادمة — للشريط الثابت فقط (السعر الأدنى + مجموع المقاعد).
+  // اختيار الموعد نفسه يتم داخل نموذج التسجيل — مدخل تسجيل واحد للموقع كله.
+  const slots = await getUpcomingSlotsForService(service.slug);
+  const minPrice = slots.length > 0 ? Math.min(...slots.map((s) => s.price)) : service.price ?? 0;
+  const seatsLeft =
+    slots.length > 0
+      ? slots.reduce((n, s) => n + Math.max(0, s.capacity - s.booked_count), 0)
+      : undefined;
+
+  /** لون التمييز حسب لون الخدمة */
+  const accent =
+    service.color === "teal" ? "var(--teal)"
+    : service.color === "yellow" ? "#C09420"
+    : service.color === "mint" ? "#6BB5B0"
+    : "var(--rose)";
+
   // رقم واتساب من env (اختياري)
   const whatsapp = process.env.HEBA_WHATSAPP_NUMBER;
 
@@ -67,12 +87,27 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
       {/* 2. المحتوى التفصيلي — وصف + مواضيع + فوائد */}
       <ServiceDetailContent service={service} />
 
-      {/* 3. CTA نهائي */}
-      <ServiceCTASection serviceTitle={service.title} color={service.color} whatsappNumber={whatsapp} />
+      {/* 3. من ترافقكِ؟ — تعريف بهبة قبل التسجيل */}
+      <ServiceAboutHeba accent={accent} zIndex={4} />
 
-      {/* 4. خدمات مقترحة (شرطي) */}
+      {/* 4. أسئلة شائعة (شرطي — يظهر فقط إن أضافت هبة أسئلة) */}
+      {service.faqs && service.faqs.length > 0 && (
+        <ServiceFAQ items={service.faqs} accent={accent} zIndex={5} />
+      )}
+
+      {/* 5. CTA نهائي */}
+      <ServiceCTASection
+        serviceTitle={service.title}
+        serviceSlug={service.slug}
+        color={service.color}
+        whatsappNumber={whatsapp}
+        ageGate={service}
+        zIndex={6}
+      />
+
+      {/* 6. خدمات مقترحة (شرطي) */}
       {related.length > 0 && (
-        <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 6 }}>
+        <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 7 }}>
           <SectionWave fill="var(--cream)" />
           <div style={{ background: "var(--cream)", marginTop: -1, padding: "40px 0 80px" }}>
             <Container>
@@ -107,6 +142,15 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
           </div>
         </section>
       )}
+
+      {/* شريط تسجيل ثابت — جوال فقط */}
+      <ServiceStickyCTA
+        serviceTitle={service.title}
+        serviceSlug={service.slug}
+        price={minPrice}
+        seatsLeft={seatsLeft}
+        ageGate={service}
+      />
 
       <SectionsReveal />
     </div>

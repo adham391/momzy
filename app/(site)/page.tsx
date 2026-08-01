@@ -5,18 +5,21 @@ import HebaSection        from "@/components/home/HebaSection";
 import ArticlesSection    from "@/components/home/ArticlesSection";
 import ReviewsSection     from "@/components/home/ReviewsSection";
 import SectionsReveal     from "@/components/ui/SectionsReveal";
+import { getHomePage }    from "@/lib/sanity/queries/homePage";
 
-/** الصفحة الرئيسية — كل أقسام الهوم بيج */
-export default function HomePage() {
+/** الصفحة الرئيسية — المحتوى قابل للتعديل من Sanity (مع fallback) */
+export default async function HomePage() {
+  const home = await getHomePage();
+
   return (
     <>
       {/* كل قسم يحتوي على wave في أعلاه يتداخل مع القسم السابق */}
-      <HeroSection />
-      <WhyMomzySection />
-      <BestSellersSection />
-      <HebaSection />
-      <ArticlesSection />
-      <ReviewsSection />
+      <HeroSection content={home} />
+      <WhyMomzySection content={home} />
+      <BestSellersSection content={home} />
+      <HebaSection content={home} />
+      <ArticlesSection content={home} />
+      <ReviewsSection content={home} />
 
       {/* fadeInUp عند الـ scroll — يراقب كل .reveal-section */}
       <SectionsReveal />

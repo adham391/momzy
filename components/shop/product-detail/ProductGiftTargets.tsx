@@ -1,7 +1,6 @@
 import Container from "@/components/ui/Container";
-import SectionLabel from "@/components/ui/SectionLabel";
 import type { ProductGiftTarget } from "@/lib/products/types";
-import { HeartHandshake, Home, Heart } from "lucide-react";
+import { Baby, HeartHandshake, Gift, Heart } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface ProductGiftTargetsProps {
@@ -10,9 +9,9 @@ interface ProductGiftTargetsProps {
 
 /** أيقونة مختلفة لكل فئة مستهدفة */
 const TARGET_ICONS: LucideIcon[] = [
-  HeartHandshake, // للصديقة
-  Home,           // للأخت أو البنت
-  Heart,          // لكِ أنتِ
+  Baby,           // الأم الحامل
+  HeartHandshake, // الأم الجديدة
+  Gift,           // كل مُهدية
 ];
 
 /** ألوان الأيقونات تتناوب بين rose / teal / yellow */
@@ -22,18 +21,17 @@ const ICON_STYLES = [
   { bg: "#FFF9E8",          border: "rgba(247,223,152,0.40)", color: "#C09420" },
 ];
 
-/** قسم "لمين هاي الهدية؟" — أهم قسم عاطفي في الصفحة */
+/** قسم "لمن هذه الهدية؟" — أهم قسم عاطفي في الصفحة */
 export default function ProductGiftTargets({ targets }: ProductGiftTargetsProps) {
   return (
     <section
       style={{
         background: "var(--rosepale)",
-        padding: "28px 0 clamp(80px, 10vw, 120px)",
+        padding: "20px 0 clamp(68px, 6vw, 88px)",
       }}
     >
       <Container>
-        <div className="mb-12 text-center">
-          <SectionLabel color="teal" centered>هدية بمعنى</SectionLabel>
+        <div className="mb-6 md:mb-12 text-center">
           <h2
             className="text-h2 font-heading font-bold"
             style={{
@@ -41,16 +39,28 @@ export default function ProductGiftTargets({ targets }: ProductGiftTargetsProps)
               lineHeight: 1.2,
             }}
           >
-            لمين هاي <span style={{ color: "var(--rose)", fontStyle: "italic" }}>الهدية؟</span>
+            لمن صُمّم هذا <span style={{ color: "var(--rose)", fontStyle: "italic" }}>الصندوق؟</span>
           </h2>
+          <p
+            className="mt-3 mx-auto"
+            style={{
+              color: "var(--mid)",
+              fontSize: "clamp(14px, 1.4vw, 16px)",
+              lineHeight: 1.9,
+              maxWidth: 620,
+              fontFamily: "'Tajawal', sans-serif",
+            }}
+          >
+            صُمم صندوق «مشوار أم» لكل أم تستحق أن تبدأ رحلتها بالدعم، والمعرفة، والعناية.
+          </p>
         </div>
 
         <div
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6"
           style={{ maxWidth: 1100, margin: "0 auto" }}
         >
           {targets.map((target, idx) => (
-            <GiftTargetCard key={target.label} target={target} idx={idx} />
+            <GiftTargetCard key={idx} target={target} idx={idx} />
           ))}
         </div>
       </Container>
@@ -64,12 +74,11 @@ function GiftTargetCard({ target, idx }: { target: ProductGiftTarget; idx: numbe
 
   return (
     <div
-      className="rounded-2xl p-6 md:p-8 flex flex-col items-center text-center [transition:transform_250ms_cubic-bezier(0.23,1,0.32,1),box-shadow_250ms_ease] hover:-translate-y-[4px]"
+      className="rounded-2xl p-4 sm:p-6 flex flex-col items-center text-center [transition:transform_250ms_cubic-bezier(0.23,1,0.32,1),box-shadow_250ms_ease] hover:-translate-y-[4px]"
       style={{
         background: "white",
         border: "1.5px solid rgba(242,167,181,0.15)",
         boxShadow: "0 6px 24px rgba(242,167,181,0.10)",
-        minHeight: 240,
       }}
     >
       {/* أيقونة في دائرة ملونة */}
@@ -87,24 +96,13 @@ function GiftTargetCard({ target, idx }: { target: ProductGiftTarget; idx: numbe
         <Icon size={24} color={style.color} strokeWidth={1.5} fill="none" />
       </div>
 
-      {/* label */}
-      <h3
-        className="font-heading font-bold mb-3"
-        style={{
-          fontSize: 18,
-          color: "var(--dark)",
-          lineHeight: 1.3,
-        }}
-      >
-        {target.label}
-      </h3>
-
-      {/* النص */}
+      {/* الجملة — بلا عنوان منفصل، كل بطاقة جملة واحدة */}
       <p
-        className="text-[14px] leading-[1.85]"
+        className="text-[15.5px] leading-[1.9]"
         style={{
-          color: "var(--mid)",
+          color: "var(--dark)",
           fontFamily: "'Tajawal', sans-serif",
+          fontWeight: 500,
         }}
       >
         {target.text}

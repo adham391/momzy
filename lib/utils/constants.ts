@@ -184,7 +184,7 @@ export const OFFER_CARDS: OfferCard[] = [
     icon: "/icons/services-icon.png",
     title: "المعرفة المهنية",
     description:
-      "خدمات متخصصة من هبة حسن — ممرضة معتمدة ومرشدة رضاعة ومرافقة ولادة بخبرة +1000 أم",
+      "خدمات متخصصة من هبة حسن — ممرضة معتمدة ومرشدة رضاعة ومرافقة ولادة بخبرة آلاف الأمهات",
     linkText: "اكتشفي الخدمات",
     href: "/services",
     color: "rose",

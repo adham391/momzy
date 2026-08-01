@@ -3,12 +3,17 @@ import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Chip from "@/components/ui/Chip";
 import { cn } from "@/lib/utils/cn";
-import { ARTICLE_PREVIEWS } from "@/lib/utils/constants";
 import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
+import MomzyText from "@/components/ui/MomzyText";
+import { getHomeArticles } from "@/lib/sanity/queries/articles";
+import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
-/** قسم أحدث المقالات */
-export default function ArticlesSection() {
+/** قسم أحدث المقالات — من Sanity (مع fallback ثابت) */
+export default async function ArticlesSection({ content }: { content: HomePageContent }) {
+  const articles = await getHomeArticles();
+  if (articles.length === 0) return null;
+
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية HebaSection ─ */
     <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 5 }}>
@@ -18,23 +23,15 @@ export default function ArticlesSection() {
 
       {/* ── محتوى القسم ── */}
       <div className="relative overflow-hidden bg-offwh" style={{ marginTop: -1, paddingTop: 16, paddingBottom: 72 }}>
-        {/* نقاط ديكورية متحركة */}
         <PolkaDots opacity={0.2} count={18} />
 
         <Container className="relative z-[2]">
           {/* عنوان القسم */}
           <div className="flex items-end justify-between mb-10">
             <div>
-              <SectionLabel color="teal">أحدث المقالات</SectionLabel>
+              <SectionLabel color="teal">{content.articlesLabel}</SectionLabel>
               <h2 className="font-heading text-h2 font-bold text-dark">
-                <span className="sm:hidden">
-                  اقرئي وتعلّمي<br />
-                  <span className="text-rose italic">مع Momzy</span>
-                </span>
-                <span className="hidden sm:inline">
-                  اقرئي وتعلّمي مع{" "}
-                  <span className="text-rose italic">Momzy</span>
-                </span>
+                <MomzyText text={content.articlesTitle} />
               </h2>
             </div>
             <Link
@@ -47,25 +44,27 @@ export default function ArticlesSection() {
 
           {/* شبكة المقالات */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {ARTICLE_PREVIEWS.map((article) => (
+            {articles.map((article, i) => (
               <Link
-                key={article.title}
-                href="/articles"
+                key={i}
+                href={article.href}
                 className="bg-white rounded-[22px] overflow-hidden border-[1.5px] border-bord cursor-pointer [transition:transform_250ms_cubic-bezier(0.23,1,0.32,1),box-shadow_250ms_ease] hover:-translate-y-[5px] hover:shadow-[0_14px_40px_rgba(0,0,0,0.09)]"
               >
-                {/* منطقة الصورة */}
-                <div
-                  className={cn(
-                    "h-[170px] flex items-center justify-center text-[56px]",
-                    article.imageBg
-                  )}
-                >
-                  {article.emoji}
-                </div>
+                {/* منطقة الصورة — صورة حقيقية أو إيموجي احتياطي */}
+                {article.coverImage ? (
+                  <div
+                    className="h-[170px] bg-cover bg-center"
+                    style={{ backgroundImage: `url('${article.coverImage}')` }}
+                  />
+                ) : (
+                  <div className={cn("h-[170px] flex items-center justify-center text-[56px]", article.imageBg)}>
+                    {article.emoji}
+                  </div>
+                )}
 
                 {/* المحتوى */}
                 <div className="p-[22px]">
-                  <Chip variant={article.chipColor}>{article.chipLabel}</Chip>
+                  <Chip variant={article.chipColor}>{article.category}</Chip>
                   <div className="font-heading text-h4 text-dark my-2.5 leading-[1.4]">
                     {article.title}
                   </div>

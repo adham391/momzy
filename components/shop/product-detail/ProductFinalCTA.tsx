@@ -55,7 +55,7 @@ export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
               <span className="relative inline-flex rounded-full" style={{ width: 7, height: 7, background: "#10B981" }} />
             </span>
             <span className="font-label font-bold text-[12px]" style={{ color: "var(--dark)", letterSpacing: "0.5px" }}>
-              متوفر اليوم — توصيل خلال 5 أيام
+              متوفر اليوم — توصيل حتى 7 أيام
             </span>
           </div>
 
@@ -82,9 +82,9 @@ export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
               fontWeight: 500,
             }}
           >
-            خلي اللحظة هاي تكون بداية لاشي مختلف،
+            اجعلي هذه اللحظة بدايةً لشيءٍ مختلف،
             <br className="hidden sm:inline" />
-            {" "}هدية تترك أثر، ولمسة لا تنسى.
+            {" "}هديةً تترك أثرًا، ولمسةً لا تُنسى.
           </p>
 
           {/* بلوك السعر — مع savings badge */}

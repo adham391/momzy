@@ -180,7 +180,7 @@ export default function Footer({ settings }: FooterProps) {
                 النشرة البريدية
               </h5>
               <p className="text-[12px] md:text-[13px] mb-4" style={{ lineHeight: 1.75, color: "rgba(255,255,255,0.85)", fontFamily: "'Tajawal', sans-serif" }}>
-                انضمي لأكثر من 1000 أم — نصائح هبة الحصرية كل أسبوع
+                انضمي لآلاف الأمهات — نصائح هبة الحصرية كل أسبوع
               </p>
               <NewsletterForm />
 

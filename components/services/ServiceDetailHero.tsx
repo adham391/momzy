@@ -174,7 +174,7 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                   boxShadow: "0 12px 32px rgba(130,201,196,0.45)",
                 }}
               >
-                <span>احجزي الآن</span>
+                <span>سجّلي الآن</span>
                 <span style={{ fontSize: "1.1em" }}>←</span>
               </button>
 
@@ -214,6 +214,8 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
         open={bookingOpen}
         onClose={() => setBookingOpen(false)}
         serviceTitle={service.title}
+        serviceSlug={service.slug}
+        ageGate={service}
       />
     </>
   );

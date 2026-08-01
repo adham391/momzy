@@ -5,6 +5,7 @@ import CartSidebar from "@/components/shop/CartSidebar";
 import FloatingCartButton from "@/components/shop/FloatingCartButton";
 import CartAddedModal from "@/components/shop/CartAddedModal";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
+import { getProducts } from "@/lib/products/getProducts";
 
 /**
  * تخطيط صفحات الموقع العامة
@@ -15,12 +16,12 @@ export default async function SiteLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSiteSettings();
+  const [settings, products] = await Promise.all([getSiteSettings(), getProducts({ inStockOnly: true })]);
 
   return (
     <>
       <TopBar settings={settings.topBar} />
-      <Header />
+      <Header products={products} />
       <main>{children}</main>
       <Footer settings={settings} />
 

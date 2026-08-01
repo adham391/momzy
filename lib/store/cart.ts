@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Product } from "@/lib/products/types";
+import type { AppliedCoupon } from "@/lib/coupons";
+import { track } from "@/lib/analytics/track";
 
 /* ── أنواع السلة ─────────────────────────────────────── */
 
@@ -16,8 +18,6 @@ export interface GiftOptions {
   recipientAddress?: string;
   /** مدينة المستلِمة */
   recipientCity?: string;
-  /** تاريخ التوصيل المرغوب — ISO date string */
-  deliveryDate?: string;
 }
 
 /** عنصر داخل السلة */
@@ -47,6 +47,7 @@ interface CartStore {
   items: CartItem[];
   isOpen: boolean;
   lastAdded: LastAdded | null;
+  appliedCoupon: AppliedCoupon | null;
 
   /** إضافة منتج — يدمج بالـ slug إذا بدون هدية، يضيف عنصراً جديداً إذا هدية */
   addItem: (product: Product, gift?: GiftOptions) => void;
@@ -58,6 +59,8 @@ interface CartStore {
   updateQuantity: (id: string, quantity: number) => void;
   /** ضبط أو إزالة خيارات الهدية لعنصر موجود */
   setGift: (id: string, gift?: GiftOptions) => void;
+  /** ضبط أو إزالة الكوبون المطبّق على السلة */
+  setCoupon: (coupon: AppliedCoupon | null) => void;
   /** تفريغ السلة */
   clearCart: () => void;
   /** فتح السلة */
@@ -79,8 +82,7 @@ function hasGiftData(gift?: GiftOptions): boolean {
   return Boolean(
     gift.message ||
     gift.recipientName ||
-    gift.recipientAddress ||
-    gift.deliveryDate
+    gift.recipientAddress
   );
 }
 
@@ -111,8 +113,10 @@ export const useCart = create<CartStore>()(
       items: [],
       isOpen: false,
       lastAdded: null,
+      appliedCoupon: null,
 
       addItem: (product, gift) => {
+        track("add_to_cart", { product_slug: product.slug, value: product.price });
         const { items } = get();
         const isGift = hasGiftData(gift);
 
@@ -202,7 +206,9 @@ export const useCart = create<CartStore>()(
         });
       },
 
-      clearCart: () => set({ items: [] }),
+      setCoupon: (coupon) => set({ appliedCoupon: coupon }),
+
+      clearCart: () => set({ items: [], appliedCoupon: null }),
 
       openCart: () => set({ isOpen: true }),
 
@@ -219,7 +225,7 @@ export const useCart = create<CartStore>()(
     }),
     {
       name: "momzy-cart",
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({ items: state.items, appliedCoupon: state.appliedCoupon }),
       version: 2,
       /** ترقية البيانات القديمة (slug-only) إلى الـ schema الجديد (id) */
       migrate: (persistedState: unknown, version: number) => {
