@@ -121,8 +121,9 @@ export default function CheckoutForm({
   const [focusedField,    setFocusedField]    = useState<string | null>(null);
   const [status,          setStatus]          = useState<FormStatus>("idle");
 
-  /** حساب الشحن — من إعدادات المتجر (جدول settings) */
-  const shippingCost = computeShipping(getTotal(), cartItems.length, shipping);
+  /** حساب الشحن — للعناصر الفيزيائية فقط (الرقمية تُرسل بالبريد بلا شحن) */
+  const physicalCount = cartItems.filter((i) => !i.isDigital).length;
+  const shippingCost = computeShipping(getTotal(), physicalCount, shipping);
   const discount     = couponDiscount(appliedCoupon, getTotal());
   const grandTotal   = getTotal() + shippingCost - discount;
 

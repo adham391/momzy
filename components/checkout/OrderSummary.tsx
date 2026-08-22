@@ -16,6 +16,8 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
   const getTotal       = useCart((s) => s.getTotal);
   const updateQuantity = useCart((s) => s.updateQuantity);
   const removeItem     = useCart((s) => s.removeItem);
+  const getEffectivePrice = useCart((s) => s.getEffectivePrice);
+  const getBundleSavings  = useCart((s) => s.getBundleSavings);
 
   const appliedCoupon = useCart((s) => s.appliedCoupon);
   const setCoupon     = useCart((s) => s.setCoupon);
@@ -24,9 +26,12 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
   const [couponCode,   setCouponCode]   = useState("");
   const [couponStatus, setCouponStatus] = useState<CouponStatus>("idle");
 
-  const total        = getTotal();
-  const discount     = couponDiscount(appliedCoupon, total);
-  const shippingCost = computeShipping(total, items.length, shipping);
+  const total         = getTotal();
+  const bundleSavings = getBundleSavings();
+  const discount      = couponDiscount(appliedCoupon, total);
+  // الشحن للعناصر الفيزيائية فقط — الرقمية (كتيبات PDF) تُرسل بالبريد بلا شحن
+  const physicalCount = items.filter((i) => !i.isDigital).length;
+  const shippingCost = computeShipping(total, physicalCount, shipping);
   const grandTotal   = total + shippingCost - discount;
 
   /** تطبيق الكوبون عبر /api/coupons/validate */
@@ -138,11 +143,37 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
               )}
             </div>
 
-            <div className="font-label font-extrabold text-teal text-[15px] shrink-0">
-              ₪{item.price * item.quantity}
+            <div className="font-label font-extrabold text-teal text-[15px] shrink-0 text-end">
+              {(() => {
+                const unit = getEffectivePrice(item);
+                const disc = unit < item.price;
+                return (
+                  <>
+                    <div>₪{unit * item.quantity}</div>
+                    {disc && (
+                      <div className="font-normal line-through text-light text-[11px]">
+                        ₪{item.price * item.quantity}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         ))}
+
+        {/* شارة توفير الباقة — إعلامية (الأسعار أعلاه مخفّضة أصلًا) */}
+        {bundleSavings > 0 && (
+          <div
+            className="flex items-center justify-center gap-2 rounded-[12px] py-2.5 px-3 mt-2"
+            style={{ background: "var(--rosepale)", border: "1px solid rgba(242,167,181,0.30)" }}
+          >
+            <span>🎁</span>
+            <span className="font-label font-bold text-[13px]" style={{ color: "var(--rose)" }}>
+              وفّرتِ ₪{bundleSavings} مع باقة الصندوق + الكتيب
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── حقل الكوبون — مخفي في وضع القراءة إلا إن وُجد كوبون مطبّق ── */}

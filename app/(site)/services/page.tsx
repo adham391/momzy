@@ -11,7 +11,7 @@ import SectionsReveal from "@/components/ui/SectionsReveal";
 
 export const metadata: Metadata = {
   title: "الخدمات | Momzy",
-  description: "ورشات ولقاءات فردية مع هبة حسن — ممرضة معتمدة ومرشدة رضاعة. سجّلي إلكترونيًا واحجزي مقعدكِ فورًا.",
+  description: "ورشات ولقاءات فردية مع هبة حسن — ممرضة معتمدة ومرشدة رضاعة. سجّلي واحجزي مقعدكِ فورًا.",
 };
 
 /** المقاعد تتغيّر مع كل تسجيل — تحديث كل دقيقة */
@@ -52,7 +52,7 @@ export default async function ServicesPage() {
             className="mx-auto text-mid leading-[1.85]"
             style={{ maxWidth: 560, fontSize: "clamp(14px, 1.5vw, 16px)" }}
           >
-            ورشات جماعية ولقاءات فردية مع هبة حسن — اختاري الخدمة المناسبة وسجّلي مقعدكِ إلكترونيًا في دقيقة.
+            ورشات جماعية ولقاءات فردية مع هبة حسن — اختاري الخدمة المناسبة وسجّلي مقعدكِ الآن.
           </p>
         </Container>
       </header>

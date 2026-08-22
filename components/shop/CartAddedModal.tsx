@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
 import type { Product } from "@/lib/products/types";
+import { effectivePrice } from "@/lib/bundles";
 
 /** Modal يظهر عند إضافة أي منتج للسلة */
 export default function CartAddedModal() {
@@ -49,6 +50,9 @@ export default function CartAddedModal() {
   const suggestions = allProducts
     .filter((p) => !cartItems.some((c) => c.slug === p.slug))
     .slice(0, 3);
+
+  /** slugs السلة — لحساب سعر الباقة على الاقتراحات (مثل: الكتيب بسعر خاص مع الصندوق) */
+  const cartSlugs = cartItems.map((c) => c.slug);
 
   return createPortal(
     <div
@@ -160,11 +164,14 @@ export default function CartAddedModal() {
               قد يعجبكِ أيضاً
             </div>
             <div className="flex flex-col gap-2">
-              {suggestions.map((product) => (
+              {suggestions.map((product) => {
+                const eff = effectivePrice(product.slug, product.price, cartSlugs);
+                const discounted = eff < product.price;
+                return (
                 <div
                   key={product.slug}
                   className="flex items-center gap-3 rounded-[12px] p-2"
-                  style={{ border: "1px solid var(--bord)", background: "var(--offwh)" }}
+                  style={{ border: discounted ? "1.5px solid var(--rose)" : "1px solid var(--bord)", background: "var(--offwh)" }}
                 >
                   <div
                     className="rounded-[10px] shrink-0 flex items-center justify-center overflow-hidden"
@@ -186,7 +193,15 @@ export default function CartAddedModal() {
 
                   <div className="flex-1 min-w-0">
                     <div className="font-label font-semibold text-dark text-[12px] truncate">{product.title}</div>
-                    <div className="font-label font-extrabold text-teal text-[13px]">₪{product.price}</div>
+                    {discounted ? (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-label font-extrabold text-teal text-[13px]">₪{eff}</span>
+                        <span className="font-label line-through text-light text-[11px]">₪{product.price}</span>
+                        <span className="font-bold text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: "var(--rose)", color: "white" }}>🎁 عرض</span>
+                      </div>
+                    ) : (
+                      <div className="font-label font-extrabold text-teal text-[13px]">₪{product.price}</div>
+                    )}
                   </div>
 
                   <button
@@ -204,7 +219,8 @@ export default function CartAddedModal() {
                     + أضيفي
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

@@ -2,7 +2,10 @@ import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
 import ProductCard from "@/components/shop/ProductCard";
 import { getProducts } from "@/lib/products/getProducts";
+import { getProduct } from "@/lib/products/getProduct";
+import { bundleOfferedBy } from "@/lib/bundles";
 import ProductHero from "./ProductHero";
+import BundleUpsell from "./BundleUpsell";
 import ProductShortDescription from "./ProductShortDescription";
 import ProductContents from "./ProductContents";
 import ProductStory from "./ProductStory";
@@ -46,11 +49,25 @@ export default async function ProductPageLayout({ product }: ProductPageLayoutPr
   const allProducts = await getProducts({ inStockOnly: true });
   const relatedProducts = allProducts.filter((p) => p.slug !== product.slug).slice(0, 3);
 
+  // باقة يقدّمها هذا المنتج (مثال: الصندوق يقدّم الكتيب بسعر خاص)
+  const bundleRule = bundleOfferedBy(product.slug);
+  const bundleProduct = bundleRule ? await getProduct(bundleRule.target) : null;
+
   return (
     <div style={{ background: "#FDFAF5" }}>
 
       {/* 1. Hero — لا wave قبله (هو القسم الأول) */}
       <ProductHero product={product} />
+
+      {/* 1.5 عرض الباقة — أضيفي الكتيب بسعر خاص (شرطي، z=2 بين الهيرو والوصف) */}
+      {bundleProduct && bundleRule && (
+        <div className="relative" style={{ marginTop: -60, zIndex: 2 }}>
+          <SectionWave fill="#F8F4EE" />
+          <div style={{ marginTop: -1 }}>
+            <BundleUpsell box={product} booklet={bundleProduct} rule={bundleRule} />
+          </div>
+        </div>
+      )}
 
       {/* 2. Short Description */}
       <div className="relative" style={{ marginTop: -60, zIndex: 3 }}>

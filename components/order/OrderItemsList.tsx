@@ -87,6 +87,9 @@ export default function OrderItemsList({ items }: OrderItemsListProps) {
                   {item.gift.recipientPhone && (
                     <div dir="ltr" style={{ textAlign: "right" }}><span className="font-bold" dir="rtl">الهاتف:</span> {item.gift.recipientPhone}</div>
                   )}
+                  {item.gift.recipientEmail && (
+                    <div dir="ltr" style={{ textAlign: "right" }}><span className="font-bold" dir="rtl">📧 بريد المستلِمة:</span> {item.gift.recipientEmail}</div>
+                  )}
                   {(item.gift.recipientAddress || item.gift.recipientCity) && (
                     <div className="sm:col-span-2">
                       <span className="font-bold">العنوان:</span> {[item.gift.recipientAddress, item.gift.recipientCity].filter(Boolean).join(", ")}

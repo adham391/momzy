@@ -237,5 +237,52 @@ export const product = defineType({
       type: "array",
       of: [{ type: "productFAQ" }],
     }),
+
+    // ─── حقول الكتيب الرقمي (خاصة بتصنيف "كتب ودلائل") ──────────────
+    defineField({
+      name: "bookletHook",
+      title: "الكتيب — الخطّاف الافتتاحي (اختياري)",
+      type: "text",
+      rows: 4,
+      description: "فقرة تشويقية أعلى صفحة الكتيب — خاصة بتصنيف «كتب ودلائل».",
+    }),
+    defineField({
+      name: "bookletAbout",
+      title: "الكتيب — نبذة عن الكتيب (فقرات)",
+      type: "array",
+      of: [{ type: "text", rows: 4 }],
+      description: "كل عنصر = فقرة مستقلة.",
+    }),
+    defineField({
+      name: "bookletChapters",
+      title: "الكتيب — ماذا ستجدين داخل الكتيب؟",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "قائمة المواضيع/الفصول — كل سطر بند. وجودها يجعل الصفحة تظهر كـ«كتيب».",
+    }),
+    defineField({
+      name: "bookletBenefits",
+      title: "الكتيب — ماذا سيفيدك هذا الكتيب؟",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "قائمة الفوائد.",
+    }),
+    defineField({
+      name: "bookletAudience",
+      title: "الكتيب — لمن صُمّم هذا الكتيب؟",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "الفئات المستهدفة.",
+    }),
+
+    // ─── الملف الرقمي (PDF) — للكتيبات ──────────────────────────────
+    defineField({
+      name: "digitalFile",
+      title: "ملف الكتيب (PDF)",
+      type: "file",
+      options: { accept: ".pdf" },
+      description:
+        "ارفعي ملف الكتيب النهائي (PDF). يُرسَل رابط تحميله للمشترية تلقائيًا بعد الطلب. خاص بالمنتجات الرقمية.",
+    }),
   ],
 });

@@ -28,7 +28,7 @@ export const homePage = defineType({
     }),
     defineField({ name: "heroTagline", title: "العنوان — السطر الأول", type: "string", group: "hero", placeholder: "نرافقك من الحمل" }),
     defineField({ name: "heroTaglineAccent", title: "العنوان — السطر الثاني (مميّز)", type: "string", group: "hero", placeholder: "حتى السنوات الأولى" }),
-    defineField({ name: "heroIntro", title: "جملة التعريف", type: "text", rows: 2, group: "hero", placeholder: "تأسست Momzy على يد هبة حسن — ممرضة معتمدة ومرافقة ولادة، رافقت آلاف الأمهات برحلتهنّ." }),
+    defineField({ name: "heroIntro", title: "جملة التعريف", type: "text", rows: 2, group: "hero", placeholder: "تأسست Momzy على يد هبة حسن — ممرضة معتمدة ومرافقة ولادة، رافقت +1000 أم برحلتهنّ." }),
     defineField({ name: "heroPoints", title: "النقاط (3)", type: "array", of: [{ type: "string" }], group: "hero", description: "نقاط مختصرة تظهر مع علامة ✓" }),
 
     // ═══════════ ليش Momzy ═══════════
@@ -64,7 +64,7 @@ export const homePage = defineType({
       type: "object",
       group: "heba",
       fields: [
-        defineField({ name: "number", title: "الرقم", type: "string", placeholder: "آلاف" }),
+        defineField({ name: "number", title: "الرقم", type: "string", placeholder: "+1000" }),
         defineField({ name: "label", title: "الوصف", type: "string", placeholder: "أمّ رافقتهنّ هبة" }),
       ],
     }),

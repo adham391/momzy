@@ -11,6 +11,8 @@ import {
   orderAdminEmailHtml,
   orderAdminSubject,
 } from "@/lib/resend/emails/orderEmail";
+import { getDownloadsByOrder } from "@/lib/db/downloads";
+import { downloadEmailHtml, downloadEmailSubject } from "@/lib/resend/emails/downloadEmail";
 import type { CreateOrderInput } from "@/lib/db/types";
 import type { GiftOptions } from "@/lib/store/cart";
 
@@ -116,6 +118,27 @@ export async function POST(request: Request) {
             subject: orderAdminSubject(full),
             html: orderAdminEmailHtml(full),
           });
+
+          // التسليم الرقمي — فور إنشاء الطلب في التدفّق اليدوي، وبعد الدفع عند تفعيل HYP
+          const canDeliver = full.payment_status === "paid" || !isHypConfigured();
+          if (canDeliver) {
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+            const downloads = await getDownloadsByOrder(result.id);
+            for (const d of downloads) {
+              await sendEmail({
+                to: d.customer_email,
+                subject: downloadEmailSubject(d.product_name, d.is_gift),
+                html: downloadEmailHtml({
+                  productName: d.product_name,
+                  downloadUrl: `${siteUrl}/download/${d.token}`,
+                  isGift: d.is_gift,
+                  gifterName: d.is_gift ? full.customer_name : undefined,
+                  expiresAt: d.expires_at,
+                  maxDownloads: d.max_downloads,
+                }),
+              });
+            }
+          }
         }
         await notifyHebaNewOrder(full);
       });

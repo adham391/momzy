@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
 import type { Product } from "@/lib/products/types";
+import { effectivePrice } from "@/lib/bundles";
 
 /** قسم البيع الإضافي — منتجات مقترحة في صفحة الدفع */
 export default function CheckoutUpsell() {
@@ -21,6 +22,9 @@ export default function CheckoutUpsell() {
   const suggestions = products.filter(
     (p) => !cartItems.some((c) => c.slug === p.slug)
   );
+
+  /** slugs السلة — لإظهار سعر الباقة على الاقتراحات */
+  const cartSlugs = cartItems.map((c) => c.slug);
 
   if (suggestions.length === 0) return null;
 
@@ -42,12 +46,15 @@ export default function CheckoutUpsell() {
         className="grid gap-4"
         style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
       >
-        {suggestions.map((product) => (
+        {suggestions.map((product) => {
+          const eff = effectivePrice(product.slug, product.price, cartSlugs);
+          const bundleDiscounted = eff < product.price;
+          return (
           <div
             key={product.slug}
             className="rounded-[18px] overflow-hidden flex flex-col"
             style={{
-              border: "2px dashed var(--roselt)",
+              border: bundleDiscounted ? "2px solid var(--rose)" : "2px dashed var(--roselt)",
               background: "white",
             }}
           >
@@ -78,14 +85,22 @@ export default function CheckoutUpsell() {
             </div>
 
             {/* السعر */}
-            <div className="flex items-center justify-center gap-2 px-3 py-2">
-              <span className="font-label font-extrabold text-dark text-[16px]">
-                ₪ {product.price}.00
-              </span>
-              {product.compareAtPrice && (
-                <span className="font-label text-light text-[13px] line-through">
-                  ₪ {product.compareAtPrice}.00
-                </span>
+            <div className="flex flex-col items-center gap-1 px-3 py-2">
+              {bundleDiscounted ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="font-label font-extrabold text-teal text-[16px]">₪ {eff}.00</span>
+                    <span className="font-label text-light text-[13px] line-through">₪ {product.price}.00</span>
+                  </div>
+                  <span className="font-bold text-[10px] px-2 py-0.5 rounded-full" style={{ background: "var(--rose)", color: "white" }}>🎁 عرض مع الصندوق</span>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="font-label font-extrabold text-dark text-[16px]">₪ {product.price}.00</span>
+                  {product.compareAtPrice && (
+                    <span className="font-label text-light text-[13px] line-through">₪ {product.compareAtPrice}.00</span>
+                  )}
+                </div>
               )}
             </div>
 
@@ -106,7 +121,8 @@ export default function CheckoutUpsell() {
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

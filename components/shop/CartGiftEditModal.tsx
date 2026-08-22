@@ -12,6 +12,8 @@ interface CartGiftEditModalProps {
   itemTitle: string;
   /** القيم الحالية للهدية إن وُجدت */
   currentGift?: GiftOptions;
+  /** منتج رقمي — نموذج هدية بالبريد بدل عنوان الشحن */
+  digital?: boolean;
   /** عند الإغلاق */
   onClose: () => void;
 }
@@ -21,6 +23,7 @@ export default function CartGiftEditModal({
   itemId,
   itemTitle,
   currentGift,
+  digital = false,
   onClose,
 }: CartGiftEditModalProps) {
   const setGift = useCart((s) => s.setGift);
@@ -113,6 +116,7 @@ export default function CartGiftEditModal({
             onToggle={setEnabled}
             value={draft}
             onChange={setDraft}
+            digital={digital}
           />
         </div>
 

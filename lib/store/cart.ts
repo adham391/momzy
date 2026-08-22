@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Product } from "@/lib/products/types";
 import type { AppliedCoupon } from "@/lib/coupons";
+import { effectivePrice } from "@/lib/bundles";
+import { isDigitalProduct } from "@/lib/products/helpers";
 import { track } from "@/lib/analytics/track";
 
 /* ── أنواع السلة ─────────────────────────────────────── */
@@ -12,12 +14,14 @@ export interface GiftOptions {
   message?: string;
   /** اسم المستلِمة */
   recipientName?: string;
-  /** هاتف المستلِمة (للتنسيق مع شركة الشحن) */
+  /** هاتف المستلِمة (للتنسيق مع شركة الشحن — للمنتجات الفيزيائية) */
   recipientPhone?: string;
-  /** عنوان المستلِمة الكامل */
+  /** عنوان المستلِمة الكامل (للمنتجات الفيزيائية) */
   recipientAddress?: string;
-  /** مدينة المستلِمة */
+  /** مدينة المستلِمة (للمنتجات الفيزيائية) */
   recipientCity?: string;
+  /** بريد المستلِمة — لإرسال المنتج الرقمي (الكتيب PDF) إليها */
+  recipientEmail?: string;
 }
 
 /** عنصر داخل السلة */
@@ -29,6 +33,8 @@ export interface CartItem {
   mainImage: string;
   price: number;
   quantity: number;
+  /** منتج رقمي (كتيب PDF) — يبدّل نموذج الهدية إلى بريد بدل عنوان الشحن */
+  isDigital?: boolean;
   /** خيارات الهدية — اختياري */
   gift?: GiftOptions;
 }
@@ -70,8 +76,12 @@ interface CartStore {
 
   /** العدد الكلي للعناصر */
   getCount: () => number;
-  /** المجموع الكلي بالشيكل */
+  /** المجموع الكلي بالشيكل (بعد تطبيق الباقات) */
   getTotal: () => number;
+  /** السعر الفعّال لعنصر واحد (بعد الباقات) — للوحدة، لا مضروب بالكمية */
+  getEffectivePrice: (item: CartItem) => number;
+  /** إجمالي وفورات الباقات في السلة */
+  getBundleSavings: () => number;
 }
 
 /* ── مساعدات ─────────────────────────────────────────── */
@@ -82,7 +92,8 @@ function hasGiftData(gift?: GiftOptions): boolean {
   return Boolean(
     gift.message ||
     gift.recipientName ||
-    gift.recipientAddress
+    gift.recipientAddress ||
+    gift.recipientEmail
   );
 }
 
@@ -101,6 +112,7 @@ function buildCartItem(product: Product, gift?: GiftOptions): CartItem {
     mainImage: product.mainImage,
     price:     product.price,
     quantity:  1,
+    isDigital: isDigitalProduct(product),
     ...(isGift && gift ? { gift } : {}),
   };
 }
@@ -217,11 +229,29 @@ export const useCart = create<CartStore>()(
       getCount: () =>
         get().items.reduce((sum, item) => sum + item.quantity, 0),
 
-      getTotal: () =>
-        get().items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
+      getTotal: () => {
+        const items = get().items;
+        const slugs = new Set(items.map((i) => i.slug));
+        return items.reduce(
+          (sum, item) => sum + effectivePrice(item.slug, item.price, slugs) * item.quantity,
           0
-        ),
+        );
+      },
+
+      getEffectivePrice: (item) => {
+        const slugs = new Set(get().items.map((i) => i.slug));
+        return effectivePrice(item.slug, item.price, slugs);
+      },
+
+      getBundleSavings: () => {
+        const items = get().items;
+        const slugs = new Set(items.map((i) => i.slug));
+        return items.reduce(
+          (sum, item) =>
+            sum + (item.price - effectivePrice(item.slug, item.price, slugs)) * item.quantity,
+          0
+        );
+      },
     }),
     {
       name: "momzy-cart",

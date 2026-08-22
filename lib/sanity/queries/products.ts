@@ -53,6 +53,12 @@ const PRODUCT_FIELDS = `{
     question,
     answer
   },
+  bookletHook,
+  bookletAbout,
+  bookletChapters,
+  bookletBenefits,
+  bookletAudience,
+  "digitalFile": digitalFile.asset->url,
   "createdAt": _createdAt,
   "updatedAt": _updatedAt
 }`;

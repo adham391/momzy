@@ -4,6 +4,9 @@ import { restoreStock } from "@/lib/products/stock";
 import { getShippingConfig } from "./settings";
 import { validateCoupon, incrementCouponUsage } from "./coupons";
 import { computeShipping } from "@/lib/shipping";
+import { effectivePrice } from "@/lib/bundles";
+import { isDigitalProduct } from "@/lib/products/helpers";
+import { createDownloadTokens, type DigitalDownloadInput } from "./downloads";
 import { toLatinDigits } from "@/lib/utils/format";
 import type { GiftOptions } from "@/lib/store/cart";
 import type {
@@ -79,19 +82,23 @@ export async function createOrder(
   const allProducts = await getProducts();
   const bySlug = new Map(allProducts.map((p) => [p.slug, p]));
 
+  // slugs الطلب — لتطبيق الباقات (سعر مخفّض لمنتج عند وجود آخر)
+  const orderSlugs = new Set(input.items.map((i) => i.slug));
+
   let subtotal = 0;
   const lineItems = [];
   for (const item of input.items) {
     const product = bySlug.get(item.slug);
     if (!product) continue; // تجاهل منتجاً غير موجود
     const quantity = Math.max(1, Math.floor(item.quantity));
-    const unitPrice = product.price;
+    // السعر الموثوق من Sanity، مع تطبيق سعر الباقة إن انطبقت شروطها
+    const unitPrice = effectivePrice(item.slug, product.price, orderSlugs);
     const linePrice = unitPrice * quantity;
     subtotal += linePrice;
     lineItems.push({
       product_slug: item.slug,
       product_name: product.title,
-      product_type: "physical" as const,
+      product_type: (isDigitalProduct(product) ? "digital" : "physical") as "digital" | "physical",
       quantity,
       unit_price: unitPrice,
       total_price: linePrice,
@@ -103,9 +110,13 @@ export async function createOrder(
     throw new Error("لا توجد عناصر صالحة في الطلب");
   }
 
-  // الشحن من الإعدادات
+  // الشحن من الإعدادات — للعناصر الفيزيائية فقط (الرقمية تُرسل بالبريد بلا شحن)
   const shipping = await getShippingConfig();
-  const shippingCost = computeShipping(subtotal, lineItems.length, shipping);
+  const physicalCount = lineItems.filter((li) => {
+    const p = bySlug.get(li.product_slug);
+    return p ? !isDigitalProduct(p) : true;
+  }).length;
+  const shippingCost = computeShipping(subtotal, physicalCount, shipping);
 
   // الكوبون — إعادة تحقّق على السيرفر (موثوق، لا نثق بقيمة العميل)
   let discount = 0;
@@ -169,6 +180,30 @@ export async function createOrder(
     // تراجع: احذف الطلب اليتيم كي لا يبقى بلا عناصر
     await supabase.from("orders").delete().eq("id", order.id);
     throw new Error(itemsError.message);
+  }
+
+  // توكنات تحميل العناصر الرقمية — فور إنشاء الطلب (المستلِم: مستلِمة الهدية أو المشترية)
+  const digitalItems: DigitalDownloadInput[] = lineItems
+    .filter((li) => {
+      const p = bySlug.get(li.product_slug);
+      return p ? isDigitalProduct(p) : false;
+    })
+    .map((li) => {
+      const recipientEmail = li.gift?.recipientEmail?.trim();
+      return {
+        productSlug: li.product_slug,
+        productName: li.product_name,
+        customerEmail: recipientEmail || input.customer.email,
+        isGift: Boolean(recipientEmail),
+      };
+    });
+  if (digitalItems.length) {
+    try {
+      await createDownloadTokens(order.id, digitalItems);
+    } catch (e) {
+      // لا نُفشل الطلب لو تعثّر إنشاء التوكن — يمكن إعادته لاحقًا
+      console.error("[createOrder] فشل إنشاء توكنات التحميل:", e);
+    }
   }
 
   // زيادة عدّاد استخدام الكوبون بعد نجاح الطلب
@@ -338,8 +373,8 @@ export async function getShippingRows(filters: OrderListFilters = {}): Promise<S
 
   return (data ?? []).map((o) => {
     const items = (o.order_items as { gift: GiftOptions | null }[] | null) ?? [];
-    // أول عنصر هدية بعنوان مستلِمة → وجهة التوصيل هي المستلِمة
-    const gift = items.find((it) => it.gift && (it.gift.recipientAddress || it.gift.recipientName))?.gift;
+    // وجهة التوصيل = الهدية الفيزيائية فقط (لها عنوان)؛ الهدايا الرقمية تُرسل بالبريد لا بالشحن
+    const gift = items.find((it) => it.gift && it.gift.recipientAddress)?.gift;
 
     if (gift) {
       return {

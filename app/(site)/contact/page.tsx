@@ -127,25 +127,6 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                {/* الخطوة 2 */}
-                <div className="flex items-start gap-3 mb-3">
-                  <div style={{
-                    width: 40, height: 40, borderRadius: 10,
-                    background: "var(--tealpale)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0,
-                  }}>
-                    <Image src="/icons/faq-icon.png" alt="أسئلة وأجوبة" width={40} height={40} className="object-contain" />
-                  </div>
-                  <div>
-                    <p className="font-label font-bold text-[13px]" style={{ color: "var(--dark)" }}>تفضلين أسئلة وأجوبة؟</p>
-                    <p className="font-body text-[12px] mt-0.5 leading-[1.7]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-                      ربما جوابك موجود بالفعل.{" "}
-                      <a href="/faq" style={{ color: "var(--teal)", fontWeight: 600 }}>زوري الصفحة ←</a>
-                    </p>
-                  </div>
-                </div>
-
                 {/* الخطوة 3 */}
                 <div className="flex items-start gap-3">
                   <div style={{
@@ -205,8 +186,8 @@ export default function ContactPage() {
                   </svg>
                 }
                 title="انستغرام"
-                value="@momzyworld"
-                href="https://instagram.com/momzyworld"
+                value="@hebahasan._"
+                href="https://www.instagram.com/hebahasan._"
               />
 
               <div

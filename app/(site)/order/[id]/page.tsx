@@ -5,6 +5,7 @@ import PageHeaderWave from "@/components/ui/PageHeaderWave";
 import OrderHeader from "@/components/order/OrderHeader";
 import OrderInfoCard from "@/components/order/OrderInfoCard";
 import OrderItemsList from "@/components/order/OrderItemsList";
+import OrderDownloads from "@/components/order/OrderDownloads";
 import OrderTotals from "@/components/order/OrderTotals";
 import OrderActions from "@/components/order/OrderActions";
 import PaymentRetryCard from "@/components/order/PaymentRetryCard";
@@ -12,6 +13,7 @@ import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import ClearCart from "@/components/order/ClearCart";
 import TrackEvent from "@/components/analytics/TrackEvent";
 import { getOrderById } from "@/lib/db/orders";
+import { getDownloadsByOrder } from "@/lib/db/downloads";
 import { isHypConfigured } from "@/lib/hyp/client";
 import { getProductImageMap } from "@/lib/products/getProductImageMap";
 import type { CartItem } from "@/lib/store/cart";
@@ -113,6 +115,7 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
             postalCode={order.customer_postal_code ?? undefined}
           />
           <OrderItemsList items={items} />
+          {orderComplete && <OrderDownloads downloads={await getDownloadsByOrder(order.id)} />}
           <OrderTotals
             subtotal={order.subtotal}
             shippingCost={order.shipping_cost}

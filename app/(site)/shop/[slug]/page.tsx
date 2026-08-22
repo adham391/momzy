@@ -4,6 +4,7 @@ import { getProduct } from "@/lib/products/getProduct";
 import { getAllProductSlugs } from "@/lib/sanity/queries/products";
 import { SEED_PRODUCTS } from "@/lib/products/seed";
 import ProductPageLayout from "@/components/shop/product-detail/ProductPageLayout";
+import BookletDetail from "@/components/shop/product-detail/BookletDetail";
 
 /** ISR — يُعاد بناء الصفحة كل 60 ثانية بعد تحديث Sanity */
 export const revalidate = 60;
@@ -44,5 +45,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!product) notFound();
 
-  return <ProductPageLayout product={product} />;
+  // الكتيبات الرقمية لها قالب مستقل — نكتشفها بوجود فصول الكتيب
+  const isBooklet = !!(product.bookletChapters && product.bookletChapters.length > 0);
+
+  return isBooklet
+    ? <BookletDetail product={product} />
+    : <ProductPageLayout product={product} />;
 }

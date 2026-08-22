@@ -246,6 +246,11 @@ function GiftDeliveryBlock({ gift }: { gift: GiftOptions }) {
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
         {gift.recipientName && <GiftField label="المستلِمة" value={gift.recipientName} />}
         {gift.recipientPhone && <GiftField label="هاتفها" value={gift.recipientPhone} ltr />}
+        {gift.recipientEmail && (
+          <div className="sm:col-span-2">
+            <GiftField label="📧 بريد المستلِمة (لإرسال الكتيب)" value={gift.recipientEmail} ltr />
+          </div>
+        )}
         {address && (
           <div className="sm:col-span-2">
             <GiftField label="عنوان التوصيل" value={address} />

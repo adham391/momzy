@@ -12,6 +12,8 @@ interface GiftOptionsFormProps {
   enabled: boolean;
   /** عند تبديل الـ toggle */
   onToggle: (enabled: boolean) => void;
+  /** منتج رقمي — يعرض بريد المستلِمة (لإرسال الـ PDF) بدل عنوان الشحن */
+  digital?: boolean;
 }
 
 const MESSAGE_MAX = 200;
@@ -25,6 +27,7 @@ export default function GiftOptionsForm({
   onChange,
   enabled,
   onToggle,
+  digital = false,
 }: GiftOptionsFormProps) {
   const [charCount, setCharCount] = useState(value.message?.length ?? 0);
 
@@ -53,7 +56,7 @@ export default function GiftOptionsForm({
             🎁 هذه الطلبية هدية
           </div>
           <div className="text-[12px] mt-0.5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            رسالة شخصية + شحن مباشر للمستلِمة
+            {digital ? "رسالة شخصية + إرسال الكتيب لبريد المستلِمة" : "رسالة شخصية + شحن مباشر للمستلِمة"}
           </div>
         </div>
       </label>
@@ -79,7 +82,7 @@ export default function GiftOptionsForm({
                 update("message", e.target.value);
                 setCharCount(e.target.value.length);
               }}
-              placeholder="اكتبي بطاقتك الشخصية... سنُرفقها مع الصندوق."
+              placeholder={digital ? "اكتبي رسالتك... سنرسلها مع الكتيب للمستلِمة." : "اكتبي بطاقتك الشخصية... سنُرفقها مع الصندوق."}
               rows={3}
               className="w-full px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none [transition:border-color_150ms_ease] focus:border-rose"
               style={{
@@ -92,50 +95,80 @@ export default function GiftOptionsForm({
             />
           </div>
 
-          {/* بيانات المستلِمة */}
-          <div>
-            <p className="font-label font-bold text-[13px] mb-2" style={{ color: "var(--dark)" }}>
-              📦 بيانات المستلِمة
-            </p>
+          {/* بيانات المستلِمة — رقمي: بريد لإرسال الـ PDF · فيزيائي: عنوان الشحن */}
+          {digital ? (
+            <div>
+              <p className="font-label font-bold text-[13px] mb-2" style={{ color: "var(--dark)" }}>
+                📧 لمن نرسل الكتيب؟
+              </p>
+              <div className="grid grid-cols-1 gap-3">
+                <input
+                  type="text"
+                  value={value.recipientName ?? ""}
+                  onChange={(e) => update("recipientName", e.target.value)}
+                  placeholder="اسم المستلِمة"
+                  className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
+                  style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
+                />
+                <input
+                  type="email"
+                  value={value.recipientEmail ?? ""}
+                  onChange={(e) => update("recipientEmail", e.target.value)}
+                  placeholder="بريد المستلِمة الإلكتروني"
+                  dir="ltr"
+                  className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
+                  style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif", textAlign: "right" }}
+                />
+              </div>
+              <p className="text-[11px] mt-2" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+                سنرسل الكتيب (PDF) إلى بريد المستلِمة بعد إتمام الطلب.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="font-label font-bold text-[13px] mb-2" style={{ color: "var(--dark)" }}>
+                📦 بيانات المستلِمة
+              </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={value.recipientName ?? ""}
+                  onChange={(e) => update("recipientName", e.target.value)}
+                  placeholder="اسم المستلِمة"
+                  className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
+                  style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
+                />
+                <input
+                  type="tel"
+                  value={value.recipientPhone ?? ""}
+                  onChange={(e) => update("recipientPhone", e.target.value)}
+                  placeholder="هاتف المستلِمة"
+                  dir="ltr"
+                  className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
+                  style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif", textAlign: "right" }}
+                />
+              </div>
+
               <input
                 type="text"
-                value={value.recipientName ?? ""}
-                onChange={(e) => update("recipientName", e.target.value)}
-                placeholder="اسم المستلِمة"
-                className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
+                value={value.recipientAddress ?? ""}
+                onChange={(e) => update("recipientAddress", e.target.value)}
+                placeholder="العنوان (الشارع، رقم البيت)"
+                className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
                 style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
               />
+
               <input
-                type="tel"
-                value={value.recipientPhone ?? ""}
-                onChange={(e) => update("recipientPhone", e.target.value)}
-                placeholder="هاتف المستلِمة"
-                dir="ltr"
-                className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
-                style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif", textAlign: "right" }}
+                type="text"
+                value={value.recipientCity ?? ""}
+                onChange={(e) => update("recipientCity", e.target.value)}
+                placeholder="المدينة"
+                className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
+                style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
               />
             </div>
-
-            <input
-              type="text"
-              value={value.recipientAddress ?? ""}
-              onChange={(e) => update("recipientAddress", e.target.value)}
-              placeholder="العنوان (الشارع، رقم البيت)"
-              className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
-              style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
-            />
-
-            <input
-              type="text"
-              value={value.recipientCity ?? ""}
-              onChange={(e) => update("recipientCity", e.target.value)}
-              placeholder="المدينة"
-              className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
-              style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
-            />
-          </div>
+          )}
         </div>
       )}
     </div>

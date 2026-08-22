@@ -41,7 +41,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
     message: "صندوق مشوار أم — اطلبي الآن قبل نفاد الكمية",
   },
   socialLinks: {
-    instagram: "#",
+    instagram: "https://www.instagram.com/hebahasan._",
     tiktok:    "#",
     whatsapp:  "#",
   },

@@ -66,21 +66,6 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
       className="fixed inset-0 bg-offwh z-[800] flex flex-col overflow-y-auto mobile-menu-enter"
       style={{ paddingTop: menuTop, paddingBottom: 0 }}
     >
-      {/* ─────────────────── CTA الرئيسي — احجزي مع هبة ─────────────────── */}
-      <div className="px-6 pt-6 pb-4">
-        <Link
-          href="/services"
-          onClick={onClose}
-          className="block w-full text-center font-label font-bold text-white text-[16px] py-4 rounded-[14px] [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1),box-shadow_200ms_ease] hover:-translate-y-[2px]"
-          style={{
-            background: "linear-gradient(135deg, var(--rose), var(--teal))",
-            boxShadow: "0 8px 24px rgba(242,167,181,0.35)",
-          }}
-        >
-          احجزي مع هبة ←
-        </Link>
-      </div>
-
       {/* ─────────────────── عناصر التنقل ─────────────────── */}
       <div className="flex flex-col gap-2 px-6">
         {MOBILE_NAV_ITEMS.map((item, idx) => (
@@ -186,7 +171,7 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
 
           {/* إنستغرام */}
           <a
-            href="https://instagram.com/momzyworld"
+            href="https://www.instagram.com/hebahasan._"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="إنستغرام"

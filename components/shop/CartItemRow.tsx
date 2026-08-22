@@ -13,11 +13,15 @@ interface CartItemRowProps {
 
 /** صف منتج واحد داخل السلة */
 export default function CartItemRow({ item }: CartItemRowProps) {
-  const removeItem     = useCart((s) => s.removeItem);
-  const updateQuantity = useCart((s) => s.updateQuantity);
+  const removeItem        = useCart((s) => s.removeItem);
+  const updateQuantity    = useCart((s) => s.updateQuantity);
+  const getEffectivePrice = useCart((s) => s.getEffectivePrice);
 
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const isGift = !!item.gift;
+
+  const unit = getEffectivePrice(item);
+  const discounted = unit < item.price;
 
   return (
     <div
@@ -50,8 +54,19 @@ export default function CartItemRow({ item }: CartItemRowProps) {
           <div className="font-heading text-[13px] font-semibold text-dark leading-snug truncate mb-1">
             {item.title}
           </div>
-          <div className="font-label font-extrabold text-teal text-[14px]">
-            ₪{item.price * item.quantity}
+          <div className="font-label font-extrabold text-teal text-[14px] flex items-center gap-2 flex-wrap">
+            <span>₪{unit * item.quantity}</span>
+            {discounted && (
+              <>
+                <span className="font-normal line-through text-light text-[12px]">₪{item.price * item.quantity}</span>
+                <span
+                  className="font-bold text-[10px] px-1.5 py-0.5 rounded-full"
+                  style={{ background: "var(--rosepale)", color: "var(--rose)" }}
+                >
+                  باقة
+                </span>
+              </>
+            )}
           </div>
 
           <div className="mt-2">
@@ -98,6 +113,11 @@ export default function CartItemRow({ item }: CartItemRowProps) {
               <span className="font-bold">إلى:</span> {item.gift.recipientName}
             </p>
           )}
+          {item.gift?.recipientEmail && (
+            <p className="text-[11px] mb-0.5" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }} dir="ltr">
+              📧 {item.gift.recipientEmail}
+            </p>
+          )}
           {item.gift?.message && (
             <p className="text-[11px] line-clamp-2 italic" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
               &ldquo;{item.gift.message}&rdquo;
@@ -128,6 +148,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
           itemId={item.id}
           itemTitle={item.title}
           currentGift={item.gift}
+          digital={item.isDigital}
           onClose={() => setGiftModalOpen(false)}
         />
       )}

@@ -31,7 +31,7 @@ export const aboutPage = defineType({
       of: [{
         type: "object",
         fields: [
-          defineField({ name: "number", title: "الرقم", type: "string", placeholder: "آلاف" }),
+          defineField({ name: "number", title: "الرقم", type: "string", placeholder: "+1000" }),
           defineField({ name: "label", title: "الوصف", type: "string", placeholder: "أم رافقتهنّ" }),
         ],
         preview: { select: { title: "number", subtitle: "label" } },
