@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import { cn } from "@/lib/utils/cn";

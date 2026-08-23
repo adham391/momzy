@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 import type { Product } from "@/lib/products/types";

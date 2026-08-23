@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "דף הבית",
+    "shop": "החנות",
+    "services": "השירותים שלנו",
+    "articles": "מאמרים",
+    "about": "על היבה"
+  },
+  "megaMenu": {
+    "label": "החנות של Momzy",
+    "tagline": "מוצרים שנבחרו בקפידה",
+    "allProducts": "כל המוצרים ←",
+    "comingSoon": "מוצרים חדשים בקרוב ✦"
+  },
+  "menu": {
+    "aria": "תפריט",
+    "contact": "צרי קשר"
+  },
+  "footer": {
+    "usefulLinks": "קישורים שימושיים",
+    "newsletterTitle": "ניוזלטר",
+    "newsletterText": "הצטרפי ל‑1,000+ אימהות — הטיפים הבלעדיים של היבה בכל שבוע",
+    "contactCta": "צרי קשר ←",
+    "rights": "כל הזכויות שמורות",
+    "madeWith": "נעשה ב‑<heart>♥</heart> לכל אמא",
+    "privacy": "מדיניות פרטיות",
+    "terms": "תקנון ותנאי שימוש",
+    "contact": "צרו קשר"
+  },
+  "newsletter": {
+    "placeholder": "האימייל שלך",
+    "subscribe": "הרשמי",
+    "success": "✓ נרשמת! המאמרים והטיפים של היבה בדרך אלייך",
+    "error": "משהו השתבש — נסי שוב"
+  },
+  "lang": {
+    "switch": "שפה"
+  }
+}

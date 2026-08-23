@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 import { MOBILE_NAV_ITEMS, HEADER_HEIGHT } from "@/lib/utils/constants";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import LanguageSwitcher from "./LanguageSwitcher";
 import type { Product } from "@/lib/products/types";
 
 /** خصائص القائمة المتنقلة */
@@ -18,6 +20,7 @@ interface MobileMenuProps {
 
 /** قائمة الموبايل — overlay كامل الشاشة مع CTA + footer */
 export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMenuProps) {
+  const t = useTranslations();
   const [shopOpen, setShopOpen] = useState(false);
 
   /** الموقع الفعلي لأسفل الهيدر (TopBar + Header) */
@@ -81,9 +84,9 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
                   className="btn-wobble-light w-full flex items-center gap-3.5 px-[18px] py-4 rounded-[14px] text-base font-semibold text-dark border-[1.5px] border-bord bg-white cursor-pointer [transition:background-color_150ms_ease,border-color_150ms_ease,color_150ms_ease] hover:border-teal hover:bg-tealpale hover:text-teal"
                 >
                   <span className={cn("w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0", item.iconBg)}>
-                    <Image src={item.icon} alt={item.label} width={26} height={26} className="object-contain" />
+                    <Image src={item.icon} alt={t(`nav.${item.id}`)} width={26} height={26} className="object-contain" />
                   </span>
-                  <span className="flex-1 text-start">{item.label}</span>
+                  <span className="flex-1 text-start">{t(`nav.${item.id}`)}</span>
                   <svg
                     width="16" height="16" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
@@ -116,7 +119,7 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
                           </Link>
                         ))
                       ) : (
-                        <div className="p-4 text-center text-mid text-[13px]">قريباً منتجات جديدة ✦</div>
+                        <div className="p-4 text-center text-mid text-[13px]">{t("megaMenu.comingSoon")}</div>
                       )}
 
                       <Link
@@ -124,7 +127,7 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
                         onClick={onClose}
                         className="text-xs font-bold text-teal flex items-center gap-1.5 px-3 py-2 rounded-[10px] hover:gap-2.5 [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1)]"
                       >
-                        كل المنتجات ←
+                        {t("megaMenu.allProducts")}
                       </Link>
                     </div>
                   </div>
@@ -137,13 +140,18 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
                 className="btn-wobble-light flex items-center gap-3.5 px-[18px] py-4 rounded-[14px] text-base font-semibold text-dark border-[1.5px] border-bord bg-white cursor-pointer [transition:background-color_150ms_ease,border-color_150ms_ease,color_150ms_ease] hover:border-rose hover:bg-rosepale hover:text-rose"
               >
                 <span className={cn("w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0", item.iconBg)}>
-                  <Image src={item.icon} alt={item.label} width={26} height={26} className="object-contain" />
+                  <Image src={item.icon} alt={t(`nav.${item.id}`)} width={26} height={26} className="object-contain" />
                 </span>
-                {item.label}
+                {t(`nav.${item.id}`)}
               </Link>
             )}
           </div>
         ))}
+      </div>
+
+      {/* ─────────────────── مبدّل اللغة ─────────────────── */}
+      <div className="flex justify-center px-6 pt-6">
+        <LanguageSwitcher size="lg" onSelect={onClose} />
       </div>
 
       {/* ─────────────────── الفوتر — تواصل سريع + سوشال ─────────────────── */}
@@ -152,7 +160,7 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
         <div style={{ height: 1, background: "var(--bord)", marginBottom: 20 }} />
 
         <p className="text-center font-label font-bold text-[12px] mb-3" style={{ color: "var(--mid)", letterSpacing: "1.5px" }}>
-          تواصلي معنا
+          {t("menu.contact")}
         </p>
 
         <div className="flex justify-center gap-3 mb-5">
@@ -201,8 +209,8 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
           </a>
         </div>
 
-        <p className="text-center text-[11px]" style={{ color: "var(--light)", fontFamily: "'Tajawal', sans-serif" }}>
-          © Momzy — جميع الحقوق محفوظة
+        <p className="text-center text-[11px]" style={{ color: "var(--light)", fontFamily: "var(--font-tajawal), sans-serif" }}>
+          © Momzy — {t("footer.rights")}
         </p>
       </div>
     </div>,

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import ServiceCardCTA from "./ServiceCardCTA";
 import { seatsLabel } from "@/lib/utils/seats";
 import type { Service, ServiceColor } from "@/lib/services/types";

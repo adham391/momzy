@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
 import Container from "@/components/ui/Container";
 import type { Product } from "@/lib/products/types";

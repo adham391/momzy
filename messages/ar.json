@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "services": "خدماتنا",
+    "articles": "المقالات",
+    "about": "عن هبة"
+  },
+  "megaMenu": {
+    "label": "متجر Momzy",
+    "tagline": "منتجات مختارة بعناية",
+    "allProducts": "كل المنتجات ←",
+    "comingSoon": "قريباً منتجات جديدة ✦"
+  },
+  "menu": {
+    "aria": "القائمة",
+    "contact": "تواصلي معنا"
+  },
+  "footer": {
+    "usefulLinks": "روابط مفيدة",
+    "newsletterTitle": "النشرة البريدية",
+    "newsletterText": "انضمي لـ+1000 أم — نصائح هبة الحصرية كل أسبوع",
+    "contactCta": "تواصلي معنا ←",
+    "rights": "جميع الحقوق محفوظة",
+    "madeWith": "صُنع بـ <heart>♥</heart> لكل أم",
+    "privacy": "سياسة الخصوصية",
+    "terms": "الشروط والأحكام",
+    "contact": "اتصل بنا"
+  },
+  "newsletter": {
+    "placeholder": "إيميلك",
+    "subscribe": "اشتركي",
+    "success": "✓ تم الاشتراك! ستصلك أحدث المقالات ونصائح هبة",
+    "error": "حدث خطأ — حاولي مرة أخرى"
+  },
+  "lang": {
+    "switch": "اللغة"
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
 import SectionLabel from "@/components/ui/SectionLabel";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 
 /** أزرار الإجراءات بعد إتمام الطلب */
 export default function OrderActions() {

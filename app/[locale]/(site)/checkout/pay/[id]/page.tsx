@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { redirect } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 interface PayPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
 }
 
 /**
@@ -22,11 +22,11 @@ interface PayPageProps {
  * حراسات: طلب غير موجود → الرئيسية · مدفوع أو HYP غير مفعّل → صفحة التأكيد.
  */
 export default async function PayPage({ params }: PayPageProps) {
-  const { id } = await params;
+  const { id, locale } = await params;
   const order = await getOrderById(id);
 
-  if (!order) redirect("/");
-  if (order.payment_status === "paid" || !isHypConfigured()) redirect(`/order/${id}`);
+  if (!order) return redirect({ href: "/", locale });
+  if (order.payment_status === "paid" || !isHypConfigured()) return redirect({ href: `/order/${id}`, locale });
 
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh", paddingBottom: 80 }}>

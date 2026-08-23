@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 import type { Product } from "@/lib/products/types";
 
@@ -13,6 +14,7 @@ interface MegaMenuProps {
 
 /** الميقا منيو — dropdown المتجر بمنتجات حقيقية وصورها */
 export default function MegaMenu({ products = [], onMouseEnter, onMouseLeave }: MegaMenuProps) {
+  const t = useTranslations("megaMenu");
   const items = products.slice(0, 4);
 
   return (
@@ -28,17 +30,17 @@ export default function MegaMenu({ products = [], onMouseEnter, onMouseLeave }: 
             className="font-label font-extrabold uppercase text-[10px] tracking-[2px]"
             style={{ color: "var(--teal)" }}
           >
-            متجر Momzy
+            {t("label")}
           </span>
           <div className="font-heading font-bold text-dark text-[15px] leading-tight mt-0.5">
-            منتجات مختارة بعناية
+            {t("tagline")}
           </div>
         </div>
         <Link
           href="/shop"
           className="font-label font-bold text-[13px] text-teal flex items-center gap-1.5 [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1)] hover:gap-2.5"
         >
-          كل المنتجات ←
+          {t("allProducts")}
         </Link>
       </div>
 
@@ -89,7 +91,7 @@ export default function MegaMenu({ products = [], onMouseEnter, onMouseLeave }: 
         </div>
       ) : (
         <div className="p-8 text-center text-mid text-[13px] font-body">
-          قريباً منتجات جديدة ✦
+          {t("comingSoon")}
         </div>
       )}
     </div>

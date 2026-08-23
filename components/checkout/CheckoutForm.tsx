@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/lib/i18n/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
 import { computeShipping, type ShippingConfig } from "@/lib/shipping";
 import { couponDiscount } from "@/lib/coupons";

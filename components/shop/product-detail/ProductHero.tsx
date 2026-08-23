@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { useCart, type GiftOptions } from "@/lib/store/cart";
 import Container from "@/components/ui/Container";
 import QuantityInput from "@/components/shop/QuantityInput";

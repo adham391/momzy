@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import PolkaDots from "@/components/ui/PolkaDots";
 import Container from "@/components/ui/Container";
 import MomzyText from "@/components/ui/MomzyText";

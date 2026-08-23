@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "services": "Our Services",
+    "articles": "Articles",
+    "about": "About Heba"
+  },
+  "megaMenu": {
+    "label": "Momzy Shop",
+    "tagline": "Handpicked with care",
+    "allProducts": "All products →",
+    "comingSoon": "New products coming soon ✦"
+  },
+  "menu": {
+    "aria": "Menu",
+    "contact": "Get in touch"
+  },
+  "footer": {
+    "usefulLinks": "Useful Links",
+    "newsletterTitle": "Newsletter",
+    "newsletterText": "Join 1,000+ moms — Heba's exclusive tips every week",
+    "contactCta": "Contact us →",
+    "rights": "All rights reserved",
+    "madeWith": "Made with <heart>♥</heart> for every mom",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "contact": "Contact Us"
+  },
+  "newsletter": {
+    "placeholder": "Your email",
+    "subscribe": "Subscribe",
+    "success": "✓ Subscribed! Heba's latest articles and tips are on their way",
+    "error": "Something went wrong — please try again"
+  },
+  "lang": {
+    "switch": "Language"
+  }
+}

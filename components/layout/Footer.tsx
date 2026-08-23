@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
-import { FOOTER_COLUMNS } from "@/lib/utils/constants";
+import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import type { SiteSettings } from "@/lib/sanity/queries/siteSettings";
 import NewsletterForm from "./NewsletterForm";
 
@@ -10,8 +10,22 @@ interface FooterProps {
 
 /** الفوتر الرئيسي — البيانات ديناميكية من Sanity */
 export default function Footer({ settings }: FooterProps) {
+  const t = useTranslations();
   const { socialLinks, contact, footer } = settings;
   const currentYear = new Date().getFullYear();
+
+  /** أعمدة الروابط — التسميات من ملفات الترجمة */
+  const momzyLinks = [
+    { label: t("nav.home"),     href: "/" },
+    { label: t("nav.services"), href: "/services" },
+    { label: t("nav.shop"),     href: "/shop" },
+    { label: t("nav.articles"), href: "/articles" },
+    { label: t("nav.about"),    href: "/about" },
+  ];
+  const usefulLinks = [
+    { label: t("footer.privacy"), href: "/privacy" },
+    { label: t("footer.terms"),   href: "/terms" },
+  ];
 
   /** روابط السوشيال مع الأيقونات */
   const socialItems = [
@@ -131,10 +145,10 @@ export default function Footer({ settings }: FooterProps) {
                 className="font-label font-bold mb-8 text-[12px] md:text-[14px]"
                 style={{ letterSpacing: "2.5px", textTransform: "uppercase", color: "var(--rose)" }}
               >
-                {FOOTER_COLUMNS[0].title}
+                MOMZY
               </h5>
               <ul className="list-none space-y-2.5">
-                {FOOTER_COLUMNS[0].links.map((link) => (
+                {momzyLinks.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
@@ -154,10 +168,10 @@ export default function Footer({ settings }: FooterProps) {
                 className="font-label font-bold mb-8 text-[12px] md:text-[14px]"
                 style={{ letterSpacing: "2.5px", textTransform: "uppercase", color: "var(--rose)" }}
               >
-                {FOOTER_COLUMNS[1].title}
+                {t("footer.usefulLinks")}
               </h5>
               <ul className="list-none space-y-2.5">
-                {FOOTER_COLUMNS[1].links.filter((l) => l.label !== "اتصل بنا").map((link) => (
+                {usefulLinks.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
@@ -177,10 +191,10 @@ export default function Footer({ settings }: FooterProps) {
                 className="font-label font-bold mb-3 text-[12px] md:text-[14px]"
                 style={{ letterSpacing: "2.5px", textTransform: "uppercase", color: "var(--rose)" }}
               >
-                النشرة البريدية
+                {t("footer.newsletterTitle")}
               </h5>
-              <p className="text-[12px] md:text-[13px] mb-4" style={{ lineHeight: 1.75, color: "rgba(255,255,255,0.85)", fontFamily: "'Tajawal', sans-serif" }}>
-                انضمي لـ+1000 أم — نصائح هبة الحصرية كل أسبوع
+              <p className="text-[12px] md:text-[13px] mb-4" style={{ lineHeight: 1.75, color: "rgba(255,255,255,0.85)", fontFamily: "var(--font-tajawal), sans-serif" }}>
+                {t("footer.newsletterText")}
               </p>
               <NewsletterForm />
 
@@ -189,7 +203,7 @@ export default function Footer({ settings }: FooterProps) {
                 className="mt-5 inline-flex items-center font-bold text-[12px] md:text-[14px] px-4 py-2 rounded-full transition-opacity hover:opacity-85"
                 style={{ background: "var(--rose)", color: "var(--dark)" }}
               >
-                تواصلي معنا ←
+                {t("footer.contactCta")}
               </Link>
             </div>
 
@@ -198,10 +212,12 @@ export default function Footer({ settings }: FooterProps) {
           {/* الشريط السفلي — Copyright ديناميكي */}
           <div className="flex flex-col sm:flex-row justify-between items-center pt-1 gap-2">
             <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.7)" }}>
-              © {currentYear} Momzy — جميع الحقوق محفوظة
+              © {currentYear} Momzy — {t("footer.rights")}
             </p>
-            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "'Tajawal', sans-serif" }}>
-              صُنع بـ <span style={{ color: "var(--rose)" }}>♥</span> لكل أم
+            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.5)", fontFamily: "var(--font-tajawal), sans-serif" }}>
+              {t.rich("footer.madeWith", {
+                heart: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span>,
+              })}
             </p>
           </div>
         </div>

@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 import { NAV_ITEMS, HEADER_HEIGHT, LOGO_HEIGHT } from "@/lib/utils/constants";
 import MegaMenu from "./MegaMenu";
 import MobileMenu from "./MobileMenu";
+import LanguageSwitcher from "./LanguageSwitcher";
 import type { Product } from "@/lib/products/types";
 
 /** تأخير إغلاق الميقا منيو بالمللي ثانية */
@@ -17,6 +19,8 @@ const MEGA_CLOSE_DELAY = 150;
 
 /** الهيدر الرئيسي — sticky مع blur و نافبار تفاعلي */
 export default function Header({ products = [] }: { products?: Product[] }) {
+  const t = useTranslations("nav");
+  const tMenu = useTranslations("menu");
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMegaOpen, setIsMegaOpen] = useState(false);
@@ -96,13 +100,13 @@ export default function Header({ products = [] }: { products?: Product[] }) {
                     >
                       <Image
                         src={item.icon}
-                        alt={item.label}
+                        alt={t(item.id)}
                         width={item.id === "services" ? 40 : 30}
                         height={item.id === "services" ? 40 : 30}
                         className="object-contain"
                       />
                     </span>
-                    {item.label}
+                    {t(item.id)}
                   </Link>
 
                   {/* الميقا منيو */}
@@ -114,11 +118,16 @@ export default function Header({ products = [] }: { products?: Product[] }) {
             })}
           </nav>
 
+          {/* مبدّل اللغة — ديسكتوب فقط */}
+          <div className="hidden sm:block shrink-0">
+            <LanguageSwitcher />
+          </div>
+
           {/* زر البرغر — موبايل فقط */}
           <button
             onClick={toggleMenu}
             className="flex sm:hidden flex-col gap-[5px] p-2 cursor-pointer rounded-lg transition-colors hover:bg-cream"
-            aria-label="القائمة"
+            aria-label={tMenu("aria")}
           >
             <span
               className={cn(

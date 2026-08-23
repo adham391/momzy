@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cache } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
 import EmbeddedPayment from "@/components/checkout/EmbeddedPayment";

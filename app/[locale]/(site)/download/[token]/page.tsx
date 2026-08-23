@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import { getDownloadStatus } from "@/lib/db/downloads";
 

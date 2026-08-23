@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
+import { routing } from "@/lib/i18n/routing";
+
+/** موجّه اللغات — يعيد كتابة / → /ar داخليًا ويخدم /he و /en */
+const intlMiddleware = createIntlMiddleware(routing);
 
 /** الدول المحظورة كلياً — ISO 3166-1 alpha-2 */
 const BLOCKED_COUNTRIES = new Set([
@@ -66,16 +71,23 @@ function getGeo(request: NextRequest): { country: string; region: string } {
   };
 }
 
-export async function proxy(request: NextRequest) {
-  /* ── 1. الحجب الجغرافي (أولاً) ── */
-  const { country, region } = getGeo(request);
+/** هل المسار صفحة الحجب الجغرافي؟ (بأي بادئة لغة) */
+function isNotAvailablePath(pathname: string): boolean {
+  return /^\/(he\/|en\/)?not-available\/?$/.test(pathname);
+}
 
-  if (country && isBlocked(country, region)) {
-    return NextResponse.redirect(new URL("/not-available", request.url));
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  /* ── 1. الحجب الجغرافي (أولاً) — تُستثنى صفحة الحجب نفسها لمنع حلقة redirect ── */
+  if (!isNotAvailablePath(pathname)) {
+    const { country, region } = getGeo(request);
+    if (country && isBlocked(country, region)) {
+      return NextResponse.redirect(new URL("/not-available", request.url));
+    }
   }
 
-  /* ── 2. حماية لوحة الأدمن ── */
-  const { pathname } = request.nextUrl;
+  /* ── 2. حماية لوحة الأدمن (خارج شجرة اللغات) ── */
   const isAdminArea = pathname.startsWith("/admin");
   // صفحة الدخول مستثناة من الفحص (وإلا حلقة redirect لا نهائية).
   // الخروج = server action (يُنفَّذ على مسار اللوحة نفسه)، لا يحتاج استثناء.
@@ -96,10 +108,16 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  return NextResponse.next();
+  /* ── 3. الأدمن (login) والاستوديو خارج نظام اللغات ── */
+  if (isAdminArea || pathname.startsWith("/studio")) {
+    return NextResponse.next();
+  }
+
+  /* ── 4. توجيه اللغات — يعيد كتابة / → /ar داخليًا ويخدم /he و /en ── */
+  return intlMiddleware(request);
 }
 
 export const config = {
-  // طبّق على كل الصفحات ما عدا: صفحة الحجب + assets + api
-  matcher: ["/((?!not-available|_next/static|_next/image|api|icons|images|favicon).*)"],
+  // طبّق على كل الصفحات ما عدا: assets + api
+  matcher: ["/((?!_next/static|_next/image|api|icons|images|favicon).*)"],
 };

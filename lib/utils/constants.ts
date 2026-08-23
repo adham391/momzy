@@ -363,6 +363,8 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 /* ── عناصر النافبار للموبايل ──────────────────────────── */
 
 export interface MobileNavItem {
+  /** مفتاح الترجمة في namespace "nav" */
+  id: string;
   label: string;
   href: string;
   icon: string;
@@ -372,12 +374,14 @@ export interface MobileNavItem {
 
 export const MOBILE_NAV_ITEMS: MobileNavItem[] = [
   {
+    id: "services",
     label: "خدماتنا",
     href: "/services",
     icon: "/icons/services-icon.png",
     iconBg: "bg-gradient-to-br from-[#fde4ec] to-rosepale",
   },
   {
+    id: "shop",
     label: "المتجر",
     href: "/shop",
     icon: "/icons/shop-icon.png",
@@ -385,12 +389,14 @@ export const MOBILE_NAV_ITEMS: MobileNavItem[] = [
     hasDropdown: true,
   },
   {
+    id: "articles",
     label: "المقالات",
     href: "/articles",
     icon: "/icons/blog-icon.png",
     iconBg: "bg-gradient-to-br from-[#fff0bb] to-yellowlt",
   },
   {
+    id: "about",
     label: "عن هبة",
     href: "/about",
     icon: "/icons/about-icon.png",

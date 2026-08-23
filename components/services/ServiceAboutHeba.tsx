@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
 import { getAboutPage } from "@/lib/sanity/queries/aboutPage";

@@ -64,6 +64,22 @@
 
 }
 
+/* ── تبديل الخطوط حسب اللغة ──────────────────────────────
+   المكونات تستخدم --font-amiri/--font-tajawal/--font-nunito
+   (عبر @theme)، فنعيد توجيهها للخط المناسب لكل لغة:
+   عبري: Frank Ruhl Libre (عناوين) + Heebo (نصوص/تسميات)
+   إنجليزي: Lora (عناوين) + Nunito (نصوص)                 */
+html[lang="he"] {
+  --font-amiri: var(--font-frank);
+  --font-tajawal: var(--font-heebo);
+  --font-nunito: var(--font-heebo);
+}
+
+html[lang="en"] {
+  --font-amiri: var(--font-lora);
+  --font-tajawal: var(--font-nunito);
+}
+
 /* ── أنماط عامة ──────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
@@ -72,7 +88,7 @@ html {
 body {
   background: var(--offwh);
   color: var(--dark);
-  direction: rtl;
+  /* الاتجاه يُحدَّد من dir على <html> حسب اللغة (rtl للعربية والعبرية، ltr للإنجليزية) */
   overflow-x: hidden;
   font-family: var(--font-body), sans-serif;
 }

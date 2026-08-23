@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 /** نموذج الاشتراك بالنشرة البريدية — يظهر في الفوتر */
 export default function NewsletterForm() {
+  const t = useTranslations("newsletter");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -35,7 +37,7 @@ export default function NewsletterForm() {
   if (status === "success") {
     return (
       <div className="text-[13px] py-3 px-4 rounded-[10px]" style={{ background: "rgba(130,201,196,0.18)", color: "#A8D8D5", border: "1px solid rgba(130,201,196,0.4)" }}>
-        ✓ تم الاشتراك! ستصلك أحدث المقالات ونصائح هبة
+        {t("success")}
       </div>
     );
   }
@@ -46,7 +48,7 @@ export default function NewsletterForm() {
         <input
           type="email"
           required
-          placeholder="إيميلك"
+          placeholder={t("placeholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={status === "loading"}
@@ -56,7 +58,7 @@ export default function NewsletterForm() {
             background: "rgba(255,255,255,0.08)",
             color: "white",
             border: "1px solid rgba(255,255,255,0.18)",
-            fontFamily: "'Tajawal', sans-serif",
+            fontFamily: "var(--font-tajawal), sans-serif",
           }}
         />
         <button
@@ -66,11 +68,11 @@ export default function NewsletterForm() {
           className="font-label font-bold text-[13px] px-4 rounded-[10px] [transition:opacity_150ms_ease] hover:opacity-85 disabled:opacity-60"
           style={{ background: "var(--rose)", color: "var(--dark)", border: "none", cursor: "pointer" }}
         >
-          {status === "loading" ? "..." : "اشتركي"}
+          {status === "loading" ? "..." : t("subscribe")}
         </button>
       </div>
       {status === "error" && (
-        <p className="text-[11px]" style={{ color: "#F2A7B5" }}>حدث خطأ — حاولي مرة أخرى</p>
+        <p className="text-[11px]" style={{ color: "#F2A7B5" }}>{t("error")}</p>
       )}
     </form>
   );
