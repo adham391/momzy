@@ -42,7 +42,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
   },
   socialLinks: {
     instagram: "https://www.instagram.com/hebahasan._",
-    tiktok:    "#",
+    tiktok:    "https://www.tiktok.com/@heba.the.nurse",
     whatsapp:  "#",
   },
   contact: {
