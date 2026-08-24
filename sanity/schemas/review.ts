@@ -22,7 +22,7 @@ export const review = defineType({
     prepare({ title, subtitle, rating }) {
       const stars = "★".repeat(rating ?? 5);
       return {
-        title: title ?? "تقييم بدون اسم",
+        title: arValue(title) ?? "تقييم بدون اسم",
         subtitle: `${stars} — ${arValue(subtitle) ?? ""}`,
       };
     },
@@ -32,16 +32,17 @@ export const review = defineType({
     defineField({
       name: "name",
       title: "اسم الأم",
-      type: "string",
-      placeholder: "مثال: سارة م.",
-      validation: (r) => r.required().min(2).error("الاسم مطلوب"),
+      type: "internationalizedArrayString",
+      description: "اسم/وصف المُقيّمة — مثال: أمّ جديدة (لكل لغة)",
+      validation: (r) => r.required().error("الاسم مطلوب"),
     }),
 
     defineField({
       name: "slug",
       title: "المعرّف (Slug)",
       type: "slug",
-      options: { source: "name", maxLength: 60 },
+      // المصدر = القيمة العربية من الحقل المُدوّل
+      options: { source: "name.0.value", maxLength: 60 },
       validation: (r) => r.required().error("المعرّف مطلوب"),
     }),
 
@@ -64,10 +65,9 @@ export const review = defineType({
     defineField({
       name: "initial",
       title: "حرف الأفاتار",
-      type: "string",
-      description: "الحرف الذي يظهر داخل دائرة الأفاتار",
-      placeholder: "س",
-      validation: (r) => r.required().max(2).error("حرف واحد أو حرفين"),
+      type: "internationalizedArrayString",
+      description: "الحرف الذي يظهر داخل دائرة الأفاتار (لكل لغة)",
+      validation: (r) => r.required().error("حرف الأفاتار مطلوب"),
     }),
 
     defineField({

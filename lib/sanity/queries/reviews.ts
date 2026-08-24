@@ -6,9 +6,9 @@ import { tf, activeLocale } from "@/lib/sanity/i18n";
 const REVIEW_FIELDS = `
   "slug": slug.current,
   ${tf("quote")},
-  name,
+  ${tf("name")},
   ${tf("info")},
-  initial,
+  ${tf("initial")},
   color,
   rating,
   order

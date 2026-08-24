@@ -73,7 +73,7 @@ const MANIFESTS: Manifest[] = [
   },
   {
     type: "review",
-    scalars: { quote: "text", info: "string" },
+    scalars: { name: "string", initial: "string", quote: "text", info: "string" },
   },
 ];
 
