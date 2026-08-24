@@ -60,13 +60,13 @@ export default async function ServicesPage() {
         </Container>
       </header>
 
-      {/* قسم الورشات الجماعية — zIndex 2 */}
+      {/* قسم اللقاءات الفردية (دعم 1:1) — في الأعلى — zIndex 2 */}
       <ServicesSection
-        label={t("groupLabel")}
+        label={t("individualLabel")}
         labelColor="teal"
-        title={t.rich("groupTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
-        description={t("groupText")}
-        services={groupServices}
+        title={t.rich("individualTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
+        description={t("individualText")}
+        services={individualServices}
         background="var(--offwh)"
         waveColor="var(--offwh)"
         zIndex={2}
@@ -74,13 +74,13 @@ export default async function ServicesPage() {
         seatsBySlug={seatsBySlug}
       />
 
-      {/* قسم اللقاءات الفردية — zIndex 3 */}
+      {/* قسم الورشات الجماعية — تحته — zIndex 3 */}
       <ServicesSection
-        label={t("individualLabel")}
+        label={t("groupLabel")}
         labelColor="teal"
-        title={t.rich("individualTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
-        description={t("individualText")}
-        services={individualServices}
+        title={t.rich("groupTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
+        description={t("groupText")}
+        services={groupServices}
         background="var(--cream)"
         waveColor="var(--cream)"
         zIndex={3}
