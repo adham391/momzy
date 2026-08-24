@@ -46,7 +46,7 @@ export default function WhyMomzySection({ content }: { content: HomePageContent 
             {content.whyValues.map((point, idx) => {
               const s = ICON_STYLE[idx % 3];
               return (
-                <div key={idx} className="group flex items-start gap-4 text-right">
+                <div key={idx} className="group flex items-start gap-4 text-start">
                   {/* الأيقونة في دائرة ملونة بحلقة خفيفة */}
                   <span
                     className="flex items-center justify-center rounded-full shrink-0 overflow-hidden [transition:transform_260ms_cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105"

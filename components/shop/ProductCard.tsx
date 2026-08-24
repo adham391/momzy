@@ -1,4 +1,6 @@
-import { getLocale } from "next-intl/server";
+"use client";
+
+import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
@@ -12,8 +14,8 @@ interface ProductCardProps {
 }
 
 /** كارد منتج واحد في شبكة المتجر — schema الجديد */
-export default async function ProductCard({ product, showTags = true }: ProductCardProps) {
-  const locale = await getLocale();
+export default function ProductCard({ product, showTags = true }: ProductCardProps) {
+  const locale = useLocale();
   /** أول 1-2 tags كـ badges فوق الصورة — فلترة القيم القديمة (strings) */
   const visibleTags = (product.tags ?? [])
     .filter((tag): tag is import("@/lib/products/types").ProductTag =>

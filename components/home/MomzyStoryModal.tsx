@@ -172,7 +172,7 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
           {/* اقتباس */}
           <blockquote
             className="mb-7"
-            style={{ borderRight: "3px solid var(--rose)", paddingRight: 18 }}
+            style={{ borderInlineStart: "3px solid var(--rose)", paddingInlineStart: 18 }}
           >
             <p
               className="font-heading italic text-[15px] leading-[1.9]"

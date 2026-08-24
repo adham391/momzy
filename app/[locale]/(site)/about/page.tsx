@@ -103,7 +103,7 @@ export default async function AboutPage() {
           <div className="relative z-[2] grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center">
 
             {/* ── النص (يمين) ── */}
-            <div className="order-2 md:order-1 text-center md:text-right">
+            <div className="order-2 md:order-1 text-center md:text-start">
               <div className="flex justify-center md:justify-start">
                 <SectionLabel color="teal">{about.heroLabel}</SectionLabel>
               </div>
@@ -221,7 +221,7 @@ export default async function AboutPage() {
               {about.philosophyValues.map((item, idx) => {
                 const c = PHIL_STYLE[idx % 3];
                 return (
-                  <div key={idx} className="group flex items-start gap-4 text-right">
+                  <div key={idx} className="group flex items-start gap-4 text-start">
                     <span className="flex items-center justify-center rounded-full shrink-0 overflow-hidden [transition:transform_260ms_cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105" style={{ width: 54, height: 54, background: c.bg, border: `1.5px solid ${c.ring}` }}>
                       {item.icon && <Image src={item.icon} alt="" width={28} height={28} className="object-contain" />}
                     </span>

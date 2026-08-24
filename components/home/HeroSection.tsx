@@ -2,13 +2,13 @@ import { Link } from "@/lib/i18n/navigation";
 import PolkaDots from "@/components/ui/PolkaDots";
 import Container from "@/components/ui/Container";
 import MomzyText from "@/components/ui/MomzyText";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
-/** أيقونة سهم لليسار (RTL) للأزرار */
-function ArrowLeft() {
+/** سهم اتجاه التقدّم — يشير لليسار في RTL ولليمين في LTR (يُقلَب) */
+function DirArrow({ flip }: { flip: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={flip ? { transform: "scaleX(-1)" } : undefined}>
       <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -21,6 +21,9 @@ function ArrowLeft() {
 export default function HeroSection({ content }: { content: HomePageContent }) {
   const t = useTranslations("home");
   const tNav = useTranslations("nav");
+  const locale = useLocale();
+  // الإنجليزية LTR — نعكس اتجاهات الصورة/التدرّج/الأسهم؛ العربية والعبرية RTL
+  const isRtl = locale !== "en";
   return (
     <section
       className="relative overflow-hidden min-h-[500px] md:min-h-0"
@@ -29,26 +32,27 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
         zIndex: 1,
       }}
     >
-      {/* ── صورة هبة — ديسكتوب: لوحة على اليسار تذوب حافتها اليمنى في الوردي ── */}
+      {/* ── صورة هبة — ديسكتوب: لوحة على جهة النهاية (يسار في RTL/يمين في LTR) تذوب حافتها نحو النص ── */}
       <div
-        className="absolute inset-y-0 left-0 hidden md:block"
+        className="absolute inset-y-0 hidden md:block"
         style={{
+          insetInlineEnd: 0,
           width: "68%",
           backgroundImage: `url('${content.heroImage}')`,
           backgroundSize: "cover",
           backgroundPosition: "center 8%",
           backgroundRepeat: "no-repeat",
-          WebkitMaskImage: "linear-gradient(to right, #000 55%, transparent 100%)",
-          maskImage: "linear-gradient(to right, #000 55%, transparent 100%)",
+          // القناع يتلاشى نحو النص (البداية): يمينًا في RTL ويسارًا في LTR
+          WebkitMaskImage: `linear-gradient(to ${isRtl ? "right" : "left"}, #000 55%, transparent 100%)`,
+          maskImage: `linear-gradient(to ${isRtl ? "right" : "left"}, #000 55%, transparent 100%)`,
         }}
         aria-hidden="true"
       />
-      {/* ── تدرّج خفيف على جهة النص (يمين) للتباين ── */}
+      {/* ── تدرّج خفيف على جهة النص (البداية) للتباين ── */}
       <div
         className="absolute inset-0 hidden md:block"
         style={{
-          background:
-            "linear-gradient(to left, rgba(242,167,181,0.55) 0%, rgba(242,167,181,0.12) 38%, transparent 60%)",
+          background: `linear-gradient(to ${isRtl ? "left" : "right"}, rgba(242,167,181,0.55) 0%, rgba(242,167,181,0.12) 38%, transparent 60%)`,
         }}
         aria-hidden="true"
       />
@@ -58,7 +62,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
         className="hero-rise absolute hidden md:flex items-center gap-3 z-[3]"
         style={{
           bottom: 84,
-          left: 40,
+          insetInlineEnd: 40,
           background: "rgba(255,255,255,0.78)",
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
@@ -89,7 +93,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
 
       <Container className="relative z-[2]">
         <div className="flex items-center md:block pb-14 md:pb-0 min-h-0">
-          <div className="text-center md:text-right py-8 md:pt-12 md:pb-[84px] w-full md:w-auto md:max-w-[480px]">
+          <div className="text-center md:text-start py-8 md:pt-12 md:pb-[84px] w-full md:w-auto md:max-w-[480px]">
 
             {/* ── صورة هبة المؤطّرة — موبايل فقط (إطار أبيض + توثيق) ── */}
             <div className="md:hidden mx-auto mb-5 relative" style={{ width: 168, maxWidth: "54%" }}>
@@ -215,7 +219,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
                 }}
               >
                 {tNav("services")}
-                <ArrowLeft />
+                <DirArrow flip={!isRtl} />
               </Link>
               <Link
                 href="/shop"
@@ -234,7 +238,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
                 }}
               >
                 {t("hero.productsCta")}
-                <ArrowLeft />
+                <DirArrow flip={!isRtl} />
               </Link>
             </div>
           </div>

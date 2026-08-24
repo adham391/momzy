@@ -65,7 +65,7 @@ export default async function ServiceAboutHeba({ accent, zIndex }: ServiceAboutH
             </div>
 
             {/* النص */}
-            <div className="flex-1 text-center md:text-right">
+            <div className="flex-1 text-center md:text-start">
               <h3 className="font-heading font-bold text-dark text-[21px] mb-1.5">{about.name}</h3>
 
               {/* الشهادات */}
@@ -96,7 +96,7 @@ export default async function ServiceAboutHeba({ accent, zIndex }: ServiceAboutH
               {/* الأرقام */}
               <div className="flex flex-wrap justify-center md:justify-start gap-6 mb-5">
                 {about.stats.map((s) => (
-                  <div key={s.label} className="text-center md:text-right">
+                  <div key={s.label} className="text-center md:text-start">
                     <div
                       className="font-label font-extrabold text-[19px]"
                       style={{ color: accent, direction: "ltr" }}

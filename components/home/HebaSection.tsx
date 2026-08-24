@@ -42,7 +42,7 @@ export default function HebaSection({ content }: { content: HomePageContent }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-7 md:gap-16 items-center">
 
             {/* ════════ عمود النص (يمين RTL) ════════ */}
-            <div className="text-center md:text-right order-2 md:order-1">
+            <div className="text-center md:text-start order-2 md:order-1">
 
               {/* eyebrow — نفس أسلوب باقي الأقسام */}
               <div className="flex justify-center md:justify-start">

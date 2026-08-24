@@ -67,7 +67,7 @@ function FAQItem({
     >
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-right transition-colors"
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-start transition-colors"
         style={{ background: "transparent", border: "none", cursor: "pointer" }}
         aria-expanded={isOpen}
       >

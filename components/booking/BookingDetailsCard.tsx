@@ -13,7 +13,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="flex items-start justify-between gap-4 py-2.5" style={{ borderBottom: "1px solid var(--bord)" }}>
       <span className="font-label text-[13px] text-light shrink-0">{label}</span>
-      <span className="font-label text-[14px] font-semibold text-dark text-left">{children}</span>
+      <span className="font-label text-[14px] font-semibold text-dark text-end">{children}</span>
     </div>
   );
 }

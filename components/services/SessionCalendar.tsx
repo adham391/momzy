@@ -218,7 +218,7 @@ export default function SessionCalendar({
                     key={s.id}
                     onClick={() => !full && onPick(s.id)}
                     disabled={full}
-                    className="rounded-xl text-right active:scale-[0.98] [transition:transform_140ms_ease-out,border-color_160ms_ease]"
+                    className="rounded-xl text-start active:scale-[0.98] [transition:transform_140ms_ease-out,border-color_160ms_ease]"
                     style={{
                       border: `1.5px solid ${full ? "var(--bord)" : "var(--mint)"}`,
                       background: full ? "var(--offwh)" : "white",

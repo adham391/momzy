@@ -69,7 +69,9 @@ export default function FilterBar({
             style={{
               border: "1.5px solid var(--bord)",
               borderRadius: 14,
-              padding: "11px 16px 11px 42px",
+              paddingBlock: 11,
+              paddingInlineStart: 16,
+              paddingInlineEnd: 42,
               background: "white",
               boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
             }}
@@ -137,7 +139,7 @@ export default function FilterBar({
                 <button
                   key={opt.value}
                   onClick={() => { onChangeSort(opt.value); setSortOpen(false); }}
-                  className="w-full text-right flex items-center gap-2 font-label font-semibold text-[13px] transition-colors"
+                  className="w-full text-start flex items-center gap-2 font-label font-semibold text-[13px] transition-colors"
                   style={{
                     padding: "11px 16px",
                     background: sort === opt.value ? "var(--tealpale)" : "transparent",
@@ -195,7 +197,7 @@ function CategoryButton({ label, active, onClick }: {
         cursor: "pointer",
       }}
     >
-      {active && <span style={{ marginLeft: 6, fontSize: 10 }}>✦</span>}
+      {active && <span style={{ marginInlineStart: 6, fontSize: 10 }}>✦</span>}
       {label}
     </button>
   );
