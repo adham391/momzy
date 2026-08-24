@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import { useRouter } from "@/lib/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import CartItemRow from "@/components/shop/CartItemRow";
 
-/** سلة التسوق — sidebar من اليسار (RTL) + overlay */
+/** سلة التسوق — sidebar على جهة النهاية (يسار في RTL / يمين في LTR) + overlay */
 export default function CartSidebar() {
   const t = useTranslations("cart");
+  const isRtl = useLocale() !== "en";
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
 
@@ -56,11 +57,12 @@ export default function CartSidebar() {
         style={{
           position: "fixed",
           top: 0,
-          left: 0,
+          insetInlineEnd: 0,
           bottom: 0,
           width: "min(380px, 100vw)",
           zIndex: 880,
-          boxShadow: "-8px 0 40px rgba(0,0,0,0.12)",
+          // الظل يقع نحو الصفحة (جهة البداية): يمينًا في RTL ويسارًا في LTR
+          boxShadow: `${isRtl ? "8px" : "-8px"} 0 40px rgba(0,0,0,0.12)`,
         }}
       >
         {/* ── هيدر السلة ── */}
