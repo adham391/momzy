@@ -309,6 +309,12 @@ button, a {
   to   { transform: translateX(-100%); }
 }
 
+/* نظير LTR — يدخل من اليسار ويخرج من اليمين (right:0 + paddingRight:100vw على العنصر) */
+@keyframes ticker-single-ltr {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
 /* ── إخفاء التوب بار عند فتح MobileMenu (Apple/Nike pattern) ─── */
 body[data-menu-open] [data-topbar] {
   display: none;

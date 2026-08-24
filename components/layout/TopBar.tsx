@@ -1,11 +1,13 @@
+import { useLocale } from "next-intl";
 import type { SiteSettingsTopBar } from "@/lib/sanity/queries/siteSettings";
 
 interface TopBarProps {
   settings: SiteSettingsTopBar;
 }
 
-/** الشريط العلوي — ticker يدخل من اليمين لليسار (موبايل + ديسكتوب) */
+/** الشريط العلوي — ticker يتحرّك بحسب اتجاه اللغة (RTL: يمين←يسار · LTR: يسار→يمين) */
 export default function TopBar({ settings }: TopBarProps) {
+  const isRtl = useLocale() !== "en";
   if (!settings.enabled) return null;
 
   return (
@@ -33,16 +35,16 @@ export default function TopBar({ settings }: TopBarProps) {
         style={{
           position: "absolute",
           top: 0,
-          left: 0,
           bottom: 0,
           display: "flex",
           alignItems: "center",
           gap: 10,
           whiteSpace: "nowrap",
-          paddingLeft: "100vw",
           willChange: "transform",
-          /* الموبايل أسرع قليلاً لأن المسافة المرئية أقصر */
-          animation: "ticker-single 12s linear infinite",
+          // RTL: يبدأ المحتوى من حافة اليمين ويتحرّك يسارًا · LTR: العكس
+          ...(isRtl
+            ? { left: 0, paddingLeft: "100vw", animation: "ticker-single 12s linear infinite" }
+            : { right: 0, paddingRight: "100vw", animation: "ticker-single-ltr 12s linear infinite" }),
         }}
       >
         {/* badge متنبض */}

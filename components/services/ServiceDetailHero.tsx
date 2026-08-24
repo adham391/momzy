@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
@@ -24,6 +24,7 @@ interface ServiceDetailHeroProps {
 export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDetailHeroProps) {
   const t = useTranslations("services");
   const tNav = useTranslations("nav");
+  const isRtl = useLocale() !== "en";
   const [bookingOpen, setBookingOpen] = useState(false);
 
   const waMessage = encodeURIComponent(t("waInquireMessage", { title: service.title }));
@@ -171,7 +172,7 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                 }}
               >
                 <span>{t("registerNow")}</span>
-                <span style={{ fontSize: "1.1em" }}>←</span>
+                <span style={{ fontSize: "1.1em" }}>{isRtl ? "←" : "→"}</span>
               </button>
 
               {/* WhatsApp — link خفيف تحت الزر */}

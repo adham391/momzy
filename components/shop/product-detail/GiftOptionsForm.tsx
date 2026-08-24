@@ -73,7 +73,7 @@ export default function GiftOptionsForm({
           <div>
             <label className="block font-label font-bold text-[13px] mb-1.5" style={{ color: "var(--dark)" }}>
               {t("messageLabel")}
-              <span className="font-normal text-[11px] mr-2" style={{ color: "var(--light)" }}>
+              <span className="font-normal text-[11px] ms-2" style={{ color: "var(--light)" }}>
                 ({charCount}/{MESSAGE_MAX})
               </span>
             </label>

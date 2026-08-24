@@ -22,7 +22,7 @@ export default function ShopHeader() {
         style={{
           position: "absolute",
           top: -60,
-          right: -80,
+          insetInlineEnd: -80,
           width: 320,
           height: 320,
           borderRadius: "50%",
@@ -36,7 +36,7 @@ export default function ShopHeader() {
         style={{
           position: "absolute",
           bottom: -40,
-          left: 120,
+          insetInlineStart: 120,
           width: 200,
           height: 200,
           borderRadius: "50%",
@@ -50,7 +50,7 @@ export default function ShopHeader() {
         style={{
           position: "absolute",
           top: 20,
-          left: -40,
+          insetInlineStart: -40,
           width: 120,
           height: 120,
           borderRadius: "50%",

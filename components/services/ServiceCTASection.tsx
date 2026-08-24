@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
@@ -87,6 +87,7 @@ export default function ServiceCTASection({
   zIndex = 5,
 }: ServiceCTASectionProps) {
   const t = useTranslations("services");
+  const isRtl = useLocale() !== "en";
   const [open, setOpen] = useState(false);
   const c = COLOR_SCHEME[color];
 
@@ -192,7 +193,7 @@ export default function ServiceCTASection({
                 }}
               >
                 <span>{t("registerNow")}</span>
-                <span style={{ fontSize: "1.2em" }}>←</span>
+                <span style={{ fontSize: "1.2em" }}>{isRtl ? "←" : "→"}</span>
               </button>
 
               {/* WhatsApp — أبرز قليلاً */}

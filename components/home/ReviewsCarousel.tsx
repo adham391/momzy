@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ReviewCard from "./ReviewCard";
 import type { Review } from "@/lib/reviews/types";
@@ -16,6 +16,7 @@ const CARD_GAP = 16;
  */
 export default function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
   const t = useTranslations("common");
+  const isRtl = useLocale() !== "en";
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -48,8 +49,9 @@ export default function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
     if (!el) return;
     const firstCard = el.firstElementChild as HTMLElement | null;
     const step = firstCard ? firstCard.offsetWidth + CARD_GAP : el.clientWidth * 0.8;
-    // في RTL: «التالي» (بطاقات لاحقة، يسارًا) = إنقاص scrollLeft
-    el.scrollBy({ left: dir === "next" ? -step : step, behavior: "smooth" });
+    // «التالي» يكشف بطاقات لاحقة: إنقاص scrollLeft في RTL، وزيادته في LTR
+    const fwd = isRtl ? -step : step;
+    el.scrollBy({ left: dir === "next" ? fwd : -fwd, behavior: "smooth" });
   };
 
   return (
@@ -70,19 +72,19 @@ export default function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
         ))}
       </div>
 
-      {/* ── أزرار التنقّل — سابق (يمين) / تالي (يسار) ── */}
+      {/* ── أزرار التنقّل — «السابق» يشير للبداية و«التالي» للنهاية حسب الاتجاه ── */}
       <div className="flex justify-center items-center gap-4 mt-7">
         <NavButton
           label={t("prev")}
           onClick={() => scrollByDir("prev")}
           disabled={atStart}
-          icon={<ChevronRight size={22} strokeWidth={2.5} />}
+          icon={isRtl ? <ChevronRight size={22} strokeWidth={2.5} /> : <ChevronLeft size={22} strokeWidth={2.5} />}
         />
         <NavButton
           label={t("next")}
           onClick={() => scrollByDir("next")}
           disabled={atEnd}
-          icon={<ChevronLeft size={22} strokeWidth={2.5} />}
+          icon={isRtl ? <ChevronLeft size={22} strokeWidth={2.5} /> : <ChevronRight size={22} strokeWidth={2.5} />}
         />
       </div>
     </div>
