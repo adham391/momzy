@@ -9,8 +9,9 @@ import { SEED_REVIEWS } from "./seed";
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  *
  * @param limit — حد أقصى لعدد التقييمات (مثلاً 4 للصفحة الرئيسية)
+ * @param locale — اللغة الفعّالة (اختياري؛ السيرفر يقرأها تلقائياً عبر activeLocale)
  */
-export async function getReviews(limit?: number): Promise<Review[]> {
+export async function getReviews(limit?: number, locale?: string): Promise<Review[]> {
   let reviews: Review[] = [];
 
   // إذا لم يُضبط projectId، ارجع للـ seed مباشرة
@@ -18,7 +19,7 @@ export async function getReviews(limit?: number): Promise<Review[]> {
     reviews = [...SEED_REVIEWS].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   } else {
     // المصدر الأساسي: Sanity
-    reviews = await getAllReviews();
+    reviews = await getAllReviews(locale);
 
     // Fallback: seed في بيئة التطوير فقط
     if (reviews.length === 0 && process.env.NODE_ENV === "development") {

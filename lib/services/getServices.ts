@@ -8,14 +8,14 @@ import { SEED_SERVICES } from "./seed";
  * المصدر: Sanity CMS (أولاً)
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  */
-export async function getServices(filters?: ServiceFilters): Promise<Service[]> {
+export async function getServices(filters?: ServiceFilters, locale?: string): Promise<Service[]> {
   // إذا لم يُضبط projectId، ارجع للـ seed مباشرة
   if (!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
     return applyFiltersToSeed(filters);
   }
 
   // المصدر الأساسي: Sanity
-  const sanityServices = await getAllServices(filters);
+  const sanityServices = await getAllServices(filters, locale);
   if (sanityServices.length > 0) return sanityServices;
 
   // Fallback: seed في بيئة التطوير فقط

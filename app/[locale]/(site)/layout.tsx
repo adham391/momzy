@@ -13,10 +13,13 @@ import { getProducts } from "@/lib/products/getProducts";
  */
 export default async function SiteLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  const [settings, products] = await Promise.all([getSiteSettings(), getProducts({ inStockOnly: true })]);
+  const { locale } = await params;
+  const [settings, products] = await Promise.all([getSiteSettings(locale), getProducts({ inStockOnly: true })]);
 
   return (
     <>

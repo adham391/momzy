@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "./i18n";
 
 /** ألوان الأفاتار — تطابق ReviewColor في lib/reviews/types.ts */
 const COLORS = [
@@ -22,7 +23,7 @@ export const review = defineType({
       const stars = "★".repeat(rating ?? 5);
       return {
         title: title ?? "تقييم بدون اسم",
-        subtitle: `${stars} — ${subtitle ?? ""}`,
+        subtitle: `${stars} — ${arValue(subtitle) ?? ""}`,
       };
     },
   },
@@ -47,18 +48,16 @@ export const review = defineType({
     defineField({
       name: "quote",
       title: "نص التقييم",
-      type: "text",
-      rows: 5,
-      placeholder: "ما الذي قالته الأم عن تجربتها مع هبة...",
-      validation: (r) => r.required().min(20).error("نص التقييم مطلوب"),
+      type: "internationalizedArrayText",
+      description: "ما الذي قالته الأم عن تجربتها مع هبة (لكل لغة)",
+      validation: (r) => r.required().error("نص التقييم مطلوب"),
     }),
 
     defineField({
       name: "info",
       title: "معلومة إضافية",
-      type: "string",
+      type: "internationalizedArrayString",
       description: "تظهر تحت الاسم — مثال: أم لطفلة ٤ أشهر",
-      placeholder: "أم لطفلة ٤ أشهر",
       validation: (r) => r.required().error("المعلومة الإضافية مطلوبة"),
     }),
 

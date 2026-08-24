@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "./i18n";
 
 /** أنواع الخدمات — تطابق ServiceType في lib/services/types.ts */
 const TYPES = [
@@ -44,7 +45,7 @@ export const service = defineType({
         individual: "لقاء فردي",
       };
       return {
-        title: title ?? "خدمة بدون اسم",
+        title: arValue(title) ?? "خدمة بدون اسم",
         subtitle: subMap[subtitle] ?? subtitle ?? "",
         media,
       };
@@ -56,26 +57,26 @@ export const service = defineType({
     defineField({
       name: "title",
       title: "اسم الخدمة",
-      type: "string",
-      placeholder: "مثال: ورشة الأيام الأولى بعد الولادة",
-      validation: (r) => r.required().min(3).error("اسم الخدمة مطلوب"),
+      type: "internationalizedArrayString",
+      description: "مثال: ورشة الأيام الأولى بعد الولادة",
+      validation: (r) => r.required().error("اسم الخدمة مطلوب"),
     }),
 
     defineField({
       name: "slug",
       title: "الرابط (Slug)",
       type: "slug",
-      options: { source: "title", maxLength: 96 },
+      // المصدر = القيمة العربية من الحقل المُدوّل
+      options: { source: "title.0.value", maxLength: 96 },
       validation: (r) => r.required().error("الرابط مطلوب"),
     }),
 
     defineField({
       name: "shortDescription",
       title: "الوصف القصير",
-      type: "text",
-      rows: 3,
-      placeholder: "سطران يظهران في كارد الخدمة...",
-      validation: (r) => r.required().min(20).error("الوصف القصير مطلوب"),
+      type: "internationalizedArrayText",
+      description: "سطران يظهران في كارد الخدمة...",
+      validation: (r) => r.required().error("الوصف القصير مطلوب"),
     }),
 
     defineField({
@@ -101,25 +102,24 @@ export const service = defineType({
     defineField({
       name: "duration",
       title: "المدة",
-      type: "string",
-      placeholder: "مثال: ساعة ونصف – ساعتين",
+      type: "internationalizedArrayString",
+      description: "نص وصفي — مثال: ساعة ونصف – ساعتين",
       validation: (r) => r.required().error("المدة مطلوبة"),
     }),
 
     defineField({
       name: "location",
       title: "المكان",
-      type: "string",
-      placeholder: "مثال: الناصرة / عبر تطبيق Zoom / في منزل الأم",
+      type: "internationalizedArrayString",
+      description: "مثال: الناصرة / عبر تطبيق Zoom / في منزل الأم",
       validation: (r) => r.required().error("المكان مطلوب"),
     }),
 
     defineField({
       name: "ageRange",
       title: "الفئة العمرية (اختياري)",
-      type: "string",
-      description: "نص للعرض فقط — بكلماتك أنتِ",
-      placeholder: "مثال: 0-3 أشهر",
+      type: "internationalizedArrayString",
+      description: "نص للعرض فقط — بكلماتك أنتِ. مثال: 0-3 أشهر",
     }),
 
     defineField({
@@ -169,25 +169,22 @@ export const service = defineType({
     defineField({
       name: "longDescription",
       title: "الوصف الطويل (paragraphs)",
-      type: "array",
-      of: [{ type: "text", rows: 4 }],
-      description: "كل عنصر = فقرة مستقلة",
+      type: "internationalizedArrayText",
+      description: "كل سطر = فقرة مستقلة (لكل لغة)",
     }),
 
     defineField({
       name: "topics",
       title: "المواضيع التي نتطرق لها",
-      type: "array",
-      of: [{ type: "string" }],
-      description: "قائمة المواضيع — كل سطر يظهر كـ bullet مع ✦",
+      type: "internationalizedArrayText",
+      description: "قائمة المواضيع — كل سطر يظهر كـ bullet مع ✦ (لكل لغة)",
     }),
 
     defineField({
       name: "benefits",
       title: "ما الذي ستحصلين عليه (اختياري)",
-      type: "array",
-      of: [{ type: "string" }],
-      description: "النتائج/الفوائد — كل سطر يظهر كـ bullet",
+      type: "internationalizedArrayText",
+      description: "النتائج/الفوائد — كل سطر يظهر كـ bullet (لكل لغة)",
     }),
 
     defineField({

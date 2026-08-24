@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "./i18n";
 
 /**
  * مقال — document عادي (عدّة نسخ)
@@ -12,14 +13,15 @@ export const article = defineType({
     defineField({
       name: "title",
       title: "العنوان",
-      type: "string",
+      type: "internationalizedArrayString",
       validation: (r) => r.required(),
     }),
     defineField({
       name: "slug",
       title: "الرابط (Slug)",
       type: "slug",
-      options: { source: "title", maxLength: 96 },
+      // المصدر = القيمة العربية من الحقل المُدوّل
+      options: { source: "title.0.value", maxLength: 96 },
       validation: (r) => r.required(),
     }),
     defineField({
@@ -37,8 +39,7 @@ export const article = defineType({
     defineField({
       name: "excerpt",
       title: "مقتطف قصير",
-      type: "text",
-      rows: 3,
+      type: "internationalizedArrayText",
     }),
     defineField({
       name: "publishedAt",
@@ -65,5 +66,12 @@ export const article = defineType({
   ],
   preview: {
     select: { title: "title", subtitle: "category", media: "coverImage" },
+    prepare({ title, subtitle, media }) {
+      return {
+        title: arValue(title) ?? "مقال بدون عنوان",
+        subtitle: subtitle ?? "",
+        media,
+      };
+    },
   },
 });

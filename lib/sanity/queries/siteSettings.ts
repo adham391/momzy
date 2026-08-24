@@ -1,4 +1,5 @@
 import { sanityFetch } from "@/lib/sanity/client";
+import { tf, activeLocale, type AppLocale } from "@/lib/sanity/i18n";
 
 /** TypeScript types لإعدادات الموقع */
 export interface SiteSettingsTopBar {
@@ -33,39 +34,85 @@ export interface SiteSettings {
   footer:      SiteSettingsFooter;
 }
 
-/** قيم افتراضية — تُستخدم إذا لم يُعدّ الـ singleton بعد */
-const DEFAULT_SETTINGS: SiteSettings = {
-  topBar: {
-    enabled: true,
-    badge: "جديد",
-    message: "صندوق مشوار أم — اطلبي الآن قبل نفاد الكمية",
+/**
+ * روابط السوشيال ومعلومات التواصل — موحّدة عبر كل اللغات (روابط/إيميلات لا نصوص قابلة للترجمة).
+ * تُشارَك بين ar/he/en فلا تُكرَّر ولا تتباين.
+ */
+const SOCIAL_LINKS: SiteSettingsSocialLinks = {
+  instagram: "https://www.instagram.com/hebahasan._",
+  tiktok:    "https://www.tiktok.com/@heba.the.nurse",
+  whatsapp:  "#",
+};
+
+const CONTACT: SiteSettingsContact = {
+  email: "hello@momzyworld.com",
+};
+
+/**
+ * قيم افتراضية مُدوّلة — تُستخدم إذا لم يُعدّ الـ singleton بعد في Studio.
+ * النصوص القابلة للترجمة (badge/message/tagline/description/copyright) مترجمة لكل لغة،
+ * والروابط/الإيميلات موحّدة عبر اللغات.
+ */
+const DEFAULTS: Record<AppLocale, SiteSettings> = {
+  ar: {
+    topBar: {
+      enabled: true,
+      badge: "جديد",
+      message: "صندوق مشوار أم — اطلبي الآن قبل نفاد الكمية",
+    },
+    socialLinks: SOCIAL_LINKS,
+    contact: CONTACT,
+    footer: {
+      tagline:     "نحن هنا للمساعدة في كل خطوة من رحلتك",
+      description: "مؤسسة متخصصة ترافق الأمهات — خدمات، منتجات، ومحتوى لكل أم.",
+      copyright:   "© 2026 Momzy — جميع الحقوق محفوظة",
+    },
   },
-  socialLinks: {
-    instagram: "https://www.instagram.com/hebahasan._",
-    tiktok:    "https://www.tiktok.com/@heba.the.nurse",
-    whatsapp:  "#",
+  he: {
+    topBar: {
+      enabled: true,
+      badge: "חדש",
+      message: "מארז מסע של אמא — הזמיני עכשיו לפני שאוזל המלאי",
+    },
+    socialLinks: SOCIAL_LINKS,
+    contact: CONTACT,
+    footer: {
+      tagline:     "אנחנו כאן לעזור לך בכל צעד במסע שלך",
+      description: "מיזם מקצועי שמלווה אמהות — שירותים, מוצרים ותוכן לכל אמא.",
+      copyright:   "© 2026 Momzy — כל הזכויות שמורות",
+    },
   },
-  contact: {
-    email: "hello@momzyworld.com",
-  },
-  footer: {
-    tagline:     "نحن هنا للمساعدة في كل خطوة من رحلتك",
-    description: "مؤسسة متخصصة ترافق الأمهات — خدمات، منتجات، ومحتوى لكل أم.",
-    copyright:   "© 2026 Momzy — جميع الحقوق محفوظة",
+  en: {
+    topBar: {
+      enabled: true,
+      badge: "New",
+      message: "Mommy's Journey Box — order now before it sells out",
+    },
+    socialLinks: SOCIAL_LINKS,
+    contact: CONTACT,
+    footer: {
+      tagline:     "We're here to help at every step of your journey",
+      description: "A specialized venture that accompanies mothers — services, products, and content for every mom.",
+      copyright:   "© 2026 Momzy — All rights reserved",
+    },
   },
 };
 
 /**
  * جلب إعدادات الموقع — Singleton
- * يعود بـ DEFAULT_SETTINGS إذا لم يُنشأ document بعد في Studio
+ * يعود بالـ defaults المُدوّلة (حسب اللغة الفعّالة) إذا لم يُنشأ document بعد في Studio.
+ * الحقول النصّية تُحلّ للغة الفعّالة ($loc) مع سقوط للعربية عبر tf().
  */
-export async function getSiteSettings(): Promise<SiteSettings> {
+export async function getSiteSettings(locale?: string): Promise<SiteSettings> {
+  const loc = await activeLocale(locale);
+  const D = DEFAULTS[loc];
+
   const query = `*[_type == "siteSettings" && _id == "siteSettings"][0]{
     topBar {
       enabled,
-      badge,
-      message,
-      featuredProduct-> { "slug": slug.current, title }
+      ${tf("badge")},
+      ${tf("message")},
+      featuredProduct-> { "slug": slug.current, ${tf("title")} }
     },
     socialLinks {
       instagram,
@@ -75,25 +122,25 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     contact {
       email,
       whatsappNumber,
-      address
+      ${tf("address")}
     },
     footer {
-      tagline,
-      description,
-      copyright
+      ${tf("tagline")},
+      ${tf("description")},
+      ${tf("copyright")}
     }
   }`;
 
-  const data = await sanityFetch<SiteSettings>(query, {}, 60);
+  const data = await sanityFetch<SiteSettings>(query, { loc }, 60);
 
-  // إذا فشل الاتصال أو لم يُعدّ الـ singleton بعد → الـ defaults
-  if (!data) return DEFAULT_SETTINGS;
+  // إذا فشل الاتصال أو لم يُعدّ الـ singleton بعد → الـ defaults المُدوّلة
+  if (!data) return D;
 
   // دمج القيم الافتراضية مع البيانات الفعلية (حماية من الحقول الفارغة)
   return {
-    topBar:      { ...DEFAULT_SETTINGS.topBar,      ...(data.topBar      ?? {}) },
-    socialLinks: { ...DEFAULT_SETTINGS.socialLinks, ...(data.socialLinks ?? {}) },
-    contact:     { ...DEFAULT_SETTINGS.contact,     ...(data.contact     ?? {}) },
-    footer:      { ...DEFAULT_SETTINGS.footer,      ...(data.footer      ?? {}) },
+    topBar:      { ...D.topBar,      ...(data.topBar      ?? {}) },
+    socialLinks: { ...D.socialLinks, ...(data.socialLinks ?? {}) },
+    contact:     { ...D.contact,     ...(data.contact     ?? {}) },
+    footer:      { ...D.footer,      ...(data.footer      ?? {}) },
   };
 }

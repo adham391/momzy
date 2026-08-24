@@ -1,4 +1,5 @@
 import { sanityFetch } from "@/lib/sanity/client";
+import { tf, activeLocale } from "@/lib/sanity/i18n";
 import { ARTICLE_PREVIEWS } from "@/lib/utils/constants";
 
 /** بطاقة مقال موحّدة (سواء من Sanity أو الاحتياطي) */
@@ -39,13 +40,14 @@ const FALLBACK: ArticleCard[] = ARTICLE_PREVIEWS.map((a) => ({
 }));
 
 /** أحدث 3 مقالات للصفحة الرئيسية — Sanity أولاً، fallback ثابت */
-export async function getHomeArticles(): Promise<ArticleCard[]> {
+export async function getHomeArticles(locale?: string): Promise<ArticleCard[]> {
+  const loc = await activeLocale(locale);
   const query = `*[_type == "article" && isPublished == true] | order(publishedAt desc)[0...3]{
-    "slug": slug.current, title, category,
+    "slug": slug.current, ${tf("title")}, category,
     "coverImage": coverImage.asset->url, publishedAt
   }`;
 
-  const data = await sanityFetch<Array<{ slug?: string; title: string; category?: string; coverImage?: string; publishedAt?: string }>>(query, {}, 60);
+  const data = await sanityFetch<Array<{ slug?: string; title: string; category?: string; coverImage?: string; publishedAt?: string }>>(query, { loc }, 60);
   if (!data || data.length === 0) return FALLBACK;
 
   return data.map((a, i) => ({

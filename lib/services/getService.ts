@@ -8,12 +8,12 @@ import { SEED_SERVICES } from "./seed";
  * المصدر: Sanity CMS (أولاً)
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  */
-export async function getService(slug: string): Promise<Service | null> {
+export async function getService(slug: string, locale?: string): Promise<Service | null> {
   if (!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
     return SEED_SERVICES.find((s) => s.slug === slug) ?? null;
   }
 
-  const sanityService = await getServiceBySlug(slug);
+  const sanityService = await getServiceBySlug(slug, locale);
   if (sanityService) return sanityService;
 
   if (process.env.NODE_ENV === "development") {

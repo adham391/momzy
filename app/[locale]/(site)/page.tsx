@@ -8,8 +8,13 @@ import SectionsReveal     from "@/components/ui/SectionsReveal";
 import { getHomePage }    from "@/lib/sanity/queries/homePage";
 
 /** الصفحة الرئيسية — المحتوى قابل للتعديل من Sanity (مع fallback) */
-export default async function HomePage() {
-  const home = await getHomePage();
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const home = await getHomePage(locale);
 
   return (
     <>
