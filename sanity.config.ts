@@ -1,7 +1,15 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
+import { internationalizedArray } from "sanity-plugin-internationalized-array";
 import { schemaTypes } from "./sanity/schemas";
+
+/** اللغات المدعومة للمحتوى — العربية أساسية */
+const CONTENT_LANGUAGES = [
+  { id: "ar", title: "العربية" },
+  { id: "he", title: "עברית" },
+  { id: "en", title: "English" },
+];
 
 /**
  * إعداد Sanity Studio الرئيسي
@@ -76,6 +84,12 @@ export default defineConfig({
                   .title("إعدادات الموقع")
               ),
           ]),
+    }),
+    // تدويل المحتوى — كل حقل نصّي مُدوّل يصير مصفوفة { _key: lang, value }
+    internationalizedArray({
+      languages: CONTENT_LANGUAGES,
+      defaultLanguages: ["ar"],
+      fieldTypes: ["string", "text"],
     }),
     visionTool(), // GROQ playground للتطوير
   ],

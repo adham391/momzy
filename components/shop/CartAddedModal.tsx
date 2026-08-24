@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
 import type { Product } from "@/lib/products/types";
@@ -12,6 +12,7 @@ import { effectivePrice } from "@/lib/bundles";
 /** Modal يظهر عند إضافة أي منتج للسلة */
 export default function CartAddedModal() {
   const t = useTranslations("cart");
+  const locale = useLocale();
   const [mounted, setMounted]         = useState(false);
   const [visible, setVisible]         = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -26,8 +27,8 @@ export default function CartAddedModal() {
 
   /** جلب كل المنتجات مرة واحدة لاقتراحات أسفل الـ modal */
   useEffect(() => {
-    getProducts({ inStockOnly: true }).then(setAllProducts);
-  }, []);
+    getProducts({ inStockOnly: true }, locale).then(setAllProducts);
+  }, [locale]);
 
   /* أظهر الـ modal عند كل إضافة جديدة */
   useEffect(() => {

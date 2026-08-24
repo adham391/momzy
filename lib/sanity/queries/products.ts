@@ -1,76 +1,79 @@
 import type { Product, ProductFilters } from "@/lib/products/types";
 import { sanityFetch } from "@/lib/sanity/client";
+import { tf, tl, activeLocale } from "@/lib/sanity/i18n";
 
 /**
- * GROQ projection — يحوّل Sanity assets إلى URL strings
- * مطابق 1:1 مع Product interface في lib/products/types.ts
- * المكونات تتلقى نفس string paths — لا تغيير في الـ UI layer
+ * GROQ projection — يحوّل Sanity assets إلى URL strings ويحلّ الحقول المُدوّلة
+ * إلى نص اللغة الفعّالة ($loc) مع سقوط للعربية.
+ * المكونات تتلقى نفس string paths — لا تغيير في الـ UI layer.
  */
 const PRODUCT_FIELDS = `{
   "id":            _id,
   "slug":          slug.current,
-  title,
-  description,
+  ${tf("title")},
+  ${tf("description")},
   price,
   compareAtPrice,
   category,
-  label,
-  badge,
+  ${tf("label")},
+  ${tf("badge")},
   badgeColor,
-  tags[] { label, color },
+  tags[] { ${tf("label")}, color },
   inStock,
   stockQuantity,
   weight,
-  longDescription,
-  specifications,
-  shippingInfo,
+  ${tf("longDescription")},
+  specifications[] { ${tf("key")}, ${tf("value")} },
+  shippingInfo { ${tf("estimatedDays")}, freeShipping, ${tf("notes")} },
   "mainImage":     mainImage.asset->url,
   "gallery":       gallery[].asset->url,
   videoUrl,
   story {
-    title,
-    paragraphs,
+    ${tf("title")},
+    ${tl("paragraphs")},
     "image": image.asset->url
   },
   contents[] {
-    name,
-    description,
+    ${tf("name")},
+    ${tf("description")},
     "icon":  icon.asset->url,
     "image": image.asset->url
   },
   giftTargets[] {
-    label,
-    text
+    ${tf("label")},
+    ${tf("text")}
   },
   testimonials[] {
     name,
-    location,
-    text,
+    ${tf("location")},
+    ${tf("text")},
     rating,
     "image": image.asset->url
   },
   faqs[] {
-    question,
-    answer
+    ${tf("question")},
+    ${tf("answer")}
   },
-  bookletHook,
-  bookletAbout,
-  bookletChapters,
-  bookletBenefits,
-  bookletAudience,
+  ${tf("bookletHook")},
+  ${tl("bookletAbout")},
+  ${tl("bookletChapters")},
+  ${tl("bookletBenefits")},
+  ${tl("bookletAudience")},
   "digitalFile": digitalFile.asset->url,
   "createdAt": _createdAt,
   "updatedAt": _updatedAt
 }`;
 
 /** جلب منتج واحد بالـ slug */
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+export async function getProductBySlug(slug: string, locale?: string): Promise<Product | null> {
+  const loc = await activeLocale(locale);
   const query = `*[_type == "product" && slug.current == $slug][0]${PRODUCT_FIELDS}`;
-  return sanityFetch<Product>(query, { slug });
+  return sanityFetch<Product>(query, { slug, loc });
 }
 
 /** جلب كل المنتجات مع فلترة اختيارية */
-export async function getAllProducts(filters?: ProductFilters): Promise<Product[]> {
+export async function getAllProducts(filters?: ProductFilters, locale?: string): Promise<Product[]> {
+  const loc = await activeLocale(locale);
   const conditions: string[] = ['_type == "product"'];
 
   if (filters?.inStockOnly) conditions.push("inStock == true");
@@ -80,20 +83,21 @@ export async function getAllProducts(filters?: ProductFilters): Promise<Product[
   const order  = "| order(_createdAt desc)";
   const limit  = filters?.limit ? `[0...${filters.limit}]` : "";
   const query  = `*[${filter}]${order}${limit}${PRODUCT_FIELDS}`;
-  const params = filters?.category ? { category: filters.category } : {};
+  const params: Record<string, unknown> = { loc };
+  if (filters?.category) params.category = filters.category;
 
   const result = await sanityFetch<Product[]>(query, params);
   return result ?? [];
 }
 
-/** جلب slugs كل المنتجات — لـ generateStaticParams */
+/** جلب slugs كل المنتجات — لـ generateStaticParams (لا يحتاج لغة) */
 export async function getAllProductSlugs(): Promise<string[]> {
   const query  = `*[_type == "product" && defined(slug.current)].slug.current`;
   const result = await sanityFetch<string[]>(query, {}, 3600);
   return result ?? [];
 }
 
-/** جلب التصنيفات الفريدة من المنتجات الموجودة */
+/** جلب التصنيفات الفريدة من المنتجات الموجودة (category غير مُدوّل) */
 export async function getProductCategories(): Promise<string[]> {
   const query  = `array::unique(*[_type == "product"].category)`;
   const result = await sanityFetch<string[]>(query);

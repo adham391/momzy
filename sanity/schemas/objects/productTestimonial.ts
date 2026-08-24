@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "../i18n";
 
 /** شهادة عميلة — يُعرض في قسم "شهادات" */
 export const productTestimonial = defineType({
@@ -6,9 +7,13 @@ export const productTestimonial = defineType({
   title: "شهادة عميلة",
   type: "object",
   preview: {
-    select: { title: "name", subtitle: "location" },
+    select: { name: "name", location: "location" },
+    prepare({ name, location }) {
+      return { title: name ?? "—", subtitle: arValue(location) };
+    },
   },
   fields: [
+    // اسم العميلة — اسم عَلَم لا يُترجَم
     defineField({
       name: "name",
       title: "الاسم",
@@ -19,15 +24,13 @@ export const productTestimonial = defineType({
     defineField({
       name: "location",
       title: "المدينة",
-      type: "string",
-      placeholder: "مثال: حيفا",
+      type: "internationalizedArrayString",
       validation: (r) => r.required(),
     }),
     defineField({
       name: "text",
       title: "نص الشهادة",
-      type: "text",
-      rows: 3,
+      type: "internationalizedArrayText",
       validation: (r) => r.required(),
     }),
     defineField({

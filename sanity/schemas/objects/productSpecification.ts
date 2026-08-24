@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "../i18n";
 
 /** مواصفة تقنية — مادة، أبعاد، سعة... */
 export const productSpecification = defineType({
@@ -6,21 +7,22 @@ export const productSpecification = defineType({
   title: "مواصفة تقنية",
   type: "object",
   preview: {
-    select: { title: "key", subtitle: "value" },
+    select: { key: "key", value: "value" },
+    prepare({ key, value }) {
+      return { title: arValue(key) ?? "—", subtitle: arValue(value) };
+    },
   },
   fields: [
     defineField({
       name: "key",
       title: "الخاصية",
-      type: "string",
-      placeholder: "مثال: المادة",
+      type: "internationalizedArrayString",
       validation: (r) => r.required(),
     }),
     defineField({
       name: "value",
       title: "القيمة",
-      type: "string",
-      placeholder: "مثال: قطن عضوي 100%",
+      type: "internationalizedArrayString",
       validation: (r) => r.required(),
     }),
   ],

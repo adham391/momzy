@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "../i18n";
 
 /** تاق واحد للمنتج — نص + لون */
 export default defineType({
@@ -9,9 +10,8 @@ export default defineType({
     defineField({
       name: "label",
       title: "النص",
-      type: "string",
+      type: "internationalizedArrayString",
       validation: (r) => r.required().error("النص مطلوب"),
-      placeholder: "مثال: هدية مميزة",
     }),
     defineField({
       name: "color",
@@ -32,7 +32,7 @@ export default defineType({
     select: { label: "label", color: "color" },
     prepare({ label, color }) {
       const emoji = color === "teal" ? "🩵" : "🌸";
-      return { title: `${emoji} ${label ?? "—"}` };
+      return { title: `${emoji} ${arValue(label) ?? "—"}` };
     },
   },
 });

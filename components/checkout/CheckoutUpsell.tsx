@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
 import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
@@ -11,14 +11,15 @@ import { effectivePrice } from "@/lib/bundles";
 /** قسم البيع الإضافي — منتجات مقترحة في صفحة الدفع */
 export default function CheckoutUpsell() {
   const t = useTranslations("checkout");
+  const locale = useLocale();
   const cartItems = useCart((s) => s.items);
   const addItem   = useCart((s) => s.addItem);
 
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    getProducts({ inStockOnly: true }).then(setProducts);
-  }, []);
+    getProducts({ inStockOnly: true }, locale).then(setProducts);
+  }, [locale]);
 
   /** المنتجات غير الموجودة في السلة */
   const suggestions = products.filter(

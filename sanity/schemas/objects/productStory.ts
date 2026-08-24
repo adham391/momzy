@@ -9,18 +9,15 @@ export const productStory = defineType({
     defineField({
       name: "title",
       title: "عنوان القسم",
-      type: "string",
-      placeholder: "مثال: من قلب هبة",
-      initialValue: "من قلب هبة",
+      type: "internationalizedArrayString",
       validation: (r) => r.required(),
     }),
     defineField({
       name: "paragraphs",
       title: "فقرات القصة",
-      type: "array",
-      of: [{ type: "text" }],
-      description: "كل عنصر = فقرة مستقلة. أضيفي 3-4 فقرات.",
-      validation: (r) => r.required().min(1).error("أضيفي فقرة واحدة على الأقل"),
+      type: "internationalizedArrayText",
+      description: "كل سطر = فقرة مستقلة. أضيفي 3-4 فقرات (لكل لغة).",
+      validation: (r) => r.required().error("أضيفي فقرة واحدة على الأقل"),
     }),
     defineField({
       name: "image",

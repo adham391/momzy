@@ -10,14 +10,14 @@ import { SEED_PRODUCTS }    from "./seed";
  *
  * التوقيع لا يتغير — كل المكونات تعمل بدون تعديل
  */
-export async function getProduct(slug: string): Promise<Product | null> {
+export async function getProduct(slug: string, locale?: string): Promise<Product | null> {
   // إذا لم يُضبط projectId، ارجع للـ seed مباشرة (بيئة تطوير بدون Sanity)
   if (!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
     return SEED_PRODUCTS.find((p) => p.slug === slug) ?? null;
   }
 
   // المصدر الأساسي: Sanity
-  const sanityProduct = await getProductBySlug(slug);
+  const sanityProduct = await getProductBySlug(slug, locale);
   if (sanityProduct) return sanityProduct;
 
   // Fallback: seed في بيئة التطوير فقط

@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "../i18n";
 
 /** سؤال شائع — يُعرض في قسم "أسئلة شائعة" */
 export const productFAQ = defineType({
@@ -6,21 +7,22 @@ export const productFAQ = defineType({
   title: "سؤال شائع",
   type: "object",
   preview: {
-    select: { title: "question" },
+    select: { question: "question" },
+    prepare({ question }) {
+      return { title: arValue(question) ?? "—" };
+    },
   },
   fields: [
     defineField({
       name: "question",
       title: "السؤال",
-      type: "string",
-      placeholder: "مثال: كم تستغرق مدة التوصيل؟",
+      type: "internationalizedArrayString",
       validation: (r) => r.required(),
     }),
     defineField({
       name: "answer",
       title: "الإجابة",
-      type: "text",
-      rows: 3,
+      type: "internationalizedArrayText",
       validation: (r) => r.required(),
     }),
   ],

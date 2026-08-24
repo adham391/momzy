@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "../i18n";
 
 /** فئة مستهدفة بالهدية — يُعرض في قسم "لمين هاي الهدية؟" */
 export const productGiftTarget = defineType({
@@ -6,22 +7,22 @@ export const productGiftTarget = defineType({
   title: "فئة الهدية",
   type: "object",
   preview: {
-    select: { title: "label", subtitle: "text" },
+    select: { label: "label", text: "text" },
+    prepare({ label, text }) {
+      return { title: arValue(label) ?? "—", subtitle: arValue(text) };
+    },
   },
   fields: [
     defineField({
       name: "label",
       title: "العنوان",
-      type: "string",
-      placeholder: "مثال: للصديقة اللي صارت أم",
+      type: "internationalizedArrayString",
       validation: (r) => r.required(),
     }),
     defineField({
       name: "text",
       title: "نص الترغيب",
-      type: "text",
-      rows: 3,
-      placeholder: "اشرحي لماذا هذه الهدية مناسبة لهذه الفئة...",
+      type: "internationalizedArrayText",
       validation: (r) => r.required(),
     }),
   ],

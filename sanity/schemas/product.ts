@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { arValue } from "./i18n";
 
 /** التصنيفات المتاحة — تطابق قيم category في TypeScript */
 const CATEGORIES = [
@@ -26,7 +27,7 @@ export const product = defineType({
     },
     prepare({ title, subtitle, media }) {
       return {
-        title: title ?? "منتج بدون اسم",
+        title: arValue(title) ?? "منتج بدون اسم",
         subtitle: subtitle ?? "",
         media,
       };
@@ -38,26 +39,25 @@ export const product = defineType({
     defineField({
       name: "title",
       title: "اسم المنتج",
-      type: "string",
-      placeholder: "مثال: صندوق مشوار أم",
-      validation: (r) => r.required().min(3).error("اسم المنتج مطلوب"),
+      type: "internationalizedArrayString",
+      validation: (r) => r.required().error("اسم المنتج مطلوب"),
     }),
 
     defineField({
       name: "slug",
       title: "الرابط (Slug)",
       type: "slug",
-      options: { source: "title", maxLength: 96 },
+      // المصدر = القيمة العربية من الحقل المُدوّل
+      options: { source: "title.0.value", maxLength: 96 },
       validation: (r) => r.required().error("الرابط مطلوب"),
     }),
 
     defineField({
       name: "description",
       title: "الوصف القصير",
-      type: "text",
-      rows: 3,
-      placeholder: "جملة أو جملتان تُعرضان في بطاقة المنتج وأعلى صفحته...",
-      validation: (r) => r.required().min(20).error("الوصف مطلوب"),
+      type: "internationalizedArrayText",
+      description: "جملة أو جملتان تُعرضان في بطاقة المنتج وأعلى صفحته...",
+      validation: (r) => r.required().error("الوصف مطلوب"),
     }),
 
     defineField({
@@ -72,17 +72,15 @@ export const product = defineType({
     defineField({
       name: "label",
       title: "الـ Label (اختياري)",
-      type: "string",
+      type: "internationalizedArrayString",
       description: "نص صغير يظهر فوق العنوان في الكارد الكبير بالصفحة الرئيسية — مثال: Limited Edition، أو اتركيه فارغاً لإخفائه",
-      placeholder: "مثال: Limited Edition",
     }),
 
     defineField({
       name: "badge",
       title: "الـ Badge (اختياري)",
-      type: "string",
+      type: "internationalizedArrayString",
       description: "نص يظهر فوق الكارد الكبير في الصفحة الرئيسية — اكتبي ما تريدين، مثال: جديد الآن، عرض محدود، مخزون محدود. اتركيه فارغاً لإخفائه.",
-      placeholder: "مثال: جديد الآن",
     }),
 
     defineField({
@@ -179,9 +177,8 @@ export const product = defineType({
     defineField({
       name: "longDescription",
       title: "الوصف التفصيلي (اختياري)",
-      type: "text",
-      rows: 8,
-      placeholder: "وصف مطوّل عن المنتج، قيمته، مكوناته...",
+      type: "internationalizedArrayText",
+      description: "وصف مطوّل عن المنتج، قيمته، مكوناته...",
     }),
 
     defineField({
@@ -242,37 +239,32 @@ export const product = defineType({
     defineField({
       name: "bookletHook",
       title: "الكتيب — الخطّاف الافتتاحي (اختياري)",
-      type: "text",
-      rows: 4,
+      type: "internationalizedArrayText",
       description: "فقرة تشويقية أعلى صفحة الكتيب — خاصة بتصنيف «كتب ودلائل».",
     }),
     defineField({
       name: "bookletAbout",
       title: "الكتيب — نبذة عن الكتيب (فقرات)",
-      type: "array",
-      of: [{ type: "text", rows: 4 }],
-      description: "كل عنصر = فقرة مستقلة.",
+      type: "internationalizedArrayText",
+      description: "كل سطر = فقرة مستقلة (لكل لغة).",
     }),
     defineField({
       name: "bookletChapters",
       title: "الكتيب — ماذا ستجدين داخل الكتيب؟",
-      type: "array",
-      of: [{ type: "string" }],
-      description: "قائمة المواضيع/الفصول — كل سطر بند. وجودها يجعل الصفحة تظهر كـ«كتيب».",
+      type: "internationalizedArrayText",
+      description: "قائمة المواضيع/الفصول — كل سطر بند (لكل لغة). وجودها يجعل الصفحة تظهر كـ«كتيب».",
     }),
     defineField({
       name: "bookletBenefits",
       title: "الكتيب — ماذا سيفيدك هذا الكتيب؟",
-      type: "array",
-      of: [{ type: "string" }],
-      description: "قائمة الفوائد.",
+      type: "internationalizedArrayText",
+      description: "قائمة الفوائد — كل سطر بند (لكل لغة).",
     }),
     defineField({
       name: "bookletAudience",
       title: "الكتيب — لمن صُمّم هذا الكتيب؟",
-      type: "array",
-      of: [{ type: "string" }],
-      description: "الفئات المستهدفة.",
+      type: "internationalizedArrayText",
+      description: "الفئات المستهدفة — كل سطر بند (لكل لغة).",
     }),
 
     // ─── الملف الرقمي (PDF) — للكتيبات ──────────────────────────────
