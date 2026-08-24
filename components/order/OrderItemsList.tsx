@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import type { CartItem } from "@/lib/store/cart";
 
 interface OrderItemsListProps {
@@ -7,6 +8,7 @@ interface OrderItemsListProps {
 
 /** قائمة عناصر الطلب — للقراءة فقط */
 export default function OrderItemsList({ items }: OrderItemsListProps) {
+  const t = useTranslations("order");
   return (
     <div
       className="rounded-[22px] overflow-hidden"
@@ -25,7 +27,7 @@ export default function OrderItemsList({ items }: OrderItemsListProps) {
           fontSize: 17,
         }}
       >
-        عناصر الطلب ({items.length})
+        {t("itemsTitle", { count: items.length })}
       </div>
 
       {/* العناصر */}
@@ -78,21 +80,21 @@ export default function OrderItemsList({ items }: OrderItemsListProps) {
                 style={{ background: "var(--rosepale)", border: "1px solid rgba(242,167,181,0.30)" }}
               >
                 <p className="font-label font-bold text-[12px] mb-2" style={{ color: "var(--rose)", letterSpacing: "1.5px" }}>
-                  🎁 تفاصيل الهدية
+                  {t("gift.details")}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px]" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
                   {item.gift.recipientName && (
-                    <div><span className="font-bold">المستلِمة:</span> {item.gift.recipientName}</div>
+                    <div><span className="font-bold">{t("gift.recipient")}</span> {item.gift.recipientName}</div>
                   )}
                   {item.gift.recipientPhone && (
-                    <div dir="ltr" style={{ textAlign: "right" }}><span className="font-bold" dir="rtl">الهاتف:</span> {item.gift.recipientPhone}</div>
+                    <div dir="ltr" style={{ textAlign: "right" }}><span className="font-bold" dir="rtl">{t("gift.phone")}</span> {item.gift.recipientPhone}</div>
                   )}
                   {item.gift.recipientEmail && (
-                    <div dir="ltr" style={{ textAlign: "right" }}><span className="font-bold" dir="rtl">📧 بريد المستلِمة:</span> {item.gift.recipientEmail}</div>
+                    <div dir="ltr" style={{ textAlign: "right" }}><span className="font-bold" dir="rtl">{t("gift.email")}</span> {item.gift.recipientEmail}</div>
                   )}
                   {(item.gift.recipientAddress || item.gift.recipientCity) && (
                     <div className="sm:col-span-2">
-                      <span className="font-bold">العنوان:</span> {[item.gift.recipientAddress, item.gift.recipientCity].filter(Boolean).join(", ")}
+                      <span className="font-bold">{t("gift.address")}</span> {[item.gift.recipientAddress, item.gift.recipientCity].filter(Boolean).join(", ")}
                     </div>
                   )}
                 </div>

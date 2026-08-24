@@ -2,6 +2,7 @@ import { Link } from "@/lib/i18n/navigation";
 import PolkaDots from "@/components/ui/PolkaDots";
 import Container from "@/components/ui/Container";
 import MomzyText from "@/components/ui/MomzyText";
+import { useTranslations } from "next-intl";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** أيقونة سهم لليسار (RTL) للأزرار */
@@ -18,6 +19,8 @@ function ArrowLeft() {
  * الصورة في: public/images/heba.jpg
  */
 export default function HeroSection({ content }: { content: HomePageContent }) {
+  const t = useTranslations("home");
+  const tNav = useTranslations("nav");
   return (
     <section
       className="relative overflow-hidden min-h-[500px] md:min-h-0"
@@ -74,9 +77,9 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
           ✓
         </span>
         <div className="leading-tight">
-          <div className="font-heading font-bold" style={{ color: "var(--dark)", fontSize: 16 }}>هبة حسن</div>
+          <div className="font-heading font-bold" style={{ color: "var(--dark)", fontSize: 16 }}>{t("hero.hebaName")}</div>
           <div className="font-label" style={{ color: "var(--mid)", fontSize: 11.5, letterSpacing: "0.2px" }}>
-            ممرضة معتمدة · مرافقة ولادة
+            {t("hero.hebaCredentials")}
           </div>
         </div>
       </div>
@@ -211,7 +214,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
                   maxWidth: 190,
                 }}
               >
-                خدماتنا
+                {tNav("services")}
                 <ArrowLeft />
               </Link>
               <Link
@@ -230,7 +233,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
                   maxWidth: 190,
                 }}
               >
-                منتجاتنا
+                {t("hero.productsCta")}
                 <ArrowLeft />
               </Link>
             </div>

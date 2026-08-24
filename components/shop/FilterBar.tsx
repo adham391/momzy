@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import type { ProductSort } from "@/lib/products/types";
 
 interface FilterBarProps {
@@ -13,11 +14,11 @@ interface FilterBarProps {
   onChangeSort:     (s: ProductSort) => void;
 }
 
-/** خيارات الترتيب */
-const SORT_OPTIONS: { value: ProductSort; label: string; icon: string }[] = [
-  { value: "newest",     label: "الأحدث",              icon: "✦" },
-  { value: "price-asc",  label: "السعر: الأقل أولاً",  icon: "↑" },
-  { value: "price-desc", label: "السعر: الأعلى أولاً", icon: "↓" },
+/** خيارات الترتيب — الـ labels مفاتيح ترجمة */
+const SORT_OPTIONS: { value: ProductSort; labelKey: string; icon: string }[] = [
+  { value: "newest",     labelKey: "sortNewest",    icon: "✦" },
+  { value: "price-asc",  labelKey: "sortPriceAsc",  icon: "↑" },
+  { value: "price-desc", labelKey: "sortPriceDesc", icon: "↓" },
 ];
 
 /** شريط فلترة + بحث + ترتيب — تصميم احترافي */
@@ -30,6 +31,7 @@ export default function FilterBar({
   sort,
   onChangeSort,
 }: FilterBarProps) {
+  const t = useTranslations("shop");
   const [sortOpen, setSortOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -60,7 +62,7 @@ export default function FilterBar({
             type="text"
             value={searchQuery}
             onChange={(e) => onChangeSearch(e.target.value)}
-            placeholder="ابحثي عن منتج..."
+            placeholder={t("searchPlaceholder")}
             className="w-full font-body text-[14px] text-dark outline-none [transition:border-color_150ms_ease]"
             style={{
               border: "1.5px solid var(--bord)",
@@ -102,7 +104,7 @@ export default function FilterBar({
           >
             <span className="flex items-center gap-1.5">
               <span style={{ color: "var(--teal)", fontWeight: 700 }}>{activeSort.icon}</span>
-              {activeSort.label}
+              {t(activeSort.labelKey)}
             </span>
             <svg
               width="12" height="12" viewBox="0 0 12 12" fill="none"
@@ -143,7 +145,7 @@ export default function FilterBar({
                   }}
                 >
                   <span style={{ color: "var(--teal)", fontWeight: 700, minWidth: 14 }}>{opt.icon}</span>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
@@ -154,7 +156,7 @@ export default function FilterBar({
       {/* صف 2: التصنيفات */}
       <div className="flex flex-wrap gap-2">
         <CategoryButton
-          label="الكل"
+          label={t("allCategories")}
           active={activeCategory === "all"}
           onClick={() => onChangeCategory("all")}
         />

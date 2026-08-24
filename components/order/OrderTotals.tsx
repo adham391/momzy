@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 interface OrderTotalsProps {
   subtotal:     number;
   shippingCost: number;
@@ -7,6 +9,7 @@ interface OrderTotalsProps {
 
 /** ملخص الأرقام — مجموع، شحن، خصم، إجمالي */
 export default function OrderTotals({ subtotal, shippingCost, discount, total }: OrderTotalsProps) {
+  const t = useTranslations("order");
   return (
     <div
       className="rounded-[22px] overflow-hidden"
@@ -25,21 +28,21 @@ export default function OrderTotals({ subtotal, shippingCost, discount, total }:
           fontSize: 17,
         }}
       >
-        ملخص الدفع
+        {t("paymentSummary")}
       </div>
 
       {/* الأرقام */}
       <div style={{ padding: "16px 24px" }}>
         {/* المجموع الجزئي */}
         <div className="flex justify-between items-center mb-2">
-          <span className="font-label text-[14px] text-mid">المجموع</span>
+          <span className="font-label text-[14px] text-mid">{t("subtotal")}</span>
           <span className="font-label font-bold text-dark text-[14px]">₪{subtotal}</span>
         </div>
 
         {/* الخصم */}
         {discount > 0 && (
           <div className="flex justify-between items-center mb-2">
-            <span className="font-label text-[14px] text-teal">الخصم</span>
+            <span className="font-label text-[14px] text-teal">{t("discount")}</span>
             <span className="font-label font-bold text-teal text-[14px]">− ₪{discount}</span>
           </div>
         )}
@@ -47,15 +50,15 @@ export default function OrderTotals({ subtotal, shippingCost, discount, total }:
         {/* الشحن */}
         <div className="flex justify-between items-start mb-3">
           <div>
-            <div className="font-label text-[14px] text-mid">الشحن</div>
+            <div className="font-label text-[14px] text-mid">{t("shipping")}</div>
             {shippingCost > 0 && (
               <div className="font-label text-[11px] text-light mt-0.5">
-                توصيل حتى البيت (خلال 7 أيام عمل)
+                {t("shippingNote")}
               </div>
             )}
           </div>
           {shippingCost === 0 ? (
-            <span className="font-label font-bold text-teal text-[14px]">مجاني 🎉</span>
+            <span className="font-label font-bold text-teal text-[14px]">{t("freeShipping")}</span>
           ) : (
             <span className="font-label font-bold text-dark text-[14px]">₪{shippingCost}</span>
           )}
@@ -66,7 +69,7 @@ export default function OrderTotals({ subtotal, shippingCost, discount, total }:
           className="flex justify-between items-center pt-3"
           style={{ borderTop: "1.5px solid var(--bord)" }}
         >
-          <span className="font-heading font-bold text-dark text-[16px]">الإجمالي</span>
+          <span className="font-heading font-bold text-dark text-[16px]">{t("total")}</span>
           <span className="font-label font-extrabold text-teal text-[24px]">₪{total}</span>
         </div>
       </div>
@@ -81,7 +84,7 @@ export default function OrderTotals({ subtotal, shippingCost, discount, total }:
         }}
       >
         <span>🔒</span>
-        <span className="font-label">دفع آمن ومشفر — بياناتك محمية</span>
+        <span className="font-label">{t("secureNote")}</span>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
@@ -5,6 +6,7 @@ import PolkaDots from "@/components/ui/PolkaDots";
 
 /** Hero صفحة الخدمات — مُحسَّن للتحويل: scarcity + credentials + CTAs */
 export default function ServicesHero() {
+  const t = useTranslations("services");
   return (
     <div
       className="relative overflow-hidden"
@@ -40,7 +42,7 @@ export default function ServicesHero() {
               <CalendarIcon />
             </span>
             <span className="font-label font-bold text-[12px] md:text-[13px]" style={{ color: "var(--dark)", letterSpacing: "0.3px" }}>
-              المواعيد محدودة — <span style={{ color: "var(--teal)" }}>احجزي مكانك مبكراً</span>
+              {t.rich("limitedBadge", { accent: (chunks) => <span style={{ color: "var(--teal)" }}>{chunks}</span> })}
             </span>
           </div>
 
@@ -49,7 +51,7 @@ export default function ServicesHero() {
             className="font-label font-bold text-[12px] md:text-[14px] mb-4"
             style={{ color: "var(--teal)", letterSpacing: "3px", textTransform: "uppercase" }}
           >
-            خدمات MOMZY
+            {t("hero.label")}
           </p>
 
           {/* العنوان الرئيسي */}
@@ -61,9 +63,9 @@ export default function ServicesHero() {
               lineHeight: 1.2,
             }}
           >
-            <span className="block">دعم حقيقي لأمومة</span>
+            <span className="block">{t("hero.titleLine1")}</span>
             <span className="block mt-3 md:mt-4" style={{ color: "var(--rose)", fontStyle: "italic" }}>
-              أهدأ وأكثر ثقة
+              {t("hero.titleLine2")}
             </span>
           </h1>
 
@@ -78,15 +80,14 @@ export default function ServicesHero() {
               fontWeight: 500,
             }}
           >
-            من اللحظة الأولى للحمل وحتى السنة الأولى لطفلك — هبة بجانبك بورشات
-            جماعية ولقاءات فردية مصمّمة بعناية لاحتياجاتك.
+            {t("hero.text")}
           </p>
 
           {/* Credential chips */}
           <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap mb-8">
-            <CredentialChip icon="👩‍⚕️" text="ممرضة معتمدة" dotColor="var(--rose)" />
-            <CredentialChip icon="🤱" text="مرشدة رضاعة" dotColor="var(--teal)" />
-            <CredentialChip icon="🤰" text="مرافقة ولادة" dotColor="#C09420" />
+            <CredentialChip icon="👩‍⚕️" text={t("credentials.nurse")} dotColor="var(--rose)" />
+            <CredentialChip icon="🤱" text={t("credentials.lactation")} dotColor="var(--teal)" />
+            <CredentialChip icon="🤰" text={t("credentials.doula")} dotColor="#C09420" />
           </div>
 
           {/* CTAs */}
@@ -106,7 +107,7 @@ export default function ServicesHero() {
                 minWidth: 200,
               }}
             >
-              <span>تصفّحي الخدمات</span>
+              <span>{t("hero.browseServices")}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
@@ -126,17 +127,17 @@ export default function ServicesHero() {
                 minWidth: 200,
               }}
             >
-              تواصلي مع هبة ←
+              {t("hero.contactHeba")}
             </Link>
           </div>
 
           {/* Trust micro-line */}
           <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
-            <TrustLine icon="🔒" text="معلوماتك محمية" />
+            <TrustLine icon="🔒" text={t("trust.privacy")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
-            <TrustLine icon="💬" text="رد خلال 24 ساعة" />
+            <TrustLine icon="💬" text={t("trust.reply24h")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
-            <TrustLine icon="✓" text="بدون التزام" />
+            <TrustLine icon="✓" text={t("trust.noCommitment")} />
           </div>
 
         </div>

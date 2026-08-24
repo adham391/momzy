@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { formatILS } from "@/lib/utils/format";
 
@@ -29,6 +30,7 @@ export default function EmbeddedPayment({
   total,
   onEdit,
 }: EmbeddedPaymentProps) {
+  const t = useTranslations("checkout");
   const [loaded, setLoaded] = useState(false);
   const isBooking = kind === "booking";
   const hasSummary = reference && total != null;
@@ -46,16 +48,16 @@ export default function EmbeddedPayment({
           className="mx-auto mb-3 object-contain"
           style={{ height: 38, width: "auto" }}
         />
-        <h2 className="font-heading font-bold text-dark text-[22px] mb-1.5">بطاقة الدفع الآمنة</h2>
+        <h2 className="font-heading font-bold text-dark text-[22px] mb-1.5">{t("securePaymentCard")}</h2>
         <p className="font-label text-[13.5px] text-mid">
           {hasSummary ? (
             <>
-              {isBooking ? "التسجيل" : "الطلب"}{" "}
-              <span dir="ltr" className="font-bold text-dark">{reference}</span> — الإجمالي{" "}
+              {isBooking ? t("registrationLabel") : t("orderLabel")}{" "}
+              <span dir="ltr" className="font-bold text-dark">{reference}</span> — {t("total")}{" "}
               <span className="font-bold text-dark">{formatILS(total)}</span>
             </>
           ) : (
-            "أدخلي بيانات بطاقتك في النموذج الآمن أدناه"
+            t("enterCardDetails")
           )}
         </p>
       </div>
@@ -77,13 +79,13 @@ export default function EmbeddedPayment({
               className="rounded-full animate-spin"
               style={{ width: 40, height: 40, border: "3px solid var(--bord)", borderTopColor: "var(--rose)" }}
             />
-            <p className="font-label text-[13px] text-light">جارٍ تحميل صفحة الدفع الآمنة…</p>
+            <p className="font-label text-[13px] text-light">{t("loadingPayment")}</p>
           </div>
         )}
 
         <iframe
           src={src}
-          title="صفحة الدفع الآمنة — HYP"
+          title={t("paymentFrameTitle")}
           onLoad={() => setLoaded(true)}
           allow="payment"
           className="w-full block"
@@ -99,10 +101,10 @@ export default function EmbeddedPayment({
             className="font-label text-[13px] text-mid hover:text-dark transition-colors active:scale-[0.98]"
             style={{ background: "none", border: "none", cursor: "pointer" }}
           >
-            ← {isBooking ? "تعديل بياناتي" : "تعديل بيانات التوصيل"}
+            {isBooking ? t("editMyDetails") : t("editDelivery")}
           </button>
         )}
-        <span className="font-label text-[12px] text-light">🔒 مشفّر عبر HYP · بياناتك البنكية لا تُحفظ لدينا</span>
+        <span className="font-label text-[12px] text-light">{t("encryptedNote")}</span>
       </div>
     </div>
   );

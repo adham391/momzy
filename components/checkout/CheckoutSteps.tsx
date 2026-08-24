@@ -4,6 +4,8 @@
  * وبتسميات الحجوزات في /booking (التسجيل بدل التوصيل).
  */
 
+import { useTranslations } from "next-intl";
+
 interface CheckoutStepsProps {
   /** المرحلة الحالية: 1 توصيل/تسجيل · 2 دفع · 3 تأكيد */
   current: 1 | 2 | 3;
@@ -11,10 +13,8 @@ interface CheckoutStepsProps {
   labels?: readonly [string, string, string];
 }
 
-/** تسميات مراحل تسجيل الورشات — نفس التجربة بمفردات الحجز */
+/** تسميات مراحل تسجيل الورشات — علامة مرجعية تُترجم داخل المكوّن */
 export const BOOKING_STEP_LABELS = ["التسجيل", "الدفع", "التأكيد"] as const;
-
-const DEFAULT_LABELS = ["التوصيل", "الدفع", "التأكيد"] as const;
 
 function CheckIcon() {
   return (
@@ -24,14 +24,20 @@ function CheckIcon() {
   );
 }
 
-export default function CheckoutSteps({ current, labels = DEFAULT_LABELS }: CheckoutStepsProps) {
+export default function CheckoutSteps({ current, labels }: CheckoutStepsProps) {
+  const t = useTranslations("checkout");
+  /* التسميات المترجمة — الافتراضي للمتجر، ومفردات الحجز عند تمرير BOOKING_STEP_LABELS */
+  const resolvedLabels: readonly [string, string, string] =
+    labels === BOOKING_STEP_LABELS
+      ? [t("stepRegistration"), t("stepPayment"), t("stepConfirmation")]
+      : labels ?? [t("stepDelivery"), t("stepPayment"), t("stepConfirmation")];
   return (
     <div className="flex items-start justify-center mx-auto" style={{ maxWidth: 440 }}>
-      {labels.map((label, i) => {
+      {resolvedLabels.map((label, i) => {
         const step = { n: i + 1, label };
         const done = step.n < current;
         const active = step.n === current;
-        const isLast = i === labels.length - 1;
+        const isLast = i === resolvedLabels.length - 1;
         return (
           <div key={step.n} className="flex items-start" style={{ flex: isLast ? "0 0 auto" : 1 }}>
             {/* الدائرة + التسمية */}

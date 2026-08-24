@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
@@ -16,6 +17,7 @@ interface ServiceAboutHebaProps {
  * يقرأ من نفس مصدر صفحة «عن هبة» (aboutPage في Sanity) — لا نسخة ثانية من سيرتها.
  */
 export default async function ServiceAboutHeba({ accent, zIndex }: ServiceAboutHebaProps) {
+  const t = await getTranslations("services");
   const about = await getAboutPage();
 
   return (
@@ -28,13 +30,13 @@ export default async function ServiceAboutHeba({ accent, zIndex }: ServiceAboutH
               className="font-label font-bold mb-2"
               style={{ color: accent, letterSpacing: "2.5px", textTransform: "uppercase", fontSize: 15 }}
             >
-              مرشدتك
+              {t("aboutHeba.label")}
             </p>
             <h2
               className="font-heading font-bold"
               style={{ fontSize: "clamp(24px, 3vw, 32px)", color: "var(--dark)" }}
             >
-              من ترافقكِ في هذه الورشة؟
+              {t("aboutHeba.title")}
             </h2>
           </div>
 
@@ -117,7 +119,7 @@ export default async function ServiceAboutHeba({ accent, zIndex }: ServiceAboutH
                   padding: "10px 24px",
                 }}
               >
-                اقرئي قصة هبة كاملة ←
+                {t("aboutHeba.readFullStory")}
               </Link>
             </div>
           </div>

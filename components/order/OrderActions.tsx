@@ -1,7 +1,9 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 
 /** أزرار الإجراءات بعد إتمام الطلب */
 export default function OrderActions() {
+  const t = useTranslations("order");
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -17,7 +19,7 @@ export default function OrderActions() {
             textDecoration: "none",
           }}
         >
-          مواصلة التسوق
+          {t("continueShopping")}
         </Link>
 
         {/* تواصلي معنا */}
@@ -33,13 +35,13 @@ export default function OrderActions() {
             textDecoration: "none",
           }}
         >
-          تواصلي معنا
+          {t("contactUs")}
         </Link>
       </div>
 
       {/* ملاحظة سفلية */}
       <p className="text-center font-label text-[13px] text-mid">
-        ✉️ ستصلكِ رسالة تأكيد على بريدك الإلكتروني خلال دقائق
+        {t("emailConfirmationNote")}
       </p>
     </div>
   );

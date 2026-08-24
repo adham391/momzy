@@ -3,17 +3,19 @@ import Button from "@/components/ui/Button";
 import SectionLabel from "@/components/ui/SectionLabel";
 import SectionWave from "@/components/ui/SectionWave";
 import MomzyText from "@/components/ui/MomzyText";
+import { useTranslations } from "next-intl";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
-/** شهادات هبة المهنية مع ألوان النقطة */
+/** شهادات هبة المهنية مع ألوان النقطة — النص من مفاتيح home.heba.tags */
 const HEBA_TAGS = [
-  { label: "ممرضة معتمدة", dot: "var(--rose)" },
-  { label: "مرشدة رضاعة",  dot: "var(--teal)" },
-  { label: "مرافقة ولادة", dot: "#C09420"      },
+  { key: "nurse",     dot: "var(--rose)" },
+  { key: "lactation", dot: "var(--teal)" },
+  { key: "doula",     dot: "#C09420"      },
 ];
 
 /** قسم هبة حسن — مؤسِّسة Momzy (تصميم editorial فاخر) */
 export default function HebaSection({ content }: { content: HomePageContent }) {
+  const t = useTranslations("home");
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية قسم الأكثر مبيعاً ─ */
     <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 4 }}>
@@ -77,12 +79,12 @@ export default function HebaSection({ content }: { content: HomePageContent }) {
               <div className="flex gap-2 flex-wrap justify-center md:justify-start mb-4 md:mb-6">
                 {HEBA_TAGS.map((tag) => (
                   <span
-                    key={tag.label}
+                    key={tag.key}
                     className="font-label font-bold text-label inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full whitespace-nowrap"
                     style={{ background: "white", color: "var(--dark)", border: "1px solid var(--bord)", letterSpacing: "0.3px", boxShadow: "0 4px 14px rgba(0,0,0,0.05)" }}
                   >
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: tag.dot, flexShrink: 0 }} />
-                    {tag.label}
+                    {t(`heba.tags.${tag.key}`)}
                   </span>
                 ))}
               </div>
@@ -96,8 +98,8 @@ export default function HebaSection({ content }: { content: HomePageContent }) {
 
               {/* أزرار CTA */}
               <div className="flex gap-3 flex-wrap justify-center md:justify-start">
-                <Button variant="rose" href="/services">احجزي مع هبة ←</Button>
-                <Button variant="outline-rose" href="/about">تعرّفي على هبة</Button>
+                <Button variant="rose" href="/services">{t("heba.bookCta")}</Button>
+                <Button variant="outline-rose" href="/about">{t("heba.aboutCta")}</Button>
               </div>
             </div>
 

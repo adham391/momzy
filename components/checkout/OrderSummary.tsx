@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useCart } from "@/lib/store/cart";
 import QuantityInput from "@/components/shop/QuantityInput";
@@ -12,6 +13,7 @@ type CouponStatus = "idle" | "checking" | "valid" | "invalid";
 
 /** ملخص الطلب مع تحكم بالكمية وحقل كوبون. readOnly = عرض فقط (مرحلة الدفع) */
 export default function OrderSummary({ shipping, readOnly = false }: { shipping: ShippingConfig; readOnly?: boolean }) {
+  const t              = useTranslations("checkout");
   const items          = useCart((s) => s.items);
   const getTotal       = useCart((s) => s.getTotal);
   const updateQuantity = useCart((s) => s.updateQuantity);
@@ -89,7 +91,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           fontSize: 17,
         }}
       >
-        ملخص الطلب
+        {t("orderSummary")}
       </div>
 
       {/* العناصر */}
@@ -123,7 +125,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                 {item.title}
               </div>
               {readOnly ? (
-                <div className="font-label text-[12px] text-light">الكمية: {item.quantity}</div>
+                <div className="font-label text-[12px] text-light">{t("quantity", { count: item.quantity })}</div>
               ) : (
                 <div className="flex items-center gap-2">
                   <QuantityInput
@@ -137,7 +139,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                     className="font-label text-[11px] text-light hover:text-rose transition-colors"
                     style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                   >
-                    حذف
+                    {t("remove")}
                   </button>
                 </div>
               )}
@@ -170,7 +172,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           >
             <span>🎁</span>
             <span className="font-label font-bold text-[13px]" style={{ color: "var(--rose)" }}>
-              وفّرتِ ₪{bundleSavings} مع باقة الصندوق + الكتيب
+              {t("bundleSavingsNote", { amount: bundleSavings })}
             </span>
           </div>
         )}
@@ -185,7 +187,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-label font-bold text-teal text-[13px]">✓ {appliedCoupon.label}</span>
-              <span className="font-label text-[12px] text-teal">— خصم ₪{discount}</span>
+              <span className="font-label text-[12px] text-teal">{t("couponDiscountNote", { amount: discount })}</span>
             </div>
             {!readOnly && (
               <button
@@ -193,7 +195,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                 className="font-label text-[12px] text-light hover:text-rose transition-colors"
                 style={{ background: "none", border: "none", cursor: "pointer" }}
               >
-                إزالة
+                {t("removeCoupon")}
               </button>
             )}
           </div>
@@ -215,7 +217,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                   <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
                   <line x1="7" y1="7" x2="7.01" y2="7"/>
                 </svg>
-                هل لديكِ كوبون خصم؟
+                {t("haveCoupon")}
               </button>
             )}
 
@@ -227,7 +229,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                     value={couponCode}
                     onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponStatus("idle"); }}
                     onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
-                    placeholder="أدخلي كود الخصم"
+                    placeholder={t("couponPlaceholder")}
                     dir="ltr"
                     autoFocus
                     className="flex-1 font-label text-[13px] text-dark outline-none"
@@ -252,12 +254,12 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                       cursor: couponCode.trim() ? "pointer" : "not-allowed",
                     }}
                   >
-                    {couponStatus === "checking" ? "..." : "تطبيق"}
+                    {couponStatus === "checking" ? "..." : t("apply")}
                   </button>
                 </div>
                 {couponStatus === "invalid" && (
                   <div className="font-label text-[12px] text-rose mt-1.5">
-                    كود الخصم غير صحيح أو منتهي الصلاحية
+                    {t("couponInvalid")}
                   </div>
                 )}
               </div>
@@ -270,28 +272,28 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
       {/* الأرقام */}
       <div style={{ padding: "12px 22px" }}>
         <div className="flex justify-between items-center mb-2">
-          <span className="font-label text-[14px] text-mid">المجموع</span>
+          <span className="font-label text-[14px] text-mid">{t("subtotal")}</span>
           <span className="font-label font-bold text-dark text-[14px]">₪{total}</span>
         </div>
 
         {discount > 0 && (
           <div className="flex justify-between items-center mb-2">
-            <span className="font-label text-[14px] text-teal">الخصم</span>
+            <span className="font-label text-[14px] text-teal">{t("discountLabel")}</span>
             <span className="font-label font-bold text-teal text-[14px]">− ₪{discount}</span>
           </div>
         )}
 
         <div className="flex justify-between items-start mb-3">
           <div>
-            <div className="font-label text-[14px] text-mid">الشحن</div>
+            <div className="font-label text-[14px] text-mid">{t("shipping")}</div>
             {shippingCost > 0 && (
               <div className="font-label text-[11px] text-light mt-0.5">
-                توصيل حتى البيت (خلال 7 أيام عمل)
+                {t("deliveryNote")}
               </div>
             )}
           </div>
           {shippingCost === 0 ? (
-            <span className="font-label font-bold text-teal text-[14px]">مجاني 🎉</span>
+            <span className="font-label font-bold text-teal text-[14px]">{t("free")}</span>
           ) : (
             <span className="font-label font-bold text-dark text-[14px]">₪{shippingCost}</span>
           )}
@@ -301,7 +303,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           className="flex justify-between items-center pt-3"
           style={{ borderTop: "1.5px solid var(--bord)" }}
         >
-          <span className="font-heading font-bold text-dark text-[16px]">الإجمالي</span>
+          <span className="font-heading font-bold text-dark text-[16px]">{t("total")}</span>
           <span className="font-label font-extrabold text-teal text-[22px]">₪{grandTotal}</span>
         </div>
       </div>
@@ -316,7 +318,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
         }}
       >
         <span>🔒</span>
-        <span className="font-label">دفع آمن ومشفر — بياناتك محمية</span>
+        <span className="font-label">{t("securePaymentNote")}</span>
       </div>
     </div>
   );

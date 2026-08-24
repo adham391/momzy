@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
@@ -18,10 +20,11 @@ import { isHypConfigured } from "@/lib/hyp/client";
 import { getProductImageMap } from "@/lib/products/getProductImageMap";
 import type { CartItem } from "@/lib/store/cart";
 
-export const metadata: Metadata = {
-  title: "تأكيد الطلب | Momzy",
-  description: "تم تأكيد طلبكِ بنجاح",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "order" });
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 interface OrderPageProps {
   params: Promise<{ id: string }>;
@@ -38,6 +41,8 @@ const FALLBACK_IMAGE = "/icons/momzy-logo.png";
 export default async function OrderPage({ params, searchParams }: OrderPageProps) {
   const { id } = await params;
   const { payment } = await searchParams;
+  const t = await getTranslations("order");
+  const tNav = await getTranslations("nav");
   const order = await getOrderById(id);
 
   if (!order) return <OrderNotFound />;
@@ -81,14 +86,14 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
       >
         <Container>
           <nav className="font-label text-[13px] text-light flex items-center gap-1.5 mb-4">
-            <Link href="/" className="hover:text-teal transition-colors">الرئيسية</Link>
+            <Link href="/" className="hover:text-teal transition-colors">{tNav("home")}</Link>
             <span>›</span>
-            <Link href="/shop" className="hover:text-teal transition-colors">المتجر</Link>
+            <Link href="/shop" className="hover:text-teal transition-colors">{tNav("shop")}</Link>
             <span>›</span>
-            <span className="text-mid">تأكيد الطلب</span>
+            <span className="text-mid">{t("title")}</span>
           </nav>
           <h1 className="font-heading font-bold text-h1 mb-2" style={{ color: "var(--dark)" }}>
-            تأكيد الطلب
+            {t("title")}
           </h1>
         </Container>
         <PageHeaderWave fillColor="var(--offwh)" />
@@ -131,6 +136,7 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
 
 /** واجهة "الطلب غير موجود" */
 function OrderNotFound() {
+  const t = useTranslations("order");
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh", paddingTop: 80, paddingBottom: 80 }}>
       <Container>
@@ -145,16 +151,16 @@ function OrderNotFound() {
           }}
         >
           <div style={{ fontSize: 56, marginBottom: 16 }}>🔍</div>
-          <h1 className="font-heading font-bold text-dark text-[24px] mb-3">الطلب غير موجود</h1>
+          <h1 className="font-heading font-bold text-dark text-[24px] mb-3">{t("notFoundTitle")}</h1>
           <p className="font-label text-[14px] text-mid leading-[1.8] mb-6">
-            لم نعثر على هذا الطلب — ربما الرابط غير صحيح.
+            {t("notFoundBody")}
           </p>
           <Link
             href="/shop"
             className="inline-block font-label font-bold text-[14px] text-dark"
             style={{ background: "var(--yellow)", border: "none", borderRadius: 50, padding: "13px 32px" }}
           >
-            العودة للمتجر
+            {t("backToShop")}
           </Link>
         </div>
       </Container>

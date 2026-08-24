@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
 
-export const metadata: Metadata = {
-  title: "الشروط والأحكام | Momzy",
-  description: "الشروط والأحكام لموقع Momzy — حقوق وواجبات المستخدم والموقع",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "terms" });
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 /** قسم فرعي */
 function Section({ num, title, children }: { num: string; title: string; children: React.ReactNode }) {
@@ -50,6 +54,13 @@ function Li({ warn, children }: { warn?: boolean; children: React.ReactNode }) {
 }
 
 export default function TermsPage() {
+  const t = useTranslations("terms");
+
+  // تنسيق النص الغامق داخل رسائل rich text
+  const b = (chunks: React.ReactNode) => (
+    <strong style={{ color: "var(--dark)" }}>{chunks}</strong>
+  );
+
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh" }}>
 
@@ -67,16 +78,16 @@ export default function TermsPage() {
             className="font-label font-bold text-[11px] mb-3"
             style={{ color: "var(--rose)", letterSpacing: "2.5px", textTransform: "uppercase" }}
           >
-            قانوني
+            {t("label")}
           </p>
           <h1
             className="font-heading font-bold text-h1 mb-2"
             style={{ color: "var(--dark)" }}
           >
-            الشروط والأحكام
+            {t("title")}
           </h1>
           <p className="font-label text-[14px]" style={{ color: "var(--mid)" }}>
-            آخر تحديث: أبريل 2026
+            {t("lastUpdated")}
           </p>
         </Container>
         <PageHeaderWave fillColor="var(--offwh)" />
@@ -95,98 +106,81 @@ export default function TermsPage() {
               borderBottom: "1px solid var(--bord)",
             }}
           >
-            باستخدامكِ لموقع <strong style={{ color: "var(--dark)" }}>Momzy</strong> أو إجرائكِ
-            لعملية شراء، فإنكِ توافقين على الشروط والأحكام الواردة في هذه الصفحة.
-            يُرجى قراءتها بعناية قبل المتابعة.
+            {t.rich("intro", { b })}
           </p>
 
-          <Section num="01" title="عن الموقع">
-            <p>
-              Momzy منصة رعاية أمومة تأسست من قِبل{" "}
-              <strong style={{ color: "var(--dark)" }}>هبة حسن</strong> —
-              ممرضة معتمدة ومرشدة رضاعة ومرافقة ولادة. يقدّم الموقع منتجات فيزيائية
-              ورقمية وورشات مسجلة موجهة للأمهات في إسرائيل.
-            </p>
+          <Section num="01" title={t("sections.0.title")}>
+            <p>{t.rich("sections.0.body", { b })}</p>
           </Section>
 
-          <Section num="02" title="الشراء والدفع">
+          <Section num="02" title={t("sections.1.title")}>
             <div className="flex flex-col gap-1">
-              <Li>الشراء متاح بدون تسجيل حساب — مجهول الهوية</Li>
-              <Li>الأسعار بالشيكل الإسرائيلي ₪ وتشمل ضريبة القيمة المضافة</Li>
-              <Li>الدفع يتم عبر بوابة الدفع الآمنة HYP</Li>
-              <Li>يُعدّ الطلب مؤكداً بعد استلام تأكيد الدفع من HYP</Li>
-              <Li>نحتفظ بالحق في رفض أي طلب في حالات الاشتباه بالاحتيال</Li>
+              <Li>{t("sections.1.items.0")}</Li>
+              <Li>{t("sections.1.items.1")}</Li>
+              <Li>{t("sections.1.items.2")}</Li>
+              <Li>{t("sections.1.items.3")}</Li>
+              <Li>{t("sections.1.items.4")}</Li>
             </div>
           </Section>
 
-          <Section num="03" title="الشحن والتوصيل">
+          <Section num="03" title={t("sections.2.title")}>
             <div className="flex flex-col gap-1">
-              <Li>الشحن متاح داخل إسرائيل فقط</Li>
-              <Li>مدة التوصيل المتوقعة: حتى 7 أيام عمل من تأكيد الطلب</Li>
-              <Li>رسوم الشحن: ₪40 للمنتجات الفيزيائية — مجاني للمنتجات الرقمية</Li>
-              <Li>رقم التتبع يُرسل بعد شحن الطلب</Li>
-              <Li>الموقع غير مسؤول عن أي تأخير من جانب شركة الشحن</Li>
+              <Li>{t("sections.2.items.0")}</Li>
+              <Li>{t("sections.2.items.1")}</Li>
+              <Li>{t("sections.2.items.2")}</Li>
+              <Li>{t("sections.2.items.3")}</Li>
+              <Li>{t("sections.2.items.4")}</Li>
             </div>
           </Section>
 
-          <Section num="04" title="سياسة الإرجاع والاستبدال">
-            <p style={{ color: "var(--teal)", fontWeight: 700 }}>المنتجات الفيزيائية:</p>
+          <Section num="04" title={t("sections.3.title")}>
+            <p style={{ color: "var(--teal)", fontWeight: 700 }}>{t("sections.3.physicalTitle")}</p>
             <div className="flex flex-col gap-1 mb-4">
-              <Li>يحق لكِ طلب الإرجاع خلال 14 يوماً من استلام الطلب</Li>
-              <Li>يجب أن يكون المنتج غير مستخدم وفي عبوته الأصلية</Li>
-              <Li>تكاليف الإرجاع تقع على عاتق العميل إلا في حالة وجود عيوب</Li>
+              <Li>{t("sections.3.physicalItems.0")}</Li>
+              <Li>{t("sections.3.physicalItems.1")}</Li>
+              <Li>{t("sections.3.physicalItems.2")}</Li>
             </div>
-            <p style={{ color: "var(--teal)", fontWeight: 700 }}>المنتجات الرقمية والورشات المسجلة:</p>
+            <p style={{ color: "var(--teal)", fontWeight: 700 }}>{t("sections.3.digitalTitle")}</p>
             <div className="flex flex-col gap-1">
-              <Li>لا يمكن الإرجاع بعد تحميل الملف أو مشاهدة الورشة</Li>
-              <Li>في حالة وجود مشكلة تقنية نلتزم بإيجاد حل بديل</Li>
+              <Li>{t("sections.3.digitalItems.0")}</Li>
+              <Li>{t("sections.3.digitalItems.1")}</Li>
             </div>
           </Section>
 
-          <Section num="05" title="حقوق المحتوى الرقمي">
-            <p>
-              جميع المنتجات الرقمية (الكتيبات، الورشات المسجلة) هي ملكية فكرية حصرية لـ{" "}
-              <strong style={{ color: "var(--dark)" }}>هبة حسن</strong>.
-            </p>
+          <Section num="05" title={t("sections.4.title")}>
+            <p>{t.rich("sections.4.intro", { b })}</p>
             <div className="flex flex-col gap-1 mt-2">
-              <Li warn>يُمنع منعاً باتاً نشر المحتوى أو توزيعه أو مشاركته مع أي طرف آخر</Li>
-              <Li warn>يُمنع إعادة بيع المحتوى أو استخدامه لأغراض تجارية</Li>
-              <Li warn>روابط التحميل صالحة لمدة 7 أيام وبحد أقصى 5 تحميلات</Li>
-              <Li warn>الاستخدام مقتصر على الغرض الشخصي فقط</Li>
+              <Li warn>{t("sections.4.items.0")}</Li>
+              <Li warn>{t("sections.4.items.1")}</Li>
+              <Li warn>{t("sections.4.items.2")}</Li>
+              <Li warn>{t("sections.4.items.3")}</Li>
             </div>
             <p className="mt-3 font-bold" style={{ color: "var(--dark)" }}>
-              أي انتهاك لهذه الحقوق يُعرّض صاحبه للمساءلة القانونية.
+              {t("sections.4.note")}
             </p>
           </Section>
 
-          <Section num="06" title="إخلاء المسؤولية">
-            <p>
-              المعلومات المقدَّمة في الموقع والمنتجات ذات طابع توعوي وتثقيفي ولا تُغني عن
-              استشارة الطبيب أو المختص الصحي. Momzy غير مسؤولة عن أي نتائج تترتب على
-              تطبيق المعلومات الواردة دون استشارة متخصص.
-            </p>
+          <Section num="06" title={t("sections.5.title")}>
+            <p>{t("sections.5.body")}</p>
           </Section>
 
-          <Section num="07" title="التعديلات على الشروط">
-            <p>
-              نحتفظ بالحق في تعديل هذه الشروط في أي وقت. سيُنشر تاريخ آخر تحديث أعلى
-              الصفحة. استمرار استخدامكِ للموقع بعد التعديل يعني موافقتكِ على الشروط الجديدة.
-            </p>
+          <Section num="07" title={t("sections.6.title")}>
+            <p>{t("sections.6.body")}</p>
           </Section>
 
-          <Section num="08" title="القانون المطبّق">
-            <p>
-              تخضع هذه الشروط والأحكام لقوانين دولة إسرائيل. أي نزاع يُحسم أمام
-              المحاكم المختصة في إسرائيل.
-            </p>
+          <Section num="08" title={t("sections.7.title")}>
+            <p>{t("sections.7.body")}</p>
           </Section>
 
-          <Section num="09" title="التواصل معنا">
+          <Section num="09" title={t("sections.8.title")}>
             <p>
-              لأي استفسار حول هذه الشروط، تواصلي معنا عبر صفحة{" "}
-              <a href="/contact" style={{ color: "var(--teal)", fontWeight: 600 }}>
-                تواصل معنا
-              </a>.
+              {t.rich("sections.8.body", {
+                link: (chunks) => (
+                  <Link href="/contact" style={{ color: "var(--teal)", fontWeight: 600 }}>
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
           </Section>
 
@@ -195,7 +189,7 @@ export default function TermsPage() {
             className="font-label text-[13px] text-center pt-8 mt-2"
             style={{ color: "var(--light)" }}
           >
-            © 2026 Momzy — جميع الحقوق محفوظة
+            {t("copyright")}
           </p>
         </div>
       </Container>

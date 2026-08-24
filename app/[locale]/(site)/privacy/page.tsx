@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
 
-export const metadata: Metadata = {
-  title: "سياسة الخصوصية | Momzy",
-  description: "سياسة الخصوصية لموقع Momzy — كيف نجمع بياناتك ونحميها",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "privacy" });
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 /** قسم فرعي */
 function Section({ num, title, children }: { num: string; title: string; children: React.ReactNode }) {
@@ -43,6 +47,13 @@ function Li({ children }: { children: React.ReactNode }) {
 }
 
 export default function PrivacyPage() {
+  const t = useTranslations("privacy");
+
+  // تنسيق النص الغامق داخل رسائل rich text
+  const b = (chunks: React.ReactNode) => (
+    <strong style={{ color: "var(--dark)" }}>{chunks}</strong>
+  );
+
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh" }}>
 
@@ -60,16 +71,16 @@ export default function PrivacyPage() {
             className="font-label font-bold text-[11px] mb-3"
             style={{ color: "var(--rose)", letterSpacing: "2.5px", textTransform: "uppercase" }}
           >
-            قانوني
+            {t("label")}
           </p>
           <h1
             className="font-heading font-bold text-h1 mb-2"
             style={{ color: "var(--dark)" }}
           >
-            سياسة الخصوصية
+            {t("title")}
           </h1>
           <p className="font-label text-[14px]" style={{ color: "var(--mid)" }}>
-            آخر تحديث: أبريل 2026
+            {t("lastUpdated")}
           </p>
         </Container>
         <PageHeaderWave fillColor="var(--offwh)" />
@@ -88,85 +99,72 @@ export default function PrivacyPage() {
               borderBottom: "1px solid var(--bord)",
             }}
           >
-            نحن في <strong style={{ color: "var(--dark)" }}>Momzy</strong> نحترم خصوصيتكِ ونلتزم بحماية بياناتك الشخصية.
-            توضّح هذه السياسة كيفية جمع معلوماتك واستخدامها وحمايتها عند استخدامكِ لموقعنا{" "}
-            <strong style={{ color: "var(--dark)" }}>momzyworld.com</strong>.
+            {t.rich("intro", { b })}
           </p>
 
-          <Section num="01" title="المعلومات التي نجمعها">
-            <p>عند إجراء عملية شراء أو تواصلكِ معنا، نجمع المعلومات التالية:</p>
+          <Section num="01" title={t("sections.0.title")}>
+            <p>{t("sections.0.intro")}</p>
             <div className="flex flex-col gap-1 mt-1">
-              <Li>الاسم الكامل</Li>
-              <Li>عنوان البريد الإلكتروني</Li>
-              <Li>رقم الهاتف</Li>
-              <Li>عنوان التوصيل (البلدة والشارع ورقم البيت)</Li>
-              <Li>ملاحظات الطلب (إن وجدت)</Li>
+              <Li>{t("sections.0.items.0")}</Li>
+              <Li>{t("sections.0.items.1")}</Li>
+              <Li>{t("sections.0.items.2")}</Li>
+              <Li>{t("sections.0.items.3")}</Li>
+              <Li>{t("sections.0.items.4")}</Li>
             </div>
-            <p className="mt-2">
-              <strong style={{ color: "var(--dark)" }}>لا نجمع</strong> بيانات بطاقات الائتمان —
-              عملية الدفع تتم عبر بوابة الدفع الآمنة HYP مباشرةً.
-            </p>
+            <p className="mt-2">{t.rich("sections.0.note", { b })}</p>
           </Section>
 
-          <Section num="02" title="كيف نستخدم معلوماتكِ">
-            <p>نستخدم بياناتكِ حصرياً للأغراض التالية:</p>
+          <Section num="02" title={t("sections.1.title")}>
+            <p>{t("sections.1.intro")}</p>
             <div className="flex flex-col gap-1 mt-1">
-              <Li>معالجة طلبكِ وتأكيده</Li>
-              <Li>التواصل معكِ بشأن حالة الطلب أو التوصيل</Li>
-              <Li>إرسال رسائل ترويجية إذا وافقتِ على ذلك (يمكن إلغاؤها في أي وقت)</Li>
-              <Li>تحسين خدماتنا ومنتجاتنا</Li>
+              <Li>{t("sections.1.items.0")}</Li>
+              <Li>{t("sections.1.items.1")}</Li>
+              <Li>{t("sections.1.items.2")}</Li>
+              <Li>{t("sections.1.items.3")}</Li>
             </div>
           </Section>
 
-          <Section num="03" title="مشاركة البيانات مع أطراف ثالثة">
-            <p>لا نبيع بياناتكِ لأي طرف ثالث. نشارك معلوماتكِ فقط مع:</p>
+          <Section num="03" title={t("sections.2.title")}>
+            <p>{t("sections.2.intro")}</p>
             <div className="flex flex-col gap-1 mt-1">
-              <Li>شركة الشحن — لتوصيل طلبكِ</Li>
-              <Li>بوابة الدفع HYP — لمعالجة الدفع بأمان</Li>
-              <Li>خدمة البريد الإلكتروني — لإرسال تأكيدات الطلب</Li>
+              <Li>{t("sections.2.items.0")}</Li>
+              <Li>{t("sections.2.items.1")}</Li>
+              <Li>{t("sections.2.items.2")}</Li>
             </div>
-            <p className="mt-2">جميع الأطراف الثالثة ملتزمة بسرية بياناتكِ وفق القوانين المعمول بها.</p>
+            <p className="mt-2">{t("sections.2.note")}</p>
           </Section>
 
-          <Section num="04" title="أمان البيانات">
-            <p>
-              نستخدم بروتوكول HTTPS لتشفير جميع البيانات المنقولة بين متصفحكِ وخوادمنا.
-              بيانات الطلبات محفوظة في قاعدة بيانات آمنة مع صلاحيات وصول مقيّدة.
-            </p>
+          <Section num="04" title={t("sections.3.title")}>
+            <p>{t("sections.3.body")}</p>
           </Section>
 
-          <Section num="05" title="ملفات تعريف الارتباط (Cookies)">
-            <p>
-              نستخدم ملفات تعريف الارتباط لحفظ محتويات سلة التسوق خلال جلستكِ.
-              لا نستخدمها لتتبعكِ عبر مواقع أخرى. يمكنكِ تعطيلها من إعدادات متصفحكِ
-              مع العلم بأن ذلك قد يؤثر على عمل سلة التسوق.
-            </p>
+          <Section num="05" title={t("sections.4.title")}>
+            <p>{t("sections.4.body")}</p>
           </Section>
 
-          <Section num="06" title="حقوقكِ">
-            <p>يحق لكِ في أي وقت:</p>
+          <Section num="06" title={t("sections.5.title")}>
+            <p>{t("sections.5.intro")}</p>
             <div className="flex flex-col gap-1 mt-1">
-              <Li>طلب الاطلاع على البيانات التي نحتفظ بها عنكِ</Li>
-              <Li>طلب تصحيح أي بيانات غير دقيقة</Li>
-              <Li>طلب حذف بياناتكِ (مع مراعاة المتطلبات القانونية)</Li>
-              <Li>إلغاء الاشتراك في الرسائل التسويقية</Li>
+              <Li>{t("sections.5.items.0")}</Li>
+              <Li>{t("sections.5.items.1")}</Li>
+              <Li>{t("sections.5.items.2")}</Li>
+              <Li>{t("sections.5.items.3")}</Li>
             </div>
           </Section>
 
-          <Section num="07" title="الاحتفاظ بالبيانات">
-            <p>
-              نحتفظ ببيانات الطلبات لمدة 3 سنوات للأغراض المحاسبية والقانونية.
-              بيانات القائمة البريدية تُحذف فور إلغاء الاشتراك.
-            </p>
+          <Section num="07" title={t("sections.6.title")}>
+            <p>{t("sections.6.body")}</p>
           </Section>
 
-          <Section num="08" title="التواصل معنا">
+          <Section num="08" title={t("sections.7.title")}>
             <p>
-              إذا كان لديكِ أي استفسار حول سياسة الخصوصية أو بياناتكِ الشخصية،
-              يسعدنا التواصل معكِ عبر صفحة{" "}
-              <a href="/contact" style={{ color: "var(--teal)", fontWeight: 600 }}>
-                تواصل معنا
-              </a>.
+              {t.rich("sections.7.body", {
+                link: (chunks) => (
+                  <Link href="/contact" style={{ color: "var(--teal)", fontWeight: 600 }}>
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </p>
           </Section>
 
@@ -175,7 +173,7 @@ export default function PrivacyPage() {
             className="font-label text-[13px] text-center pt-8 mt-2"
             style={{ color: "var(--light)" }}
           >
-            © 2026 Momzy — جميع الحقوق محفوظة
+            {t("copyright")}
           </p>
         </div>
       </Container>

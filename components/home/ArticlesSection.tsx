@@ -7,10 +7,12 @@ import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
 import MomzyText from "@/components/ui/MomzyText";
 import { getHomeArticles } from "@/lib/sanity/queries/articles";
+import { getTranslations } from "next-intl/server";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** قسم أحدث المقالات — من Sanity (مع fallback ثابت) */
 export default async function ArticlesSection({ content }: { content: HomePageContent }) {
+  const t = await getTranslations("home");
   const articles = await getHomeArticles();
   if (articles.length === 0) return null;
 
@@ -38,7 +40,7 @@ export default async function ArticlesSection({ content }: { content: HomePageCo
               href="/articles"
               className="text-btn font-semibold text-teal cursor-pointer transition-colors hover:text-teald"
             >
-              كل المقالات ←
+              {t("articles.viewAll")}
             </Link>
           </div>
 
@@ -70,7 +72,7 @@ export default async function ArticlesSection({ content }: { content: HomePageCo
                   </div>
                   <div className="flex justify-between mt-3 text-[11px] md:text-[13px] text-light">
                     <span style={{ fontFamily: "'Tajawal', sans-serif" }}>{article.publishedAt}</span>
-                    <span className="text-[11px] md:text-[14px] text-teal font-bold">اقرئي ←</span>
+                    <span className="text-[11px] md:text-[14px] text-teal font-bold">{t("articles.read")}</span>
                   </div>
                 </div>
               </Link>

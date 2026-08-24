@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import { getDownloadStatus } from "@/lib/db/downloads";
@@ -6,7 +8,11 @@ import { getDownloadStatus } from "@/lib/db/downloads";
 /** رابط التحميل بالتوكن — لا يُخزَّن مؤقتًا */
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "تحميل الكتيب | Momzy" };
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "download" });
+  return { title: t("metaTitle") };
+}
 
 interface DownloadPageProps {
   params: Promise<{ token: string }>;
@@ -16,45 +22,25 @@ interface DownloadPageProps {
 export default async function DownloadPage({ params, searchParams }: DownloadPageProps) {
   const { token } = await params;
   const { e } = await searchParams;
+  const t = await getTranslations("download");
 
   // أخطاء قادمة من الـ API (ملف غير مرفوع / تعذّر الجلب)
   if (e === "nofile") {
-    return (
-      <StateCard
-        icon="⏳"
-        title="الكتيب قيد التجهيز"
-        body="كتيبكِ محجوز لكِ! نضع اللمسات الأخيرة على النسخة النهائية، وسيصلكِ رابط التحميل قريبًا. لأي استفسار تواصلي معنا."
-      />
-    );
+    return <StateCard icon="⏳" title={t("nofileTitle")} body={t("nofileBody")} />;
   }
   if (e === "fetch") {
-    return (
-      <StateCard
-        icon="⚠️"
-        title="تعذّر التحميل مؤقتًا"
-        body="حدث خطأ بسيط أثناء تجهيز الملف. حاولي مرة أخرى بعد قليل، وإن استمرّ تواصلي معنا."
-      />
-    );
+    return <StateCard icon="⚠️" title={t("fetchErrorTitle")} body={t("fetchErrorBody")} />;
   }
 
   const status = await getDownloadStatus(token);
 
   if (!status) {
-    return (
-      <StateCard
-        icon="🔗"
-        title="رابط غير صالح"
-        body="رابط التحميل غير صحيح أو لم يعد موجودًا. تأكّدي من الرابط كاملًا، أو تواصلي معنا."
-      />
-    );
+    return <StateCard icon="🔗" title={t("invalidTitle")} body={t("invalidBody")} />;
   }
 
   if (!status.valid) {
-    const body =
-      status.reason === "expired"
-        ? "انتهت صلاحية رابط التحميل (7 أيام من تاريخ الطلب). تواصلي معنا لإعادة إرساله."
-        : "بلغتِ الحد الأقصى لعدد مرّات التحميل. تواصلي معنا وسنساعدك بكل سرور.";
-    return <StateCard icon="⌛" title="الرابط لم يعد متاحًا" body={body} />;
+    const body = status.reason === "expired" ? t("expiredBody") : t("limitBody");
+    return <StateCard icon="⌛" title={t("unavailableTitle")} body={body} />;
   }
 
   const { row } = status;
@@ -72,13 +58,13 @@ export default async function DownloadPage({ params, searchParams }: DownloadPag
           🎉
         </div>
         <h1 className="font-heading font-bold mb-2" style={{ fontSize: 26, color: "var(--dark)" }}>
-          كتيبكِ جاهز للتحميل
+          {t("readyTitle")}
         </h1>
         <p className="font-heading font-bold" style={{ fontSize: 18, color: "var(--dark)" }}>
           {row.product_name}
         </p>
         <p className="text-[13px] mb-6" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-          بصيغة PDF — قابل للطباعة والقراءة دون إنترنت.
+          {t("pdfNote")}
         </p>
 
         <a
@@ -94,11 +80,11 @@ export default async function DownloadPage({ params, searchParams }: DownloadPag
             boxShadow: "0 10px 28px rgba(242,167,181,0.5)",
           }}
         >
-          ⬇️ تحميل الكتيب (PDF)
+          {t("downloadButton")}
         </a>
 
         <p className="text-[12px] mt-4" style={{ color: "var(--light)", fontFamily: "'Tajawal', sans-serif" }}>
-          المتبقّي: {remaining} من {row.max_downloads} مرّات · صالح حتى {expStr}
+          {t("remainingNote", { remaining, max: row.max_downloads, date: expStr })}
         </p>
       </div>
     </Shell>
@@ -129,6 +115,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function StateCard({ icon, title, body }: { icon: string; title: string; body: string }) {
+  const t = useTranslations("download");
   return (
     <Shell>
       <div className="text-center">
@@ -155,7 +142,7 @@ function StateCard({ icon, title, body }: { icon: string; title: string; body: s
             padding: "11px 26px",
           }}
         >
-          تواصلي معنا
+          {t("contactUs")}
         </Link>
       </div>
     </Shell>

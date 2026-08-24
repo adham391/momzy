@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import type { Product } from "@/lib/products/types";
 
@@ -11,6 +12,7 @@ interface AddToCartButtonProps {
 
 /** زر إضافة للسلة */
 export default function AddToCartButton({ product, variant = "icon" }: AddToCartButtonProps) {
+  const t = useTranslations("shop");
   const addItem = useCart((s) => s.addItem);
 
   function handleAdd(e: React.MouseEvent) {
@@ -33,7 +35,7 @@ export default function AddToCartButton({ product, variant = "icon" }: AddToCart
           cursor: "pointer",
         }}
       >
-        إضافة إلى السلة
+        {t("addToCart")}
       </button>
     );
   }
@@ -41,7 +43,7 @@ export default function AddToCartButton({ product, variant = "icon" }: AddToCart
   return (
     <button
       onClick={handleAdd}
-      aria-label="أضيفي للسلة"
+      aria-label={t("addToCartAria")}
       className="flex items-center justify-center font-label font-extrabold text-[22px] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1)] hover:scale-110 active:scale-95"
       style={{
         width: 36,

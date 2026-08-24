@@ -6,9 +6,12 @@ import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 import { getProduct } from "@/lib/products/getProduct";
+import { getTranslations } from "next-intl/server";
 
 /** قسم آخر التحديثات — صندوق مشوار أم فقط في المرحلة الأولى */
 export default async function LatestSection() {
+  const t = await getTranslations("home");
+  const tMega = await getTranslations("megaMenu");
   const hero = await getProduct("mommy-journey-box");
 
   return (
@@ -39,16 +42,16 @@ export default async function LatestSection() {
             {/* ── عنوان القسم ── */}
             <div className="flex items-end justify-between mb-6">
               <div>
-                <SectionLabel color="teal">جديد في Momzy</SectionLabel>
+                <SectionLabel color="teal">{t("latest.label")}</SectionLabel>
                 <h2 className="font-heading text-h2 font-bold text-dark">
-                  آخر <span className="text-rose">التحديثات</span>
+                  {t.rich("latest.title", { accent: (chunks) => <span className="text-rose">{chunks}</span> })}
                 </h2>
               </div>
               <Link
                 href="/shop"
                 className="text-btn font-semibold text-teal [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1),color_150ms_ease] hover:gap-2 flex items-center gap-1.5 hover:text-teal/80"
               >
-                كل المنتجات ←
+                {tMega("allProducts")}
               </Link>
             </div>
 
@@ -61,7 +64,7 @@ export default async function LatestSection() {
               <div className="relative min-h-[260px] md:min-h-[360px]">
                 <ProductImagePlaceholder
                   src={hero?.mainImage}
-                  alt={hero?.title ?? "صندوق مشوار أم"}
+                  alt={hero?.title ?? t("latest.fallbackTitle")}
                   size="hero"
                   className="absolute inset-0 w-full h-full"
                 />
@@ -97,7 +100,7 @@ export default async function LatestSection() {
                     </div>
                   )}
                   <div className="font-heading text-h3 text-dark mb-3 leading-[1.3]">
-                    {hero?.title ?? "صندوق مشوار أم"}
+                    {hero?.title ?? t("latest.fallbackTitle")}
                   </div>
                   <LatestBigCardBody description={hero?.description} />
 
@@ -125,7 +128,7 @@ export default async function LatestSection() {
                 <span
                   className="btn-wobble inline-flex items-center gap-2 bg-rose text-dark text-body font-extrabold shadow-[0_4px_16px_rgba(242,167,181,0.45)] px-7 py-3 rounded-full w-fit [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1),box-shadow_200ms_ease] group-hover:shadow-[0_8px_24px_rgba(242,167,181,0.55)] group-hover:-translate-y-0.5"
                 >
-                  اشتري الآن ←
+                  {t("latest.buyNow")}
                 </span>
               </div>
             </Link>

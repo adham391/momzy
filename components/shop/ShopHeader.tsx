@@ -1,8 +1,11 @@
+import { useTranslations } from "next-intl";
 import SectionLabel from "@/components/ui/SectionLabel";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
 
 /** هيدر صفحة المتجر */
 export default function ShopHeader() {
+  const t = useTranslations("shop");
+
   return (
     <div
       className="relative overflow-hidden"
@@ -62,20 +65,20 @@ export default function ShopHeader() {
         className="relative mx-auto text-center"
         style={{ maxWidth: 700, padding: "0 24px", zIndex: 2 }}
       >
-        <SectionLabel color="teal" centered noDash>متجر Momzy</SectionLabel>
+        <SectionLabel color="teal" centered noDash>{t("headerLabel")}</SectionLabel>
         <h1
           className="font-heading font-bold text-dark text-h1"
           style={{ lineHeight: 1.2 }}
         >
-          كل ما تحتاجينه في مكان{" "}
-          <span className="text-rose italic">واحد</span>
+          {t.rich("headerTitle", {
+            em: (chunks) => <span className="text-rose italic">{chunks}</span>,
+          })}
         </h1>
         <p
           className="text-body leading-[1.85] text-mid mt-4"
           style={{ maxWidth: 500, margin: "16px auto 0" }}
         >
-          منتجات مختارة بعناية، كتيبات تعليمية، وورشات مسجلة — كلها مصممة
-          لترافقك في كل خطوة من رحلتك كأم.
+          {t("headerSubtitle")}
         </p>
       </div>
 

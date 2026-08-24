@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import BookingModal from "./BookingModal";
-import { seatsLabel } from "@/lib/utils/seats";
 import type { AgeGate } from "@/lib/utils/age";
 
 interface ServiceStickyCTAProps {
@@ -27,6 +27,7 @@ export default function ServiceStickyCTA({
   seatsLeft,
   ageGate,
 }: ServiceStickyCTAProps) {
+  const t = useTranslations("services");
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -56,8 +57,8 @@ export default function ServiceStickyCTA({
           <div className="flex-1 min-w-0">
             <div className="font-label font-bold text-dark text-[13px] truncate">{serviceTitle}</div>
             <div className="font-label text-[11.5px] text-light">
-              {price > 0 ? `₪${price}` : "حسب الطلب"}
-              {typeof seatsLeft === "number" && ` · ${seatsLabel(seatsLeft)}`}
+              {price > 0 ? `₪${price}` : t("onRequest")}
+              {typeof seatsLeft === "number" && ` · ${t("seatsLeft", { count: seatsLeft })}`}
             </div>
           </div>
 
@@ -74,7 +75,7 @@ export default function ServiceStickyCTA({
               boxShadow: isFull ? "none" : "0 6px 18px rgba(242,167,181,0.38)",
             }}
           >
-            {isFull ? "قائمة الانتظار" : "سجّلي الآن"}
+            {isFull ? t("waitlist") : t("registerNow")}
           </button>
         </div>
       </div>

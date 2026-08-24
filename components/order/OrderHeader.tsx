@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { formatDateTime } from "@/lib/utils/format";
 
 interface OrderHeaderProps {
@@ -13,6 +14,7 @@ interface OrderHeaderProps {
 
 /** هيدر صفحة التأكيد — أيقونة الحالة + رقم الطلب + التاريخ */
 export default function OrderHeader({ orderNumber, createdAt, paid = true }: OrderHeaderProps) {
+  const t = useTranslations("order");
   const [copied, setCopied] = useState(false);
 
   /** نسخ رقم الطلب إلى الحافظة */
@@ -51,13 +53,13 @@ export default function OrderHeader({ orderNumber, createdAt, paid = true }: Ord
         {paid ? (
           <Image
             src="/icons/correct-icon.png"
-            alt="تم"
+            alt={t("doneIconAlt")}
             width={48}
             height={48}
             className="object-contain"
           />
         ) : (
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--dark)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label="بانتظار الدفع">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--dark)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label={t("awaitingIconLabel")}>
             <circle cx="12" cy="12" r="9" />
             <polyline points="12 7 12 12 15.5 14" />
           </svg>
@@ -66,10 +68,10 @@ export default function OrderHeader({ orderNumber, createdAt, paid = true }: Ord
 
       {/* العنوان — حسب حالة الدفع */}
       <h1 className="font-heading font-bold text-dark text-h2 mb-2">
-        {paid ? "تم تأكيد طلبكِ بنجاح" : "طلبكِ محفوظ — بانتظار الدفع"}
+        {paid ? t("successTitle") : t("awaitingTitle")}
       </h1>
       <p className="font-label text-[14px] text-mid mb-6">
-        {paid ? "شكراً لثقتكِ بـ Momzy" : "أكملي الدفع الآمن بالأسفل لتأكيد طلبكِ"}
+        {paid ? t("successSubtitle") : t("awaitingSubtitle")}
       </p>
 
       {/* رقم الطلب — قابل للنسخ */}
@@ -82,7 +84,7 @@ export default function OrderHeader({ orderNumber, createdAt, paid = true }: Ord
           padding: "10px 20px",
         }}
       >
-        <span className="font-label text-[13px] text-mid">رقم الطلب:</span>
+        <span className="font-label text-[13px] text-mid">{t("orderNumberLabel")}</span>
         <span
           className="font-label font-extrabold text-dark text-[16px]"
           style={{ letterSpacing: "0.5px", direction: "ltr" }}
@@ -91,7 +93,7 @@ export default function OrderHeader({ orderNumber, createdAt, paid = true }: Ord
         </span>
         <button
           onClick={copyOrderNumber}
-          aria-label="نسخ رقم الطلب"
+          aria-label={t("copyOrderNumber")}
           className="text-light hover:text-teal transition-colors"
           style={{ background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 0 }}
         >

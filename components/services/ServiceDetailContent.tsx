@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
 import type { Service } from "@/lib/services/types";
@@ -50,6 +51,7 @@ function TopicCard({ topic, palette }: { topic: string; palette: { bg: string; c
  * كل قسم يظهر فقط إذا كانت بياناته متوفرة.
  */
 export default function ServiceDetailContent({ service }: ServiceDetailContentProps) {
+  const t = useTranslations("services");
   const hasLongDesc = service.longDescription && service.longDescription.length > 0;
   const hasTopics   = service.topics         && service.topics.length > 0;
   const hasBenefits = service.benefits       && service.benefits.length > 0;
@@ -69,13 +71,13 @@ export default function ServiceDetailContent({ service }: ServiceDetailContentPr
                 className="font-label font-bold mb-4 text-[13px] md:text-[19px]"
                 style={{ color: "var(--teal)", letterSpacing: "2.5px", textTransform: "uppercase" }}
               >
-                عن الخدمة
+                {t("content.aboutLabel")}
               </p>
               <h2
                 className="text-h2 font-heading font-bold mb-6"
                 style={{ color: "#3D2C24" }}
               >
-                ماذا نتطرق له خلال <span style={{ color: "var(--rose)" }}>اللقاء</span>
+                {t.rich("content.aboutTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
               </h2>
               <div className="flex flex-col gap-4">
                 {service.longDescription!.map((para, i) => (
@@ -110,13 +112,13 @@ export default function ServiceDetailContent({ service }: ServiceDetailContentPr
                       className="font-label font-bold mb-3 text-[12px] md:text-[14px]"
                       style={{ color: "var(--teal)", letterSpacing: "3px", textTransform: "uppercase" }}
                     >
-                      المحاور
+                      {t("content.topicsLabel")}
                     </p>
                     <h2
                       className="font-heading font-bold"
                       style={{ fontSize: "clamp(24px, 2.6vw, 32px)", color: "#3D2C24", lineHeight: 1.25 }}
                     >
-                      مواضيع نتعمّق بها <span style={{ color: "var(--rose)" }}>معاً</span>
+                      {t.rich("content.topicsTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
                     </h2>
                   </div>
 
@@ -159,13 +161,13 @@ export default function ServiceDetailContent({ service }: ServiceDetailContentPr
                       className="font-label font-bold mb-3 text-[12px] md:text-[14px]"
                       style={{ color: "var(--teal)", letterSpacing: "3px", textTransform: "uppercase" }}
                     >
-                      لمين هاي الخدمة
+                      {t("content.benefitsLabel")}
                     </p>
                     <h2
                       className="font-heading font-bold"
                       style={{ fontSize: "clamp(24px, 2.6vw, 32px)", color: "#3D2C24", lineHeight: 1.25 }}
                     >
-                      ما الذي <span style={{ color: "var(--rose)" }}>ستحصلين عليه</span>
+                      {t.rich("content.benefitsTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
                     </h2>
                   </div>
 

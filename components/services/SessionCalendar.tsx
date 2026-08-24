@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { seatsLabel } from "@/lib/utils/seats";
 
 /** جلسة معروضة في الرزنامة */
@@ -26,9 +27,6 @@ interface SessionCalendarProps {
   compact?: boolean;
 }
 
-/** أيام الأسبوع مختصرة — تبدأ بالأحد (يمينًا في RTL) */
-const WEEKDAYS = ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"];
-
 const pad = (n: number) => String(n).padStart(2, "0");
 /** مفتاح تاريخ محلي YYYY-MM-DD (بلا انزياح توقيت) */
 const dateKey = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
@@ -44,6 +42,19 @@ export default function SessionCalendar({
   accent = "var(--rose)",
   compact = false,
 }: SessionCalendarProps) {
+  const t = useTranslations("booking");
+
+  /** أيام الأسبوع مختصرة — تبدأ بالأحد (يمينًا في RTL) */
+  const WEEKDAYS = [
+    t("calendar.sun"),
+    t("calendar.mon"),
+    t("calendar.tue"),
+    t("calendar.wed"),
+    t("calendar.thu"),
+    t("calendar.fri"),
+    t("calendar.sat"),
+  ];
+
   /** الجلسات مجمّعة حسب اليوم */
   const byDate = useMemo(() => {
     const map = new Map<string, CalendarSession[]>();
@@ -107,7 +118,7 @@ export default function SessionCalendar({
         <button
           onClick={() => shiftMonth(-1)}
           disabled={!canGoBack}
-          aria-label="الشهر السابق"
+          aria-label={t("calendar.prevMonth")}
           className="w-8 h-8 rounded-full flex items-center justify-center active:scale-[0.95] [transition:transform_140ms_ease-out]"
           style={{
             border: "1.5px solid var(--bord)",
@@ -125,7 +136,7 @@ export default function SessionCalendar({
 
         <button
           onClick={() => shiftMonth(1)}
-          aria-label="الشهر التالي"
+          aria-label={t("calendar.nextMonth")}
           className="w-8 h-8 rounded-full flex items-center justify-center active:scale-[0.95] [transition:transform_140ms_ease-out]"
           style={{ border: "1.5px solid var(--bord)", background: "white", color: "var(--dark)", cursor: "pointer" }}
         >
@@ -192,12 +203,12 @@ export default function SessionCalendar({
       <div className="mt-5">
         {!selected || selectedSessions.length === 0 ? (
           <p className="text-center font-label text-[12.5px] text-light">
-            اختاري يومًا مميّزًا من الرزنامة لعرض المواعيد.
+            {t("calendar.pickDayHint")}
           </p>
         ) : (
           <>
             <p className="font-label font-bold text-dark text-[13px] mb-2.5 text-center">
-              مواعيد <span dir="ltr">{selected.split("-").reverse().join("/")}</span>
+              {t("calendar.sessionsOn")} <span dir="ltr">{selected.split("-").reverse().join("/")}</span>
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {selectedSessions.map((s) => {
@@ -221,11 +232,11 @@ export default function SessionCalendar({
                       {hhmm(s.startTime)}{s.endTime ? `–${hhmm(s.endTime)}` : ""}
                     </div>
                     <div className="font-label text-light" style={{ fontSize: 11 }}>
-                      {full ? "اكتمل العدد" : seatsLabel(s.seatsLeft)}
+                      {full ? t("calendar.full") : seatsLabel(s.seatsLeft)}
                       {s.price > 0 ? ` · ₪${s.price}` : ""}
                     </div>
                     <div className="font-label text-light" style={{ fontSize: 10.5 }}>
-                      {s.isOnline ? "💻 أونلاين" : s.location ? `📍 ${s.location}` : ""}
+                      {s.isOnline ? t("calendar.online") : s.location ? `📍 ${s.location}` : ""}
                     </div>
                   </button>
                 );

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { Service } from "@/lib/services/types";
 
 interface ServiceMetaProps {
@@ -10,11 +11,12 @@ interface ServiceMetaProps {
  * أيقونات SVG بسيطة + label صغير رمادي + قيمة بـ bold
  */
 export default function ServiceMeta({ service }: ServiceMetaProps) {
+  const t = useTranslations("services");
   const items: { icon: React.ReactNode; label: string; value: string }[] = [
-    { icon: <ClockIcon />,    label: "المدة",  value: service.duration },
-    ...(service.ageRange ? [{ icon: <BabyIcon />, label: "الفئة العمرية", value: service.ageRange }] : []),
-    { icon: <LocationIcon />, label: "المكان", value: service.location },
-    ...(service.maxParticipants ? [{ icon: <UsersIcon />, label: "عدد المشاركين", value: `حتى ${service.maxParticipants} أمهات` }] : []),
+    { icon: <ClockIcon />,    label: t("meta.duration"),  value: service.duration },
+    ...(service.ageRange ? [{ icon: <BabyIcon />, label: t("meta.ageRange"), value: service.ageRange }] : []),
+    { icon: <LocationIcon />, label: t("meta.location"), value: service.location },
+    ...(service.maxParticipants ? [{ icon: <UsersIcon />, label: t("meta.participants"), value: t("meta.participantsValue", { count: service.maxParticipants }) }] : []),
   ];
 
   return (
@@ -74,7 +76,7 @@ export default function ServiceMeta({ service }: ServiceMetaProps) {
             className="font-label font-semibold text-[12px]"
             style={{ color: "var(--mid)", letterSpacing: "0.5px" }}
           >
-            السعر
+            {t("meta.price")}
           </span>
           <div className="flex items-baseline gap-1.5">
             <span
@@ -85,7 +87,7 @@ export default function ServiceMeta({ service }: ServiceMetaProps) {
               ₪{service.price}
             </span>
             <span className="font-label text-[12px]" style={{ color: "var(--mid)" }}>
-              للجلسة
+              {t("meta.perSession")}
             </span>
           </div>
         </div>

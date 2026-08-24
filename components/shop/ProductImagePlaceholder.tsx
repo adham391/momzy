@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils/cn";
 
 type Size = "card" | "hero" | "gallery" | "story" | "testimonial" | "thumb";
@@ -19,6 +20,8 @@ export default function ProductImagePlaceholder({
   className,
   objectFit = "cover",
 }: ProductImagePlaceholderProps) {
+  const t = useTranslations("shop");
+
   return (
     <div
       className={cn("relative w-full h-full overflow-hidden flex items-center justify-center", className)}
@@ -38,7 +41,7 @@ export default function ProductImagePlaceholder({
             letterSpacing: "0.5px",
           }}
         >
-          صورة المنتج
+          {t("productImage")}
         </span>
       </div>
 

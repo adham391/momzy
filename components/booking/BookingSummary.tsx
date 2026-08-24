@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { formatSlotDate, formatTimeShort, formatILS } from "@/lib/utils/format";
 import type { BookingRow } from "@/lib/db/bookings";
 
@@ -13,10 +14,11 @@ interface BookingSummaryProps {
  * (كما في BookingDetailsCard)؛ هنا نكتفي بنوع الحضور.
  */
 export default function BookingSummary({ booking }: BookingSummaryProps) {
+  const t = useTranslations("booking");
   const attendance = booking.meeting_link
-    ? "💻 ورشة أونلاين"
+    ? t("summary.online")
     : booking.location
-      ? "📍 ورشة حضورية"
+      ? t("summary.onsite")
       : null;
 
   return (
@@ -29,12 +31,12 @@ export default function BookingSummary({ booking }: BookingSummaryProps) {
         boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
       }}
     >
-      <h2 className="font-heading font-bold text-dark text-[17px] mb-4">ملخّص التسجيل</h2>
+      <h2 className="font-heading font-bold text-dark text-[17px] mb-4">{t("summary.title")}</h2>
 
       {/* ── الورشة والموعد ── */}
       <div className="pb-4" style={{ borderBottom: "1px solid var(--bord)" }}>
         <p className="font-label font-bold text-dark text-[14.5px] leading-[1.7] mb-2">
-          {booking.service_name ?? "ورشة"}
+          {booking.service_name ?? t("summary.workshopFallback")}
         </p>
         <p className="font-label text-[13px] text-mid leading-[1.9]">
           {formatSlotDate(booking.date)} ·{" "}
@@ -50,13 +52,13 @@ export default function BookingSummary({ booking }: BookingSummaryProps) {
 
       {/* ── المقعد ── */}
       <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid var(--bord)" }}>
-        <span className="font-label text-[13.5px] text-mid">مقعد واحد باسم {booking.customer_name}</span>
+        <span className="font-label text-[13.5px] text-mid">{t("summary.seatFor", { name: booking.customer_name })}</span>
         <span className="font-label text-[13.5px] font-semibold text-dark">{formatILS(booking.amount)}</span>
       </div>
 
       {/* ── الإجمالي ── */}
       <div className="flex items-center justify-between pt-4">
-        <span className="font-label font-bold text-dark text-[15px]">الإجمالي</span>
+        <span className="font-label font-bold text-dark text-[15px]">{t("summary.total")}</span>
         <span className="font-label font-extrabold text-[19px]" style={{ color: "var(--rose)" }}>
           {formatILS(booking.amount)}
         </span>
@@ -68,7 +70,7 @@ export default function BookingSummary({ booking }: BookingSummaryProps) {
         style={{ background: "var(--tealpale)", border: "1px solid var(--mint)", padding: "10px 14px" }}
       >
         <span className="font-label text-[12.5px]" style={{ color: "var(--mid)" }}>
-          🎟️ مقعدكِ محجوز باسمكِ أثناء إتمام الدفع
+          {t("summary.seatHeld")}
         </span>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 /** كارد قيمة داخل الـ modal */
 function ValueCard({
@@ -37,12 +38,12 @@ function ValueCard({
   );
 }
 
-/** بيانات كاردات القيم */
+/** بيانات كاردات القيم — النصوص من مفاتيح home.story.values */
 const VALUE_CARDS = [
-  { icon: "/icons/services-icon.png", bg: "var(--rosepale)",  title: "المعرفة المهنية",       desc: "خدمات متخصصة مبنية على خبرة حقيقية" },
-  { icon: "/icons/products-icon.png", bg: "var(--tealpale)",  title: "منتجات مختارة بعناية", desc: "محتوى ومنتجات على أساس علمي موثوق" },
-  { icon: "/icons/blog-icon.png",     bg: "var(--yellowlt)",  title: "المجتمع الداعم",       desc: "مساحة آمنة تجمع الأمهات" },
-  { icon: "/icons/heart-icon.png",    bg: "var(--rosepale)",  title: "الطفل في المركز",      desc: "دعم الأم يؤثر على نمو طفلها" },
+  { icon: "/icons/services-icon.png", bg: "var(--rosepale)",  key: "knowledge" },
+  { icon: "/icons/products-icon.png", bg: "var(--tealpale)",  key: "products" },
+  { icon: "/icons/blog-icon.png",     bg: "var(--yellowlt)",  key: "community" },
+  { icon: "/icons/heart-icon.png",    bg: "var(--rosepale)",  key: "child" },
 ];
 
 interface Props {
@@ -52,6 +53,7 @@ interface Props {
 
 /** Modal قصة Momzy — يُفتح من الهيرو */
 export default function MomzyStoryModal({ open, onClose }: Props) {
+  const t = useTranslations("home");
   /** mounted: هل المكوّن في الـ DOM | visible: هل الـ animation في حالة ظهور */
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -133,10 +135,10 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
               className="font-label font-bold text-[11px] mb-1"
               style={{ color: "var(--teal)", letterSpacing: "2.5px", textTransform: "uppercase" }}
             >
-              قصتنا
+              {t("story.eyebrow")}
             </p>
             <h2 className="font-heading font-bold text-[22px]" style={{ color: "var(--dark)" }}>
-              قصة <span style={{ color: "var(--rose)" }}>Momzy</span>
+              {t.rich("story.modalTitle", { brand: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
             </h2>
           </div>
           {/* زر إغلاق */}
@@ -144,7 +146,7 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
             onClick={onClose}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
             style={{ color: "var(--mid)", fontSize: 18, background: "var(--bord)" }}
-            aria-label="إغلاق"
+            aria-label={t("story.close")}
           >
             ✕
           </button>
@@ -158,13 +160,13 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
             className="text-[15px] leading-[1.9] mb-3"
             style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}
           >
-            Momzy مؤسسة متخصصة ترافق الأمهات منذ فترة الحمل وحتى السنوات الأولى من حياة الطفل، مع تركيز خاص على مرحلة ما بعد الولادة ورعاية الأطفال حديثي الولادة.
+            {t("story.para1")}
           </p>
           <p
             className="text-[15px] leading-[1.9] mb-6"
             style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}
           >
-            تقوم Momzy على رؤية تؤمن أن دعم الأم في هذه المرحلة المبكرة لا ينعكس عليها فقط، بل يؤثر بشكل عميق على بداية حياة الطفل ونموه.
+            {t("story.para2")}
           </p>
 
           {/* اقتباس */}
@@ -176,7 +178,7 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
               className="font-heading italic text-[15px] leading-[1.9]"
               style={{ color: "var(--mid)", fontFamily: "'Amiri', serif" }}
             >
-              "في Momzy نؤمن أن بداية الأمومة لحظة مفصلية في حياة كل عائلة — لحظة تتشكل فيها تجربة الأم، وتبدأ فيها قصة حياة طفل جديد."
+              {t("story.quote")}
             </p>
           </blockquote>
 
@@ -185,11 +187,17 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
             className="font-label font-bold text-[11px] mb-4"
             style={{ color: "var(--rose)", letterSpacing: "2.5px", textTransform: "uppercase" }}
           >
-            قيمنا
+            {t("story.valuesLabel")}
           </p>
           <div className="grid grid-cols-2 gap-3 mb-7">
             {VALUE_CARDS.map((card) => (
-              <ValueCard key={card.title} {...card} />
+              <ValueCard
+                key={card.key}
+                icon={card.icon}
+                bg={card.bg}
+                title={t(`story.values.${card.key}.title`)}
+                desc={t(`story.values.${card.key}.desc`)}
+              />
             ))}
           </div>
 
@@ -199,7 +207,7 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
             className="w-full font-label font-bold text-[14px] py-3 rounded-full transition-opacity hover:opacity-85"
             style={{ background: "var(--rose)", color: "white" }}
           >
-            إغلاق
+            {t("story.close")}
           </button>
         </div>
       </div>

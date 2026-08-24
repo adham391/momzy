@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
@@ -60,36 +61,36 @@ function FieldError({ msg }: { msg: string }) {
   );
 }
 
-/** قواعد التحقق لكل حقل — طول + محتوى */
+/** قواعد التحقق لكل حقل — طول + محتوى (تُعيد مفتاح رسالة الخطأ في namespace "checkout") */
 const validators: Record<RequiredField, (v: string) => string | null> = {
   /** الاسم: حرفان على الأقل، لا أرقام */
   name: (v) => {
-    if (v.trim().length < 2) return "الرجاء إدخال الاسم الكامل";
-    if (/\d/.test(v))        return "الاسم لا يجب أن يحتوي على أرقام";
+    if (v.trim().length < 2) return "errorNameRequired";
+    if (/\d/.test(v))        return "errorNameDigits";
     return null;
   },
   /** الإيميل: صيغة صحيحة */
   email: (v) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(v.trim())) return "الرجاء إدخال بريد إلكتروني صحيح (مثال: name@gmail.com)";
+    if (!emailRegex.test(v.trim())) return "errorEmailInvalid";
     return null;
   },
   /** الهاتف: أرقام وعلامات فقط (+، -، مسافة) */
   phone: (v) => {
     const clean = v.trim();
-    if (clean.length < 9)             return "رقم الهاتف قصير جداً";
-    if (!/^[\d+\-\s()]+$/.test(clean)) return "الهاتف يجب أن يحتوي على أرقام فقط";
+    if (clean.length < 9)             return "errorPhoneShort";
+    if (!/^[\d+\-\s()]+$/.test(clean)) return "errorPhoneDigits";
     return null;
   },
   /** البلدة: حروف فقط، لا أرقام */
   city: (v) => {
-    if (v.trim().length < 2) return "الرجاء إدخال اسم البلدة";
-    if (/^\d+$/.test(v.trim())) return "اسم البلدة غير صحيح";
+    if (v.trim().length < 2) return "errorCityRequired";
+    if (/^\d+$/.test(v.trim())) return "errorCityInvalid";
     return null;
   },
   /** العنوان: حد أدنى 5 أحرف */
   address: (v) => {
-    if (v.trim().length < 5) return "الرجاء إدخال العنوان الكامل (الشارع ورقم البيت)";
+    if (v.trim().length < 5) return "errorAddressRequired";
     return null;
   },
 };
@@ -103,6 +104,7 @@ export default function CheckoutForm({
   /** يُستدعى بعد إنشاء الطلب حين يكون الدفع الإلكتروني مفعّلاً — للانتقال لمرحلة الدفع في نفس الصفحة */
   onProceedToPayment?: (orderId: string) => void;
 }) {
+  const t         = useTranslations("checkout");
   const router    = useRouter();
   const cartItems     = useCart((s) => s.items);
   const getTotal      = useCart((s) => s.getTotal);
@@ -141,7 +143,8 @@ export default function CheckoutForm({
   /** خطأ الحقل — يظهر فقط إذا لُمس */
   function fieldError(field: RequiredField): string | null {
     if (!touched[field]) return null;
-    return validators[field](form[field]);
+    const errorKey = validators[field](form[field]);
+    return errorKey ? t(errorKey) : null;
   }
 
   /** لون حدود الحقل */
@@ -218,7 +221,7 @@ export default function CheckoutForm({
           className="font-heading font-bold text-dark"
           style={{ padding: "18px 24px", borderBottom: "1.5px solid var(--bord)", fontSize: 17 }}
         >
-          بيانات التوصيل
+          {t("deliveryInfo")}
         </div>
 
         {/* ── الحقول ── */}
@@ -226,12 +229,12 @@ export default function CheckoutForm({
 
           {/* الاسم الكامل */}
           <div>
-            <label style={labelStyle}>الاسم الكامل *</label>
+            <label style={labelStyle}>{t("nameLabel")}</label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => updateField("name", e.target.value)}
-              placeholder="الاسم الأول والأخير"
+              placeholder={t("namePlaceholder")}
               autoComplete="name"
               style={{ ...inputBase, border: `1.5px solid ${borderColor("name")}` }}
               onFocus={() => setFocusedField("name")}
@@ -243,7 +246,7 @@ export default function CheckoutForm({
           {/* صف الإيميل والهاتف */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label style={labelStyle}>البريد الإلكتروني *</label>
+              <label style={labelStyle}>{t("emailLabel")}</label>
               <input
                 type="email"
                 value={form.email}
@@ -258,7 +261,7 @@ export default function CheckoutForm({
               {fieldError("email") && <FieldError msg={fieldError("email")!} />}
             </div>
             <div>
-              <label style={labelStyle}>رقم الهاتف *</label>
+              <label style={labelStyle}>{t("phoneLabel")}</label>
               <input
                 type="tel"
                 value={form.phone}
@@ -277,12 +280,12 @@ export default function CheckoutForm({
           {/* البلدة + الرمز البريدي */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label style={labelStyle}>البلدة *</label>
+              <label style={labelStyle}>{t("cityLabel")}</label>
               <input
                 type="text"
                 value={form.city}
                 onChange={(e) => updateField("city", e.target.value)}
-                placeholder="اسم البلدة"
+                placeholder={t("cityPlaceholder")}
                 autoComplete="address-level2"
                 style={{ ...inputBase, border: `1.5px solid ${borderColor("city")}` }}
                 onFocus={() => setFocusedField("city")}
@@ -291,12 +294,12 @@ export default function CheckoutForm({
               {fieldError("city") && <FieldError msg={fieldError("city")!} />}
             </div>
             <div>
-              <label style={labelStyle}>الرمز البريدي (اختياري)</label>
+              <label style={labelStyle}>{t("postalLabel")}</label>
               <input
                 type="text"
                 value={form.postalCode}
                 onChange={(e) => updateField("postalCode", e.target.value)}
-                placeholder="مثال: 1610001"
+                placeholder={t("postalPlaceholder")}
                 autoComplete="postal-code"
                 dir="ltr"
                 inputMode="numeric"
@@ -309,11 +312,11 @@ export default function CheckoutForm({
 
           {/* العنوان */}
           <div>
-            <label style={labelStyle}>العنوان *</label>
+            <label style={labelStyle}>{t("addressLabel")}</label>
             <textarea
               value={form.address}
               onChange={(e) => updateField("address", e.target.value)}
-              placeholder="الشارع ورقم البيت"
+              placeholder={t("addressPlaceholder")}
               rows={2}
               style={{ ...inputBase, border: `1.5px solid ${borderColor("address")}`, resize: "none" }}
               onFocus={() => setFocusedField("address")}
@@ -324,12 +327,12 @@ export default function CheckoutForm({
 
           {/* طابق / شقة / مدخل */}
           <div>
-            <label style={labelStyle}>طابق / شقة / مدخل (اختياري)</label>
+            <label style={labelStyle}>{t("buildingLabel")}</label>
             <input
               type="text"
               value={form.building}
               onChange={(e) => updateField("building", e.target.value)}
-              placeholder="مثال: طابق 3، شقة 8، مدخل ب"
+              placeholder={t("buildingPlaceholder")}
               style={{ ...inputBase, border: `1.5px solid ${focusedField === "building" ? "var(--teal)" : "var(--bord)"}` }}
               onFocus={() => setFocusedField("building")}
               onBlur={() => setFocusedField(null)}
@@ -340,13 +343,13 @@ export default function CheckoutForm({
         {/* ── معلومات إضافية ── */}
         <div style={{ padding: "20px 24px", borderTop: "1.5px solid var(--bord)" }}>
           <div className="font-heading font-bold text-dark mb-3" style={{ fontSize: 15 }}>
-            معلومات إضافية
+            {t("additionalInfo")}
           </div>
-          <label style={labelStyle}>ملاحظات الطلب (اختياري)</label>
+          <label style={labelStyle}>{t("notesLabel")}</label>
           <textarea
             value={form.notes}
             onChange={(e) => updateField("notes", e.target.value)}
-            placeholder="ملاحظات حول الطلب"
+            placeholder={t("notesPlaceholder")}
             rows={3}
             style={{
               ...inputBase,
@@ -372,11 +375,13 @@ export default function CheckoutForm({
               style={{ accentColor: "var(--teal)", width: 17, height: 17, cursor: "pointer" }}
             />
             <span className="text-[13px] text-mid">
-              لقد قرأتُ{" "}
-              <Link href="/privacy" className="text-teal font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
-                سياسة الخصوصية
-              </Link>
-              {" "}وأوافق عليها لهذا الموقع
+              {t.rich("agreePolicy", {
+                link: (chunks) => (
+                  <Link href="/privacy" className="text-teal font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </span>
           </label>
 
@@ -389,11 +394,13 @@ export default function CheckoutForm({
               style={{ accentColor: "var(--teal)", width: 17, height: 17, cursor: "pointer" }}
             />
             <span className="text-[13px] text-mid">
-              لقد قرأتُ{" "}
-              <Link href="/terms" className="text-teal font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
-                الشروط والأحكام
-              </Link>
-              {" "}وأوافق عليها لهذا الموقع
+              {t.rich("agreeTerms", {
+                link: (chunks) => (
+                  <Link href="/terms" className="text-teal font-semibold hover:underline" target="_blank" rel="noopener noreferrer">
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </span>
           </label>
 
@@ -406,7 +413,7 @@ export default function CheckoutForm({
               style={{ accentColor: "var(--teal)", width: 17, height: 17, cursor: "pointer" }}
             />
             <span className="text-[13px] text-mid">
-              أوافق على إرسال مواد دعائية عبر البريد الإلكتروني أو رسالة SMS/Whatsapp
+              {t("agreeMarketing")}
             </span>
           </label>
         </div>
@@ -418,7 +425,7 @@ export default function CheckoutForm({
               className="text-center text-[13px] mb-3 rounded-[10px] py-2"
               style={{ background: "#FEF5F7", color: "var(--rose)", border: "1px solid var(--roselt)" }}
             >
-              حدث خطأ، يرجى المحاولة مجدداً
+              {t("submitError")}
             </div>
           )}
 
@@ -437,12 +444,12 @@ export default function CheckoutForm({
             }}
           >
             {status === "submitting"
-              ? "جارٍ تجهيز الدفع الآمن…"
-              : `المتابعة للدفع الآمن — ₪${grandTotal} ←`}
+              ? t("preparingPayment")
+              : t("proceedToPayment", { total: grandTotal })}
           </button>
 
           <p className="text-center text-[12px] text-light mt-3">
-            🔒 لن يُخصم أي مبلغ قبل إدخالك بيانات الدفع في الخطوة التالية
+            {t("noChargeYet")}
           </p>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { formatILS } from "@/lib/utils/format";
 
 interface PaymentRetryCardProps {
@@ -14,6 +15,7 @@ interface PaymentRetryCardProps {
  * والطلب لم يُدفع بعد. تعرض زر إعادة توليد رابط دفع HYP.
  */
 export default function PaymentRetryCard({ orderId, amount, failed }: PaymentRetryCardProps) {
+  const t = useTranslations("order");
   return (
     <div
       className="rounded-[22px] text-center"
@@ -25,12 +27,10 @@ export default function PaymentRetryCard({ orderId, amount, failed }: PaymentRet
       }}
     >
       <h2 className="font-heading font-bold text-dark text-[19px] mb-2">
-        {failed ? "لم يكتمل الدفع" : "بانتظار إتمام الدفع"}
+        {failed ? t("retryFailedTitle") : t("retryAwaitingTitle")}
       </h2>
       <p className="font-label text-[13.5px] text-mid leading-[1.85] mb-5 max-w-[440px] mx-auto">
-        {failed
-          ? "لم تكتمل عملية الدفع، وطلبكِ محفوظ لدينا. يمكنكِ إعادة المحاولة الآن بأمان."
-          : "طلبكِ محفوظ بانتظار الدفع. أكملي الدفع الآمن لتأكيد طلبكِ وبدء تجهيزه."}
+        {failed ? t("retryFailedBody") : t("retryAwaitingBody")}
       </p>
 
       {/* زر إعادة الدفع — لصفحة الدفع المدمجة (iframe داخل الموقع) */}
@@ -44,11 +44,11 @@ export default function PaymentRetryCard({ orderId, amount, failed }: PaymentRet
           boxShadow: "0 6px 20px rgba(242,167,181,0.45)",
         }}
       >
-        {`إتمام الدفع — ${formatILS(amount)} ←`}
+        {t("payNow", { amount: formatILS(amount) })}
       </a>
 
       <p className="font-label text-[11.5px] text-light mt-4">
-        🔒 دفع آمن ومشفّر عبر HYP
+        {t("hypSecureNote")}
       </p>
     </div>
   );

@@ -3,6 +3,8 @@
  * أيقونات SVG مضمّنة (لا أصول خارجية).
  */
 
+import { useTranslations } from "next-intl";
+
 /** شعار Visa مبسّط */
 function VisaMark() {
   return (
@@ -47,6 +49,7 @@ function HypMark() {
 }
 
 export default function TrustBadges() {
+  const t = useTranslations("checkout");
   return (
     <div className="flex flex-col items-center gap-2.5">
       <div className="flex items-center justify-center gap-2">
@@ -59,7 +62,7 @@ export default function TrustBadges() {
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
-        <span>دفع آمن ومشفّر بتقنية SSL</span>
+        <span>{t("sslSecure")}</span>
       </div>
     </div>
   );

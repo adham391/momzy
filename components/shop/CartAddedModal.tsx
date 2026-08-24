@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
 import type { Product } from "@/lib/products/types";
@@ -10,6 +11,7 @@ import { effectivePrice } from "@/lib/bundles";
 
 /** Modal يظهر عند إضافة أي منتج للسلة */
 export default function CartAddedModal() {
+  const t = useTranslations("cart");
   const [mounted, setMounted]         = useState(false);
   const [visible, setVisible]         = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -84,13 +86,13 @@ export default function CartAddedModal() {
           }}
         >
           <div className="flex items-center gap-2">
-            <Image src="/icons/correct-icon.png" alt="تم" width={20} height={20} className="object-contain" />
+            <Image src="/icons/correct-icon.png" alt={t("successIconAlt")} width={20} height={20} className="object-contain" />
             <span className="font-heading font-bold text-dark text-[16px]">
-              أُضيف إلى السلة
+              {t("addedToCart")}
             </span>
           </div>
           <div className="font-label text-[13px] text-mid">
-            {count} {count === 1 ? "منتج" : "منتجات"} في السلة
+            {t("itemsInCart", { count })}
           </div>
         </div>
 
@@ -138,7 +140,7 @@ export default function CartAddedModal() {
               cursor: "pointer",
             }}
           >
-            مواصلة التسوق
+            {t("continueShopping")}
           </button>
 
           <button
@@ -153,7 +155,7 @@ export default function CartAddedModal() {
               cursor: "pointer",
             }}
           >
-            انتقل للسلة ←
+            {t("goToCart")}
           </button>
         </div>
 
@@ -161,7 +163,7 @@ export default function CartAddedModal() {
         {suggestions.length > 0 && (
           <div style={{ borderTop: "1.5px solid var(--bord)", padding: "16px 20px 20px" }}>
             <div className="font-label font-bold text-[11px] text-mid mb-3" style={{ letterSpacing: "1.5px", textTransform: "uppercase" }}>
-              قد يعجبكِ أيضاً
+              {t("youMayAlsoLike")}
             </div>
             <div className="flex flex-col gap-2">
               {suggestions.map((product) => {
@@ -197,7 +199,7 @@ export default function CartAddedModal() {
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-label font-extrabold text-teal text-[13px]">₪{eff}</span>
                         <span className="font-label line-through text-light text-[11px]">₪{product.price}</span>
-                        <span className="font-bold text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: "var(--rose)", color: "white" }}>🎁 عرض</span>
+                        <span className="font-bold text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: "var(--rose)", color: "white" }}>{t("bundleOfferBadge")}</span>
                       </div>
                     ) : (
                       <div className="font-label font-extrabold text-teal text-[13px]">₪{product.price}</div>
@@ -216,7 +218,7 @@ export default function CartAddedModal() {
                       cursor: "pointer",
                     }}
                   >
-                    + أضيفي
+                    {t("addSuggestion")}
                   </button>
                 </div>
                 );

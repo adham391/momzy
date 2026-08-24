@@ -1,6 +1,6 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import ServiceCardCTA from "./ServiceCardCTA";
-import { seatsLabel } from "@/lib/utils/seats";
 import type { Service, ServiceColor } from "@/lib/services/types";
 
 interface ServiceCardProps {
@@ -19,21 +19,14 @@ const PALETTE: Record<ServiceColor, { accent: string; emblem: string; chip: stri
   mint:   { accent: "#5DA9A4", emblem: "linear-gradient(135deg,#DDF0EE,#A8D8D5)", chip: "rgba(168,216,213,0.20)", glow: "rgba(168,216,213,0.50)" },
 };
 
-/** ترجمة type → نص عربي */
-const TYPE_LABEL: Record<Service["type"], string> = {
-  workshop:   "ورشة جماعية",
-  individual: "لقاء فردي",
-  online:     "أونلاين",
-  home:       "زيارة بيتية",
-};
-
 /** كارد خدمة فاخر — بلا صورة، شعار نوع + توهّج + حجز واتساب */
 export default function ServiceCard({ service, whatsappNumber, seatsLeft }: ServiceCardProps) {
+  const t = useTranslations("services");
   const p = PALETTE[service.color];
 
   // رابط واتساب للاستفسار (التسجيل صار إلكترونيًا عبر الزر الأساسي)
   const waMessage = encodeURIComponent(
-    `مرحباً هبة 🌸\nعندي استفسار عن: ${service.title}`
+    t("waCardMessage", { title: service.title })
   );
   const waDigits = (whatsappNumber ?? "972500000000").replace(/\D/g, "") || "972500000000";
   const waLink = `https://wa.me/${waDigits}?text=${waMessage}`;
@@ -72,7 +65,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
             className="font-label font-extrabold uppercase"
             style={{ color: p.accent, fontSize: 11, letterSpacing: "1.5px" }}
           >
-            {TYPE_LABEL[service.type]}
+            {t(`type.${service.type}`)}
           </span>
         </div>
 
@@ -91,7 +84,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
               chip={seatsLeft === 0 ? "rgba(217,105,122,0.12)" : "rgba(130,201,196,0.18)"}
               accent={seatsLeft === 0 ? "#D9697A" : "#3E8F8B"}
             >
-              <SeatIcon /> {seatsLabel(seatsLeft)}
+              <SeatIcon /> {t("seatsLeft", { count: seatsLeft })}
             </MetaChip>
           )}
         </div>
@@ -118,7 +111,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
               className="font-bold hover:opacity-70 transition-opacity"
               style={{ color: p.accent, fontSize: 13 }}
             >
-              التفاصيل ←
+              {t("details")}
             </Link>
             <span style={{ color: "var(--bord)", fontSize: 12 }}>·</span>
             <a
@@ -129,7 +122,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
               style={{ color: "#1EBE5A", fontSize: 12.5 }}
             >
               <WhatsAppIcon size={13} />
-              استفسار
+              {t("inquiry")}
             </a>
           </div>
         </div>

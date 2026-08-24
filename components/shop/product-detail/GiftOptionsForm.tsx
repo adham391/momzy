@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { GiftOptions } from "@/lib/store/cart";
 
 interface GiftOptionsFormProps {
@@ -29,6 +30,7 @@ export default function GiftOptionsForm({
   onToggle,
   digital = false,
 }: GiftOptionsFormProps) {
+  const t = useTranslations("gift");
   const [charCount, setCharCount] = useState(value.message?.length ?? 0);
 
   function update<K extends keyof GiftOptions>(key: K, val: GiftOptions[K]) {
@@ -53,10 +55,10 @@ export default function GiftOptionsForm({
         />
         <div className="flex-1">
           <div className="font-heading font-bold text-body" style={{ color: "var(--dark)" }}>
-            🎁 هذه الطلبية هدية
+            {t("toggleTitle")}
           </div>
           <div className="text-[12px] mt-0.5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            {digital ? "رسالة شخصية + إرسال الكتيب لبريد المستلِمة" : "رسالة شخصية + شحن مباشر للمستلِمة"}
+            {digital ? t("toggleHintDigital") : t("toggleHintPhysical")}
           </div>
         </div>
       </label>
@@ -70,7 +72,7 @@ export default function GiftOptionsForm({
           {/* رسالة شخصية */}
           <div>
             <label className="block font-label font-bold text-[13px] mb-1.5" style={{ color: "var(--dark)" }}>
-              ✏️ رسالة شخصية
+              {t("messageLabel")}
               <span className="font-normal text-[11px] mr-2" style={{ color: "var(--light)" }}>
                 ({charCount}/{MESSAGE_MAX})
               </span>
@@ -82,7 +84,7 @@ export default function GiftOptionsForm({
                 update("message", e.target.value);
                 setCharCount(e.target.value.length);
               }}
-              placeholder={digital ? "اكتبي رسالتك... سنرسلها مع الكتيب للمستلِمة." : "اكتبي بطاقتك الشخصية... سنُرفقها مع الصندوق."}
+              placeholder={digital ? t("messagePlaceholderDigital") : t("messagePlaceholderPhysical")}
               rows={3}
               className="w-full px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none [transition:border-color_150ms_ease] focus:border-rose"
               style={{
@@ -99,14 +101,14 @@ export default function GiftOptionsForm({
           {digital ? (
             <div>
               <p className="font-label font-bold text-[13px] mb-2" style={{ color: "var(--dark)" }}>
-                📧 لمن نرسل الكتيب؟
+                {t("digitalRecipientTitle")}
               </p>
               <div className="grid grid-cols-1 gap-3">
                 <input
                   type="text"
                   value={value.recipientName ?? ""}
                   onChange={(e) => update("recipientName", e.target.value)}
-                  placeholder="اسم المستلِمة"
+                  placeholder={t("recipientName")}
                   className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
                   style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
                 />
@@ -114,20 +116,20 @@ export default function GiftOptionsForm({
                   type="email"
                   value={value.recipientEmail ?? ""}
                   onChange={(e) => update("recipientEmail", e.target.value)}
-                  placeholder="بريد المستلِمة الإلكتروني"
+                  placeholder={t("recipientEmail")}
                   dir="ltr"
                   className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
                   style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif", textAlign: "right" }}
                 />
               </div>
               <p className="text-[11px] mt-2" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-                سنرسل الكتيب (PDF) إلى بريد المستلِمة بعد إتمام الطلب.
+                {t("digitalRecipientNote")}
               </p>
             </div>
           ) : (
             <div>
               <p className="font-label font-bold text-[13px] mb-2" style={{ color: "var(--dark)" }}>
-                📦 بيانات المستلِمة
+                {t("physicalRecipientTitle")}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -135,7 +137,7 @@ export default function GiftOptionsForm({
                   type="text"
                   value={value.recipientName ?? ""}
                   onChange={(e) => update("recipientName", e.target.value)}
-                  placeholder="اسم المستلِمة"
+                  placeholder={t("recipientName")}
                   className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
                   style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
                 />
@@ -143,7 +145,7 @@ export default function GiftOptionsForm({
                   type="tel"
                   value={value.recipientPhone ?? ""}
                   onChange={(e) => update("recipientPhone", e.target.value)}
-                  placeholder="هاتف المستلِمة"
+                  placeholder={t("recipientPhone")}
                   dir="ltr"
                   className="px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
                   style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif", textAlign: "right" }}
@@ -154,7 +156,7 @@ export default function GiftOptionsForm({
                 type="text"
                 value={value.recipientAddress ?? ""}
                 onChange={(e) => update("recipientAddress", e.target.value)}
-                placeholder="العنوان (الشارع، رقم البيت)"
+                placeholder={t("recipientAddress")}
                 className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
                 style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
               />
@@ -163,7 +165,7 @@ export default function GiftOptionsForm({
                 type="text"
                 value={value.recipientCity ?? ""}
                 onChange={(e) => update("recipientCity", e.target.value)}
-                placeholder="المدينة"
+                placeholder={t("recipientCity")}
                 className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none focus:border-rose [transition:border-color_150ms_ease]"
                 style={{ background: "var(--offwh)", color: "var(--dark)", border: "1.5px solid var(--bord)", fontFamily: "'Tajawal', sans-serif" }}
               />

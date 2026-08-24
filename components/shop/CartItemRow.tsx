@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import QuantityInput from "@/components/shop/QuantityInput";
 import CartGiftEditModal from "@/components/shop/CartGiftEditModal";
@@ -13,6 +14,8 @@ interface CartItemRowProps {
 
 /** صف منتج واحد داخل السلة */
 export default function CartItemRow({ item }: CartItemRowProps) {
+  const t     = useTranslations("cart");
+  const tGift = useTranslations("gift");
   const removeItem        = useCart((s) => s.removeItem);
   const updateQuantity    = useCart((s) => s.updateQuantity);
   const getEffectivePrice = useCart((s) => s.getEffectivePrice);
@@ -63,7 +66,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
                   className="font-bold text-[10px] px-1.5 py-0.5 rounded-full"
                   style={{ background: "var(--rosepale)", color: "var(--rose)" }}
                 >
-                  باقة
+                  {t("bundleBadge")}
                 </span>
               </>
             )}
@@ -82,7 +85,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
         {/* زر حذف */}
         <button
           onClick={() => removeItem(item.id)}
-          aria-label="حذف المنتج"
+          aria-label={t("removeItem")}
           className="shrink-0 text-light hover:text-rose transition-colors font-label"
           style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, lineHeight: 1 }}
         >
@@ -98,19 +101,19 @@ export default function CartItemRow({ item }: CartItemRowProps) {
         >
           <div className="flex items-center justify-between mb-1.5">
             <p className="font-label font-bold text-[11px]" style={{ color: "var(--rose)", letterSpacing: "1px" }}>
-              🎁 هدية
+              {tGift("badge")}
             </p>
             <button
               onClick={() => setGiftModalOpen(true)}
               className="font-label text-[11px] hover:underline"
               style={{ background: "none", border: "none", cursor: "pointer", color: "var(--rose)" }}
             >
-              ✏️ تعديل
+              {tGift("edit")}
             </button>
           </div>
           {item.gift?.recipientName && (
             <p className="text-[11px] mb-0.5" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
-              <span className="font-bold">إلى:</span> {item.gift.recipientName}
+              <span className="font-bold">{tGift("to")}</span> {item.gift.recipientName}
             </p>
           )}
           {item.gift?.recipientEmail && (
@@ -137,7 +140,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
               cursor: "pointer",
             }}
           >
-            🎁 جعلها هدية ←
+            {tGift("makeGift")}
           </button>
         </div>
       )}

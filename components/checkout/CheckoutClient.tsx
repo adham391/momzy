@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
@@ -22,6 +23,8 @@ type Step = "delivery" | "payment";
  * الطلب يُنشأ عند الانتقال للدفع (قياسي)، والرابط يُزامَن بـ ?order= ليصمد التحديث.
  */
 export default function CheckoutClient({ shipping }: { shipping: ShippingConfig }) {
+  const t    = useTranslations("checkout");
+  const tNav = useTranslations("nav");
   const [hydrated, setHydrated] = useState(false);
   const [step, setStep]         = useState<Step>("delivery");
   const [orderId, setOrderId]   = useState<string | null>(null);
@@ -63,7 +66,7 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
   if (!hydrated || (step === "delivery" && items.length === 0)) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-light text-[15px]">جارٍ التحميل...</div>
+        <div className="text-light text-[15px]">{t("loading")}</div>
       </div>
     );
   }
@@ -104,19 +107,17 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
       >
         <Container>
           <nav className="font-label text-[13px] text-light flex items-center gap-1.5 mb-4">
-            <Link href="/" className="hover:text-teal transition-colors">الرئيسية</Link>
+            <Link href="/" className="hover:text-teal transition-colors">{tNav("home")}</Link>
             <span>›</span>
-            <Link href="/shop" className="hover:text-teal transition-colors">المتجر</Link>
+            <Link href="/shop" className="hover:text-teal transition-colors">{tNav("shop")}</Link>
             <span>›</span>
-            <span className="text-mid">{isPayment ? "الدفع الآمن" : "إتمام الشراء"}</span>
+            <span className="text-mid">{isPayment ? t("securePayment") : t("completePurchase")}</span>
           </nav>
           <h1 className="font-heading font-bold text-h1 mb-2" style={{ color: "var(--dark)" }}>
-            {isPayment ? "الدفع الآمن" : "إتمام الشراء"}
+            {isPayment ? t("securePayment") : t("completePurchase")}
           </h1>
           <p className="font-body text-[15px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            {isPayment
-              ? "أدخلي بيانات بطاقتك بأمان لإتمام طلبك"
-              : "أكملي بياناتك وسيصلك طلبك خلال 7 أيام عمل"}
+            {isPayment ? t("paymentSubtitle") : t("deliverySubtitle")}
           </p>
         </Container>
         <PageHeaderWave fillColor="var(--offwh)" />

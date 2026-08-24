@@ -169,41 +169,31 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
 
 /* ── بيانات قسم "كل ما تحتاجينه" ─────────────────────── */
 
-/** واجهة كارد العرض */
+/** واجهة كارد العرض — النصوص (العنوان/الوصف/الرابط) من مفاتيح home.offer.cards */
 export interface OfferCard {
+  /** مفتاح الترجمة داخل namespace "home" → offer.cards.{key} */
+  key: "knowledge" | "products" | "community";
   icon: string;
-  title: string;
-  description: string;
-  linkText: string;
   href: string;
   color: "rose" | "teal" | "yellow";
 }
 
 export const OFFER_CARDS: OfferCard[] = [
   {
+    key: "knowledge",
     icon: "/icons/services-icon.png",
-    title: "المعرفة المهنية",
-    description:
-      "خدمات متخصصة من هبة حسن — ممرضة معتمدة ومرشدة رضاعة ومرافقة ولادة بخبرة +1000 أم",
-    linkText: "اكتشفي الخدمات",
     href: "/services",
     color: "rose",
   },
   {
+    key: "products",
     icon: "/icons/products-icon.png",
-    title: "منتجات مختارة بعناية",
-    description:
-      "منتجات ومحتوى تعليمي مبني على أساس علمي — لترافقك في كل خطوة من رحلتك",
-    linkText: "تصفحي المتجر",
     href: "/shop",
     color: "teal",
   },
   {
+    key: "community",
     icon: "/icons/blog-icon.png",
-    title: "المجتمع الداعم",
-    description:
-      "مساحة تجمع الأمهات — لأن بداية الأمومة لحظة مفصلية تستحق الدعم الحقيقي",
-    linkText: "اقرئي المقالات",
     href: "/articles",
     color: "yellow",
   },

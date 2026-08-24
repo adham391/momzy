@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
@@ -17,7 +19,8 @@ const getBooking = cache(getBookingById);
 
 /** العنوان يتبع المرحلة — «الدفع الآمن» أثناء الدفع لا «تأكيد التسجيل» */
 export async function generateMetadata({ params }: BookingPageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { locale, id } = await params;
+  const t = await getTranslations({ locale, namespace: "booking" });
   const booking = await getBooking(id);
   const awaiting =
     booking != null &&
@@ -27,33 +30,14 @@ export async function generateMetadata({ params }: BookingPageProps): Promise<Me
     booking.status !== "cancelled";
 
   return {
-    title: `${awaiting ? "الدفع الآمن" : "تأكيد التسجيل"} | Momzy`,
-    description: "تفاصيل تسجيلكِ في الورشة",
+    title: `${awaiting ? t("page.awaitingTitle") : t("page.confirmedTitle")} | Momzy`,
+    description: t("page.metaDescription"),
     robots: { index: false, follow: false },
   };
 }
 
-/** نصوص الترويسة حسب المرحلة — تطابق تجربة /checkout في المتجر */
-const HEADER_COPY = {
-  awaiting: {
-    crumb: "الدفع الآمن",
-    title: "الدفع الآمن",
-    subtitle: "أدخلي بيانات بطاقتك بأمان لتثبيت مقعدكِ",
-  },
-  confirmed: {
-    crumb: "تأكيد التسجيل",
-    title: "تأكيد التسجيل",
-    subtitle: "تسجيلكِ مثبّت — نراكِ في الورشة!",
-  },
-  cancelled: {
-    crumb: "التسجيل ملغى",
-    title: "التسجيل ملغى",
-    subtitle: "تواصلي معنا لو رغبتِ بالتسجيل مجددًا",
-  },
-} as const;
-
 interface BookingPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
   searchParams: Promise<{ payment?: string }>;
 }
 
@@ -65,6 +49,9 @@ interface BookingPageProps {
 export default async function BookingPage({ params, searchParams }: BookingPageProps) {
   const { id } = await params;
   const { payment } = await searchParams;
+  const t = await getTranslations("booking");
+  const tNav = await getTranslations("nav");
+  const tMenu = await getTranslations("menu");
   const booking = await getBooking(id);
 
   if (!booking) return <BookingNotFound />;
@@ -76,7 +63,12 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
   const paymentFailed = payment === "failed";
   const state = isCancelled ? "cancelled" : awaitingPayment ? "awaiting" : "confirmed";
   const isAwaiting = state === "awaiting";
-  const copy = HEADER_COPY[state];
+  /** نصوص الترويسة حسب المرحلة — تطابق تجربة /checkout في المتجر */
+  const copy = {
+    crumb: t(`page.${state}Title`),
+    title: t(`page.${state}Title`),
+    subtitle: t(`page.${state}Subtitle`),
+  };
 
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh", paddingBottom: 80 }}>
@@ -91,9 +83,9 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
       >
         <Container>
           <nav className="font-label text-[13px] text-light flex items-center gap-1.5 mb-4">
-            <Link href="/" className="hover:text-teal transition-colors">الرئيسية</Link>
+            <Link href="/" className="hover:text-teal transition-colors">{tNav("home")}</Link>
             <span>›</span>
-            <Link href="/services" className="hover:text-teal transition-colors">الخدمات</Link>
+            <Link href="/services" className="hover:text-teal transition-colors">{t("page.servicesCrumb")}</Link>
             <span>›</span>
             <span className="text-mid">{copy.crumb}</span>
           </nav>
@@ -136,7 +128,7 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
                   style={{ background: "#FEF5F7", border: "1.5px solid var(--roselt)", padding: "14px 20px" }}
                 >
                   <span className="font-label text-[13.5px]" style={{ color: "var(--rose)" }}>
-                    لم تكتمل عملية الدفع — مقعدكِ ما زال محجوزًا، ويمكنكِ المحاولة مجددًا بالأسفل.
+                    {t("page.paymentFailed")}
                   </span>
                 </div>
               )}
@@ -164,14 +156,14 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
                 className="font-label font-bold text-[14px] text-dark"
                 style={{ background: "var(--yellow)", borderRadius: 50, padding: "13px 30px" }}
               >
-                خدمات أخرى
+                {t("page.otherServices")}
               </Link>
               <Link
                 href="/contact"
                 className="font-label font-bold text-[14px] text-mid"
                 style={{ background: "white", border: "1.5px solid var(--bord)", borderRadius: 50, padding: "13px 30px" }}
               >
-                تواصلي معنا
+                {tMenu("contact")}
               </Link>
             </div>
           </div>
@@ -183,6 +175,7 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
 
 /** واجهة "التسجيل غير موجود" */
 function BookingNotFound() {
+  const t = useTranslations("booking");
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh", paddingTop: 80, paddingBottom: 80 }}>
       <Container>
@@ -197,16 +190,16 @@ function BookingNotFound() {
           }}
         >
           <div style={{ fontSize: 56, marginBottom: 16 }}>🔍</div>
-          <h1 className="font-heading font-bold text-dark text-[24px] mb-3">التسجيل غير موجود</h1>
+          <h1 className="font-heading font-bold text-dark text-[24px] mb-3">{t("page.notFoundTitle")}</h1>
           <p className="font-label text-[14px] text-mid leading-[1.8] mb-6">
-            لم نعثر على هذا التسجيل — ربما الرابط غير صحيح.
+            {t("page.notFoundBody")}
           </p>
           <Link
             href="/services"
             className="inline-block font-label font-bold text-[14px] text-dark"
             style={{ background: "var(--yellow)", border: "none", borderRadius: 50, padding: "13px 32px" }}
           >
-            تصفّحي الخدمات
+            {t("page.browseServices")}
           </Link>
         </div>
       </Container>

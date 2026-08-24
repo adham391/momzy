@@ -5,10 +5,12 @@ import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
 import ProductCard from "@/components/shop/ProductCard";
 import { getProducts } from "@/lib/products/getProducts";
+import { getTranslations } from "next-intl/server";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** قسم "الأكثر مبيعاً" — شبكة منتجات بشارة ترتيب (مثل متاجر الأمومة العصرية) */
 export default async function BestSellersSection({ content }: { content: HomePageContent }) {
+  const tMega = await getTranslations("megaMenu");
   const products = (await getProducts({ inStockOnly: true })).slice(0, 4);
 
   // لا تعرض القسم إذا لا توجد منتجات
@@ -53,7 +55,7 @@ export default async function BestSellersSection({ content }: { content: HomePag
               href="/shop"
               className="text-btn font-semibold text-teal [transition:gap_200ms_cubic-bezier(0.23,1,0.32,1),color_150ms_ease] hover:gap-2 flex items-center gap-1.5 hover:text-teal/80"
             >
-              كل المنتجات ←
+              {tMega("allProducts")}
             </Link>
           </div>
 

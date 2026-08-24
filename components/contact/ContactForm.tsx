@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 /** بيانات نموذج التواصل */
 interface FormData {
@@ -51,14 +52,15 @@ function FieldError({ msg }: { msg: string }) {
 
 /** قواعد التحقق لكل حقل */
 const validators: Record<keyof Omit<FormData, "phone">, (v: string) => string | null> = {
-  name:    (v) => v.trim().length < 2 ? "الرجاء إدخال الاسم الكامل" : /\d/.test(v) ? "الاسم لا يجب أن يحتوي على أرقام" : null,
-  email:   (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? "الرجاء إدخال بريد إلكتروني صحيح" : null,
-  subject: (v) => v.trim().length < 2 ? "الرجاء إدخال موضوع الرسالة" : null,
-  message: (v) => v.trim().length < 10 ? "الرسالة قصيرة جداً (10 أحرف على الأقل)" : null,
+  name:    (v) => v.trim().length < 2 ? "errorNameRequired" : /\d/.test(v) ? "errorNameNoDigits" : null,
+  email:   (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? "errorEmailInvalid" : null,
+  subject: (v) => v.trim().length < 2 ? "errorSubjectRequired" : null,
+  message: (v) => v.trim().length < 10 ? "errorMessageTooShort" : null,
 };
 
 /** نموذج التواصل مع validation وإرسال حقيقي */
 export default function ContactForm() {
+  const t = useTranslations("contact");
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", subject: "", message: "",
   });
@@ -151,14 +153,14 @@ export default function ContactForm() {
           ✓
         </div>
         <h2 className="font-heading font-bold text-[22px] mb-2" style={{ color: "var(--dark)" }}>
-          رسالتكِ وصلت — سنرد خلال 24 ساعة
+          {t("successTitle")}
         </h2>
         <button
           onClick={() => setStatus("idle")}
           className="mt-6 font-label font-bold text-[13px]"
           style={{ color: "var(--teal)", background: "none", border: "none", cursor: "pointer" }}
         >
-          إرسال رسالة أخرى ←
+          {t("sendAnother")}
         </button>
       </div>
     );
@@ -180,7 +182,7 @@ export default function ContactForm() {
           className="font-heading font-bold"
           style={{ padding: "18px 24px", borderBottom: "1.5px solid var(--bord)", fontSize: 17, color: "var(--dark)" }}
         >
-          أرسلي رسالتك
+          {t("formTitle")}
         </div>
 
         {/* الحقول */}
@@ -188,24 +190,24 @@ export default function ContactForm() {
 
           {/* الاسم */}
           <div>
-            <label style={labelStyle}>الاسم الكامل *</label>
+            <label style={labelStyle}>{t("nameLabel")}</label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => updateField("name", e.target.value)}
-              placeholder="اسمك الكامل"
+              placeholder={t("namePlaceholder")}
               autoComplete="name"
               style={{ ...inputBase, border: `1.5px solid ${borderColor("name")}` }}
               onFocus={() => setFocusedField("name")}
               onBlur={() => handleBlur("name")}
             />
-            {fieldError("name") && <FieldError msg={fieldError("name")!} />}
+            {fieldError("name") && <FieldError msg={t(fieldError("name")!)} />}
           </div>
 
           {/* الإيميل والهاتف */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label style={labelStyle}>البريد الإلكتروني *</label>
+              <label style={labelStyle}>{t("emailLabel")}</label>
               <input
                 type="email"
                 value={form.email}
@@ -217,10 +219,10 @@ export default function ContactForm() {
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => handleBlur("email")}
               />
-              {fieldError("email") && <FieldError msg={fieldError("email")!} />}
+              {fieldError("email") && <FieldError msg={t(fieldError("email")!)} />}
             </div>
             <div>
-              <label style={labelStyle}>رقم الهاتف (اختياري)</label>
+              <label style={labelStyle}>{t("phoneLabel")}</label>
               <input
                 type="tel"
                 value={form.phone}
@@ -237,32 +239,32 @@ export default function ContactForm() {
 
           {/* الموضوع */}
           <div>
-            <label style={labelStyle}>الموضوع *</label>
+            <label style={labelStyle}>{t("subjectLabel")}</label>
             <input
               type="text"
               value={form.subject}
               onChange={(e) => updateField("subject", e.target.value)}
-              placeholder="موضوع رسالتك"
+              placeholder={t("subjectPlaceholder")}
               style={{ ...inputBase, border: `1.5px solid ${borderColor("subject")}` }}
               onFocus={() => setFocusedField("subject")}
               onBlur={() => handleBlur("subject")}
             />
-            {fieldError("subject") && <FieldError msg={fieldError("subject")!} />}
+            {fieldError("subject") && <FieldError msg={t(fieldError("subject")!)} />}
           </div>
 
           {/* الرسالة */}
           <div>
-            <label style={labelStyle}>الرسالة *</label>
+            <label style={labelStyle}>{t("messageLabel")}</label>
             <textarea
               value={form.message}
               onChange={(e) => updateField("message", e.target.value)}
-              placeholder="اكتبي رسالتك هنا..."
+              placeholder={t("messagePlaceholder")}
               rows={5}
               style={{ ...inputBase, border: `1.5px solid ${borderColor("message")}`, resize: "none" }}
               onFocus={() => setFocusedField("message")}
               onBlur={() => handleBlur("message")}
             />
-            {fieldError("message") && <FieldError msg={fieldError("message")!} />}
+            {fieldError("message") && <FieldError msg={t(fieldError("message")!)} />}
           </div>
         </div>
 
@@ -273,7 +275,7 @@ export default function ContactForm() {
               className="text-center text-[13px] mb-3 rounded-[10px] py-2"
               style={{ background: "#FEF5F7", color: "var(--rose)", border: "1px solid var(--roselt)" }}
             >
-              حدث خطأ، يرجى المحاولة مجدداً
+              {t("submitError")}
             </div>
           )}
 
@@ -291,7 +293,7 @@ export default function ContactForm() {
               opacity: status === "submitting" ? 0.8 : 1,
             }}
           >
-            {status === "submitting" ? "جارٍ الإرسال..." : "إرسال الرسالة ←"}
+            {status === "submitting" ? t("submitting") : t("submitButton")}
           </button>
         </div>
       </div>

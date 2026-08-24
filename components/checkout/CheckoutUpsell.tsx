@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
@@ -9,6 +10,7 @@ import { effectivePrice } from "@/lib/bundles";
 
 /** قسم البيع الإضافي — منتجات مقترحة في صفحة الدفع */
 export default function CheckoutUpsell() {
+  const t = useTranslations("checkout");
   const cartItems = useCart((s) => s.items);
   const addItem   = useCart((s) => s.addItem);
 
@@ -36,7 +38,7 @@ export default function CheckoutUpsell() {
           className="font-label font-extrabold text-dark text-[13px] px-4 py-1.5 rounded-full"
           style={{ background: "var(--yellow)", letterSpacing: "0.5px" }}
         >
-          قد يعجبكِ أيضاً
+          {t("alsoLike")}
         </div>
         <div style={{ flex: 1, height: 1, background: "var(--bord)" }} />
       </div>
@@ -92,7 +94,7 @@ export default function CheckoutUpsell() {
                     <span className="font-label font-extrabold text-teal text-[16px]">₪ {eff}.00</span>
                     <span className="font-label text-light text-[13px] line-through">₪ {product.price}.00</span>
                   </div>
-                  <span className="font-bold text-[10px] px-2 py-0.5 rounded-full" style={{ background: "var(--rose)", color: "white" }}>🎁 عرض مع الصندوق</span>
+                  <span className="font-bold text-[10px] px-2 py-0.5 rounded-full" style={{ background: "var(--rose)", color: "white" }}>{t("bundleOffer")}</span>
                 </>
               ) : (
                 <div className="flex items-center gap-2">
@@ -117,7 +119,7 @@ export default function CheckoutUpsell() {
                   cursor: "pointer",
                 }}
               >
-                + أضيفي للطلب
+                {t("addToOrder")}
               </button>
             </div>
           </div>

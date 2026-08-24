@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import { useCart, type GiftOptions } from "@/lib/store/cart";
 import GiftOptionsForm from "./product-detail/GiftOptionsForm";
 
@@ -26,6 +27,7 @@ export default function CartGiftEditModal({
   digital = false,
   onClose,
 }: CartGiftEditModalProps) {
+  const t = useTranslations("gift");
   const setGift = useCart((s) => s.setGift);
 
   /** إذا فيه بيانات حالية → نبدأ بـ enabled */
@@ -93,7 +95,7 @@ export default function CartGiftEditModal({
         >
           <div>
             <h2 id="gift-edit-title" className="font-heading font-bold text-[18px]" style={{ color: "var(--dark)" }}>
-              🎁 خيارات الهدية
+              {t("optionsTitle")}
             </h2>
             <p className="text-[12px] mt-0.5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
               {itemTitle}
@@ -101,7 +103,7 @@ export default function CartGiftEditModal({
           </div>
           <button
             onClick={onClose}
-            aria-label="إغلاق"
+            aria-label={t("close")}
             className="w-9 h-9 rounded-full flex items-center justify-center text-light hover:bg-rosepale hover:text-rose transition-colors"
             style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, lineHeight: 1 }}
           >
@@ -135,7 +137,7 @@ export default function CartGiftEditModal({
               className="font-label text-[13px] text-light hover:text-rose transition-colors"
               style={{ background: "none", border: "none", cursor: "pointer" }}
             >
-              إزالة الهدية
+              {t("remove")}
             </button>
           ) : (
             <span />
@@ -153,7 +155,7 @@ export default function CartGiftEditModal({
                 cursor: "pointer",
               }}
             >
-              إلغاء
+              {t("cancel")}
             </button>
             <button
               onClick={handleSave}
@@ -168,7 +170,7 @@ export default function CartGiftEditModal({
                 boxShadow: "0 4px 14px rgba(242,167,181,0.4)",
               }}
             >
-              حفظ
+              {t("save")}
             </button>
           </div>
         </div>

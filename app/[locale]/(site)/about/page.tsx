@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
@@ -11,10 +12,11 @@ import { getServices } from "@/lib/services/getServices";
 import { getAboutPage } from "@/lib/sanity/queries/aboutPage";
 import MomzyText from "@/components/ui/MomzyText";
 
-export const metadata: Metadata = {
-  title: "عن هبة حسن | Momzy",
-  description: "هبة حسن — ممرضة معتمدة ومرشدة رضاعة ومرافقة ولادة، مؤسِّسة Momzy",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "about" });
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 /** ألوان نقاط الشهادات (بالترتيب) */
 const CRED_DOTS = ["var(--rose)", "var(--teal)", "#C09420"];
@@ -71,7 +73,12 @@ function TypeIcon({ type }: { type: string }) {
 }
 
 export default async function AboutPage() {
-  const [services, about] = await Promise.all([getServices(), getAboutPage()]);
+  const [services, about, t, tMenu] = await Promise.all([
+    getServices(),
+    getAboutPage(),
+    getTranslations("about"),
+    getTranslations("menu"),
+  ]);
   const [nameFirst, ...nameRest] = about.name.split(" ");
   const nameAccent = nameRest.join(" ");
 
@@ -140,8 +147,8 @@ export default async function AboutPage() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                <Button variant="rose" href="/services" className="w-full sm:w-auto justify-center">احجزي مع هبة ←</Button>
-                <Button variant="outline-rose" href="/contact" className="w-full sm:w-auto justify-center">تواصلي معنا</Button>
+                <Button variant="rose" href="/services" className="w-full sm:w-auto justify-center">{t("bookWithHeba")}</Button>
+                <Button variant="outline-rose" href="/contact" className="w-full sm:w-auto justify-center">{tMenu("contact")}</Button>
               </div>
             </div>
 
@@ -163,7 +170,7 @@ export default async function AboutPage() {
                 {/* بطاقة مؤسِّسة عائمة */}
                 <div className="absolute flex items-center gap-2.5" style={{ bottom: -18, insetInlineStart: -16, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.7)", borderRadius: 16, padding: "10px 14px", boxShadow: "0 16px 40px rgba(0,0,0,0.14)" }}>
                   <span className="flex items-center justify-center rounded-full text-white font-bold shrink-0" style={{ width: 34, height: 34, background: "linear-gradient(135deg, var(--rose), var(--teal))", fontFamily: "'Nunito', sans-serif", fontSize: 14 }}>M</span>
-                  <span className="font-heading font-bold leading-none" style={{ color: "var(--dark)", fontSize: 14 }}>مؤسِّسة Momzy</span>
+                  <span className="font-heading font-bold leading-none" style={{ color: "var(--dark)", fontSize: 14 }}>{t("founderBadge")}</span>
                 </div>
               </div>
             </div>
@@ -286,8 +293,8 @@ export default async function AboutPage() {
                 {about.ctaText}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button variant="rose" href="/services" className="w-full sm:w-auto justify-center">استكشفي الخدمات ←</Button>
-                <Button variant="outline-rose" href="/contact" className="w-full sm:w-auto justify-center">تواصلي معنا</Button>
+                <Button variant="rose" href="/services" className="w-full sm:w-auto justify-center">{t("exploreServices")}</Button>
+                <Button variant="outline-rose" href="/contact" className="w-full sm:w-auto justify-center">{tMenu("contact")}</Button>
               </div>
             </div>
           </Container>

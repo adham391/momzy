@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
@@ -79,16 +80,21 @@ export default function ServiceCTASection({
   serviceTitle,
   serviceSlug,
   color = "rose",
-  heading = "جاهزة للخطوة التالية؟",
-  subheading = "سجّلي مكانك الآن — مقعدكِ يُحجز فورًا، ويصلكِ التأكيد على بريدكِ.",
+  heading,
+  subheading,
   whatsappNumber,
   ageGate,
   zIndex = 5,
 }: ServiceCTASectionProps) {
+  const t = useTranslations("services");
   const [open, setOpen] = useState(false);
   const c = COLOR_SCHEME[color];
 
-  const waMessage = encodeURIComponent(`مرحباً، أرغب بحجز "${serviceTitle}"`);
+  // القيم الافتراضية للعنوان والنص الفرعي — من ملف الترجمة إن لم تُمرَّر من الصفحة
+  const resolvedHeading = heading ?? t("ctaReadyHeading");
+  const resolvedSubheading = subheading ?? t("ctaReadySubheading");
+
+  const waMessage = encodeURIComponent(t("waBookMessage", { title: serviceTitle }));
   const waLink    = whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${waMessage}`
     : null;
@@ -140,7 +146,7 @@ export default function ServiceCTASection({
                   </svg>
                 </span>
                 <span className="font-label font-bold text-[12px] md:text-[13px]" style={{ color: "var(--dark)", letterSpacing: "0.3px" }}>
-                  المواعيد محدودة — <span style={{ color: "var(--teal)" }}>احجزي مكانك مبكراً</span>
+                  {t.rich("limitedBadge", { accent: (chunks) => <span style={{ color: "var(--teal)" }}>{chunks}</span> })}
                 </span>
               </div>
 
@@ -153,7 +159,7 @@ export default function ServiceCTASection({
                   lineHeight: 1.2,
                 }}
               >
-                {heading}
+                {resolvedHeading}
               </h2>
 
               {/* النص الفرعي */}
@@ -166,7 +172,7 @@ export default function ServiceCTASection({
                   lineHeight: 1.85,
                 }}
               >
-                {subheading}
+                {resolvedSubheading}
               </p>
 
               {/* CTA رئيسي — تيل (لون البراند، يتباين مع خلفية الوردي) */}
@@ -185,7 +191,7 @@ export default function ServiceCTASection({
                   minWidth: 240,
                 }}
               >
-                <span>سجّلي الآن</span>
+                <span>{t("registerNow")}</span>
                 <span style={{ fontSize: "1.2em" }}>←</span>
               </button>
 
@@ -208,7 +214,7 @@ export default function ServiceCTASection({
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884" />
                     </svg>
-                    أو تحدّثي معي على واتساب
+                    {t("orWhatsapp")}
                   </a>
                 </div>
               )}
@@ -220,17 +226,17 @@ export default function ServiceCTASection({
                   className="font-label text-[13px] [transition:color_180ms_ease] hover:underline"
                   style={{ color: "var(--light)" }}
                 >
-                  تفضّلين نموذج تواصل؟ ←
+                  {t("preferContactForm")}
                 </Link>
               </div>
 
               {/* Trust line */}
               <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-                <TrustLine icon="🔒" text="معلوماتك محمية" />
+                <TrustLine icon="🔒" text={t("trust.privacy")} />
                 <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
-                <TrustLine icon="💬" text="استشارة بدون التزام" />
+                <TrustLine icon="💬" text={t("trust.consultNoCommitment")} />
                 <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
-                <TrustLine icon="✓" text="ممرضة معتمدة" />
+                <TrustLine icon="✓" text={t("credentials.nurse")} />
               </div>
 
             </div>

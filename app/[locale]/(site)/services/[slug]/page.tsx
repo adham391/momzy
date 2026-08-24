@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import Container from "@/components/ui/Container";
 import { getService } from "@/lib/services/getService";
 import { getServices } from "@/lib/services/getServices";
@@ -20,7 +21,7 @@ import SectionsReveal from "@/components/ui/SectionsReveal";
 export const revalidate = 60;
 
 interface ServicePageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 /** توليد static params — من Sanity أو seed كـ fallback */
@@ -34,11 +35,12 @@ export async function generateStaticParams() {
 
 /** metadata ديناميكي حسب الخدمة */
 export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  const t = await getTranslations({ locale, namespace: "services" });
   const service = await getService(slug);
-  if (!service) return { title: "خدمة غير موجودة | Momzy" };
+  if (!service) return { title: t("metaTitleNotFound") };
   return {
-    title: `${service.title} | Momzy`,
+    title: t("metaTitleWithName", { title: service.title }),
     description: service.shortDescription,
     openGraph: {
       title: service.title,
@@ -51,6 +53,7 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
 /** صفحة تفاصيل الخدمة */
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const { slug } = await params;
+  const t = await getTranslations("services");
   const service = await getService(slug);
 
   if (!service) notFound();
@@ -124,13 +127,13 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
                     fontSize: 17,
                   }}
                 >
-                  خدمات أخرى
+                  {t("related.label")}
                 </p>
                 <h2
                   className="font-heading font-bold"
                   style={{ fontSize: "clamp(24px, 3vw, 32px)", color: "var(--dark)" }}
                 >
-                  قد يهمّك أيضاً
+                  {t("related.title")}
                 </h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

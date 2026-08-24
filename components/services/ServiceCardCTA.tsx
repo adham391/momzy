@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import BookingModal from "./BookingModal";
 import type { AgeGate } from "@/lib/utils/age";
 
@@ -18,6 +19,7 @@ interface ServiceCardCTAProps {
  * عند اكتمال المقاعد يتحوّل لزرّ قائمة انتظار (النموذج نفسه يعرض خطوة الانتظار).
  */
 export default function ServiceCardCTA({ serviceTitle, serviceSlug, seatsLeft, ageGate }: ServiceCardCTAProps) {
+  const t = useTranslations("services");
   const [open, setOpen] = useState(false);
   const isFull = seatsLeft === 0;
 
@@ -37,7 +39,7 @@ export default function ServiceCardCTA({ serviceTitle, serviceSlug, seatsLeft, a
           boxShadow: isFull ? "none" : "0 6px 18px rgba(242,167,181,0.38)",
         }}
       >
-        {isFull ? "اكتمل العدد — انضمي للانتظار" : "سجّلي الآن"}
+        {isFull ? t("fullJoinWaitlist") : t("registerNow")}
       </button>
 
       <BookingModal

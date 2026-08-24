@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { DigitalDownloadRow } from "@/lib/db/downloads";
 
 interface OrderDownloadsProps {
@@ -9,6 +10,7 @@ interface OrderDownloadsProps {
  * غير الهدية → زر تحميل مباشر. الهدية → ملاحظة أنها أُرسلت لبريد المستلِمة.
  */
 export default function OrderDownloads({ downloads }: OrderDownloadsProps) {
+  const t = useTranslations("order");
   if (!downloads.length) return null;
 
   return (
@@ -20,7 +22,7 @@ export default function OrderDownloads({ downloads }: OrderDownloadsProps) {
         className="font-heading font-bold text-dark"
         style={{ padding: "18px 24px", borderBottom: "1.5px solid var(--bord)", fontSize: 17 }}
       >
-        📘 كتيباتك الرقمية
+        {t("downloadsTitle")}
       </div>
 
       <div style={{ padding: "6px 24px 18px" }}>
@@ -34,11 +36,11 @@ export default function OrderDownloads({ downloads }: OrderDownloadsProps) {
               <div className="font-label font-semibold text-dark text-[14px] mb-0.5">{d.product_name}</div>
               {d.is_gift ? (
                 <div className="text-[12px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }} dir="ltr">
-                  📧 أُرسل إلى {d.customer_email}
+                  {t("sentTo", { email: d.customer_email })}
                 </div>
               ) : (
                 <div className="text-[12px]" style={{ color: "var(--light)", fontFamily: "'Tajawal', sans-serif" }}>
-                  PDF · صالح 7 أيام · حتى {d.max_downloads} مرّات تحميل
+                  {t("downloadMeta", { max: d.max_downloads })}
                 </div>
               )}
             </div>
@@ -55,7 +57,7 @@ export default function OrderDownloads({ downloads }: OrderDownloadsProps) {
                   boxShadow: "0 6px 18px rgba(242,167,181,0.4)",
                 }}
               >
-                ⬇️ تحميل الكتيب
+                {t("downloadBooklet")}
               </a>
             )}
           </div>

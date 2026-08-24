@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { OrderCustomer } from "@/lib/utils/orders";
 
 interface OrderInfoCardProps {
@@ -29,6 +30,7 @@ function InfoRow({ label, value, ltr }: { label: string; value: string; ltr?: bo
 
 /** كاردا بيانات العميل وعنوان التوصيل */
 export default function OrderInfoCard({ customer, notes, building, postalCode }: OrderInfoCardProps) {
+  const t = useTranslations("order");
   const cardStyle = {
     background: "white",
     border: "1.5px solid var(--bord)",
@@ -45,12 +47,12 @@ export default function OrderInfoCard({ customer, notes, building, postalCode }:
           className="font-heading font-bold text-dark text-[16px] mb-4 pb-3"
           style={{ borderBottom: "1.5px solid var(--bord)" }}
         >
-          بياناتكِ
+          {t("customerTitle")}
         </h3>
         <div className="flex flex-col gap-3">
-          <InfoRow label="الاسم"          value={customer.name} />
-          <InfoRow label="البريد الإلكتروني" value={customer.email} ltr />
-          <InfoRow label="رقم الهاتف"     value={customer.phone} ltr />
+          <InfoRow label={t("nameLabel")} value={customer.name} />
+          <InfoRow label={t("emailLabel")} value={customer.email} ltr />
+          <InfoRow label={t("phoneLabel")} value={customer.phone} ltr />
         </div>
       </div>
 
@@ -60,19 +62,19 @@ export default function OrderInfoCard({ customer, notes, building, postalCode }:
           className="font-heading font-bold text-dark text-[16px] mb-4 pb-3"
           style={{ borderBottom: "1.5px solid var(--bord)" }}
         >
-          عنوان التوصيل
+          {t("deliveryTitle")}
         </h3>
         <div className="flex flex-col gap-3">
-          <InfoRow label="البلدة"  value={customer.city} />
+          <InfoRow label={t("cityLabel")} value={customer.city} />
           {postalCode && postalCode.trim().length > 0 && (
-            <InfoRow label="الرمز البريدي" value={postalCode} ltr />
+            <InfoRow label={t("postalCodeLabel")} value={postalCode} ltr />
           )}
-          <InfoRow label="العنوان" value={customer.address} />
+          <InfoRow label={t("addressLabel")} value={customer.address} />
           {building && building.trim().length > 0 && (
-            <InfoRow label="طابق / شقة / مدخل" value={building} />
+            <InfoRow label={t("buildingLabel")} value={building} />
           )}
           {notes && notes.trim().length > 0 && (
-            <InfoRow label="ملاحظات" value={notes} />
+            <InfoRow label={t("notesLabel")} value={notes} />
           )}
         </div>
       </div>

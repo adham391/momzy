@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import { useRouter } from "@/lib/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import CartItemRow from "@/components/shop/CartItemRow";
 
 /** سلة التسوق — sidebar من اليسار (RTL) + overlay */
 export default function CartSidebar() {
+  const t = useTranslations("cart");
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
 
@@ -49,7 +51,7 @@ export default function CartSidebar() {
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="سلة التسوق"
+        aria-label={t("title")}
         className="bg-white flex flex-col"
         style={{
           position: "fixed",
@@ -70,12 +72,12 @@ export default function CartSidebar() {
           }}
         >
           <div className="font-heading text-[20px] font-bold text-teal flex items-center gap-2">
-            سلة التسوق
-            <Image src="/icons/cart-icon.png" alt="سلة" width={44} height={44} className="object-contain" />
+            {t("title")}
+            <Image src="/icons/cart-icon.png" alt={t("cartIconAlt")} width={44} height={44} className="object-contain" />
           </div>
           <button
             onClick={closeCart}
-            aria-label="إغلاق السلة"
+            aria-label={t("closeCart")}
             className="w-9 h-9 rounded-full flex items-center justify-center text-light hover:bg-rosepale hover:text-rose transition-colors font-label text-[20px]"
             style={{ border: "none", background: "none", cursor: "pointer" }}
           >
@@ -94,13 +96,13 @@ export default function CartSidebar() {
           {isEmpty ? (
             <div className="text-center py-16">
               <div className="mb-4 flex justify-center">
-                <Image src="/icons/cart-icon.png" alt="سلة" width={72} height={72} className="object-contain" />
+                <Image src="/icons/cart-icon.png" alt={t("cartIconAlt")} width={72} height={72} className="object-contain" />
               </div>
               <div className="font-heading text-[18px] font-bold text-teal mb-2">
-                سلتك فارغة
+                {t("emptyTitle")}
               </div>
               <div className="text-[14px] text-rose mb-6">
-                اكتشفي منتجاتنا وأضيفي ما يعجبك
+                {t("emptyHint")}
               </div>
               <Link
                 href="/shop"
@@ -114,7 +116,7 @@ export default function CartSidebar() {
                   textDecoration: "none",
                 }}
               >
-                اكتشفي المنتجات
+                {t("discoverProducts")}
               </Link>
             </div>
           ) : (
@@ -138,7 +140,7 @@ export default function CartSidebar() {
             }}
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="font-label font-semibold text-[15px] text-mid">المجموع</span>
+              <span className="font-label font-semibold text-[15px] text-mid">{t("subtotal")}</span>
               <span className="font-label font-extrabold text-[22px] text-teal">
                 ₪{total}
               </span>
@@ -157,7 +159,7 @@ export default function CartSidebar() {
                 boxShadow: "0 4px 16px rgba(242,167,181,0.4)",
               }}
             >
-              إتمام الشراء ←
+              {t("checkoutCta")}
             </button>
 
             <button
@@ -165,7 +167,7 @@ export default function CartSidebar() {
               className="w-full font-label font-semibold text-mid text-[13px] transition-colors hover:text-dark"
               style={{ background: "none", border: "none", cursor: "pointer" }}
             >
-              مواصلة التسوق
+              {t("continueShopping")}
             </button>
           </div>
         )}

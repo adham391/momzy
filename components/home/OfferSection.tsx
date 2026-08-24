@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/cn";
 import { OFFER_CARDS } from "@/lib/utils/constants";
 import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
+import { useTranslations } from "next-intl";
 
 /** ألوان البار العلوي لكل variant */
 const BAR_GRADIENT: Record<string, string> = {
@@ -29,6 +30,7 @@ const LINK_COLOR: Record<string, string> = {
 
 /** قسم "كل ما تحتاجينه في Momzy" */
 export default function OfferSection() {
+  const t = useTranslations("home");
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية LatestSection ─ */
     <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 3 }}>
@@ -44,7 +46,7 @@ export default function OfferSection() {
           {/* العنوان المركزي */}
           <div className="text-center mb-7">
             <h2 className="font-heading text-h2 font-bold text-dark">
-              كل ما تحتاجينه في <span className="text-rose italic">Momzy</span>
+              {t.rich("offer.title", { brand: (chunks) => <span className="text-rose italic">{chunks}</span> })}
             </h2>
           </div>
 
@@ -52,7 +54,7 @@ export default function OfferSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {OFFER_CARDS.map((card) => (
               <Link
-                key={card.href + card.title}
+                key={card.key}
                 href={card.href}
                 className="bg-white rounded-[14px] p-[18px_20px] border-[1.5px] border-bord relative overflow-hidden [transition:transform_280ms_cubic-bezier(0.23,1,0.32,1),box-shadow_280ms_ease,border-color_200ms_ease] cursor-pointer flex items-start gap-3.5 hover:-translate-y-1.5 hover:shadow-[0_16px_44px_rgba(0,0,0,0.09)] hover:border-transparent"
               >
@@ -71,16 +73,16 @@ export default function OfferSection() {
                     ICON_BG[card.color]
                   )}
                 >
-                  <Image src={card.icon} alt={card.title} width={26} height={26} className="object-contain" />
+                  <Image src={card.icon} alt={t(`offer.cards.${card.key}.title`)} width={26} height={26} className="object-contain" />
                 </span>
 
                 {/* المحتوى */}
                 <div className="pt-2.5">
                   <div className="font-heading text-h4 text-dark mb-2">
-                    {card.title}
+                    {t(`offer.cards.${card.key}.title`)}
                   </div>
                   <div className="text-body-sm text-mid leading-[1.65] mb-3.5">
-                    {card.description}
+                    {t(`offer.cards.${card.key}.description`)}
                   </div>
                   <span
                     className={cn(
@@ -88,7 +90,7 @@ export default function OfferSection() {
                       LINK_COLOR[card.color]
                     )}
                   >
-                    {card.linkText} ←
+                    {t(`offer.cards.${card.key}.link`)}
                   </span>
                 </div>
               </Link>

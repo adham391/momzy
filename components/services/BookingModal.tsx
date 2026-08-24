@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
 import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
@@ -109,6 +110,7 @@ export default function BookingModal({
   forceWaitlist,
   ageGate,
 }: BookingModalProps) {
+  const t = useTranslations("booking");
   const router = useRouter();
   const [step, setStep] = useState<Step>("loading");
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -237,7 +239,7 @@ export default function BookingModal({
         router.push(`/booking/${data.id}`);
       } else {
         // الموعد امتلأ → أعد تحميل المواعيد
-        setErrorMsg(data.error ?? "تعذّر الحجز");
+        setErrorMsg(data.error ?? t("modal.bookingFailed"));
         setStatus("idle");
         if (res.status === 409) {
           setSelected(null);
@@ -302,7 +304,7 @@ export default function BookingModal({
         setSuccessKind("waitlist");
         setStep("success");
       } else {
-        setErrorMsg(json.error ?? "تعذّر التسجيل، حاولي مجددًا");
+        setErrorMsg(json.error ?? t("modal.waitlistFailed"));
         setStatus("idle");
       }
     } catch {
@@ -348,13 +350,13 @@ export default function BookingModal({
         >
           <div>
             <p className="font-label font-bold text-[11px] mb-1" style={{ color: "var(--teal)", letterSpacing: "2.5px", textTransform: "uppercase" }}>
-              {step === "success" ? "تم" : step === "waitlist" ? "قائمة الانتظار" : "احجزي موعدك"}
+              {step === "success" ? t("modal.done") : step === "waitlist" ? t("modal.waitlistTitle") : t("modal.bookYourSlot")}
             </p>
             <h2 className="font-heading font-bold text-[20px]" style={{ color: "var(--dark)" }}>
               {serviceTitle}
             </h2>
           </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ color: "var(--mid)", fontSize: 18, background: "var(--bord)" }} aria-label="إغلاق">
+          <button onClick={onClose} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ color: "var(--mid)", fontSize: 18, background: "var(--bord)" }} aria-label={t("modal.close")}>
             ✕
           </button>
         </div>
@@ -363,7 +365,7 @@ export default function BookingModal({
         {step === "loading" && (
           <div className="px-7 py-16 text-center">
             <p className="text-[14px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-              جارٍ تحميل المواعيد المتاحة...
+              {t("modal.loadingSlots")}
             </p>
           </div>
         )}
@@ -372,7 +374,7 @@ export default function BookingModal({
         {step === "slots" && (
           <div className="px-7 py-6">
             <p className="text-[14px] leading-[1.85] mb-5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-              اختاري الموعد المناسب لكِ:
+              {t("modal.pickSlot")}
             </p>
             <SessionCalendar
               compact
@@ -414,40 +416,38 @@ export default function BookingModal({
                   {formatSlotDate(selected.date)} · {formatTime(selected.start_time)}
                 </span>
                 <button type="button" onClick={() => setStep("slots")} className="text-[12px] font-bold" style={{ color: "var(--teal)" }}>
-                  تغيير
+                  {t("modal.change")}
                 </button>
               </div>
             ) : step === "waitlist" ? (
               <div className="rounded-xl px-4 py-3.5 mb-5" style={{ background: "var(--yellowlt)", border: "1.5px solid var(--yellow)" }}>
                 <p className="text-[13.5px] font-bold mb-1" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
-                  {noSessionsAtAll ? "لا مواعيد مجدولة حاليًا" : "المقاعد مكتملة حاليًا"}
+                  {noSessionsAtAll ? t("modal.noSessionsTitle") : t("modal.fullTitle")}
                 </p>
                 <p className="text-[13px] leading-[1.8]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-                  {noSessionsAtAll
-                    ? "سجّلي في قائمة الانتظار ونُعلمكِ فور فتح دورة جديدة."
-                    : "سجّلي في قائمة الانتظار ونُعلمكِ فور توفّر مقعد أو فتح دورة جديدة."}
+                  {noSessionsAtAll ? t("modal.noSessionsBody") : t("modal.fullBody")}
                 </p>
               </div>
             ) : (
               <p className="text-[14px] leading-[1.85] mb-6" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-                املئي بياناتك وسنتواصل معك خلال 24 ساعة لتأكيد الحجز.
+                {t("modal.contactIntro")}
               </p>
             )}
 
             <div className="flex flex-col gap-4">
               <div>
-                <label style={labelStyle}>الاسم الكامل *</label>
-                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="اسمك الكامل" autoComplete="name"
+                <label style={labelStyle}>{t("modal.nameLabel")}</label>
+                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("modal.namePlaceholder")} autoComplete="name"
                   style={{ ...inputBase, border: `1.5px solid ${borderFor("name")}` }} onFocus={() => setFocused("name")} onBlur={() => setFocused(null)} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label style={labelStyle}>البريد الإلكتروني *</label>
+                  <label style={labelStyle}>{t("modal.emailLabel")}</label>
                   <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="example@email.com" autoComplete="email" dir="ltr"
                     style={{ ...inputBase, border: `1.5px solid ${borderFor("email")}`, textAlign: "right" }} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} />
                 </div>
                 <div>
-                  <label style={labelStyle}>رقم الواتساب *</label>
+                  <label style={labelStyle}>{t("modal.phoneLabel")}</label>
                   <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+972 5X-XXXXXXX" autoComplete="tel" dir="ltr"
                     style={{ ...inputBase, border: `1.5px solid ${borderFor("phone")}`, textAlign: "right" }} onFocus={() => setFocused("phone")} onBlur={() => setFocused(null)} />
                 </div>
@@ -455,7 +455,7 @@ export default function BookingModal({
               {/* تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */}
               {needsBabyAge && (
                 <div>
-                  <label style={labelStyle}>تاريخ ميلاد طفلك *</label>
+                  <label style={labelStyle}>{t("modal.babyBirthDateLabel")}</label>
                   <input
                     type="date"
                     value={form.babyBirthDate}
@@ -486,22 +486,22 @@ export default function BookingModal({
                     {ageCheck && !ageCheck.ok
                       ? ageCheck.message
                       : ageCheck?.ok && ageCheck.months !== null
-                        ? `عمر طفلكِ يوم الورشة: ${monthsLabel(ageCheck.months)} ✓`
-                        : `هذه الورشة مخصّصة لـ${ageGate ? ageRangeText(ageGate) : ""} — وإن كنتِ حاملاً أدخلي الموعد المتوقّع.`}
+                        ? t("modal.babyAgeOk", { age: monthsLabel(ageCheck.months) })
+                        : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                   </p>
                 </div>
               )}
 
               <div>
-                <label style={labelStyle}>ملاحظات إضافية (اختياري)</label>
-                <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder={needsBabyAge ? "أسئلة محددة، ملاحظات صحية..." : "عمر طفلك، أسئلة محددة..."} rows={3}
+                <label style={labelStyle}>{t("modal.notesLabel")}</label>
+                <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder={needsBabyAge ? t("modal.notesPlaceholderAge") : t("modal.notesPlaceholder")} rows={3}
                   style={{ ...inputBase, border: `1.5px solid ${borderFor("message")}`, resize: "none" }} onFocus={() => setFocused("message")} onBlur={() => setFocused(null)} />
               </div>
             </div>
 
             {(status === "error" || errorMsg) && (
               <div className="text-center text-[13px] mt-5 rounded-[10px] py-2 px-3" style={{ background: "#FEF5F7", color: "var(--rose)", border: "1px solid var(--roselt)" }}>
-                {errorMsg || "حدث خطأ، يرجى المحاولة مجدداً"}
+                {errorMsg || t("modal.genericError")}
               </div>
             )}
 
@@ -515,14 +515,14 @@ export default function BookingModal({
                 opacity: status === "submitting" ? 0.8 : 1,
               }}>
               {status === "submitting"
-                ? "جارٍ الإرسال..."
+                ? t("modal.submitting")
                 : step === "form"
                   ? selected && selected.price > 0
-                    ? `المتابعة للدفع — ₪${selected.price} ←`
-                    : "تأكيد التسجيل ←"
+                    ? t("modal.proceedToPayment", { price: selected.price })
+                    : t("modal.confirmRegistration")
                   : step === "waitlist"
-                    ? "انضمي لقائمة الانتظار ←"
-                    : "إرسال طلب الحجز ←"}
+                    ? t("modal.joinWaitlist")
+                    : t("modal.sendBookingRequest")}
             </button>
           </form>
         )}
@@ -534,15 +534,13 @@ export default function BookingModal({
               ✓
             </div>
             <h3 className="font-heading font-bold text-[20px] mb-3" style={{ color: "var(--dark)" }}>
-              {successKind === "waitlist" ? "سجّلناكِ في قائمة الانتظار 🌸" : "طلبكِ وصل!"}
+              {successKind === "waitlist" ? t("modal.waitlistSuccessTitle") : t("modal.contactSuccessTitle")}
             </h3>
             <p className="text-[14px] leading-[1.85] mb-6" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-              {successKind === "waitlist"
-                ? "سنُعلمكِ فور توفّر مقعد أو فتح دورة جديدة."
-                : "سنتواصل معك خلال 24 ساعة لتأكيد الموعد وترتيب التفاصيل."}
+              {successKind === "waitlist" ? t("modal.waitlistSuccessBody") : t("modal.contactSuccessBody")}
             </p>
             <button onClick={onClose} className="font-label font-bold text-[14px] px-8 py-3 rounded-full transition-opacity hover:opacity-85" style={{ background: "var(--teal)", color: "white" }}>
-              إغلاق
+              {t("modal.close")}
             </button>
           </div>
         )}

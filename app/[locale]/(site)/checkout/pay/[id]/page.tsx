@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
@@ -7,13 +8,17 @@ import EmbeddedPayment from "@/components/checkout/EmbeddedPayment";
 import { getOrderById } from "@/lib/db/orders";
 import { isHypConfigured } from "@/lib/hyp/client";
 
-export const metadata: Metadata = {
-  title: "إتمام الدفع | Momzy",
-  robots: { index: false, follow: false },
-};
-
 interface PayPageProps {
   params: Promise<{ id: string; locale: string }>;
+}
+
+export async function generateMetadata({ params }: PayPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "checkout" });
+  return {
+    title: t("payMetaTitle"),
+    robots: { index: false, follow: false },
+  };
 }
 
 /**
@@ -23,6 +28,7 @@ interface PayPageProps {
  */
 export default async function PayPage({ params }: PayPageProps) {
   const { id, locale } = await params;
+  const t = await getTranslations("checkout");
   const order = await getOrderById(id);
 
   if (!order) return redirect({ href: "/", locale });
@@ -41,10 +47,10 @@ export default async function PayPage({ params }: PayPageProps) {
       >
         <Container>
           <h1 className="font-heading font-bold text-h1 mb-2" style={{ color: "var(--dark)" }}>
-            الدفع الآمن
+            {t("securePayment")}
           </h1>
           <p className="font-body text-[15px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            أكملي دفع طلبك بأمان لتأكيده وبدء تجهيزه
+            {t("paySubtitle")}
           </p>
         </Container>
         <PageHeaderWave fillColor="var(--offwh)" />

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import ProductCard from "@/components/shop/ProductCard";
 import type { Product } from "@/lib/products/types";
 
@@ -7,13 +8,15 @@ interface ProductGridProps {
 
 /** شبكة المنتجات */
 export default function ProductGrid({ products }: ProductGridProps) {
+  const t = useTranslations("shop");
+
   if (products.length === 0) {
     return (
       <div
         className="text-center text-mid font-body py-20"
         style={{ fontSize: 16 }}
       >
-        لا توجد منتجات تطابق الفلتر
+        {t("noProductsMatch")}
       </div>
     );
   }

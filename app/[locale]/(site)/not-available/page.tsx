@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
-export const metadata: Metadata = {
-  title: "غير متاح | Momzy",
-  robots: { index: false },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "notAvailable" });
+  return { title: t("metaTitle"), robots: { index: false } };
+}
 
 /** صفحة الحجب الجغرافي — تظهر للزوار من المناطق المحظورة */
 export default function NotAvailablePage() {
+  const t = useTranslations("notAvailable");
   return (
     <div
-      dir="rtl"
       style={{
         minHeight: "100vh",
         display: "flex",
@@ -35,7 +38,7 @@ export default function NotAvailablePage() {
           marginBottom: 24,
         }}
       >
-        <Image src="/icons/lock-icon.png" alt="محجوب" width={38} height={38} />
+        <Image src="/icons/lock-icon.png" alt={t("lockAlt")} width={38} height={38} />
       </div>
 
       {/* العنوان */}
@@ -49,7 +52,7 @@ export default function NotAvailablePage() {
           lineHeight: 1.4,
         }}
       >
-        هذا الموقع غير متاح في منطقتك
+        {t("title")}
       </h1>
 
       {/* الوصف */}
@@ -63,8 +66,9 @@ export default function NotAvailablePage() {
           marginBottom: 32,
         }}
       >
-        عذراً، خدمات <strong style={{ color: "var(--dark)" }}>Momzy</strong> غير متاحة
-        في دولتك أو منطقتك.
+        {t.rich("description", {
+          b: (chunks) => <strong style={{ color: "var(--dark)" }}>{chunks}</strong>,
+        })}
       </p>
 
       {/* شعار */}
@@ -76,7 +80,7 @@ export default function NotAvailablePage() {
           letterSpacing: "1px",
         }}
       >
-        © 2026 Momzy — جميع الحقوق محفوظة
+        {t("copyright")}
       </p>
     </div>
   );

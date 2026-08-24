@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface LatestBigCardBodyProps {
   description?: string;
@@ -11,6 +12,7 @@ const SHORT_LIMIT = 80;
 
 /** وصف الكارد الكبير مع زر توسيع/طي — النص من Sanity */
 export default function LatestBigCardBody({ description }: LatestBigCardBodyProps) {
+  const t = useTranslations("home");
   const [expanded, setExpanded] = useState(false);
 
   const text      = description ?? "";
@@ -29,7 +31,7 @@ export default function LatestBigCardBody({ description }: LatestBigCardBodyProp
           }}
           className="text-teal font-bold cursor-pointer text-[13px] md:text-[15px] me-1"
         >
-          {expanded ? "← أقل" : "اقرئي المزيد ←"}
+          {expanded ? t("latest.readLess") : t("latest.readMore")}
         </button>
       )}
     </div>

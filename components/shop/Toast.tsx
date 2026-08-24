@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 
 const TOAST_DURATION = 2500;
 
 /** رسالة "أُضيف للسلة" — تظهر لـ 2.5 ثانية */
 export default function Toast() {
+  const t = useTranslations("shop");
   const lastAdded = useCart((s) => s.lastAdded);
   const [visible, setVisible] = useState(false);
   const [text, setText] = useState("");
@@ -40,7 +42,7 @@ export default function Toast() {
     >
       <span className="text-teal text-[16px]">✓</span>
       <span>
-        أُضيف &ldquo;{text}&rdquo; للسلة
+        {t("addedToCart", { title: text })}
       </span>
     </div>
   );

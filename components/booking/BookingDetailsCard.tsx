@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { formatSlotDate, formatTimeShort, formatILS } from "@/lib/utils/format";
 import type { BookingRow } from "@/lib/db/bookings";
 
@@ -19,6 +20,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 /** بطاقة تفاصيل التسجيل — الورشة والموعد وطريقة الحضور وبيانات المسجِّلة */
 export default function BookingDetailsCard({ booking, revealSession }: BookingDetailsCardProps) {
+  const t = useTranslations("booking");
   const hasOnline = Boolean(booking.meeting_link);
   const hasOnsite = Boolean(booking.location);
 
@@ -29,16 +31,16 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
         className="rounded-[22px]"
         style={{ background: "white", border: "1.5px solid var(--bord)", padding: "24px 26px", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}
       >
-        <h2 className="font-heading font-bold text-dark text-[17px] mb-3">تفاصيل الورشة</h2>
-        <Row label="الورشة">{booking.service_name ?? "—"}</Row>
-        <Row label="التاريخ">{formatSlotDate(booking.date)}</Row>
-        <Row label="الوقت">
+        <h2 className="font-heading font-bold text-dark text-[17px] mb-3">{t("details.title")}</h2>
+        <Row label={t("details.workshop")}>{booking.service_name ?? "—"}</Row>
+        <Row label={t("details.date")}>{formatSlotDate(booking.date)}</Row>
+        <Row label={t("details.time")}>
           <span dir="ltr">
             {formatTimeShort(booking.start_time)}
             {booking.end_time ? ` – ${formatTimeShort(booking.end_time)}` : ""}
           </span>
         </Row>
-        {booking.amount > 0 && <Row label="المبلغ">{formatILS(booking.amount)}</Row>}
+        {booking.amount > 0 && <Row label={t("details.amount")}>{formatILS(booking.amount)}</Row>}
       </div>
 
       {/* ── كيف أحضر؟ ── */}
@@ -50,16 +52,16 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
           padding: "24px 26px",
         }}
       >
-        <h2 className="font-heading font-bold text-dark text-[17px] mb-2">كيف أحضر؟</h2>
+        <h2 className="font-heading font-bold text-dark text-[17px] mb-2">{t("details.howToAttend")}</h2>
 
         {!revealSession ? (
           <p className="font-label text-[13.5px] text-mid leading-[1.9]">
-            تفاصيل الحضور (رابط اللقاء أو المكان) تظهر هنا فور تثبيت تسجيلكِ.
+            {t("details.revealAfterPayment")}
           </p>
         ) : hasOnline ? (
           <>
             <p className="font-label text-[13.5px] text-mid leading-[1.9] mb-4">
-              ورشة أونلاين — انضمي عبر الرابط في موعد الورشة. أرسلناه أيضًا على بريدكِ.
+              {t("details.onlineIntro")}
             </p>
             <a
               href={booking.meeting_link ?? "#"}
@@ -73,17 +75,17 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
                 boxShadow: "0 6px 18px rgba(130,201,196,0.45)",
               }}
             >
-              انضمي للقاء ←
+              {t("details.joinMeeting")}
             </a>
           </>
         ) : hasOnsite ? (
           <>
-            <p className="font-label text-[13.5px] text-mid leading-[1.9] mb-2">ورشة حضورية — مكان اللقاء:</p>
+            <p className="font-label text-[13.5px] text-mid leading-[1.9] mb-2">{t("details.onsiteIntro")}</p>
             <p className="font-label text-[15px] font-bold text-dark leading-[1.8]">{booking.location}</p>
           </>
         ) : (
           <p className="font-label text-[13.5px] text-mid leading-[1.9]">
-            سنرسل لكِ تفاصيل الحضور على بريدكِ وواتساب قبل موعد الورشة.
+            {t("details.attendanceDetailsSoon")}
           </p>
         )}
       </div>
@@ -93,15 +95,15 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
         className="rounded-[22px]"
         style={{ background: "white", border: "1.5px solid var(--bord)", padding: "24px 26px", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}
       >
-        <h2 className="font-heading font-bold text-dark text-[17px] mb-3">بياناتكِ</h2>
-        <Row label="الاسم">{booking.customer_name}</Row>
-        <Row label="البريد الإلكتروني">
+        <h2 className="font-heading font-bold text-dark text-[17px] mb-3">{t("details.yourInfo")}</h2>
+        <Row label={t("details.name")}>{booking.customer_name}</Row>
+        <Row label={t("details.email")}>
           <span dir="ltr">{booking.customer_email}</span>
         </Row>
-        <Row label="رقم الهاتف">
+        <Row label={t("details.phone")}>
           <span dir="ltr">{booking.customer_phone}</span>
         </Row>
-        {booking.notes && <Row label="ملاحظات">{booking.notes}</Row>}
+        {booking.notes && <Row label={t("details.notes")}>{booking.notes}</Row>}
       </div>
     </div>
   );

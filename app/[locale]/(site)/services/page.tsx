@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { getServices } from "@/lib/services/getServices";
 import { getAvailableSeatsBySlug } from "@/lib/db/bookings";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
@@ -9,16 +10,18 @@ import ServicesSection from "@/components/services/ServicesSection";
 import ServiceCTASection from "@/components/services/ServiceCTASection";
 import SectionsReveal from "@/components/ui/SectionsReveal";
 
-export const metadata: Metadata = {
-  title: "الخدمات | Momzy",
-  description: "ورشات ولقاءات فردية مع هبة حسن — ممرضة معتمدة ومرشدة رضاعة. سجّلي واحجزي مقعدكِ فورًا.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "services" });
+  return { title: t("metaTitle"), description: t("metaDescription") };
+}
 
 /** المقاعد تتغيّر مع كل تسجيل — تحديث كل دقيقة */
 export const revalidate = 60;
 
 /** صفحة الخدمات — رأس مدمج + بطاقات + تسجيل إلكتروني مباشر */
 export default async function ServicesPage() {
+  const t = await getTranslations("services");
   const [allServices, settings, seatsBySlug] = await Promise.all([
     getServices(),
     getSiteSettings(),
@@ -40,29 +43,29 @@ export default async function ServicesPage() {
         <PolkaDots colors={["#F2A7B5", "#82C9C4", "#F7DF98"]} opacity={0.18} count={14} />
         <Container className="relative z-[2]">
           <div className="flex justify-center">
-            <SectionLabel color="teal" centered>خدمات هبة</SectionLabel>
+            <SectionLabel color="teal" centered>{t("headerLabel")}</SectionLabel>
           </div>
           <h1
             className="font-heading font-bold text-dark mt-1 mb-3"
             style={{ fontSize: "clamp(28px, 4vw, 46px)", lineHeight: 1.22 }}
           >
-            خدمات ترافقك في <span className="text-rose italic">كل خطوة</span>
+            {t.rich("headerTitle", { accent: (chunks) => <span className="text-rose italic">{chunks}</span> })}
           </h1>
           <p
             className="mx-auto text-mid leading-[1.85]"
             style={{ maxWidth: 560, fontSize: "clamp(14px, 1.5vw, 16px)" }}
           >
-            ورشات جماعية ولقاءات فردية مع هبة حسن — اختاري الخدمة المناسبة وسجّلي مقعدكِ الآن.
+            {t("headerText")}
           </p>
         </Container>
       </header>
 
       {/* قسم الورشات الجماعية — zIndex 2 */}
       <ServicesSection
-        label="ورشات جماعية"
+        label={t("groupLabel")}
         labelColor="teal"
-        title={<>ورشات للأمهات وأطفالهن في <span style={{ color: "var(--rose)" }}>الناصرة</span></>}
-        description="مساحة آمنة تجمع الأمهات في مرحلة عمرية متشابهة — نتعلم، نتشارك، ونطبّق معاً تحت توجيه مهني."
+        title={t.rich("groupTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
+        description={t("groupText")}
         services={groupServices}
         background="var(--offwh)"
         waveColor="var(--offwh)"
@@ -73,10 +76,10 @@ export default async function ServicesPage() {
 
       {/* قسم اللقاءات الفردية — zIndex 3 */}
       <ServicesSection
-        label="لقاءات فردية"
+        label={t("individualLabel")}
         labelColor="teal"
-        title={<>دعم 1:1 مخصّص <span style={{ color: "var(--rose)" }}>لاحتياجاتك</span></>}
-        description="لقاءات فردية في الناصرة، أو زيارات بيتية، أو عبر زوم — تجربة شخصية مرنة تحترم وقتك وراحتك."
+        title={t.rich("individualTitle", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
+        description={t("individualText")}
         services={individualServices}
         background="var(--cream)"
         waveColor="var(--cream)"
@@ -87,9 +90,9 @@ export default async function ServicesPage() {
 
       {/* CTA نهائي — zIndex 4 */}
       <ServiceCTASection
-        serviceTitle="استشارة عامة"
-        heading={<>محتارة أيّ خدمة <span style={{ color: "var(--rose)" }}>تناسبك؟</span></>}
-        subheading="تواصلي معنا وسنساعدك في اختيار الأنسب لك ولطفلك."
+        serviceTitle={t("generalConsultation")}
+        heading={t.rich("chooseHeading", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
+        subheading={t("chooseText")}
         whatsappNumber={whatsappNumber}
       />
 

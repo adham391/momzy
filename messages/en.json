@@ -35,5 +35,774 @@
   },
   "lang": {
     "switch": "Language"
-  }
+  },
+  "booking": {
+    "calendar": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "pickDayHint": "Pick a highlighted day on the calendar to see available times.",
+      "sessionsOn": "Sessions on",
+      "full": "Full",
+      "online": "💻 Online"
+    },
+    "modal": {
+      "bookingFailed": "Booking failed",
+      "waitlistFailed": "Registration failed, please try again",
+      "done": "Done",
+      "waitlistTitle": "Waitlist",
+      "bookYourSlot": "Book your slot",
+      "close": "Close",
+      "loadingSlots": "Loading available times...",
+      "pickSlot": "Pick the time that works for you:",
+      "change": "Change",
+      "noSessionsTitle": "No sessions scheduled right now",
+      "fullTitle": "Seats are full right now",
+      "noSessionsBody": "Join the waitlist and we'll let you know as soon as a new round opens.",
+      "fullBody": "Join the waitlist and we'll let you know as soon as a seat frees up or a new round opens.",
+      "contactIntro": "Fill in your details and we'll get back to you within 24 hours to confirm your booking.",
+      "nameLabel": "Full name *",
+      "namePlaceholder": "Your full name",
+      "emailLabel": "Email *",
+      "phoneLabel": "WhatsApp number *",
+      "babyBirthDateLabel": "Your baby's birth date *",
+      "babyAgeOk": "Your baby's age on the workshop day: {age} ✓",
+      "babyAgeHint": "This workshop is for {range} — and if you're pregnant, enter your due date.",
+      "notesLabel": "Additional notes (optional)",
+      "notesPlaceholderAge": "Specific questions, health notes...",
+      "notesPlaceholder": "Your baby's age, specific questions...",
+      "genericError": "Something went wrong, please try again",
+      "submitting": "Sending...",
+      "proceedToPayment": "Continue to payment — ₪{price} →",
+      "confirmRegistration": "Confirm registration →",
+      "joinWaitlist": "Join the waitlist →",
+      "sendBookingRequest": "Send booking request →",
+      "waitlistSuccessTitle": "You're on the waitlist 🌸",
+      "contactSuccessTitle": "Your request is in!",
+      "waitlistSuccessBody": "We'll let you know as soon as a seat frees up or a new round opens.",
+      "contactSuccessBody": "We'll get back to you within 24 hours to confirm the time and arrange the details."
+    },
+    "header": {
+      "confirmedTitle": "You're registered 🌸",
+      "confirmedSubtitle": "Your seat is reserved — see you there!",
+      "awaitingTitle": "We saved your seat — awaiting payment",
+      "awaitingSubtitle": "Complete the payment below to secure your seat",
+      "cancelledTitle": "Registration cancelled",
+      "cancelledSubtitle": "Contact us if you'd like to register again",
+      "iconConfirmed": "Done",
+      "iconAwaiting": "Awaiting payment",
+      "iconCancelled": "Cancelled",
+      "bookingNumber": "Registration number:"
+    },
+    "details": {
+      "title": "Workshop details",
+      "workshop": "Workshop",
+      "date": "Date",
+      "time": "Time",
+      "amount": "Amount",
+      "howToAttend": "How do I attend?",
+      "revealAfterPayment": "Attendance details (the meeting link or location) will appear here as soon as your registration is confirmed.",
+      "onlineIntro": "Online workshop — join via the link at the workshop time. We also sent it to your email.",
+      "joinMeeting": "Join the meeting →",
+      "onsiteIntro": "In-person workshop — meeting location:",
+      "attendanceDetailsSoon": "We'll send you the attendance details by email and WhatsApp before the workshop.",
+      "yourInfo": "Your details",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone number",
+      "notes": "Notes"
+    },
+    "summary": {
+      "online": "💻 Online workshop",
+      "onsite": "📍 In-person workshop",
+      "title": "Registration summary",
+      "workshopFallback": "Workshop",
+      "seatFor": "One seat for {name}",
+      "total": "Total",
+      "seatHeld": "🎟️ Your seat is held in your name while you complete payment"
+    },
+    "page": {
+      "awaitingTitle": "Secure checkout",
+      "confirmedTitle": "Registration confirmation",
+      "cancelledTitle": "Registration cancelled",
+      "awaitingSubtitle": "Enter your card details securely to secure your seat",
+      "confirmedSubtitle": "Your registration is confirmed — see you at the workshop!",
+      "cancelledSubtitle": "Contact us if you'd like to register again",
+      "metaDescription": "Your workshop registration details",
+      "servicesCrumb": "Services",
+      "paymentFailed": "The payment didn't go through — your seat is still held, and you can try again below.",
+      "otherServices": "Other services",
+      "notFoundTitle": "Registration not found",
+      "notFoundBody": "We couldn't find this registration — the link may be incorrect.",
+      "browseServices": "Browse services"
+    }
+  },
+  "cart": {
+    "title": "Shopping cart",
+    "cartIconAlt": "Cart",
+    "closeCart": "Close cart",
+    "emptyTitle": "Your cart is empty",
+    "emptyHint": "Discover our products and add what you love",
+    "discoverProducts": "Discover products",
+    "subtotal": "Subtotal",
+    "checkoutCta": "Checkout →",
+    "continueShopping": "Continue shopping",
+    "removeItem": "Remove item",
+    "bundleBadge": "Bundle",
+    "successIconAlt": "Done",
+    "addedToCart": "Added to cart",
+    "itemsInCart": "{count, plural, =1 {# item} other {# items}} in your cart",
+    "goToCart": "Go to cart →",
+    "youMayAlsoLike": "You may also like",
+    "bundleOfferBadge": "🎁 Deal",
+    "addSuggestion": "+ Add",
+    "openCartAria": "Open cart — {count} items"
+  },
+  "gift": {
+    "badge": "🎁 Gift",
+    "edit": "✏️ Edit",
+    "to": "To:",
+    "makeGift": "🎁 Make it a gift →",
+    "optionsTitle": "🎁 Gift options",
+    "close": "Close",
+    "remove": "Remove gift",
+    "cancel": "Cancel",
+    "save": "Save",
+    "toggleTitle": "🎁 This order is a gift",
+    "toggleHintDigital": "A personal message + the booklet sent to the recipient's email",
+    "toggleHintPhysical": "A personal message + shipping straight to the recipient",
+    "messageLabel": "✏️ Personal message",
+    "messagePlaceholderDigital": "Write your message... we'll send it along with the booklet.",
+    "messagePlaceholderPhysical": "Write your personal card... we'll tuck it inside the box.",
+    "digitalRecipientTitle": "📧 Who should receive the booklet?",
+    "recipientName": "Recipient's name",
+    "recipientEmail": "Recipient's email",
+    "digitalRecipientNote": "We'll email the booklet (PDF) to the recipient after the order is complete.",
+    "physicalRecipientTitle": "📦 Recipient details",
+    "recipientPhone": "Recipient's phone",
+    "recipientAddress": "Address (street, house number)",
+    "recipientCity": "City"
+  },
+  "checkout": {
+    "metaTitle": "Checkout | Momzy",
+    "metaDescription": "Complete your order safely — fast shipping and full security",
+    "payMetaTitle": "Payment | Momzy",
+    "securePayment": "Secure checkout",
+    "paySubtitle": "Complete your payment safely to confirm your order and start preparing it",
+    "stepDelivery": "Delivery",
+    "stepRegistration": "Registration",
+    "stepPayment": "Payment",
+    "stepConfirmation": "Confirmation",
+    "loading": "Loading...",
+    "completePurchase": "Checkout",
+    "paymentSubtitle": "Enter your card details safely to complete your order",
+    "deliverySubtitle": "Fill in your details and your order will arrive within 7 business days",
+    "deliveryInfo": "Delivery details",
+    "nameLabel": "Full name *",
+    "namePlaceholder": "First and last name",
+    "emailLabel": "Email *",
+    "phoneLabel": "Phone number *",
+    "cityLabel": "City *",
+    "cityPlaceholder": "City name",
+    "postalLabel": "Postal code (optional)",
+    "postalPlaceholder": "Example: 1610001",
+    "addressLabel": "Address *",
+    "addressPlaceholder": "Street and house number",
+    "buildingLabel": "Floor / apartment / entrance (optional)",
+    "buildingPlaceholder": "Example: floor 3, apartment 8, entrance B",
+    "additionalInfo": "Additional information",
+    "notesLabel": "Order notes (optional)",
+    "notesPlaceholder": "Notes about the order",
+    "agreePolicy": "I have read the <link>Privacy Policy</link> and agree to it for this site",
+    "agreeTerms": "I have read the <link>Terms and Conditions</link> and agree to them for this site",
+    "agreeMarketing": "I agree to receive promotional materials by email or SMS/Whatsapp message",
+    "submitError": "Something went wrong, please try again",
+    "preparingPayment": "Preparing secure checkout…",
+    "proceedToPayment": "Continue to secure checkout — ₪{total} →",
+    "noChargeYet": "🔒 No amount will be charged before you enter your payment details in the next step",
+    "errorNameRequired": "Please enter your full name",
+    "errorNameDigits": "Name cannot contain numbers",
+    "errorEmailInvalid": "Please enter a valid email (example: name@gmail.com)",
+    "errorPhoneShort": "Phone number is too short",
+    "errorPhoneDigits": "Phone can contain digits only",
+    "errorCityRequired": "Please enter your city",
+    "errorCityInvalid": "City name is invalid",
+    "errorAddressRequired": "Please enter your full address (street and house number)",
+    "alsoLike": "You may also like",
+    "bundleOffer": "🎁 Offer with the box",
+    "addToOrder": "+ Add to order",
+    "securePaymentCard": "Secure payment",
+    "registrationLabel": "Registration",
+    "orderLabel": "Order",
+    "enterCardDetails": "Enter your card details in the secure form below",
+    "loadingPayment": "Loading the secure payment page…",
+    "paymentFrameTitle": "Secure payment page — HYP",
+    "editDelivery": "→ Edit delivery details",
+    "editMyDetails": "→ Edit my details",
+    "encryptedNote": "🔒 Encrypted via HYP · your banking details are not stored with us",
+    "orderSummary": "Order summary",
+    "quantity": "Quantity: {count}",
+    "remove": "Remove",
+    "bundleSavingsNote": "You saved ₪{amount} with the box + booklet bundle",
+    "couponDiscountNote": "— ₪{amount} off",
+    "removeCoupon": "Remove",
+    "haveCoupon": "Have a discount coupon?",
+    "couponPlaceholder": "Enter your discount code",
+    "apply": "Apply",
+    "couponInvalid": "The discount code is invalid or expired",
+    "subtotal": "Subtotal",
+    "discountLabel": "Discount",
+    "shipping": "Shipping",
+    "deliveryNote": "Home delivery (within 7 business days)",
+    "free": "Free 🎉",
+    "total": "Total",
+    "securePaymentNote": "Secure encrypted payment — your data is protected",
+    "sslSecure": "Secure encrypted payment with SSL technology"
+  },
+  "home": {
+    "hero": {
+      "hebaName": "Heba Hasan",
+      "hebaCredentials": "Certified nurse · Birth doula",
+      "productsCta": "Our products"
+    },
+    "latest": {
+      "label": "New at Momzy",
+      "title": "Latest <accent>updates</accent>",
+      "fallbackTitle": "Mommy's Journey Box",
+      "buyNow": "Buy now →",
+      "readMore": "Read more →",
+      "readLess": "← Show less"
+    },
+    "heba": {
+      "tags": {
+        "nurse": "Certified nurse",
+        "lactation": "Lactation consultant",
+        "doula": "Birth doula"
+      },
+      "bookCta": "Book with Heba →",
+      "aboutCta": "Meet Heba"
+    },
+    "articles": {
+      "viewAll": "All articles →",
+      "read": "Read →"
+    },
+    "offer": {
+      "title": "Everything you need at <brand>Momzy</brand>",
+      "cards": {
+        "knowledge": {
+          "title": "Professional knowledge",
+          "description": "Specialized services from Heba Hasan — a certified nurse, lactation consultant, and birth doula with 1000+ moms of experience",
+          "link": "Discover services →"
+        },
+        "products": {
+          "title": "Carefully selected products",
+          "description": "Products and educational content built on a scientific foundation — to accompany you at every step of your journey",
+          "link": "Browse the shop →"
+        },
+        "community": {
+          "title": "The supportive community",
+          "description": "A space that brings moms together — because the start of motherhood is a pivotal moment that deserves real support",
+          "link": "Read the articles →"
+        }
+      }
+    },
+    "story": {
+      "button": "The Momzy story →",
+      "eyebrow": "Our story",
+      "modalTitle": "The <brand>Momzy</brand> story",
+      "close": "Close",
+      "para1": "Momzy is a specialized initiative that accompanies moms from pregnancy through the first years of a child's life, with a special focus on the postpartum stage and newborn care.",
+      "para2": "Momzy is built on a vision that believes supporting the mother at this early stage doesn't affect her alone, but deeply shapes the beginning of the child's life and growth.",
+      "quote": "\"At Momzy we believe the start of motherhood is a pivotal moment in every family's life — a moment when the mother's experience takes shape, and the story of a new child's life begins.\"",
+      "valuesLabel": "Our values",
+      "values": {
+        "knowledge": {
+          "title": "Professional knowledge",
+          "desc": "Specialized services built on real experience"
+        },
+        "products": {
+          "title": "Carefully selected products",
+          "desc": "Content and products on a trusted scientific basis"
+        },
+        "community": {
+          "title": "The supportive community",
+          "desc": "A safe space that brings moms together"
+        },
+        "child": {
+          "title": "The child at the center",
+          "desc": "Supporting the mother shapes her child's growth"
+        }
+      }
+    }
+  },
+  "privacy": {
+    "metaTitle": "Privacy Policy | Momzy",
+    "metaDescription": "Momzy's privacy policy — how we collect and protect your data",
+    "label": "Legal",
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: April 2026",
+    "intro": "At <b>Momzy</b> we respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use and protect your information when you use our website <b>momzyworld.com</b>.",
+    "sections": {
+      "0": {
+        "title": "Information we collect",
+        "intro": "When you make a purchase or contact us, we collect the following information:",
+        "items": {
+          "0": "Full name",
+          "1": "Email address",
+          "2": "Phone number",
+          "3": "Delivery address (town, street and house number)",
+          "4": "Order notes (if any)"
+        },
+        "note": "<b>We do not collect</b> credit card details — payment is processed directly through the secure HYP payment gateway."
+      },
+      "1": {
+        "title": "How we use your information",
+        "intro": "We use your data solely for the following purposes:",
+        "items": {
+          "0": "Processing and confirming your order",
+          "1": "Contacting you about your order or delivery status",
+          "2": "Sending promotional messages if you have opted in (you can unsubscribe at any time)",
+          "3": "Improving our services and products"
+        }
+      },
+      "2": {
+        "title": "Sharing data with third parties",
+        "intro": "We do not sell your data to any third party. We share your information only with:",
+        "items": {
+          "0": "The shipping company — to deliver your order",
+          "1": "The HYP payment gateway — to process payment securely",
+          "2": "The email service — to send order confirmations"
+        },
+        "note": "All third parties are bound to keep your data confidential in accordance with applicable laws."
+      },
+      "3": {
+        "title": "Data security",
+        "body": "We use the HTTPS protocol to encrypt all data transferred between your browser and our servers. Order data is stored in a secure database with restricted access permissions."
+      },
+      "4": {
+        "title": "Cookies",
+        "body": "We use cookies to save the contents of your shopping cart during your session. We do not use them to track you across other websites. You can disable them in your browser settings, though this may affect how the shopping cart works."
+      },
+      "5": {
+        "title": "Your rights",
+        "intro": "At any time you have the right to:",
+        "items": {
+          "0": "Request access to the data we hold about you",
+          "1": "Request correction of any inaccurate data",
+          "2": "Request deletion of your data (subject to legal requirements)",
+          "3": "Unsubscribe from marketing messages"
+        }
+      },
+      "6": {
+        "title": "Data retention",
+        "body": "We keep order data for 3 years for accounting and legal purposes. Mailing list data is deleted as soon as you unsubscribe."
+      },
+      "7": {
+        "title": "Contact us",
+        "body": "If you have any question about this privacy policy or your personal data, we'd be happy to hear from you through our <link>contact us</link> page."
+      }
+    },
+    "copyright": "© 2026 Momzy — All rights reserved"
+  },
+  "terms": {
+    "metaTitle": "Terms & Conditions | Momzy",
+    "metaDescription": "Momzy's terms and conditions — the rights and obligations of the user and the website",
+    "label": "Legal",
+    "title": "Terms & Conditions",
+    "lastUpdated": "Last updated: April 2026",
+    "intro": "By using the <b>Momzy</b> website or making a purchase, you agree to the terms and conditions set out on this page. Please read them carefully before continuing.",
+    "sections": {
+      "0": {
+        "title": "About the site",
+        "body": "Momzy is a motherhood care platform founded by <b>Heba Hasan</b> — a certified nurse, lactation consultant and birth doula. The site offers physical and digital products and recorded workshops for moms in Israel."
+      },
+      "1": {
+        "title": "Purchase and payment",
+        "items": {
+          "0": "Purchasing is available without registering an account — anonymously",
+          "1": "Prices are in Israeli shekels ₪ and include VAT",
+          "2": "Payment is processed through the secure HYP payment gateway",
+          "3": "An order is considered confirmed once payment confirmation is received from HYP",
+          "4": "We reserve the right to refuse any order in cases of suspected fraud"
+        }
+      },
+      "2": {
+        "title": "Shipping and delivery",
+        "items": {
+          "0": "Shipping is available within Israel only",
+          "1": "Estimated delivery time: up to 7 business days from order confirmation",
+          "2": "Shipping fee: ₪40 for physical products — free for digital products",
+          "3": "A tracking number is sent after your order ships",
+          "4": "The site is not responsible for any delays on the part of the shipping company"
+        }
+      },
+      "3": {
+        "title": "Returns and exchanges policy",
+        "physicalTitle": "Physical products:",
+        "physicalItems": {
+          "0": "You have the right to request a return within 14 days of receiving your order",
+          "1": "The product must be unused and in its original packaging",
+          "2": "Return costs are borne by the customer, except in the case of defects"
+        },
+        "digitalTitle": "Digital products and recorded workshops:",
+        "digitalItems": {
+          "0": "Returns are not possible after the file has been downloaded or the workshop viewed",
+          "1": "In the event of a technical issue, we are committed to finding an alternative solution"
+        }
+      },
+      "4": {
+        "title": "Digital content rights",
+        "intro": "All digital products (the booklets and recorded workshops) are the exclusive intellectual property of <b>Heba Hasan</b>.",
+        "items": {
+          "0": "Publishing, distributing or sharing the content with any other party is strictly prohibited",
+          "1": "Reselling the content or using it for commercial purposes is prohibited",
+          "2": "Download links are valid for 7 days and up to 5 downloads maximum",
+          "3": "Use is limited to personal purposes only"
+        },
+        "note": "Any violation of these rights exposes the offender to legal liability."
+      },
+      "5": {
+        "title": "Disclaimer",
+        "body": "The information provided on the site and in the products is of an awareness and educational nature and is not a substitute for consulting a doctor or health professional. Momzy is not responsible for any consequences arising from applying the information provided without consulting a specialist."
+      },
+      "6": {
+        "title": "Changes to the terms",
+        "body": "We reserve the right to amend these terms at any time. The date of the last update will be published at the top of the page. Your continued use of the site after an update constitutes your acceptance of the new terms."
+      },
+      "7": {
+        "title": "Governing law",
+        "body": "These terms and conditions are subject to the laws of the State of Israel. Any dispute will be resolved before the competent courts in Israel."
+      },
+      "8": {
+        "title": "Contact us",
+        "body": "For any question about these terms, contact us through our <link>contact us</link> page."
+      }
+    },
+    "copyright": "© 2026 Momzy — All rights reserved"
+  },
+  "order": {
+    "metaTitle": "Order Confirmation | Momzy",
+    "metaDescription": "Your order has been confirmed",
+    "title": "Order confirmation",
+    "notFoundTitle": "Order not found",
+    "notFoundBody": "We couldn't find this order — the link may be incorrect.",
+    "backToShop": "Back to shop",
+    "continueShopping": "Continue shopping",
+    "contactUs": "Contact us",
+    "emailConfirmationNote": "✉️ A confirmation email will reach you within minutes",
+    "downloadsTitle": "📘 Your digital booklets",
+    "sentTo": "📧 Sent to {email}",
+    "downloadMeta": "PDF · valid 7 days · up to {max} downloads",
+    "downloadBooklet": "⬇️ Download booklet",
+    "doneIconAlt": "Done",
+    "awaitingIconLabel": "Awaiting payment",
+    "successTitle": "Your order has been confirmed",
+    "awaitingTitle": "Your order is saved — awaiting payment",
+    "successSubtitle": "Thank you for trusting Momzy",
+    "awaitingSubtitle": "Complete the secure payment below to confirm your order",
+    "orderNumberLabel": "Order number:",
+    "copyOrderNumber": "Copy order number",
+    "customerTitle": "Your details",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone number",
+    "deliveryTitle": "Delivery address",
+    "cityLabel": "Town",
+    "postalCodeLabel": "Postal code",
+    "addressLabel": "Address",
+    "buildingLabel": "Floor / apartment / entrance",
+    "notesLabel": "Notes",
+    "itemsTitle": "Order items ({count})",
+    "gift": {
+      "details": "🎁 Gift details",
+      "recipient": "Recipient:",
+      "phone": "Phone:",
+      "email": "📧 Recipient's email:",
+      "address": "Address:"
+    },
+    "paymentSummary": "Payment summary",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "shipping": "Shipping",
+    "shippingNote": "Home delivery (within 7 business days)",
+    "freeShipping": "Free 🎉",
+    "total": "Total",
+    "secureNote": "Secure encrypted payment — your data is protected",
+    "retryFailedTitle": "Payment didn't go through",
+    "retryAwaitingTitle": "Awaiting payment completion",
+    "retryFailedBody": "The payment didn't complete, and your order is saved with us. You can safely try again now.",
+    "retryAwaitingBody": "Your order is saved and awaiting payment. Complete the secure payment to confirm your order and start preparing it.",
+    "payNow": "Complete payment — {amount} →",
+    "hypSecureNote": "🔒 Secure encrypted payment via HYP"
+  },
+  "download": {
+    "metaTitle": "Download booklet | Momzy",
+    "nofileTitle": "Your booklet is being prepared",
+    "nofileBody": "Your booklet is reserved for you! We're adding the final touches to the finished version, and the download link will reach you soon. For any question, contact us.",
+    "fetchErrorTitle": "Download temporarily unavailable",
+    "fetchErrorBody": "A small error occurred while preparing the file. Please try again shortly, and if it persists, contact us.",
+    "invalidTitle": "Invalid link",
+    "invalidBody": "The download link is incorrect or no longer exists. Please check the full link, or contact us.",
+    "unavailableTitle": "The link is no longer available",
+    "expiredBody": "The download link has expired (7 days from the order date). Contact us to resend it.",
+    "limitBody": "You've reached the maximum number of downloads. Contact us and we'll be glad to help.",
+    "readyTitle": "Your booklet is ready to download",
+    "pdfNote": "In PDF format — printable and readable offline.",
+    "downloadButton": "⬇️ Download booklet (PDF)",
+    "remainingNote": "Remaining: {remaining} of {max} · valid until {date}",
+    "contactUs": "Contact us"
+  },
+  "about": {
+    "metaTitle": "About Heba Hasan | Momzy",
+    "metaDescription": "Heba Hasan — certified nurse, lactation consultant, and birth doula, founder of Momzy",
+    "bookWithHeba": "Book with Heba →",
+    "founderBadge": "Founder of Momzy",
+    "exploreServices": "Explore our services →"
+  },
+  "contact": {
+    "metaTitle": "Contact us | Momzy",
+    "metaDescription": "Get in touch with Heba Hasan — certified nurse, lactation consultant, and birth doula",
+    "headerLabel": "We're here",
+    "title": "Contact us",
+    "intro": "Have a question? Send us your message and we'll get back to you as soon as we can.",
+    "sideTitle": "We're always here for you",
+    "questionIconAlt": "Question",
+    "questionTitle": "Have a question?",
+    "questionText": "Send your message through the form and we'll get back to you.",
+    "heartIconAlt": "We're here",
+    "noAnswerTitle": "Didn't find an answer?",
+    "noAnswerText": "We're here for you — don't hesitate to reach out.",
+    "emailTitle": "Email",
+    "whatsappTitle": "WhatsApp",
+    "whatsappValue": "Chat with us on WhatsApp",
+    "instagramTitle": "Instagram",
+    "whatsappTip": "💡 For urgent questions about orders or services, WhatsApp is the fastest way to reach us.",
+    "formTitle": "Send us a message",
+    "nameLabel": "Full name *",
+    "namePlaceholder": "Your full name",
+    "emailLabel": "Email *",
+    "phoneLabel": "Phone number (optional)",
+    "subjectLabel": "Subject *",
+    "subjectPlaceholder": "Message subject",
+    "messageLabel": "Message *",
+    "messagePlaceholder": "Write your message here...",
+    "errorNameRequired": "Please enter your full name",
+    "errorNameNoDigits": "Name can't contain numbers",
+    "errorEmailInvalid": "Please enter a valid email address",
+    "errorSubjectRequired": "Please enter a message subject",
+    "errorMessageTooShort": "Message is too short (at least 10 characters)",
+    "submitError": "Something went wrong, please try again",
+    "submitting": "Sending...",
+    "submitButton": "Send message →",
+    "successTitle": "Your message has been received — we'll reply within 24 hours",
+    "sendAnother": "Send another message →"
+  },
+  "notAvailable": {
+    "metaTitle": "Not available | Momzy",
+    "lockAlt": "Blocked",
+    "title": "This site isn't available in your region",
+    "description": "Sorry, <b>Momzy</b> services aren't available in your country or region.",
+    "copyright": "© 2026 Momzy — All rights reserved"
+  },
+  "product": {
+    "notFoundTitle": "Product not found | Momzy",
+    "taglineMommyBox": "More than a box — it’s a hug",
+    "giftTagline": "🎁 An unforgettable gift for every new mom",
+    "shippingFree": "Free shipping nationwide",
+    "shippingEstimated": "Delivery {days}",
+    "shippingFast": "Fast shipping nationwide",
+    "playVideo": "Play video",
+    "saveAmount": "Save ₪{amount}",
+    "quantityLabel": "Quantity:",
+    "inStockNow": "In stock now",
+    "deliveryUpTo": "Delivery within <b>7 days</b>",
+    "buyNowArrow": "Buy now →",
+    "buyNow": "Buy now",
+    "arrow": "→",
+    "orAddToCart": "Or add to cart",
+    "trustGiftWrapped": "Gift-wrapped and ready",
+    "trustGiftCard": "Free greeting card",
+    "galleryLabel": "Photo gallery",
+    "galleryTitle": "Details worth <i>a closer look</i>",
+    "videoOf": "Video of {title}",
+    "videoBadge": "Video",
+    "imageOf": "Image {index} of {title}",
+    "close": "Close",
+    "contentsLabel": "Box contents",
+    "contentsTitle": "Every piece, gathered <i>for you</i>",
+    "more": "More ↓",
+    "less": "Less ↑",
+    "storyLabel": "Our story",
+    "storyImageAlt": "Heba Hasan",
+    "aboutLink": "Learn more about Momzy →",
+    "giftTargetsTitle": "Who is this <i>box for?</i>",
+    "giftTargetsSubtitle": "The Mommy’s Journey Box was made for every mom who deserves to begin her journey with support, knowledge, and care.",
+    "detailsLabel": "Details",
+    "whyDifferentTitle": "Why Mommy’s Journey is <i>different</i>",
+    "moreInfoTitle": "More about this product",
+    "specsTitle": "Specifications",
+    "pillars": {
+      "loveTitle": "Made with love",
+      "loveText": "Every piece was hand-picked by a motherhood expert, not pulled from a catalog. That’s the difference you feel the moment you open the box.",
+      "luxuryTitle": "A luxurious experience",
+      "luxuryText": "From the cover art to the inner wrapping to the satin ribbon — every detail says: this moment matters.",
+      "togetherTitle": "Real companionship",
+      "togetherText": "The box isn’t the end of the journey — it’s the beginning of a relationship with Momzy and Heba, a warm community of moms who understand you."
+    },
+    "testimonialsLabel": "Testimonials",
+    "testimonialsTitle": "Words from moms who’ve <i>been there</i>",
+    "faqLabel": "FAQ",
+    "faqTitle": "Everything on <i>your mind</i>",
+    "ctaAvailability": "Available today — delivery within 7 days",
+    "ctaTitle": "Start your journey <i>today</i>",
+    "ctaSubtitle": "Let this moment be the start of something different —<br></br> a gift that leaves a mark, a touch that won’t be forgotten.",
+    "trustSecurePay": "Secure payment",
+    "trustWrapped": "Gift-wrapped",
+    "trustQuality": "Quality guarantee",
+    "relatedTitle": "More from Momzy",
+    "bundle": {
+      "header": "Complete your box at a special price",
+      "description": "Add it to your box at a special price — a practical guide to accompany you through tummy time.",
+      "inCart": "✓ Booklet in your cart at the bundle price",
+      "addButton": "Add the booklet to your box for ₪{price} →"
+    }
+  },
+  "booklet": {
+    "badgePdf": "Digital booklet · PDF",
+    "tagline": "📘 A digital guide at your fingertips",
+    "trustPdf": "PDF format — easy to read",
+    "trustDelivery": "Sent to you after checkout",
+    "trustSecure": "Secure, encrypted payment",
+    "ctaTitle": "Start tummy time <i>with confidence</i>",
+    "ctaSubtitle": "Get the booklet now and practice tummy time safely and correctly from day one.",
+    "ctaButton": "Get the booklet",
+    "ctaTrustPdf": "PDF format",
+    "ctaTrustDelivery": "Sent after purchase",
+    "aboutLabel": "About the booklet",
+    "aboutTitle": "Why <i>tummy time?</i>",
+    "chaptersLabel": "Inside the booklet",
+    "chaptersTitle": "What’s <i>inside the booklet?</i>",
+    "benefitsLabel": "The benefits",
+    "benefitsTitle": "How will this booklet <i>help you?</i>",
+    "benefitsIntro": "After reading it, you’ll be able to:",
+    "audienceTitle": "Who is this <i>booklet for?</i>"
+  },
+  "services": {
+    "metaTitle": "Services | Momzy",
+    "metaDescription": "Workshops and one-on-one sessions with Heba Hasan — a certified nurse and lactation consultant. Register and save your seat now.",
+    "headerLabel": "Heba's services",
+    "headerTitle": "Services that walk with you <accent>every step</accent>",
+    "headerText": "Group workshops and one-on-one sessions with Heba Hasan — pick the right service and save your seat now.",
+    "groupLabel": "Group workshops",
+    "groupTitle": "Workshops for moms and their little ones in <accent>Nazareth</accent>",
+    "groupText": "A safe space that brings together moms at a similar stage — we learn, share, and practice together with professional guidance.",
+    "individualLabel": "One-on-one sessions",
+    "individualTitle": "Personalized 1:1 support <accent>for your needs</accent>",
+    "individualText": "One-on-one sessions in Nazareth, home visits, or over Zoom — a flexible, personal experience that respects your time and comfort.",
+    "generalConsultation": "General consultation",
+    "chooseHeading": "Not sure which service <accent>fits you?</accent>",
+    "chooseText": "Get in touch and we'll help you choose what's best for you and your baby.",
+    "metaTitleNotFound": "Service not found | Momzy",
+    "metaTitleWithName": "{title} | Momzy",
+    "related": {
+      "label": "More services",
+      "title": "You might also like"
+    },
+    "limitedBadge": "Limited spots — <accent>reserve yours early</accent>",
+    "limitedDates": "Limited spots",
+    "hero": {
+      "label": "MOMZY services",
+      "titleLine1": "Real support for a",
+      "titleLine2": "calmer, more confident motherhood",
+      "text": "From the very first moment of pregnancy through your baby's first year — Heba is by your side with group workshops and one-on-one sessions designed with care for your needs.",
+      "browseServices": "Browse services",
+      "contactHeba": "Contact Heba →"
+    },
+    "credentials": {
+      "nurse": "Certified nurse",
+      "lactation": "Lactation consultant",
+      "doula": "Birth doula"
+    },
+    "trust": {
+      "privacy": "Your info is protected",
+      "reply24h": "Reply within 24 hours",
+      "noCommitment": "No commitment",
+      "consultNoCommitment": "Consultation with no commitment"
+    },
+    "waCardMessage": "Hi Heba 🌸\nI have a question about: {title}",
+    "waBookMessage": "Hi, I'd like to book \"{title}\"",
+    "waInquireMessage": "Hi, I'd like to ask about \"{title}\"",
+    "type": {
+      "workshop": "Group workshop",
+      "individual": "One-on-one",
+      "online": "Online",
+      "home": "Home visit"
+    },
+    "seatsLeft": "{count, plural, =0 {Fully booked} one {1 seat left} other {# seats left}}",
+    "details": "Details →",
+    "inquiry": "Ask",
+    "fullJoinWaitlist": "Fully booked — join the waitlist",
+    "registerNow": "Register now",
+    "ctaReadyHeading": "Ready for the next step?",
+    "ctaReadySubheading": "Save your seat now — your spot is booked instantly, and confirmation lands in your inbox.",
+    "orWhatsapp": "Or chat with me on WhatsApp",
+    "orWhatsappInquire": "Or message me on WhatsApp →",
+    "preferContactForm": "Prefer a contact form? →",
+    "aboutHeba": {
+      "label": "Your guide",
+      "title": "Who's guiding you in this workshop?",
+      "readFullStory": "Read Heba's full story →"
+    },
+    "breadcrumbServices": "Services",
+    "heroSupervisedBy": "Led by <name>Heba Hasan</name> - certified nurse and lactation consultant",
+    "content": {
+      "aboutLabel": "About the service",
+      "aboutTitle": "What we'll cover in the <accent>session</accent>",
+      "topicsLabel": "Topics",
+      "topicsTitle": "Topics we'll dive into <accent>together</accent>",
+      "benefitsLabel": "Who it's for",
+      "benefitsTitle": "What <accent>you'll gain</accent>"
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Everything on your mind"
+    },
+    "meta": {
+      "duration": "Duration",
+      "ageRange": "Age group",
+      "location": "Location",
+      "participants": "Participants",
+      "participantsValue": "Up to {count} moms",
+      "price": "Price",
+      "perSession": "per session"
+    },
+    "onRequest": "On request",
+    "waitlist": "Waitlist"
+  },
+  "shop": {
+    "metaTitle": "Shop | Momzy",
+    "metaDescription": "Browse Momzy products — luxurious gift boxes, baby accessories, and carefully curated items to accompany you on your motherhood journey.",
+    "headerLabel": "Momzy shop",
+    "headerTitle": "Everything you need in <em>one</em> place",
+    "headerSubtitle": "Carefully curated products, educational booklets, and recorded workshops — all designed to accompany you through every step of your journey as a mom.",
+    "searchPlaceholder": "Search for a product...",
+    "sortNewest": "Newest",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "allCategories": "All",
+    "noProductsMatch": "No products match your filters",
+    "productImage": "Product image",
+    "decreaseQty": "Decrease quantity",
+    "increaseQty": "Increase quantity",
+    "addToCart": "Add to cart",
+    "addToCartAria": "Add to cart",
+    "addedToCart": "Added “{title}” to cart"
+  },
+  "ui": {}
 }

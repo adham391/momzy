@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
@@ -14,13 +15,6 @@ interface ServiceDetailHeroProps {
   whatsappNumber?: string;
 }
 
-const TYPE_LABEL: Record<Service["type"], string> = {
-  workshop:   "ورشة جماعية",
-  individual: "لقاء فردي",
-  online:     "أونلاين",
-  home:       "زيارة بيتية",
-};
-
 /**
  * Hero صفحة تفاصيل الخدمة — palette موحّد عبر كل الموقع
  *   - خلفية: gradient وردي → تيل (نفس باقي الصفحات)
@@ -28,9 +22,11 @@ const TYPE_LABEL: Record<Service["type"], string> = {
  *   - نصوص: بني دافئ #3D2C24
  */
 export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDetailHeroProps) {
+  const t = useTranslations("services");
+  const tNav = useTranslations("nav");
   const [bookingOpen, setBookingOpen] = useState(false);
 
-  const waMessage = encodeURIComponent(`مرحباً، أرغب بالاستفسار عن "${service.title}"`);
+  const waMessage = encodeURIComponent(t("waInquireMessage", { title: service.title }));
   const waLink = whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${waMessage}`
     : null;
@@ -51,9 +47,9 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
             className="font-label text-[13px] md:text-[15px] flex items-center gap-1.5 mb-5"
             style={{ color: "var(--light)" }}
           >
-            <Link href="/" className="hover:text-dark transition-colors">الرئيسية</Link>
+            <Link href="/" className="hover:text-dark transition-colors">{tNav("home")}</Link>
             <span>›</span>
-            <Link href="/services" className="hover:text-dark transition-colors">الخدمات</Link>
+            <Link href="/services" className="hover:text-dark transition-colors">{t("breadcrumbServices")}</Link>
             <span>›</span>
             <span style={{ color: "var(--mid)" }}>{service.title}</span>
           </nav>
@@ -99,7 +95,7 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                   className="font-label font-bold text-[14px] md:text-[15px]"
                   style={{ color: "var(--mid)", letterSpacing: "1.5px", textTransform: "uppercase" }}
                 >
-                  {TYPE_LABEL[service.type]}
+                  {t(`type.${service.type}`)}
                 </span>
               </div>
 
@@ -130,7 +126,7 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                 className="font-label text-[15px] md:text-[16px] mb-5"
                 style={{ color: "var(--mid)" }}
               >
-                بإشراف <span style={{ color: "#3D2C24", fontWeight: 700 }}>هبة حسن</span> - ممرضة معتمدة ومرشدة رضاعة
+                {t.rich("heroSupervisedBy", { name: (chunks) => <span style={{ color: "#3D2C24", fontWeight: 700 }}>{chunks}</span> })}
               </p>
 
               {/* الوصف القصير */}
@@ -156,7 +152,7 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                 style={{ color: "var(--mid)" }}
               >
                 <CalendarIcon />
-                المواعيد محدودة
+                {t("limitedDates")}
               </p>
 
               {/* CTA الرئيسي */}
@@ -174,7 +170,7 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                   boxShadow: "0 12px 32px rgba(130,201,196,0.45)",
                 }}
               >
-                <span>سجّلي الآن</span>
+                <span>{t("registerNow")}</span>
                 <span style={{ fontSize: "1.1em" }}>←</span>
               </button>
 
@@ -191,18 +187,18 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884" />
                     </svg>
-                    أو راسليني على واتساب ←
+                    {t("orWhatsappInquire")}
                   </a>
                 </div>
               )}
 
               {/* Micro-trust — أيقونات SVG monochrome */}
               <div className="flex items-center justify-center gap-4 flex-wrap">
-                <MicroTrust icon={<LockIcon />} text="معلوماتك محمية" />
+                <MicroTrust icon={<LockIcon />} text={t("trust.privacy")} />
                 <span style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(37,34,32,0.20)" }} />
-                <MicroTrust icon={<ChatIcon />} text="بدون التزام" />
+                <MicroTrust icon={<ChatIcon />} text={t("trust.noCommitment")} />
                 <span style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(37,34,32,0.20)" }} />
-                <MicroTrust icon={<CheckMonoIcon />} text="رد خلال 24 ساعة" />
+                <MicroTrust icon={<CheckMonoIcon />} text={t("trust.reply24h")} />
               </div>
 
             </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface QuantityInputProps {
   value: number;
   onChange: (value: number) => void;
@@ -16,6 +18,7 @@ export default function QuantityInput({
   size = "md",
   min = 1,
 }: QuantityInputProps) {
+  const t = useTranslations("shop");
   const btnSize = size === "sm" ? 28 : 36;
   const fontSize = size === "sm" ? 13 : 15;
 
@@ -35,7 +38,7 @@ export default function QuantityInput({
       <button
         onClick={decrement}
         disabled={value <= min}
-        aria-label="تقليل الكمية"
+        aria-label={t("decreaseQty")}
         className="flex items-center justify-center font-label font-bold text-mid transition-colors hover:bg-rosepale disabled:opacity-40"
         style={{
           width: btnSize,
@@ -59,7 +62,7 @@ export default function QuantityInput({
       <button
         onClick={increment}
         disabled={value >= 99}
-        aria-label="زيادة الكمية"
+        aria-label={t("increaseQty")}
         className="flex items-center justify-center font-label font-bold text-mid transition-colors hover:bg-tealpale disabled:opacity-40"
         style={{
           width: btnSize,
