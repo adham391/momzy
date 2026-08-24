@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -41,16 +42,17 @@ const ICON_COLORS = [
  * فتبقى الشبكة مرتّبة رغم تفصيل الأوصاف.
  */
 export default function ProductContents({ items }: ProductContentsProps) {
+  const t = useTranslations("product");
   return (
     <section style={{ background: "var(--cream)", padding: "20px 0 clamp(68px, 6vw, 88px)" }}>
       <Container>
         <div className="mb-6 md:mb-12 text-center">
-          <SectionLabel color="teal" centered>محتويات الصندوق</SectionLabel>
+          <SectionLabel color="teal" centered>{t("contentsLabel")}</SectionLabel>
           <h2
             className="text-h2 font-heading font-bold"
             style={{ color: "var(--dark)", lineHeight: 1.2 }}
           >
-            كل قطعةٍ جمعناها <span style={{ color: "var(--rose)", fontStyle: "italic" }}>لكِ</span>
+            {t.rich("contentsTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
           </h2>
         </div>
 
@@ -66,6 +68,7 @@ export default function ProductContents({ items }: ProductContentsProps) {
 }
 
 function ContentCard({ item, idx }: { item: ProductContent; idx: number }) {
+  const t = useTranslations("product");
   const FallbackIcon = FALLBACK_ICONS[idx] ?? Sparkles;
   const colorSet     = ICON_COLORS[idx % 3];
 
@@ -167,7 +170,7 @@ function ContentCard({ item, idx }: { item: ProductContent; idx: number }) {
             className="mt-1.5 font-label font-bold text-[12.5px] active:scale-[0.97] [transition:transform_140ms_ease-out]"
             style={{ color: "var(--teal)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
           >
-            {open ? "أقل ↑" : "المزيد ↓"}
+            {open ? t("less") : t("more")}
           </button>
         )}
       </div>

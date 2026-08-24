@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -10,6 +11,7 @@ interface ProductStoryProps {
 
 /** قسم القصة — "من قلب هبة" */
 export default function ProductStory({ story }: ProductStoryProps) {
+  const t = useTranslations("product");
   return (
     <section style={{ background: "#FDFAF5", padding: "20px 0 clamp(68px, 6vw, 88px)" }}>
       <Container>
@@ -27,13 +29,13 @@ export default function ProductStory({ story }: ProductStoryProps) {
                   boxShadow: "0 12px 32px rgba(0,0,0,0.08)",
                 }}
               >
-                <ProductImagePlaceholder src={story.image} alt="هبة حسن" size="story" />
+                <ProductImagePlaceholder src={story.image} alt={t("storyImageAlt")} size="story" />
               </div>
             </div>
 
             {/* النص */}
             <div>
-              <SectionLabel color="teal">قصتنا</SectionLabel>
+              <SectionLabel color="teal">{t("storyLabel")}</SectionLabel>
               <h2
                 className="text-h2 font-heading font-bold mb-6"
                 style={{ color: "var(--dark)", lineHeight: 1.2 }}
@@ -57,7 +59,7 @@ export default function ProductStory({ story }: ProductStoryProps) {
                 className="inline-block font-label font-bold text-[14px] mt-3 transition-opacity hover:opacity-80"
                 style={{ color: "var(--rose)", borderBottom: "1px solid rgba(242,167,181,0.4)", paddingBottom: 2 }}
               >
-                اعرفي أكثر عن Momzy ←
+                {t("aboutLink")}
               </Link>
             </div>
           </div>

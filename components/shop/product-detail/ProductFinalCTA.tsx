@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
 import Container from "@/components/ui/Container";
@@ -11,6 +12,7 @@ interface ProductFinalCTAProps {
 
 /** قسم CTA النهائي — مُحسَّن للتحويل بهرمية بصرية واضحة */
 export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
+  const t = useTranslations("product");
   const addItemSilent = useCart((s) => s.addItemSilent);
   const router = useRouter();
 
@@ -55,7 +57,7 @@ export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
               <span className="relative inline-flex rounded-full" style={{ width: 7, height: 7, background: "#10B981" }} />
             </span>
             <span className="font-label font-bold text-[12px]" style={{ color: "var(--dark)", letterSpacing: "0.5px" }}>
-              متوفر اليوم — توصيل حتى 7 أيام
+              {t("ctaAvailability")}
             </span>
           </div>
 
@@ -68,7 +70,7 @@ export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
               lineHeight: 1.15,
             }}
           >
-            ابدئي مشوارك <span style={{ color: "white", fontStyle: "italic" }}>اليوم</span>
+            {t.rich("ctaTitle", { i: (chunks) => <span style={{ color: "white", fontStyle: "italic" }}>{chunks}</span> })}
           </h2>
 
           {/* النص الفرعي */}
@@ -82,9 +84,7 @@ export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
               fontWeight: 500,
             }}
           >
-            اجعلي هذه اللحظة بدايةً لشيءٍ مختلف،
-            <br className="hidden sm:inline" />
-            {" "}هديةً تترك أثرًا، ولمسةً لا تُنسى.
+            {t.rich("ctaSubtitle", { br: () => <br className="hidden sm:inline" /> })}
           </p>
 
           {/* بلوك السعر — مع savings badge */}
@@ -122,7 +122,7 @@ export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                 }}
               >
-                وفّري ₪{savings}
+                {t("saveAmount", { amount: savings })}
               </span>
             )}
           </div>
@@ -143,17 +143,17 @@ export default function ProductFinalCTA({ product }: ProductFinalCTAProps) {
               minWidth: 240,
             }}
           >
-            <span>اشتري الآن</span>
-            <span style={{ fontSize: "1.2em" }}>←</span>
+            <span>{t("buyNow")}</span>
+            <span style={{ fontSize: "1.2em" }}>{t("arrow")}</span>
           </button>
 
           {/* trust line تحت الزر */}
           <div className="flex items-center justify-center gap-4 mt-5 flex-wrap">
-            <TrustLine icon="🔒" text="دفع آمن" />
+            <TrustLine icon="🔒" text={t("trustSecurePay")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.30)" }} />
-            <TrustLine icon="🎁" text="مغلّف كهدية" />
+            <TrustLine icon="🎁" text={t("trustWrapped")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.30)" }} />
-            <TrustLine icon="✓" text="ضمان الجودة" />
+            <TrustLine icon="✓" text={t("trustQuality")} />
           </div>
 
         </div>

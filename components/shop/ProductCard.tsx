@@ -1,6 +1,8 @@
+import { getLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import { categoryLabel } from "@/lib/products/categoryLabels";
 import type { Product } from "@/lib/products/types";
 
 interface ProductCardProps {
@@ -10,7 +12,8 @@ interface ProductCardProps {
 }
 
 /** كارد منتج واحد في شبكة المتجر — schema الجديد */
-export default function ProductCard({ product, showTags = true }: ProductCardProps) {
+export default async function ProductCard({ product, showTags = true }: ProductCardProps) {
+  const locale = await getLocale();
   /** أول 1-2 tags كـ badges فوق الصورة — فلترة القيم القديمة (strings) */
   const visibleTags = (product.tags ?? [])
     .filter((tag): tag is import("@/lib/products/types").ProductTag =>
@@ -59,7 +62,7 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
           className="font-label uppercase text-dark mb-1"
           style={{ fontSize: 12, letterSpacing: "1.5px" }}
         >
-          {product.category}
+          {categoryLabel(product.category, locale)}
         </div>
 
         {/* الاسم */}

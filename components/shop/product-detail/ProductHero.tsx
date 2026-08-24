@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart, type GiftOptions } from "@/lib/store/cart";
+import { categoryLabel } from "@/lib/products/categoryLabels";
 import Container from "@/components/ui/Container";
 import QuantityInput from "@/components/shop/QuantityInput";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
@@ -15,9 +17,13 @@ interface ProductHeroProps {
   product: Product;
 }
 
-/** عناوين شاعرية مخصصة لمنتجات معيّنة */
-const HERO_TAGLINES: Record<string, string> = {
-  "mommy-journey-box": "ليس مجرّد صندوق، بل حِضن",
+/** عناوين شاعرية مخصصة لمنتجات معيّنة — مُدوّلة (ar/he/en) */
+const HERO_TAGLINES: Record<string, Record<string, string>> = {
+  "mommy-journey-box": {
+    ar: "ليس مجرّد صندوق، بل حِضن",
+    he: "לא רק מארז — חיבוק",
+    en: "Not just a box — an embrace",
+  },
 };
 
 /* ── helpers للفيديو ─────────────────────────────────────────── */
@@ -52,6 +58,9 @@ type MediaItem = { type: "image"; src: string } | { type: "video"; src: string; 
  *   - الفيديو يظهر مباشرة في الـ main area بزر play مركزي
  */
 export default function ProductHero({ product }: ProductHeroProps) {
+  const t = useTranslations("product");
+  const tNav = useTranslations("nav");
+  const locale = useLocale();
   const [quantity, setQuantity] = useState(1);
   const [videoPlaying, setVideoPlaying] = useState(false);
 
@@ -94,15 +103,15 @@ export default function ProductHero({ product }: ProductHeroProps) {
   }
 
   const savings = product.compareAtPrice ? product.compareAtPrice - product.price : null;
-  const tagline = HERO_TAGLINES[product.slug] ?? null;
+  const tagline = HERO_TAGLINES[product.slug]?.[locale] ?? HERO_TAGLINES[product.slug]?.ar ?? null;
 
   const shippingLabel =
     product.shippingInfo?.notes ??
     (product.shippingInfo?.freeShipping
-      ? "شحن مجاني لكل البلاد"
+      ? t("shippingFree")
       : product.shippingInfo?.estimatedDays
-      ? `التوصيل ${product.shippingInfo.estimatedDays}`
-      : "شحن سريع لكل البلاد");
+      ? t("shippingEstimated", { days: product.shippingInfo.estimatedDays })
+      : t("shippingFast"));
 
   return (
     <section
@@ -120,9 +129,9 @@ export default function ProductHero({ product }: ProductHeroProps) {
           className="font-label text-[13px] md:text-[14px] flex items-center gap-1.5 mb-5"
           style={{ color: "var(--light)" }}
         >
-          <Link href="/" className="hover:text-dark transition-colors">الرئيسية</Link>
+          <Link href="/" className="hover:text-dark transition-colors">{tNav("home")}</Link>
           <span>›</span>
-          <Link href="/shop" className="hover:text-dark transition-colors">المتجر</Link>
+          <Link href="/shop" className="hover:text-dark transition-colors">{tNav("shop")}</Link>
           <span>›</span>
           <span style={{ color: "var(--mid)" }}>{product.title}</span>
         </nav>
@@ -227,7 +236,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                       onClick={() => setVideoPlaying(true)}
                       className="absolute inset-0 flex items-center justify-center group"
                       style={{ background: "rgba(0,0,0,0.15)", cursor: "pointer" }}
-                      aria-label="تشغيل الفيديو"
+                      aria-label={t("playVideo")}
                     >
                       <span
                         className="flex items-center justify-center [transition:transform_220ms_cubic-bezier(0.23,1,0.32,1),box-shadow_220ms_ease] group-hover:scale-110"
@@ -269,7 +278,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                 letterSpacing: "1px",
               }}
             >
-              🎁 هدية لا تُنسى لكل أم جديدة
+              {t("giftEyebrow")}
             </p>
 
             {/* category — chip أنيق */}
@@ -282,7 +291,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                 className="font-label font-bold text-[12px] uppercase"
                 style={{ color: "var(--teal)", letterSpacing: "2px" }}
               >
-                {product.category}
+                {categoryLabel(product.category, locale)}
               </span>
             </div>
 
@@ -379,7 +388,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                     boxShadow: "0 4px 12px rgba(242,167,181,0.45)",
                   }}
                 >
-                  وفّري ₪{savings}
+                  {t("saveAmount", { amount: savings })}
                 </div>
               )}
             </div>
@@ -397,7 +406,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
             {/* الكمية */}
             <div className="flex items-center gap-3 mb-4">
               <span className="font-label text-[13px] font-semibold" style={{ color: "var(--mid)" }}>
-                الكمية:
+                {t("quantityLabel")}
               </span>
               <QuantityInput value={quantity} onChange={setQuantity} size="md" min={1} />
             </div>
@@ -424,7 +433,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                   />
                 </span>
                 <span className="font-label font-bold text-[13px]" style={{ color: "var(--dark)" }}>
-                  متوفر الآن
+                  {t("inStockNow")}
                 </span>
               </div>
 
@@ -435,7 +444,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
               <div className="flex items-center gap-2">
                 <TruckIcon />
                 <span className="font-label font-semibold text-[13px]" style={{ color: "var(--mid)" }}>
-                  توصيل حتى <span style={{ color: "var(--dark)", fontWeight: 700 }}>7 أيام</span>
+                  {t.rich("deliveryUpTo", { b: (chunks) => <span style={{ color: "var(--dark)", fontWeight: 700 }}>{chunks}</span> })}
                 </span>
               </div>
             </div>
@@ -456,7 +465,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                 boxShadow: "0 10px 28px rgba(242,167,181,0.55)",
               }}
             >
-              اشتري الآن ←
+              {t("buyNowArrow")}
             </button>
 
             {/* CTA ثانوي — مخفّف */}
@@ -471,7 +480,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
                 cursor: "pointer",
               }}
             >
-              أو أضيفي للسلة
+              {t("orAddToCart")}
             </button>
 
             {/* إشارات الثقة — موبايل: stacked عمودياً / ديسكتوب: صف أفقي */}
@@ -484,9 +493,9 @@ export default function ProductHero({ product }: ProductHeroProps) {
             >
               <TrustSignal icon="/icons/shipping-icon.png" label={shippingLabel} />
               <Divider />
-              <TrustSignal icon="/icons/products-icon.png" label="مغلّف وجاهز كهدية" />
+              <TrustSignal icon="/icons/products-icon.png" label={t("trustGiftWrapped")} />
               <Divider />
-              <TrustSignal icon="/icons/heart-icon.png" label="بطاقة إهداء مجانية" />
+              <TrustSignal icon="/icons/heart-icon.png" label={t("trustGiftCard")} />
             </div>
 
           </div>

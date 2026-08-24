@@ -14,7 +14,10 @@
   },
   "menu": {
     "aria": "القائمة",
-    "contact": "تواصلي معنا"
+    "contact": "تواصلي معنا",
+    "whatsappAria": "واتساب",
+    "instagramAria": "إنستغرام",
+    "emailAria": "إيميل"
   },
   "footer": {
     "usefulLinks": "روابط مفيدة",
@@ -671,7 +674,8 @@
       "description": "أضيفيه إلى صندوقك بسعرٍ خاص — دليلٌ عملي يرافقكِ في وقت البطن.",
       "inCart": "✓ الكتيب في سلتك بسعر الباقة",
       "addButton": "أضيفي الكتيب بـ ₪{price} إلى صندوقك ←"
-    }
+    },
+    "giftEyebrow": "🎁 هدية لا تُنسى لكل أم جديدة"
   },
   "booklet": {
     "badgePdf": "كتيب رقمي · PDF",
@@ -691,7 +695,13 @@
     "benefitsLabel": "الفائدة",
     "benefitsTitle": "ماذا سيفيدك <i>هذا الكتيب؟</i>",
     "benefitsIntro": "بعد قراءته ستتمكّنين من:",
-    "audienceTitle": "لمن صُمّم <i>هذا الكتيب؟</i>"
+    "audienceTitle": "لمن صُمّم <i>هذا الكتيب؟</i>",
+    "savings": "وفّري ₪{amount}",
+    "buyNow": "اشتري الآن ←",
+    "addToCart": "أو أضيفي للسلة",
+    "ctaArrow": "←",
+    "ctaTrustSecure": "دفع آمن",
+    "relatedTitle": "منتجات أخرى من Momzy"
   },
   "services": {
     "metaTitle": "الخدمات | Momzy",
@@ -804,5 +814,9 @@
     "addToCartAria": "أضيفي للسلة",
     "addedToCart": "أُضيف “{title}” للسلة"
   },
-  "ui": {}
+  "ui": {},
+  "common": {
+    "prev": "السابق",
+    "next": "التالي"
+  }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
 import type { Product } from "@/lib/products/types";
@@ -11,6 +12,7 @@ interface ProductStickyMobileCTAProps {
 
 /** Sticky CTA الموبايل — يظهر فقط بعد أن يخرج زر "اشتري الآن" الرئيسي من الشاشة */
 export default function ProductStickyMobileCTA({ product }: ProductStickyMobileCTAProps) {
+  const t = useTranslations("product");
   const [visible, setVisible] = useState(false);
 
   const addItemSilent = useCart((s) => s.addItemSilent);
@@ -80,7 +82,7 @@ export default function ProductStickyMobileCTA({ product }: ProductStickyMobileC
           cursor: "pointer",
         }}
       >
-        اشتري الآن ←
+        {t("buyNowArrow")}
       </button>
     </div>
   );

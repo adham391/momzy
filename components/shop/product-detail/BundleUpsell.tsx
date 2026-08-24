@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import Container from "@/components/ui/Container";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
@@ -20,6 +21,7 @@ interface BundleUpsellProps {
  * في السلة أيضًا كي يُفعَّل سعر الباقة فورًا.
  */
 export default function BundleUpsell({ box, booklet, rule }: BundleUpsellProps) {
+  const t = useTranslations("product");
   const items = useCart((s) => s.items);
   const addItemSilent = useCart((s) => s.addItemSilent);
   const openCart = useCart((s) => s.openCart);
@@ -45,7 +47,7 @@ export default function BundleUpsell({ box, booklet, rule }: BundleUpsellProps) 
           <div className="flex items-center gap-2 px-5 py-2.5" style={{ background: "var(--tealpale)" }}>
             <span>🎁</span>
             <span className="font-label font-bold text-[13px]" style={{ color: "var(--teal)", letterSpacing: "0.5px" }}>
-              أكملي صندوقك بسعرٍ خاص
+              {t("bundle.header")}
             </span>
           </div>
 
@@ -64,7 +66,7 @@ export default function BundleUpsell({ box, booklet, rule }: BundleUpsellProps) 
                 {booklet.title}
               </div>
               <p className="text-[13px] leading-[1.6] mb-2" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-                أضيفيه إلى صندوقك بسعرٍ خاص — دليلٌ عملي يرافقكِ في وقت البطن.
+                {t("bundle.description")}
               </p>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-label font-extrabold text-[20px]" dir="ltr" style={{ color: "var(--teal)" }}>
@@ -77,7 +79,7 @@ export default function BundleUpsell({ box, booklet, rule }: BundleUpsellProps) 
                   className="font-label font-bold text-[11px] px-2 py-0.5 rounded-full"
                   style={{ background: "var(--rose)", color: "white" }}
                 >
-                  وفّري ₪{savings}
+                  {t("saveAmount", { amount: savings })}
                 </span>
               </div>
             </div>
@@ -90,7 +92,7 @@ export default function BundleUpsell({ box, booklet, rule }: BundleUpsellProps) 
                 className="w-full text-center font-label font-bold text-[14px] py-3 rounded-[12px]"
                 style={{ background: "var(--tealpale)", color: "var(--teal)" }}
               >
-                ✓ الكتيب في سلتك بسعر الباقة
+                {t("bundle.inCart")}
               </div>
             ) : (
               <button
@@ -98,7 +100,7 @@ export default function BundleUpsell({ box, booklet, rule }: BundleUpsellProps) 
                 className="w-full font-label font-bold text-[15px] btn-wobble [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1),box-shadow_200ms_ease] hover:-translate-y-[2px]"
                 style={{ background: "var(--teal)", color: "white", border: "none", borderRadius: 12, padding: "13px", cursor: "pointer", boxShadow: "0 8px 22px rgba(130,201,196,0.40)" }}
               >
-                أضيفي الكتيب بـ ₪{rule.bundlePrice} إلى صندوقك ←
+                {t("bundle.addButton", { price: rule.bundlePrice })}
               </button>
             )}
           </div>

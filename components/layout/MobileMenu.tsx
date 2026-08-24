@@ -169,7 +169,7 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
             href="https://wa.me/972500000000"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="واتساب"
+            aria-label={t("menu.whatsappAria")}
             className="w-12 h-12 rounded-full bg-white border-[1.5px] border-bord flex items-center justify-center hover:border-[#25D366] transition-colors"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366">
@@ -182,7 +182,7 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
             href="https://www.instagram.com/hebahasan._"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="إنستغرام"
+            aria-label={t("menu.instagramAria")}
             className="w-12 h-12 rounded-full bg-white border-[1.5px] border-bord flex items-center justify-center hover:border-[#DD2A7B] transition-colors"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="url(#ig-mobile)">
@@ -200,7 +200,7 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
           {/* إيميل */}
           <a
             href="mailto:heba@momzyworld.com"
-            aria-label="إيميل"
+            aria-label={t("menu.emailAria")}
             className="w-12 h-12 rounded-full bg-white border-[1.5px] border-bord flex items-center justify-center hover:border-rose transition-colors"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#F2A7B5">

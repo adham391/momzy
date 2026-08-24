@@ -1,10 +1,12 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
 import Container from "@/components/ui/Container";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import { categoryLabel } from "@/lib/products/categoryLabels";
 import type { Product } from "@/lib/products/types";
 
 interface BookletHeroProps {
@@ -17,6 +19,9 @@ interface BookletHeroProps {
  * وبشارات ثقة رقمية بدل شارات الشحن الفيزيائي.
  */
 export default function BookletHero({ product }: BookletHeroProps) {
+  const locale = useLocale();
+  const t = useTranslations("booklet");
+  const tNav = useTranslations("nav");
   const addItem = useCart((s) => s.addItem);
   const addItemSilent = useCart((s) => s.addItemSilent);
   const router = useRouter();
@@ -46,9 +51,9 @@ export default function BookletHero({ product }: BookletHeroProps) {
       <Container>
         {/* Breadcrumb */}
         <nav className="font-label text-[13px] md:text-[14px] flex items-center gap-1.5 mb-5" style={{ color: "var(--light)" }}>
-          <Link href="/" className="hover:text-dark transition-colors">الرئيسية</Link>
+          <Link href="/" className="hover:text-dark transition-colors">{tNav("home")}</Link>
           <span>›</span>
-          <Link href="/shop" className="hover:text-dark transition-colors">المتجر</Link>
+          <Link href="/shop" className="hover:text-dark transition-colors">{tNav("shop")}</Link>
           <span>›</span>
           <span style={{ color: "var(--mid)" }}>{product.title}</span>
         </nav>
@@ -66,7 +71,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
                 className="absolute top-3 font-label font-bold text-[12px] px-3 py-1.5 rounded-full"
                 style={{ insetInlineStart: 12, background: "var(--teal)", color: "white", boxShadow: "0 4px 12px rgba(130,201,196,0.45)" }}
               >
-                كتيب رقمي · PDF
+                {t("badgePdf")}
               </span>
             </div>
           </div>
@@ -74,13 +79,13 @@ export default function BookletHero({ product }: BookletHeroProps) {
           {/* ── المعلومات ── */}
           <div>
             <p className="font-label font-bold text-[16px] md:text-[18px] mb-3" style={{ color: "var(--teal)", letterSpacing: "1px" }}>
-              📘 دليلٌ رقميّ بين يديكِ
+              {t("tagline")}
             </p>
 
             <div className="flex items-center gap-2 mb-3">
               <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: "var(--rose)" }} />
               <span className="font-label font-bold text-[12px] uppercase" style={{ color: "var(--rose)", letterSpacing: "2px" }}>
-                {product.category}
+                {categoryLabel(product.category, locale)}
               </span>
             </div>
 
@@ -109,7 +114,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
               </div>
               {savings && savings > 0 && (
                 <div className="font-label font-bold text-[13px] px-3.5 py-2 rounded-full" style={{ background: "var(--rose)", color: "white", boxShadow: "0 4px 12px rgba(242,167,181,0.45)" }}>
-                  وفّري ₪{savings}
+                  {t("savings", { amount: savings })}
                 </div>
               )}
             </div>
@@ -121,7 +126,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
               className="w-full font-label font-bold mb-3 btn-wobble [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1),box-shadow_200ms_ease] hover:-translate-y-[2px]"
               style={{ fontSize: "clamp(17px, 1.4vw, 19px)", background: "var(--rose)", color: "var(--dark)", border: "none", borderRadius: 50, padding: "16px 26px", cursor: "pointer", boxShadow: "0 10px 28px rgba(242,167,181,0.55)" }}
             >
-              اشتري الآن ←
+              {t("buyNow")}
             </button>
 
             <button
@@ -129,7 +134,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
               className="w-full font-label font-semibold text-[14px] mb-4 [transition:color_180ms_ease] hover:underline"
               style={{ background: "transparent", color: "var(--mid)", border: "none", padding: "8px", cursor: "pointer" }}
             >
-              أو أضيفي للسلة
+              {t("addToCart")}
             </button>
 
             {/* شارات ثقة رقمية */}
@@ -137,11 +142,11 @@ export default function BookletHero({ product }: BookletHeroProps) {
               className="rounded-[16px] overflow-hidden flex flex-col md:flex-row md:items-center md:justify-around md:py-4 md:px-3 md:gap-2"
               style={{ background: "rgba(255,255,255,0.6)", border: "1px solid var(--bord)" }}
             >
-              <TrustSignal emoji="📄" label="صيغة PDF — سهل القراءة" />
+              <TrustSignal emoji="📄" label={t("trustPdf")} />
               <Divider />
-              <TrustSignal emoji="✉️" label="يصلكِ بعد إتمام الطلب" />
+              <TrustSignal emoji="✉️" label={t("trustDelivery")} />
               <Divider />
-              <TrustSignal emoji="🔒" label="دفع آمن ومشفّر" />
+              <TrustSignal emoji="🔒" label={t("trustSecure")} />
             </div>
           </div>
         </div>
@@ -152,6 +157,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
 
 /** CTA النهائي للكتيب — نظير ProductFinalCTA لكن بصياغة الكتيب الرقمي */
 export function BookletFinalCTA({ product }: BookletHeroProps) {
+  const t = useTranslations("booklet");
   const addItemSilent = useCart((s) => s.addItemSilent);
   const router = useRouter();
 
@@ -172,10 +178,10 @@ export function BookletFinalCTA({ product }: BookletHeroProps) {
       <Container>
         <div className="text-center relative z-10" style={{ maxWidth: 620, margin: "0 auto" }}>
           <h2 className="font-heading font-bold mb-3" style={{ fontSize: "clamp(30px, 4vw, 44px)", color: "var(--dark)", lineHeight: 1.15 }}>
-            ابدئي وقت البطن <span style={{ color: "white", fontStyle: "italic" }}>بثقة</span>
+            {t.rich("ctaTitle", { i: (chunks) => <span style={{ color: "white", fontStyle: "italic" }}>{chunks}</span> })}
           </h2>
           <p className="mb-6" style={{ fontSize: "clamp(15px, 1.3vw, 17px)", color: "rgba(37,34,32,0.85)", fontFamily: "'Tajawal', sans-serif", lineHeight: 1.75, fontWeight: 500 }}>
-            احصلي على الكتيب الآن، وطبّقي وقت البطن بطريقة صحيحة وآمنة من اليوم الأول.
+            {t("ctaSubtitle")}
           </p>
 
           <div className="flex items-center justify-center gap-3 flex-wrap mb-6">
@@ -194,16 +200,16 @@ export function BookletFinalCTA({ product }: BookletHeroProps) {
             className="inline-flex items-center justify-center gap-2 font-label font-extrabold [transition:transform_220ms_cubic-bezier(0.23,1,0.32,1),box-shadow_220ms_ease] hover:-translate-y-[3px] hover:shadow-[0_20px_48px_rgba(0,0,0,0.22)]"
             style={{ fontSize: "clamp(17px, 1.5vw, 20px)", background: "white", color: "var(--dark)", border: "none", borderRadius: 50, padding: "20px 48px", cursor: "pointer", boxShadow: "0 14px 36px rgba(0,0,0,0.18)", minWidth: 240 }}
           >
-            <span>احصلي على الكتيب</span>
-            <span style={{ fontSize: "1.2em" }}>←</span>
+            <span>{t("ctaButton")}</span>
+            <span style={{ fontSize: "1.2em" }}>{t("ctaArrow")}</span>
           </button>
 
           <div className="flex items-center justify-center gap-4 mt-5 flex-wrap">
-            <TrustLine icon="📄" text="صيغة PDF" />
+            <TrustLine icon="📄" text={t("ctaTrustPdf")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.30)" }} />
-            <TrustLine icon="✉️" text="يصلكِ بعد الشراء" />
+            <TrustLine icon="✉️" text={t("ctaTrustDelivery")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.30)" }} />
-            <TrustLine icon="🔒" text="دفع آمن" />
+            <TrustLine icon="🔒" text={t("ctaTrustSecure")} />
           </div>
         </div>
       </Container>

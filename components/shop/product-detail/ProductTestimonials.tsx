@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
@@ -8,11 +9,12 @@ interface ProductTestimonialsProps {
 }
 
 export default function ProductTestimonials({ items }: ProductTestimonialsProps) {
+  const t = useTranslations("product");
   return (
     <section style={{ background: "#F5F0EA", padding: "20px 0 clamp(68px, 6vw, 88px)" }}>
       <Container>
         <div className="mb-6 md:mb-12 text-center">
-          <SectionLabel color="teal" centered>شهادات</SectionLabel>
+          <SectionLabel color="teal" centered>{t("testimonialsLabel")}</SectionLabel>
           <h2
             className="text-h2 font-heading font-bold"
             style={{
@@ -20,13 +22,13 @@ export default function ProductTestimonials({ items }: ProductTestimonialsProps)
               lineHeight: 1.2,
             }}
           >
-            كلمات من أمهات عشن <span style={{ color: "var(--rose)", fontStyle: "italic" }}>التجربة</span>
+            {t.rich("testimonialsTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {items.map((t, idx) => (
-            <TestimonialCard key={idx} item={t} />
+          {items.map((item, idx) => (
+            <TestimonialCard key={idx} item={item} />
           ))}
         </div>
       </Container>

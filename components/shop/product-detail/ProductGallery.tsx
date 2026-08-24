@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Container from "@/components/ui/Container";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -63,6 +64,7 @@ function toThumbnailUrl(url: string): string | null {
 
 /** معرض صور/فيديو — الفيديو أول + Grid + lightbox */
 export default function ProductGallery({ images, mainImage, title, videoUrl }: ProductGalleryProps) {
+  const t = useTranslations("product");
   const [lightbox, setLightbox] = useState<LightboxItem | null>(null);
 
   const galleryImages = (images ?? []).filter((img) => img !== mainImage);
@@ -84,12 +86,12 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
       <section style={{ background: "white", padding: "28px 0 80px" }}>
         <Container>
           <div className="mb-8">
-            <SectionLabel color="teal">معرض الصور</SectionLabel>
+            <SectionLabel color="teal">{t("galleryLabel")}</SectionLabel>
             <h2
               className="text-h2 font-heading font-bold"
               style={{ color: "var(--dark)" }}
             >
-              تفاصيل تستحق <span style={{ color: "var(--rose)", fontStyle: "italic" }}>التأمل</span>
+              {t.rich("galleryTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
             </h2>
           </div>
 
@@ -101,7 +103,7 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
                 onClick={openVideo}
                 className="relative rounded-[16px] overflow-hidden [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1)] hover:scale-[1.02]"
                 style={{ aspectRatio: "4 / 5", border: "1.5px solid var(--bord)", cursor: "pointer", background: "#111" }}
-                aria-label={`فيديو ${title}`}
+                aria-label={t("videoOf", { title })}
               >
                 {/* Thumbnail */}
                 {thumbnailUrl ? (
@@ -153,7 +155,7 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
                     padding: "3px 10px", borderRadius: 20,
                   }}
                 >
-                  فيديو
+                  {t("videoBadge")}
                 </div>
               </button>
             )}
@@ -165,7 +167,7 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
                 onClick={() => setLightbox({ type: "image", src: img })}
                 className="rounded-[16px] overflow-hidden [transition:transform_200ms_cubic-bezier(0.23,1,0.32,1)] hover:scale-[1.02]"
                 style={{ aspectRatio: "4 / 5", border: "1.5px solid var(--bord)", cursor: "pointer" }}
-                aria-label={`صورة ${idx + 1} من ${title}`}
+                aria-label={t("imageOf", { index: idx + 1, title })}
               >
                 <ProductImagePlaceholder src={img} alt={title} size="gallery" />
               </button>
@@ -235,7 +237,7 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
             onClick={() => setLightbox(null)}
             className="absolute top-6 end-6 w-10 h-10 rounded-full flex items-center justify-center text-white"
             style={{ background: "rgba(255,255,255,0.15)", fontSize: 20 }}
-            aria-label="إغلاق"
+            aria-label={t("close")}
           >
             ✕
           </button>

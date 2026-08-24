@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ReviewCard from "./ReviewCard";
 import type { Review } from "@/lib/reviews/types";
@@ -14,6 +15,7 @@ const CARD_GAP = 16;
  * التمرير مُراعٍ لِـ RTL: «التالي» يكشف البطاقات التالية (يسارًا) عبر إنقاص scrollLeft.
  */
 export default function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
+  const t = useTranslations("common");
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -71,13 +73,13 @@ export default function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
       {/* ── أزرار التنقّل — سابق (يمين) / تالي (يسار) ── */}
       <div className="flex justify-center items-center gap-4 mt-7">
         <NavButton
-          label="السابق"
+          label={t("prev")}
           onClick={() => scrollByDir("prev")}
           disabled={atStart}
           icon={<ChevronRight size={22} strokeWidth={2.5} />}
         />
         <NavButton
-          label="التالي"
+          label={t("next")}
           onClick={() => scrollByDir("next")}
           disabled={atEnd}
           icon={<ChevronLeft size={22} strokeWidth={2.5} />}

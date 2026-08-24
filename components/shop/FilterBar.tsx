@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { categoryLabel } from "@/lib/products/categoryLabels";
 import type { ProductSort } from "@/lib/products/types";
 
 interface FilterBarProps {
@@ -32,6 +33,7 @@ export default function FilterBar({
   onChangeSort,
 }: FilterBarProps) {
   const t = useTranslations("shop");
+  const locale = useLocale();
   const [sortOpen, setSortOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -163,7 +165,7 @@ export default function FilterBar({
         {categories.map((cat) => (
           <CategoryButton
             key={cat}
-            label={cat}
+            label={categoryLabel(cat, locale)}
             active={activeCategory === cat}
             onClick={() => onChangeCategory(cat)}
           />

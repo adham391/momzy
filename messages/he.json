@@ -14,7 +14,10 @@
   },
   "menu": {
     "aria": "תפריט",
-    "contact": "צרי קשר"
+    "contact": "צרי קשר",
+    "whatsappAria": "וואטסאפ",
+    "instagramAria": "אינסטגרם",
+    "emailAria": "אימייל"
   },
   "footer": {
     "usefulLinks": "קישורים שימושיים",
@@ -671,7 +674,8 @@
       "description": "הוסיפי את החוברת למארז שלך במחיר מיוחד — מדריך מעשי שמלווה אותך בזמן בטן.",
       "inCart": "✓ החוברת בעגלה שלך במחיר החבילה",
       "addButton": "הוסיפי את החוברת ב־₪{price} למארז שלך ←"
-    }
+    },
+    "giftEyebrow": "🎁 מתנה בלתי נשכחת לכל אמא טרייה"
   },
   "booklet": {
     "badgePdf": "חוברת דיגיטלית · PDF",
@@ -691,7 +695,13 @@
     "benefitsLabel": "התועלת",
     "benefitsTitle": "איך תעזור לך <i>החוברת הזו?</i>",
     "benefitsIntro": "אחרי הקריאה תוכלי:",
-    "audienceTitle": "למי נועדה <i>החוברת הזו?</i>"
+    "audienceTitle": "למי נועדה <i>החוברת הזו?</i>",
+    "savings": "חסכי ₪{amount}",
+    "buyNow": "קני עכשיו ←",
+    "addToCart": "או הוסיפי לעגלה",
+    "ctaArrow": "←",
+    "ctaTrustSecure": "תשלום מאובטח",
+    "relatedTitle": "מוצרים נוספים מ-Momzy"
   },
   "services": {
     "metaTitle": "השירותים | Momzy",
@@ -804,5 +814,9 @@
     "addToCartAria": "הוסיפי לעגלה",
     "addedToCart": "“{title}” נוסף לעגלה"
   },
-  "ui": {}
+  "ui": {},
+  "common": {
+    "prev": "הקודם",
+    "next": "הבא"
+  }
 }

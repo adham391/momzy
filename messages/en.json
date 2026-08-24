@@ -14,7 +14,10 @@
   },
   "menu": {
     "aria": "Menu",
-    "contact": "Get in touch"
+    "contact": "Get in touch",
+    "whatsappAria": "WhatsApp",
+    "instagramAria": "Instagram",
+    "emailAria": "Email"
   },
   "footer": {
     "usefulLinks": "Useful Links",
@@ -671,7 +674,8 @@
       "description": "Add it to your box at a special price — a practical guide to accompany you through tummy time.",
       "inCart": "✓ Booklet in your cart at the bundle price",
       "addButton": "Add the booklet to your box for ₪{price} →"
-    }
+    },
+    "giftEyebrow": "🎁 An unforgettable gift for every new mom"
   },
   "booklet": {
     "badgePdf": "Digital booklet · PDF",
@@ -691,7 +695,13 @@
     "benefitsLabel": "The benefits",
     "benefitsTitle": "How will this booklet <i>help you?</i>",
     "benefitsIntro": "After reading it, you’ll be able to:",
-    "audienceTitle": "Who is this <i>booklet for?</i>"
+    "audienceTitle": "Who is this <i>booklet for?</i>",
+    "savings": "Save ₪{amount}",
+    "buyNow": "Buy now →",
+    "addToCart": "Or add to cart",
+    "ctaArrow": "→",
+    "ctaTrustSecure": "Secure payment",
+    "relatedTitle": "More products from Momzy"
   },
   "services": {
     "metaTitle": "Services | Momzy",
@@ -804,5 +814,9 @@
     "addToCartAria": "Add to cart",
     "addedToCart": "Added “{title}” to cart"
   },
-  "ui": {}
+  "ui": {},
+  "common": {
+    "prev": "Previous",
+    "next": "Next"
+  }
 }

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Container from "@/components/ui/Container";
 import type { ProductGiftTarget } from "@/lib/products/types";
 import { Baby, HeartHandshake, Gift, Heart } from "lucide-react";
@@ -23,6 +24,7 @@ const ICON_STYLES = [
 
 /** قسم "لمن هذه الهدية؟" — أهم قسم عاطفي في الصفحة */
 export default function ProductGiftTargets({ targets }: ProductGiftTargetsProps) {
+  const t = useTranslations("product");
   return (
     <section
       style={{
@@ -39,7 +41,7 @@ export default function ProductGiftTargets({ targets }: ProductGiftTargetsProps)
               lineHeight: 1.2,
             }}
           >
-            لمن صُمّم هذا <span style={{ color: "var(--rose)", fontStyle: "italic" }}>الصندوق؟</span>
+            {t.rich("giftTargetsTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
           </h2>
           <p
             className="mt-3 mx-auto"
@@ -51,7 +53,7 @@ export default function ProductGiftTargets({ targets }: ProductGiftTargetsProps)
               fontFamily: "'Tajawal', sans-serif",
             }}
           >
-            صُمم صندوق «مشوار أم» لكل أم تستحق أن تبدأ رحلتها بالدعم، والمعرفة، والعناية.
+            {t("giftTargetsSubtitle")}
           </p>
         </div>
 

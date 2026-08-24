@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 import { Check } from "lucide-react";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -20,6 +21,7 @@ interface BookletDetailProps {
  * ويقدّم أقسامًا خاصة بالكتيب: الخطّاف · نبذة · المحتويات · الفائدة · الجمهور.
  */
 export default async function BookletDetail({ product }: BookletDetailProps) {
+  const t = await getTranslations("booklet");
   const allProducts = await getProducts({ inStockOnly: true });
   const related = allProducts.filter((p) => p.slug !== product.slug).slice(0, 3);
 
@@ -62,9 +64,9 @@ export default async function BookletDetail({ product }: BookletDetailProps) {
             <Container>
               <div className="mx-auto" style={{ maxWidth: 760 }}>
                 <div className="mb-6 md:mb-10 text-center">
-                  <SectionLabel color="teal" centered>نبذة عن الكتيب</SectionLabel>
+                  <SectionLabel color="teal" centered>{t("aboutLabel")}</SectionLabel>
                   <h2 className="text-h2 font-heading font-bold" style={{ color: "var(--dark)", lineHeight: 1.2 }}>
-                    لماذا <span style={{ color: "var(--rose)", fontStyle: "italic" }}>وقت البطن؟</span>
+                    {t.rich("aboutTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
                   </h2>
                 </div>
                 {about.map((p, i) => (
@@ -84,9 +86,9 @@ export default async function BookletDetail({ product }: BookletDetailProps) {
           <section style={{ background: "var(--cream)", padding: "20px 0 clamp(68px, 6vw, 88px)" }}>
             <Container>
               <div className="mb-6 md:mb-12 text-center">
-                <SectionLabel color="teal" centered>محتويات الكتيب</SectionLabel>
+                <SectionLabel color="teal" centered>{t("chaptersLabel")}</SectionLabel>
                 <h2 className="text-h2 font-heading font-bold" style={{ color: "var(--dark)", lineHeight: 1.2 }}>
-                  ماذا ستجدين <span style={{ color: "var(--rose)", fontStyle: "italic" }}>داخل الكتيب؟</span>
+                  {t.rich("chaptersTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
                 </h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4" style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -119,12 +121,12 @@ export default async function BookletDetail({ product }: BookletDetailProps) {
           <section style={{ background: "#FDFAF5", padding: "20px 0 clamp(68px, 6vw, 88px)" }}>
             <Container>
               <div className="mb-6 md:mb-10 text-center">
-                <SectionLabel color="teal" centered>الفائدة</SectionLabel>
+                <SectionLabel color="teal" centered>{t("benefitsLabel")}</SectionLabel>
                 <h2 className="text-h2 font-heading font-bold" style={{ color: "var(--dark)", lineHeight: 1.2 }}>
-                  ماذا سيفيدك <span style={{ color: "var(--rose)", fontStyle: "italic" }}>هذا الكتيب؟</span>
+                  {t.rich("benefitsTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
                 </h2>
                 <p className="mt-3 mx-auto" style={{ color: "var(--mid)", fontSize: 15, maxWidth: 560, fontFamily: "'Tajawal', sans-serif" }}>
-                  بعد قراءته ستتمكّنين من:
+                  {t("benefitsIntro")}
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4" style={{ maxWidth: 880, margin: "0 auto" }}>
@@ -158,7 +160,7 @@ export default async function BookletDetail({ product }: BookletDetailProps) {
             <Container>
               <div className="mb-6 md:mb-10 text-center">
                 <h2 className="text-h2 font-heading font-bold" style={{ color: "var(--dark)", lineHeight: 1.2 }}>
-                  لمن صُمّم <span style={{ color: "var(--rose)", fontStyle: "italic" }}>هذا الكتيب؟</span>
+                  {t.rich("audienceTitle", { i: (chunks) => <span style={{ color: "var(--rose)", fontStyle: "italic" }}>{chunks}</span> })}
                 </h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4" style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -203,7 +205,7 @@ export default async function BookletDetail({ product }: BookletDetailProps) {
           <section style={{ background: "var(--offwh)", padding: "28px 0 96px" }}>
             <Container>
               <h2 className="font-heading font-bold mb-8" style={{ fontSize: 28, color: "var(--dark)" }}>
-                منتجات أخرى من Momzy
+                {t("relatedTitle")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                 {related.map((p) => (

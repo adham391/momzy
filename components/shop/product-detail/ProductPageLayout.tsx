@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Container from "@/components/ui/Container";
 import SectionWave from "@/components/ui/SectionWave";
 import ProductCard from "@/components/shop/ProductCard";
@@ -45,6 +46,7 @@ const WAVES = {
  *   - SectionWave    (بلون خلفية القسم الحالي)
  */
 export default async function ProductPageLayout({ product }: ProductPageLayoutProps) {
+  const t = await getTranslations("product");
   // جلب المنتجات المرتبطة مسبقاً لإخفاء القسم كاملاً عند غيابها
   const allProducts = await getProducts({ inStockOnly: true });
   const relatedProducts = allProducts.filter((p) => p.slug !== product.slug).slice(0, 3);
@@ -154,7 +156,7 @@ export default async function ProductPageLayout({ product }: ProductPageLayoutPr
                   className="font-heading font-bold mb-8"
                   style={{ fontSize: 28, color: "var(--dark)" }}
                 >
-                  منتجات أخرى من Momzy
+                  {t("relatedTitle")}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                   {relatedProducts.map((p) => (
