@@ -107,7 +107,7 @@
 |--------|--------|
 | تأكيد الطلب | `/order/[id]` |
 | تأكيد الحجز | `/booking/[id]` |
-| تحميل ملف رقمي | `/download/[token]` |
+| قراءة الكتيب الرقمي (flipbook) | `/read/[token]` — القديم `/download/[token]` يحوّل إليه |
 | 404 | `/not-found` |
 
 ---
@@ -116,7 +116,7 @@
 
 ### أنواع المنتجات
 1. **فيزيائي** — الصندوق (شحن داخل إسرائيل كاملة)
-2. **رقمي** — كتيبات PDF (رابط تحميل آمن بتوكن، حد أقصى 5 تحميلات، صلاحية 7 أيام)
+2. **رقمي** — كتيبات تُقرأ على الموقع فقط بقارئ flipbook (`/read/[token]`) — لا تحميل PDF؛ التوكن صالح سنة، قراءة غير محدودة
 3. **ورشة مسجلة** — فيديو/رابط مشاهدة
 
 ### Product Interface (constants.ts)
@@ -179,8 +179,11 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 
 ## 🔐 حماية المحتوى الرقمي
 
-- روابط تحميل بـ token فريد
-- حد أقصى 5 تحميلات — صلاحية 7 أيام
+- **قراءة على الموقع فقط (flipbook)** — لا رابط تحميل PDF إطلاقًا
+- صفحات الكتيب صور WebP في bucket **خاص** على Supabase Storage (`booklets`) — تُبثّ حصرًا عبر `/api/booklet/[token]/[page]` بعد التحقق من توكن الشراء
+- الرفع/التحديث: `npx tsx scripts/booklet-upload.ts "<pdf>" <slug>` (idempotent)
+- التوكن (جدول `digital_downloads`) صالح **سنة** — قراءة غير محدودة العدد
+- القارئ: `components/booklet/FlipbookReader.tsx` (react-pageflip — تقليب RTL بعكس ترتيب الصفحات)
 - شروط قانونية: لا نشر أو توزيع بدون إذن هبة
 
 ---
@@ -193,7 +196,7 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 | حجز جديد | هبة | واتساب فوري |
 | تأكيد الطلب | العميل | إيميل |
 | تأكيد الحجز | العميل | إيميل |
-| رابط تحميل | العميل (رقمي) | إيميل |
+| رابط قراءة الكتيب | العميل (رقمي) | إيميل |
 | تذكير الحجز | العميل | إيميل قبل 24 ساعة |
 | تذكير الحجز | العميل | إيميل قبل 2 ساعة |
 
@@ -250,9 +253,10 @@ quantity, unit_price, total_price
 id, order_id, old_status, new_status, note, changed_by, created_at
 
 **09. digital_downloads**
-id, order_id, product_id, customer_email, download_token,
-download_url, expires_at, download_count, max_downloads(5),
-whatsapp_notified, is_active, created_at
+id, order_id, product_slug, product_name, customer_email, token,
+expires_at (سنة), is_gift, created_at
+-- توكن قراءة flipbook (لا تحميل)؛ download_count صار عدّاد مشاهدات للرصد،
+-- و max_downloads عمود قديم غير مُستخدَم
 
 **10. shipping_updates**
 id, order_id, status, note, location, updated_by, created_at

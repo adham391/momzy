@@ -135,8 +135,6 @@ export interface Product {
   bookletBenefits?: string[];
   /** "لمن صُمّم هذا الكتيب؟" — الفئات المستهدفة */
   bookletAudience?: string[];
-  /** رابط ملف الكتيب (PDF) من Sanity — للتسليم الرقمي بعد الطلب */
-  digitalFile?: string;
 
   /* ── meta ── */
   /** معرّف Sanity (_id) — يُستخدم للتعديل من لوحة الأدمن */

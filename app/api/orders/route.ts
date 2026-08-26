@@ -130,11 +130,10 @@ export async function POST(request: Request) {
                 subject: downloadEmailSubject(d.product_name, d.is_gift),
                 html: downloadEmailHtml({
                   productName: d.product_name,
-                  downloadUrl: `${siteUrl}/download/${d.token}`,
+                  readUrl: `${siteUrl}/read/${d.token}`,
                   isGift: d.is_gift,
                   gifterName: d.is_gift ? full.customer_name : undefined,
                   expiresAt: d.expires_at,
-                  maxDownloads: d.max_downloads,
                 }),
               });
             }

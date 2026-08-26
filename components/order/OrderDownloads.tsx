@@ -1,4 +1,5 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
 import type { DigitalDownloadRow } from "@/lib/db/downloads";
 
 interface OrderDownloadsProps {
@@ -7,11 +8,11 @@ interface OrderDownloadsProps {
 
 /**
  * بطاقة الكتيبات الرقمية في صفحة تأكيد الطلب.
- * غير الهدية → زر تحميل مباشر. الهدية → ملاحظة أنها أُرسلت لبريد المستلِمة.
+ * غير الهدية → زر قراءة على الموقع (flipbook). الهدية → ملاحظة أنها أُرسلت لبريد المستلِمة.
  */
-export default function OrderDownloads({ downloads }: OrderDownloadsProps) {
-  const t = useTranslations("order");
+export default async function OrderDownloads({ downloads }: OrderDownloadsProps) {
   if (!downloads.length) return null;
+  const t = await getTranslations("order");
 
   return (
     <div
@@ -40,14 +41,14 @@ export default function OrderDownloads({ downloads }: OrderDownloadsProps) {
                 </div>
               ) : (
                 <div className="text-[12px]" style={{ color: "var(--light)", fontFamily: "'Tajawal', sans-serif" }}>
-                  {t("downloadMeta", { max: d.max_downloads })}
+                  {t("readMeta")}
                 </div>
               )}
             </div>
 
             {!d.is_gift && (
-              <a
-                href={`/download/${d.token}`}
+              <Link
+                href={`/read/${d.token}`}
                 className="font-label font-bold text-[13px] shrink-0 [transition:transform_180ms_ease] hover:-translate-y-[1px]"
                 style={{
                   background: "var(--rose)",
@@ -57,8 +58,8 @@ export default function OrderDownloads({ downloads }: OrderDownloadsProps) {
                   boxShadow: "0 6px 18px rgba(242,167,181,0.4)",
                 }}
               >
-                {t("downloadBooklet")}
-              </a>
+                {t("readBooklet")}
+              </Link>
             )}
           </div>
         ))}

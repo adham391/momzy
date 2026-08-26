@@ -267,14 +267,7 @@ export const product = defineType({
       description: "الفئات المستهدفة — كل سطر بند (لكل لغة).",
     }),
 
-    // ─── الملف الرقمي (PDF) — للكتيبات ──────────────────────────────
-    defineField({
-      name: "digitalFile",
-      title: "ملف الكتيب (PDF)",
-      type: "file",
-      options: { accept: ".pdf" },
-      description:
-        "ارفعي ملف الكتيب النهائي (PDF). يُرسَل رابط تحميله للمشترية تلقائيًا بعد الطلب. خاص بالمنتجات الرقمية.",
-    }),
+    // ملاحظة: لا حقل PDF هنا — الكتيبات الرقمية تُقرأ على الموقع فقط (flipbook).
+    // الرفع عبر: npx tsx scripts/booklet-upload.ts "<pdf>" <slug> — انظري CLAUDE.md «حماية المحتوى الرقمي».
   ],
 });

@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * عميل Supabase بصلاحية service-role — يتجاوز RLS بالكامل.
@@ -11,7 +11,11 @@ import { createClient } from "@supabase/supabase-js";
  *   const supabase = createAdminClient();
  *   const { data } = await supabase.from("orders").select("*");
  */
-export function createAdminClient() {
+let cachedClient: SupabaseClient | null = null;
+
+export function createAdminClient(): SupabaseClient {
+  if (cachedClient) return cachedClient;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -21,8 +25,10 @@ export function createAdminClient() {
     );
   }
 
-  return createClient(url, serviceKey, {
+  // singleton — يعاد استخدام الاتصال (keep-alive) بدل بناء عميل جديد لكل استدعاء
+  cachedClient = createClient(url, serviceKey, {
     // لا حاجة لجلسات — عمليات خادمية بحتة
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  return cachedClient;
 }

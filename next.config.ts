@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  /** تحويلات دائمة على مستوى الراوتر — أرخص من صفحات redirect */
+  async redirects() {
+    return [
+      // روابط الإيميلات القديمة: التسليم الرقمي صار قراءة flipbook على /read
+      { source: "/download/:token", destination: "/read/:token", permanent: true },
+      { source: "/:locale(he|en)/download/:token", destination: "/:locale/read/:token", permanent: true },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

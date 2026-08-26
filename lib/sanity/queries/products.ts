@@ -59,7 +59,6 @@ const PRODUCT_FIELDS = `{
   ${tl("bookletChapters")},
   ${tl("bookletBenefits")},
   ${tl("bookletAudience")},
-  "digitalFile": digitalFile.asset->url,
   "createdAt": _createdAt,
   "updatedAt": _updatedAt
 }`;

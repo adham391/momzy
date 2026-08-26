@@ -501,8 +501,6 @@
     "emailConfirmationNote": "✉️ A confirmation email will reach you within minutes",
     "downloadsTitle": "📘 Your digital booklets",
     "sentTo": "📧 Sent to {email}",
-    "downloadMeta": "PDF · valid 7 days · up to {max} downloads",
-    "downloadBooklet": "⬇️ Download booklet",
     "doneIconAlt": "Done",
     "awaitingIconLabel": "Awaiting payment",
     "successTitle": "Your order has been confirmed",
@@ -542,23 +540,18 @@
     "retryFailedBody": "The payment didn't complete, and your order is saved with us. You can safely try again now.",
     "retryAwaitingBody": "Your order is saved and awaiting payment. Complete the secure payment to confirm your order and start preparing it.",
     "payNow": "Complete payment — {amount} →",
-    "hypSecureNote": "🔒 Secure encrypted payment via HYP"
+    "hypSecureNote": "🔒 Secure encrypted payment via HYP",
+    "readMeta": "Read online on the site · the link is in your email too",
+    "readBooklet": "📖 Read the booklet"
   },
   "download": {
-    "metaTitle": "Download booklet | Momzy",
+    "metaTitle": "Read the booklet | Momzy",
     "nofileTitle": "Your booklet is being prepared",
-    "nofileBody": "Your booklet is reserved for you! We're adding the final touches to the finished version, and the download link will reach you soon. For any question, contact us.",
-    "fetchErrorTitle": "Download temporarily unavailable",
-    "fetchErrorBody": "A small error occurred while preparing the file. Please try again shortly, and if it persists, contact us.",
+    "nofileBody": "Your booklet is reserved for you! We are putting the final touches on it, and you will get a message as soon as it is ready to read. Contact us with any questions.",
     "invalidTitle": "Invalid link",
-    "invalidBody": "The download link is incorrect or no longer exists. Please check the full link, or contact us.",
+    "invalidBody": "This reading link is incorrect or no longer exists. Check the full link, or contact us.",
     "unavailableTitle": "The link is no longer available",
-    "expiredBody": "The download link has expired (7 days from the order date). Contact us to resend it.",
-    "limitBody": "You've reached the maximum number of downloads. Contact us and we'll be glad to help.",
-    "readyTitle": "Your booklet is ready to download",
-    "pdfNote": "In PDF format — printable and readable offline.",
-    "downloadButton": "⬇️ Download booklet (PDF)",
-    "remainingNote": "Remaining: {remaining} of {max} · valid until {date}",
+    "expiredBody": "This reading link has expired (one year from the order date). Contact us and we will renew it.",
     "contactUs": "Contact us"
   },
   "about": {
@@ -818,5 +811,12 @@
   "common": {
     "prev": "Previous",
     "next": "Next"
+  },
+  "reader": {
+    "pageOf": "Page {page} of {total}",
+    "pageAlt": "Booklet page {page}",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "loadError": "Some pages failed to load — check your connection and refresh; if it persists, contact us."
   }
 }

@@ -1,8 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
-/** إعدادات التسليم الرقمي */
-const EXPIRY_DAYS = 7;
-const MAX_DOWNLOADS = 5;
+/**
+ * التسليم الرقمي — نموذج «قراءة على الموقع» (flipbook):
+ * التوكن يفتح قارئ الكتيب في /read/[token] — لا تحميل PDF إطلاقًا.
+ * الصلاحية سنة كاملة من الشراء، والقراءة غير محدودة العدد.
+ */
+const EXPIRY_DAYS = 365;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** مدخل إنشاء توكن لعنصر رقمي */
@@ -14,7 +17,7 @@ export interface DigitalDownloadInput {
   isGift: boolean;
 }
 
-/** صف توكن التحميل */
+/** صف توكن القراءة (جدول digital_downloads) */
 export interface DigitalDownloadRow {
   id: string;
   order_id: string;
@@ -23,8 +26,6 @@ export interface DigitalDownloadRow {
   customer_email: string;
   token: string;
   expires_at: string;
-  download_count: number;
-  max_downloads: number;
   is_gift: boolean;
 }
 
@@ -33,8 +34,13 @@ function generateToken(): string {
   return crypto.randomUUID().replace(/-/g, "");
 }
 
+/** هل انتهت صلاحية التوكن؟ — نقطة القرار الوحيدة للصلاحية */
+function isExpired(expiresAt: string): boolean {
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
 /**
- * ينشئ توكن تحميل لكل عنصر رقمي في الطلب (فور إنشاء الطلب).
+ * ينشئ توكن قراءة لكل عنصر رقمي في الطلب (فور إنشاء الطلب).
  * يُرجِع الصفوف المُنشأة لإرسال روابطها بالإيميل.
  */
 export async function createDownloadTokens(
@@ -52,7 +58,6 @@ export async function createDownloadTokens(
     customer_email: it.customerEmail,
     token: generateToken(),
     expires_at: expiresAt,
-    max_downloads: MAX_DOWNLOADS,
     is_gift: it.isGift,
   }));
 
@@ -61,48 +66,59 @@ export async function createDownloadTokens(
   return (data ?? []) as DigitalDownloadRow[];
 }
 
-/** توكنات التحميل لطلب معيّن — لإرفاق الروابط في الإيميل/صفحة التأكيد */
+/** توكنات القراءة لطلب معيّن — لإرفاق الروابط في الإيميل/صفحة التأكيد */
 export async function getDownloadsByOrder(orderId: string): Promise<DigitalDownloadRow[]> {
   const supabase = createAdminClient();
   const { data } = await supabase.from("digital_downloads").select("*").eq("order_id", orderId);
   return (data ?? []) as DigitalDownloadRow[];
 }
 
-export type DownloadInvalidReason = "not_found" | "expired" | "limit";
-
-/** حالة التوكن دون زيادة العدّاد — لصفحة /download/[token] */
+/**
+ * حالة التوكن — لصفحة القارئ /read/[token].
+ * null = غير موجود · valid=false = منتهي الصلاحية.
+ */
 export async function getDownloadStatus(
   token: string
-): Promise<{ row: DigitalDownloadRow; valid: boolean; reason?: DownloadInvalidReason } | null> {
+): Promise<{ row: DigitalDownloadRow; valid: boolean } | null> {
   const supabase = createAdminClient();
   const { data } = await supabase.from("digital_downloads").select("*").eq("token", token).maybeSingle();
   if (!data) return null;
   const row = data as DigitalDownloadRow;
-  if (new Date(row.expires_at).getTime() <= Date.now()) return { row, valid: false, reason: "expired" };
-  if (row.download_count >= row.max_downloads) return { row, valid: false, reason: "limit" };
-  return { row, valid: true };
+  return { row, valid: !isExpired(row.expires_at) };
 }
 
-export type RedeemResult =
-  | { ok: true; row: DigitalDownloadRow }
-  | { ok: false; reason: DownloadInvalidReason };
+/**
+ * تحقّق خفيف لواجهة بثّ الصفحات — عمودان فقط، يعيد slug الكتيب أو null.
+ */
+export async function getTokenAccess(token: string): Promise<{ productSlug: string } | null> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("digital_downloads")
+    .select("product_slug, expires_at")
+    .eq("token", token)
+    .maybeSingle();
+  if (!data) return null;
+  const row = data as { product_slug: string; expires_at: string };
+  if (isExpired(row.expires_at)) return null;
+  return { productSlug: row.product_slug };
+}
 
 /**
- * يتحقّق من التوكن ويزيد العدّاد (عند التحميل الفعلي).
- * fetch-validate-increment — كافٍ لكتيب PDF (تزامن نادر).
+ * عدّاد فتحات القراءة — يعيد استخدام عمود download_count كعداد مشاهدات
+ * (لم يعد هناك تحميل). للرصد فقط: يكشف مشاركة الرابط على نطاق واسع.
+ * best-effort — لا يعطّل القراءة عند الفشل.
  */
-export async function redeemDownload(token: string): Promise<RedeemResult> {
-  const supabase = createAdminClient();
-  const { data } = await supabase.from("digital_downloads").select("*").eq("token", token).maybeSingle();
-  if (!data) return { ok: false, reason: "not_found" };
-  const row = data as DigitalDownloadRow;
-  if (new Date(row.expires_at).getTime() <= Date.now()) return { ok: false, reason: "expired" };
-  if (row.download_count >= row.max_downloads) return { ok: false, reason: "limit" };
-
-  await supabase
-    .from("digital_downloads")
-    .update({ download_count: row.download_count + 1 })
-    .eq("id", row.id);
-
-  return { ok: true, row: { ...row, download_count: row.download_count + 1 } };
+export async function recordReadView(rowId: string): Promise<void> {
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("digital_downloads")
+      .select("download_count")
+      .eq("id", rowId)
+      .maybeSingle();
+    const count = (data as { download_count: number } | null)?.download_count ?? 0;
+    await supabase.from("digital_downloads").update({ download_count: count + 1 }).eq("id", rowId);
+  } catch {
+    // رصد فقط — تجاهُل أي فشل
+  }
 }

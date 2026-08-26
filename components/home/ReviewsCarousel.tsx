@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import NavButton from "@/components/ui/NavButton";
 import ReviewCard from "./ReviewCard";
 import type { Review } from "@/lib/reviews/types";
 
@@ -88,32 +89,5 @@ export default function ReviewsCarousel({ reviews }: { reviews: Review[] }) {
         />
       </div>
     </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────
-   زر تنقّل دائري — أبيض مع ظل، يتعطّل عند الحافة
-   ───────────────────────────────────────────────────────── */
-function NavButton({
-  label,
-  onClick,
-  disabled,
-  icon,
-}: {
-  label: string;
-  onClick: () => void;
-  disabled: boolean;
-  icon: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      disabled={disabled}
-      className="w-12 h-12 rounded-full bg-white text-dark flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.12)] [transition:transform_180ms_ease,opacity_180ms_ease,box-shadow_180ms_ease] hover:-translate-y-0.5 hover:shadow-[0_8px_22px_rgba(0,0,0,0.18)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
-    >
-      {icon}
-    </button>
   );
 }
