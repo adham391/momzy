@@ -49,12 +49,12 @@ const PREFETCH_AHEAD = 3;
    ٢) «خبطة» خفيفة عند استقرار الورقة (flap) قرب نهاية القلبة */
 /** طبقة الحفيف: المدة والذروة وترددا المرشح */
 const RUSTLE_DURATION = 0.32;
-const RUSTLE_PEAK = 0.5;
+const RUSTLE_PEAK = 0.16;
 const RUSTLE_HIGHPASS_HZ = 700;
 /** طبقة الخبطة: تبدأ قرب نهاية الحفيف — قصيرة وأغلظ وأعلى */
 const FLAP_DELAY = 0.22;
 const FLAP_DURATION = 0.06;
-const FLAP_PEAK = 0.75;
+const FLAP_PEAK = 0.24;
 const FLAP_LOWPASS_HZ = 1400;
 /** مفتاح حفظ تفضيل الصوت في المتصفح */
 const SOUND_PREF_KEY = "momzy-reader-sound";
@@ -92,13 +92,13 @@ function playFlipSound(ctx: AudioContext, bufs: { current: { rustle: AudioBuffer
   const rustleGain = ctx.createGain();
   rustleGain.gain.setValueAtTime(0.0001, t0);
   rustleGain.gain.exponentialRampToValueAtTime(RUSTLE_PEAK, t0 + 0.025);
-  rustleGain.gain.exponentialRampToValueAtTime(0.12, t0 + FLAP_DELAY);
+  rustleGain.gain.exponentialRampToValueAtTime(0.04, t0 + FLAP_DELAY);
   rustleGain.gain.exponentialRampToValueAtTime(0.0001, t0 + RUSTLE_DURATION);
-  // ارتجاف الورقة: تذبذب سريع خفيف في مستوى الحفيف
+  // ارتجاف الورقة: تذبذب سريع خفيف في مستوى الحفيف — عمقه نسبة من الذروة
   const flutter = ctx.createOscillator();
   flutter.frequency.value = 28;
   const flutterDepth = ctx.createGain();
-  flutterDepth.gain.value = 0.35;
+  flutterDepth.gain.value = RUSTLE_PEAK * 0.5;
   flutter.connect(flutterDepth);
   flutterDepth.connect(rustleGain.gain);
   rustleSrc.connect(hp);
