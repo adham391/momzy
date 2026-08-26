@@ -28,7 +28,8 @@ export default function ProductImagePlaceholder({
       style={{ background: "linear-gradient(135deg, #FEF5F7 0%, #F5F0EA 100%)" }}
       data-size={size}
     >
-      {/* placeholder خافت — لا يسرق الانتباه */}
+      {/* placeholder خافت — فقط حين لا توجد صورة (وإلا أطلّ على جانبي contain) */}
+      {!src && (
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
         <span style={{ fontSize: 28, color: "#F2A7B5", opacity: 0.35, lineHeight: 1 }}>✦</span>
         <span
@@ -44,6 +45,7 @@ export default function ProductImagePlaceholder({
           {t("productImage")}
         </span>
       </div>
+      )}
 
       {/* الصورة الحقيقية — تُغطي الـ placeholder عند نجاح التحميل */}
       {src ? (

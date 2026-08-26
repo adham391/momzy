@@ -42,14 +42,18 @@ export default function CartItemRow({ item }: CartItemRowProps) {
             border: "1px solid var(--bord)",
           }}
         >
-          <Image
-            src={item.mainImage}
-            alt={item.title}
-            width={64}
-            height={64}
-            className="w-full h-full object-cover"
-            unoptimized
-          />
+          {item.mainImage ? (
+            <Image
+              src={item.mainImage}
+              alt={item.title}
+              width={64}
+              height={64}
+              className={`w-full h-full ${item.isDigital ? "object-contain" : "object-cover"}`}
+              unoptimized
+            />
+          ) : (
+            <span aria-hidden style={{ color: "var(--rose)", opacity: 0.4, fontSize: 18 }}>✦</span>
+          )}
         </div>
 
         {/* التفاصيل */}

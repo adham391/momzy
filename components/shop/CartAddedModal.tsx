@@ -8,6 +8,7 @@ import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
 import type { Product } from "@/lib/products/types";
 import { effectivePrice } from "@/lib/bundles";
+import { isDigitalProduct } from "@/lib/products/helpers";
 
 /** Modal يظهر عند إضافة أي منتج للسلة */
 export default function CartAddedModal() {
@@ -108,14 +109,18 @@ export default function CartAddedModal() {
               border: "1px solid var(--bord)",
             }}
           >
-            <Image
-              src={lastAdded.mainImage}
-              alt={lastAdded.title}
-              width={72}
-              height={72}
-              className="rounded-[14px] object-cover"
-              unoptimized
-            />
+            {lastAdded.mainImage ? (
+              <Image
+                src={lastAdded.mainImage}
+                alt={lastAdded.title}
+                width={72}
+                height={72}
+                className="rounded-[14px] object-contain"
+                unoptimized
+              />
+            ) : (
+              <span aria-hidden style={{ color: "var(--rose)", opacity: 0.4, fontSize: 20 }}>✦</span>
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -189,7 +194,7 @@ export default function CartAddedModal() {
                       alt={product.title}
                       width={44}
                       height={44}
-                      className="rounded-[10px] object-cover"
+                      className={`rounded-[10px] ${isDigitalProduct(product) ? "object-contain" : "object-cover"}`}
                       unoptimized
                     />
                   </div>

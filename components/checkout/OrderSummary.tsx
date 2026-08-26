@@ -110,14 +110,18 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                 background: "linear-gradient(140deg, var(--rosepale), var(--tealpale))",
               }}
             >
-              <Image
-                src={item.mainImage}
-                alt={item.title}
-                width={52}
-                height={52}
-                className="rounded-[10px] object-cover"
-                unoptimized
-              />
+              {item.mainImage ? (
+                <Image
+                  src={item.mainImage}
+                  alt={item.title}
+                  width={52}
+                  height={52}
+                  className={`rounded-[10px] ${item.isDigital ? "object-contain" : "object-cover"}`}
+                  unoptimized
+                />
+              ) : (
+                <span aria-hidden style={{ color: "var(--rose)", opacity: 0.4, fontSize: 16 }}>✦</span>
+              )}
             </div>
 
             <div className="flex-1 min-w-0">

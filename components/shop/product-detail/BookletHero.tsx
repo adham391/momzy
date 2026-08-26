@@ -66,7 +66,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
               className="relative rounded-[20px] overflow-hidden mx-auto aspect-[3/4] w-full max-w-[340px] md:w-[340px]"
               style={{ border: "1.5px solid var(--bord)", boxShadow: "0 16px 48px rgba(0,0,0,0.10)", background: "white" }}
             >
-              <ProductImagePlaceholder src={product.mainImage ?? ""} alt={product.title} size="hero" objectFit="cover" />
+              <ProductImagePlaceholder src={product.mainImage ?? ""} alt={product.title} size="hero" objectFit="contain" />
               <span
                 className="absolute top-3 font-label font-bold text-[12px] px-3 py-1.5 rounded-full"
                 style={{ insetInlineStart: 12, background: "var(--teal)", color: "white", boxShadow: "0 4px 12px rgba(130,201,196,0.45)" }}

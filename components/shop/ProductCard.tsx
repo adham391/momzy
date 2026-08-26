@@ -5,6 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
 import { categoryLabel } from "@/lib/products/categoryLabels";
+import { isDigitalProduct } from "@/lib/products/helpers";
 import type { Product } from "@/lib/products/types";
 
 interface ProductCardProps {
@@ -30,7 +31,13 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
     >
       {/* ── منطقة الصورة ── */}
       <div className="relative shrink-0" style={{ height: 220 }}>
-        <ProductImagePlaceholder src={product.mainImage} alt={product.title} size="card" />
+        {/* الكتيبات طولية — contain يعرض الغلاف كاملًا على الخلفية الناعمة */}
+        <ProductImagePlaceholder
+          src={product.mainImage}
+          alt={product.title}
+          size="card"
+          objectFit={isDigitalProduct(product) ? "contain" : "cover"}
+        />
 
         {/* badge علوي — من Sanity، نفس الصفحة الرئيسية */}
         {product.badge && (

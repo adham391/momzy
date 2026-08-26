@@ -145,12 +145,15 @@ export const useCart = create<CartStore>()(
           return;
         }
 
-        // عناصر عادية → تُدمج بالـ slug
+        // عناصر عادية → تُدمج بالـ slug — مع تحديث لقطة الصورة/النوع
+        // (سلال محفوظة قبل رفع صورة المنتج تتعافى عند أول إضافة جديدة)
         const existing = items.find((i) => i.slug === product.slug && !i.gift);
         if (existing) {
           set({
             items: items.map((i) =>
-              i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i
+              i.id === existing.id
+                ? { ...i, quantity: i.quantity + 1, mainImage: product.mainImage, isDigital: isDigitalProduct(product) }
+                : i
             ),
             lastAdded,
           });
@@ -172,7 +175,9 @@ export const useCart = create<CartStore>()(
         if (existing) {
           set({
             items: items.map((i) =>
-              i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i
+              i.id === existing.id
+                ? { ...i, quantity: i.quantity + 1, mainImage: product.mainImage, isDigital: isDigitalProduct(product) }
+                : i
             ),
           });
         } else {
