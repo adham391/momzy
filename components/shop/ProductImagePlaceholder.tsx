@@ -47,6 +47,21 @@ export default function ProductImagePlaceholder({
       </div>
       )}
 
+      {/* في وضع contain: خلفية من الصورة نفسها مكبَّرة ومموّهة — تملأ الإطار بلا قص للصورة الأصلية */}
+      {src && objectFit === "contain" ? (
+        <img
+          src={src}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{ objectFit: "cover", filter: "blur(20px)", transform: "scale(1.2)", opacity: 0.6 }}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
+          loading="lazy"
+        />
+      ) : null}
+
       {/* الصورة الحقيقية — تُغطي الـ placeholder عند نجاح التحميل */}
       {src ? (
         <img
