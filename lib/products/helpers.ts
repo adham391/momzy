@@ -10,3 +10,9 @@ export function isDigitalProduct(
 ): boolean {
   return p.category === "كتب ودلائل" || (p.bookletChapters?.length ?? 0) > 0;
 }
+
+/**
+ * نسبة غلاف الكتيب (عرض/ارتفاع) — للمصغّرات الطولية في القوائم والسلة:
+ * الحاوية بهذه النسبة تُملأ بالغلاف تمامًا بلا قص ولا هوامش.
+ */
+export const BOOKLET_COVER_RATIO = "1200 / 1705";

@@ -8,7 +8,7 @@ import { useCart } from "@/lib/store/cart";
 import { getProducts } from "@/lib/products/getProducts";
 import type { Product } from "@/lib/products/types";
 import { effectivePrice } from "@/lib/bundles";
-import { isDigitalProduct } from "@/lib/products/helpers";
+import { isDigitalProduct, BOOKLET_COVER_RATIO } from "@/lib/products/helpers";
 
 /** Modal يظهر عند إضافة أي منتج للسلة */
 export default function CartAddedModal() {
@@ -103,8 +103,10 @@ export default function CartAddedModal() {
           <div
             className="rounded-[14px] shrink-0 flex items-center justify-center overflow-hidden"
             style={{
-              width: 72,
-              height: 72,
+              // الكتيب بحاوية طولية بنسبة الغلاف — ملء تام بلا قص ولا هوامش
+              ...(lastAdded.isDigital && lastAdded.mainImage
+                ? { height: 72, aspectRatio: BOOKLET_COVER_RATIO }
+                : { width: 72, height: 72 }),
               background: "linear-gradient(140deg, var(--rosepale), var(--tealpale))",
               border: "1px solid var(--bord)",
             }}
@@ -115,7 +117,7 @@ export default function CartAddedModal() {
                 alt={lastAdded.title}
                 width={72}
                 height={72}
-                className="rounded-[14px] object-contain"
+                className="w-full h-full rounded-[14px] object-cover"
                 unoptimized
               />
             ) : (
@@ -184,8 +186,9 @@ export default function CartAddedModal() {
                   <div
                     className="rounded-[10px] shrink-0 flex items-center justify-center overflow-hidden"
                     style={{
-                      width: 44,
-                      height: 44,
+                      ...(isDigitalProduct(product) && product.mainImage
+                        ? { height: 44, aspectRatio: BOOKLET_COVER_RATIO }
+                        : { width: 44, height: 44 }),
                       background: "linear-gradient(140deg, var(--rosepale), var(--tealpale))",
                     }}
                   >
@@ -194,7 +197,7 @@ export default function CartAddedModal() {
                       alt={product.title}
                       width={44}
                       height={44}
-                      className={`rounded-[10px] ${isDigitalProduct(product) ? "object-contain" : "object-cover"}`}
+                      className="w-full h-full rounded-[10px] object-cover"
                       unoptimized
                     />
                   </div>

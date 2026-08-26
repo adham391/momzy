@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { BOOKLET_COVER_RATIO } from "@/lib/products/helpers";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/lib/store/cart";
 import QuantityInput from "@/components/shop/QuantityInput";
@@ -32,12 +33,13 @@ export default function CartItemRow({ item }: CartItemRowProps) {
       style={{ borderBottom: "1px solid var(--bord)" }}
     >
       <div className="flex items-center gap-3">
-        {/* صورة المنتج — placeholder ذهبي إذا الصورة مفقودة */}
+        {/* صورة المنتج — الكتيب بحاوية طولية بنسبة الغلاف (ملء تام بلا قص ولا هوامش) */}
         <div
           className="rounded-[12px] shrink-0 overflow-hidden flex items-center justify-center"
           style={{
-            width: 64,
-            height: 64,
+            ...(item.isDigital && item.mainImage
+              ? { height: 64, aspectRatio: BOOKLET_COVER_RATIO }
+              : { width: 64, height: 64 }),
             background: "linear-gradient(140deg, var(--rosepale), var(--tealpale))",
             border: "1px solid var(--bord)",
           }}
@@ -48,7 +50,7 @@ export default function CartItemRow({ item }: CartItemRowProps) {
               alt={item.title}
               width={64}
               height={64}
-              className={`w-full h-full ${item.isDigital ? "object-contain" : "object-cover"}`}
+              className="w-full h-full object-cover"
               unoptimized
             />
           ) : (

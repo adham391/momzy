@@ -8,6 +8,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 import { MOBILE_NAV_ITEMS, HEADER_HEIGHT } from "@/lib/utils/constants";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import { isDigitalProduct, BOOKLET_COVER_RATIO } from "@/lib/products/helpers";
 import LanguageSwitcher from "./LanguageSwitcher";
 import type { Product } from "@/lib/products/types";
 
@@ -107,8 +108,15 @@ export default function MobileMenu({ isOpen, onClose, products = [] }: MobileMen
                             onClick={onClose}
                             className="flex items-center gap-3 p-2.5 rounded-[12px] border border-transparent [transition:background-color_160ms_ease,border-color_160ms_ease] hover:bg-rosepale hover:border-[rgba(242,167,181,0.28)]"
                           >
-                            {/* صورة المنتج الحقيقية */}
-                            <span className="relative rounded-[10px] overflow-hidden shrink-0" style={{ width: 56, height: 56, background: "var(--offwh)" }}>
+                            {/* صورة المنتج — الكتيبات بحاوية طولية بنسبة الغلاف (ملء تام بلا قص) */}
+                            <span
+                              className="relative rounded-[10px] overflow-hidden shrink-0"
+                              style={
+                                isDigitalProduct(p)
+                                  ? { height: 56, aspectRatio: BOOKLET_COVER_RATIO, background: "var(--offwh)" }
+                                  : { width: 56, height: 56, background: "var(--offwh)" }
+                              }
+                            >
                               <ProductImagePlaceholder src={p.mainImage} alt={p.title} size="thumb" objectFit="cover" />
                             </span>
                             <div className="min-w-0">

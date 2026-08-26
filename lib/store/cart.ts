@@ -44,6 +44,8 @@ export interface LastAdded {
   title: string;
   price: number;
   mainImage: string;
+  /** رقمي؟ — لمصغّرة طولية بنسبة الغلاف في مودال «أُضيف للسلة» */
+  isDigital: boolean;
   timestamp: number;
 }
 
@@ -136,6 +138,7 @@ export const useCart = create<CartStore>()(
           title: product.title,
           price: product.price,
           mainImage: product.mainImage,
+          isDigital: isDigitalProduct(product),
           timestamp: Date.now(),
         };
 

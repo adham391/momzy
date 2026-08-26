@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import { isDigitalProduct, BOOKLET_COVER_RATIO } from "@/lib/products/helpers";
 import type { Product } from "@/lib/products/types";
 
 /** خصائص الميقا منيو */
@@ -53,10 +54,14 @@ export default function MegaMenu({ products = [], onMouseEnter, onMouseLeave }: 
               href={`/shop/${p.slug}`}
               className="group flex items-center gap-3 p-2.5 rounded-[14px] border border-transparent [transition:background-color_160ms_ease,border-color_160ms_ease,transform_200ms_cubic-bezier(0.23,1,0.32,1)] hover:bg-rosepale hover:border-[rgba(242,167,181,0.28)] hover:-translate-y-[2px]"
             >
-              {/* صورة المنتج الحقيقية */}
+              {/* صورة المنتج — الكتيبات بحاوية طولية بنسبة الغلاف (ملء تام بلا قص) */}
               <span
                 className="relative rounded-[11px] overflow-hidden shrink-0"
-                style={{ width: 62, height: 62, background: "var(--offwh)" }}
+                style={
+                  isDigitalProduct(p)
+                    ? { height: 62, aspectRatio: BOOKLET_COVER_RATIO, background: "var(--offwh)" }
+                    : { width: 62, height: 62, background: "var(--offwh)" }
+                }
               >
                 <ProductImagePlaceholder src={p.mainImage} alt={p.title} size="thumb" objectFit="cover" />
                 {p.badge && (

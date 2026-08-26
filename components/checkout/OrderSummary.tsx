@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { BOOKLET_COVER_RATIO } from "@/lib/products/helpers";
 import { useCart } from "@/lib/store/cart";
 import QuantityInput from "@/components/shop/QuantityInput";
 import { computeShipping, type ShippingConfig } from "@/lib/shipping";
@@ -105,8 +106,10 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
             <div
               className="rounded-[10px] shrink-0 flex items-center justify-center overflow-hidden"
               style={{
-                width: 52,
-                height: 52,
+                // الكتيب بحاوية طولية بنسبة الغلاف — ملء تام بلا قص ولا هوامش
+                ...(item.isDigital && item.mainImage
+                  ? { height: 52, aspectRatio: BOOKLET_COVER_RATIO }
+                  : { width: 52, height: 52 }),
                 background: "linear-gradient(140deg, var(--rosepale), var(--tealpale))",
               }}
             >
@@ -116,7 +119,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                   alt={item.title}
                   width={52}
                   height={52}
-                  className={`rounded-[10px] ${item.isDigital ? "object-contain" : "object-cover"}`}
+                  className="w-full h-full rounded-[10px] object-cover"
                   unoptimized
                 />
               ) : (
