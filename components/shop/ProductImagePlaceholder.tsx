@@ -54,7 +54,7 @@ export default function ProductImagePlaceholder({
           alt=""
           aria-hidden
           className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ objectFit: "cover", filter: "blur(20px)", transform: "scale(1.2)", opacity: 0.6 }}
+          style={{ objectFit: "fill", filter: "blur(26px) saturate(1.3)", transform: "scale(1.15)", opacity: 0.95 }}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
