@@ -25,7 +25,13 @@ export default function ProductImagePlaceholder({
   return (
     <div
       className={cn("relative w-full h-full overflow-hidden flex items-center justify-center", className)}
-      style={{ background: "linear-gradient(135deg, #FEF5F7 0%, #F5F0EA 100%)" }}
+      style={{
+        // مع صورة contain: أبيض نظيف (منتج على خلفية بيضاء) — وإلا التدرّج الناعم كـ placeholder
+        background:
+          src && objectFit === "contain"
+            ? "white"
+            : "linear-gradient(135deg, #FEF5F7 0%, #F5F0EA 100%)",
+      }}
       data-size={size}
     >
       {/* placeholder خافت — فقط حين لا توجد صورة (وإلا أطلّ على جانبي contain) */}
@@ -46,21 +52,6 @@ export default function ProductImagePlaceholder({
         </span>
       </div>
       )}
-
-      {/* في وضع contain: خلفية من الصورة نفسها مكبَّرة ومموّهة — تملأ الإطار بلا قص للصورة الأصلية */}
-      {src && objectFit === "contain" ? (
-        <img
-          src={src}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ objectFit: "fill", filter: "blur(26px) saturate(1.3)", transform: "scale(1.15)", opacity: 0.95 }}
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
-          loading="lazy"
-        />
-      ) : null}
 
       {/* الصورة الحقيقية — تُغطي الـ placeholder عند نجاح التحميل */}
       {src ? (

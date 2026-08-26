@@ -30,8 +30,8 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
       className="group flex flex-col h-full bg-white rounded-[22px] overflow-hidden border border-bord [transition:transform_250ms_cubic-bezier(0.23,1,0.32,1),box-shadow_250ms_ease,border-color_200ms_ease] hover:-translate-y-[5px] hover:shadow-[0_14px_40px_rgba(0,0,0,0.10)] hover:border-transparent"
     >
       {/* ── منطقة الصورة ── */}
-      <div className="relative shrink-0" style={{ height: 220 }}>
-        {/* الكتيبات طولية — contain يعرض الغلاف كاملًا على الخلفية الناعمة */}
+      <div className="relative shrink-0" style={{ height: 300 }}>
+        {/* الكتيبات طولية — contain على أبيض نظيف يعرض الغلاف كبيرًا كاملًا بلا قص */}
         <ProductImagePlaceholder
           src={product.mainImage}
           alt={product.title}
