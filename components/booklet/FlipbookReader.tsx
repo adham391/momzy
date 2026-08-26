@@ -44,45 +44,85 @@ const SHADOW_OPACITY = 0.35;
 const EAGER_PAGES = 3;
 /** عدد الصفحات التالية المُجهَّزة مسبقًا مع كل تقليبة (فلا تظهر صفحة بيضاء أثناء الأنيميشن) */
 const PREFETCH_AHEAD = 3;
-/** صوت التقليب: المدة (ثانية) وذروة الصوت — حفيف ورقي خفيف لا يزعج */
-const FLIP_SOUND_DURATION = 0.18;
-const FLIP_SOUND_PEAK = 0.28;
+/* صوت التقليب — طبقتان تحاكيان كتابًا حقيقيًا:
+   ١) حفيف انزلاق الورقة (rustle) طوال الحركة
+   ٢) «خبطة» خفيفة عند استقرار الورقة (flap) قرب نهاية القلبة */
+/** طبقة الحفيف: المدة والذروة وترددا المرشح */
+const RUSTLE_DURATION = 0.32;
+const RUSTLE_PEAK = 0.5;
+const RUSTLE_HIGHPASS_HZ = 700;
+/** طبقة الخبطة: تبدأ قرب نهاية الحفيف — قصيرة وأغلظ وأعلى */
+const FLAP_DELAY = 0.22;
+const FLAP_DURATION = 0.06;
+const FLAP_PEAK = 0.75;
+const FLAP_LOWPASS_HZ = 1400;
 /** مفتاح حفظ تفضيل الصوت في المتصفح */
 const SOUND_PREF_KEY = "momzy-reader-sound";
 
-/**
- * يعزف حفيف تقليب ورقي مُولَّد صناعيًا (Web Audio) — ضجيج أبيض متلاشٍ
- * عبر مرشّح bandpass ينزلق من الحادّ للغليظ، فيحاكي انزلاق الورقة.
- * لا ملفات صوتية — يعمل بلا تحميل ولا حقوق.
- */
-function playFlipSound(ctx: AudioContext, noiseBuf: { current: AudioBuffer | null }) {
-  if (ctx.state === "suspended") void ctx.resume();
-  if (!noiseBuf.current) {
-    const len = Math.floor(ctx.sampleRate * FLIP_SOUND_DURATION);
-    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) {
-      // ضجيج أبيض بمظروف تلاشٍ أُسّي — يشبه احتكاك الورق
-      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.8);
-    }
-    noiseBuf.current = buf;
+/** ينشئ buffer ضجيج أبيض بمظروف تلاشٍ أُسّي — أساس صوتَي الورق */
+function makeNoiseBuffer(ctx: AudioContext, duration: number, decayPower: number): AudioBuffer {
+  const len = Math.floor(ctx.sampleRate * duration);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) {
+    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decayPower);
   }
+  return buf;
+}
+
+/**
+ * يعزف صوت تقليب ورقي مُولَّد (Web Audio) — لا ملفات صوتية ولا حقوق:
+ * حفيف انزلاق (ضجيج مُرشَّح highpass بذبذبة سريعة تحاكي ارتجاف الورقة)
+ * تعقبه خبطة استقرار غليظة قصيرة — معًا يشبهان قلب صفحة كتاب حقيقي.
+ */
+function playFlipSound(ctx: AudioContext, bufs: { current: { rustle: AudioBuffer; flap: AudioBuffer } | null }) {
+  if (ctx.state === "suspended") void ctx.resume();
+  bufs.current ??= {
+    rustle: makeNoiseBuffer(ctx, RUSTLE_DURATION, 1.2),
+    flap: makeNoiseBuffer(ctx, FLAP_DURATION, 0.8),
+  };
   const t0 = ctx.currentTime;
-  const src = ctx.createBufferSource();
-  src.buffer = noiseBuf.current;
-  const bp = ctx.createBiquadFilter();
-  bp.type = "bandpass";
-  bp.Q.value = 0.9;
-  bp.frequency.setValueAtTime(2200, t0);
-  bp.frequency.exponentialRampToValueAtTime(500, t0 + FLIP_SOUND_DURATION);
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(0.0001, t0);
-  gain.gain.exponentialRampToValueAtTime(FLIP_SOUND_PEAK, t0 + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + FLIP_SOUND_DURATION);
-  src.connect(bp);
-  bp.connect(gain);
-  gain.connect(ctx.destination);
-  src.start(t0);
+
+  /* ── طبقة الحفيف ── */
+  const rustleSrc = ctx.createBufferSource();
+  rustleSrc.buffer = bufs.current.rustle;
+  const hp = ctx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = RUSTLE_HIGHPASS_HZ;
+  const rustleGain = ctx.createGain();
+  rustleGain.gain.setValueAtTime(0.0001, t0);
+  rustleGain.gain.exponentialRampToValueAtTime(RUSTLE_PEAK, t0 + 0.025);
+  rustleGain.gain.exponentialRampToValueAtTime(0.12, t0 + FLAP_DELAY);
+  rustleGain.gain.exponentialRampToValueAtTime(0.0001, t0 + RUSTLE_DURATION);
+  // ارتجاف الورقة: تذبذب سريع خفيف في مستوى الحفيف
+  const flutter = ctx.createOscillator();
+  flutter.frequency.value = 28;
+  const flutterDepth = ctx.createGain();
+  flutterDepth.gain.value = 0.35;
+  flutter.connect(flutterDepth);
+  flutterDepth.connect(rustleGain.gain);
+  rustleSrc.connect(hp);
+  hp.connect(rustleGain);
+  rustleGain.connect(ctx.destination);
+  rustleSrc.start(t0);
+  flutter.start(t0);
+  flutter.stop(t0 + RUSTLE_DURATION);
+
+  /* ── طبقة الخبطة (استقرار الورقة) ── */
+  const flapSrc = ctx.createBufferSource();
+  flapSrc.buffer = bufs.current.flap;
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = FLAP_LOWPASS_HZ;
+  const flapGain = ctx.createGain();
+  const tFlap = t0 + FLAP_DELAY;
+  flapGain.gain.setValueAtTime(0.0001, tFlap);
+  flapGain.gain.exponentialRampToValueAtTime(FLAP_PEAK, tFlap + 0.008);
+  flapGain.gain.exponentialRampToValueAtTime(0.0001, tFlap + FLAP_DURATION);
+  flapSrc.connect(lp);
+  lp.connect(flapGain);
+  flapGain.connect(ctx.destination);
+  flapSrc.start(tFlap);
 }
 
 /**
@@ -107,7 +147,7 @@ export default function FlipbookReader({ token, pages, ratio, title }: FlipbookR
   const [soundOn, setSoundOn] = useState(true);
   const soundOnRef = useRef(true); // مرآة للحالة — معالج StPageFlip يُربط مرة واحدة
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const noiseBufRef = useRef<AudioBuffer | null>(null);
+  const noiseBufsRef = useRef<{ rustle: AudioBuffer; flap: AudioBuffer } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -116,6 +156,22 @@ export default function FlipbookReader({ token, pages, ratio, title }: FlipbookR
       setSoundOn(false);
       soundOnRef.current = false;
     }
+  }, []);
+
+  /* تهيئة الصوت عند أول تفاعل مباشر — المتصفح يمنع بدء AudioContext خارج
+     إيماءة مستخدم، وحدث التقليب يصل من أنيميشن لا من النقرة نفسها،
+     فنجهّز السياق هنا لتكون القلبة الأولى مسموعة */
+  useEffect(() => {
+    const prime = () => {
+      audioCtxRef.current ??= new AudioContext();
+      if (audioCtxRef.current.state === "suspended") void audioCtxRef.current.resume();
+    };
+    window.addEventListener("pointerdown", prime);
+    window.addEventListener("keydown", prime);
+    return () => {
+      window.removeEventListener("pointerdown", prime);
+      window.removeEventListener("keydown", prime);
+    };
   }, []);
 
   function toggleSound() {
@@ -131,7 +187,7 @@ export default function FlipbookReader({ token, pages, ratio, title }: FlipbookR
   function onFlipStart() {
     if (!soundOnRef.current) return;
     audioCtxRef.current ??= new AudioContext();
-    playFlipSound(audioCtxRef.current, noiseBufRef);
+    playFlipSound(audioCtxRef.current, noiseBufsRef);
   }
 
   /* تتبّع حالة ملء الشاشة (زر Esc يخرج منها خارج أزرارنا) */
