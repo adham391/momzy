@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize, Minimize, Volume2, VolumeX } from "lucide-react";
 import HTMLFlipBook from "react-pageflip";
 import NavButton from "@/components/ui/NavButton";
 
@@ -44,6 +44,46 @@ const SHADOW_OPACITY = 0.35;
 const EAGER_PAGES = 3;
 /** عدد الصفحات التالية المُجهَّزة مسبقًا مع كل تقليبة (فلا تظهر صفحة بيضاء أثناء الأنيميشن) */
 const PREFETCH_AHEAD = 3;
+/** صوت التقليب: المدة (ثانية) وذروة الصوت — حفيف ورقي خفيف لا يزعج */
+const FLIP_SOUND_DURATION = 0.18;
+const FLIP_SOUND_PEAK = 0.28;
+/** مفتاح حفظ تفضيل الصوت في المتصفح */
+const SOUND_PREF_KEY = "momzy-reader-sound";
+
+/**
+ * يعزف حفيف تقليب ورقي مُولَّد صناعيًا (Web Audio) — ضجيج أبيض متلاشٍ
+ * عبر مرشّح bandpass ينزلق من الحادّ للغليظ، فيحاكي انزلاق الورقة.
+ * لا ملفات صوتية — يعمل بلا تحميل ولا حقوق.
+ */
+function playFlipSound(ctx: AudioContext, noiseBuf: { current: AudioBuffer | null }) {
+  if (ctx.state === "suspended") void ctx.resume();
+  if (!noiseBuf.current) {
+    const len = Math.floor(ctx.sampleRate * FLIP_SOUND_DURATION);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      // ضجيج أبيض بمظروف تلاشٍ أُسّي — يشبه احتكاك الورق
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.8);
+    }
+    noiseBuf.current = buf;
+  }
+  const t0 = ctx.currentTime;
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuf.current;
+  const bp = ctx.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.Q.value = 0.9;
+  bp.frequency.setValueAtTime(2200, t0);
+  bp.frequency.exponentialRampToValueAtTime(500, t0 + FLIP_SOUND_DURATION);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(FLIP_SOUND_PEAK, t0 + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + FLIP_SOUND_DURATION);
+  src.connect(bp);
+  bp.connect(gain);
+  gain.connect(ctx.destination);
+  src.start(t0);
+}
 
 /**
  * قارئ flipbook للكتيب — عرض على الموقع فقط، بلا تحميل.
@@ -63,7 +103,36 @@ export default function FlipbookReader({ token, pages, ratio, title }: FlipbookR
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  /* صوت التقليب — التفضيل محفوظ في المتصفح، والافتراضي مفعّل */
+  const [soundOn, setSoundOn] = useState(true);
+  const soundOnRef = useRef(true); // مرآة للحالة — معالج StPageFlip يُربط مرة واحدة
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const noiseBufRef = useRef<AudioBuffer | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    const saved = window.localStorage.getItem(SOUND_PREF_KEY);
+    if (saved === "off") {
+      setSoundOn(false);
+      soundOnRef.current = false;
+    }
+  }, []);
+
+  function toggleSound() {
+    setSoundOn((v) => {
+      const next = !v;
+      soundOnRef.current = next;
+      window.localStorage.setItem(SOUND_PREF_KEY, next ? "on" : "off");
+      return next;
+    });
+  }
+
+  /** يُستدعى عند بدء كل تقليبة (حالة "flipping") — لا عند اكتمالها */
+  function onFlipStart() {
+    if (!soundOnRef.current) return;
+    audioCtxRef.current ??= new AudioContext();
+    playFlipSound(audioCtxRef.current, noiseBufRef);
+  }
 
   /* تتبّع حالة ملء الشاشة (زر Esc يخرج منها خارج أزرارنا) */
   useEffect(() => {
@@ -158,6 +227,15 @@ export default function FlipbookReader({ token, pages, ratio, title }: FlipbookR
           </span>
           <button
             type="button"
+            onClick={toggleSound}
+            aria-label={soundOn ? t("muteSound") : t("unmuteSound")}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-tealpale"
+            style={{ border: "1.5px solid var(--bord)", background: "white", color: soundOn ? "var(--teal)" : "var(--light)", cursor: "pointer" }}
+          >
+            {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
+          <button
+            type="button"
             onClick={toggleFullscreen}
             aria-label={isFullscreen ? t("exitFullscreen") : t("fullscreen")}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-tealpale"
@@ -214,6 +292,9 @@ export default function FlipbookReader({ token, pages, ratio, title }: FlipbookR
               style={{ margin: "0 auto" }}
               onFlip={(e: { data: number }) => setFlipIdx(e.data)}
               onChangeOrientation={(e: { data: "portrait" | "landscape" }) => setOrientation(e.data)}
+              onChangeState={(e: { data: string }) => {
+                if (e.data === "flipping") onFlipStart();
+              }}
             >
               {pageNodes}
             </HTMLFlipBook>

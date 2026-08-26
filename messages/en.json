@@ -817,6 +817,8 @@
     "pageAlt": "Booklet page {page}",
     "fullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
-    "loadError": "Some pages failed to load — check your connection and refresh; if it persists, contact us."
+    "loadError": "Some pages failed to load — check your connection and refresh; if it persists, contact us.",
+    "muteSound": "Mute page-flip sound",
+    "unmuteSound": "Unmute page-flip sound"
   }
 }
