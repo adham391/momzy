@@ -182,6 +182,7 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 - **قراءة على الموقع فقط (flipbook)** — لا رابط تحميل PDF إطلاقًا
 - صفحات الكتيب صور WebP في bucket **خاص** على Supabase Storage (`booklets`) — تُبثّ حصرًا عبر `/api/booklet/[token]/[page]` بعد التحقق من توكن الشراء
 - الرفع/التحديث: `npx tsx scripts/booklet-upload.ts "<pdf>" <slug>` (idempotent)
+- فيديو المنتج: `npx tsx scripts/video-upload.ts "<video>" <slug>` — يضغط لـ1080 عموديًا (faststart) ويرفعه لـSanity ويربط `videoUrl`
 - التوكن (جدول `digital_downloads`) صالح **سنة** — قراءة غير محدودة العدد
 - القارئ: `components/booklet/FlipbookReader.tsx` (react-pageflip — تقليب RTL بعكس ترتيب الصفحات)
 - شروط قانونية: لا نشر أو توزيع بدون إذن هبة
