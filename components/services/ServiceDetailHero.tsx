@@ -21,6 +21,10 @@ interface ServiceDetailHeroProps {
  *   - accent أساسي: تيل (CTA) + وردي (تفاصيل)
  *   - نصوص: بني دافئ #3D2C24
  */
+/** حدود نسبة إطار الغلاف — تمنع أن يطول أو يعرض بإفراط */
+const MIN_COVER_ASPECT = 0.8;   // 4:5 طولي
+const MAX_COVER_ASPECT = 1.78;  // 16:9 عرضي
+
 export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDetailHeroProps) {
   const t = useTranslations("services");
   const tNav = useTranslations("nav");
@@ -61,7 +65,10 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
             <div
               className="rounded-[24px] overflow-hidden relative"
               style={{
-                aspectRatio: "4/3",
+                // الإطار يتبع نسبة الغلاف (بحدود معقولة) فلا يُقصّ منه شيء
+                aspectRatio: String(
+                  Math.min(Math.max(service.coverAspect ?? 4 / 3, MIN_COVER_ASPECT), MAX_COVER_ASPECT)
+                ),
                 border: "1.5px solid var(--bord)",
                 boxShadow: "0 16px 48px rgba(0,0,0,0.10)",
                 background: "white",

@@ -27,6 +27,7 @@ const SERVICE_FIELDS = `{
   price,
   order,
   "coverImage":       coverImage.asset->url,
+  "coverAspect":      coverImage.asset->metadata.dimensions.aspectRatio,
   "icon":             icon.asset->url,
   "createdAt":        _createdAt,
   "updatedAt":        _updatedAt

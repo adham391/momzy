@@ -60,6 +60,8 @@ export interface Service {
   faqs?: ServiceFAQ[];
   /** صورة الغلاف */
   coverImage?: string;
+  /** نسبة عرض الغلاف لارتفاعه — يتكيّف بها الإطار فلا تُقصّ الصورة */
+  coverAspect?: number;
   /** أيقونة صغيرة */
   icon?: string;
   /** السعر بالشيكل (اختياري — قد تكون "حسب الطلب") */
