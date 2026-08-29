@@ -60,7 +60,8 @@ export default async function ServiceAboutHeba({ accent, zIndex }: ServiceAboutH
                 alt={about.name}
                 fill
                 sizes="132px"
-                className="object-cover"
+                // الصورة طولية — المحاذاة للأعلى تُبقي الوجه داخل الدائرة (الوسط = الفستان)
+                className="object-cover object-top"
               />
             </div>
 
