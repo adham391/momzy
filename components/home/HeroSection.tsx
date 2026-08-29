@@ -98,10 +98,12 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
             {/* ── صورة هبة المؤطّرة — موبايل فقط (إطار أبيض + توثيق) ── */}
             <div className="md:hidden mx-auto mb-5 relative" style={{ width: 168, maxWidth: "54%" }}>
               <div
-                className="rounded-[26px] overflow-hidden border-[5px] border-white bg-cover"
+                className="rounded-[26px] overflow-hidden border-[5px] border-white"
                 style={{
                   aspectRatio: "4 / 5",
                   backgroundImage: `url('${content.heroImage}')`,
+                  // تقريب أكبر من cover — يعرض الرأس حتى الخصر كنسخة الديسكتوب
+                  backgroundSize: "160%",
                   backgroundPosition: "center 10%",
                   boxShadow: "0 18px 44px rgba(0,0,0,0.24)",
                 }}
