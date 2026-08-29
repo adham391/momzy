@@ -72,9 +72,11 @@ export default function CheckoutUpsell() {
               <Image
                 src={product.mainImage}
                 alt={product.title}
-                width={120}
-                height={120}
+                width={140}
+                height={140}
+                // الأغلفة طولية — تقييد الارتفاع بالشريط يمنع قصّها (كباقي الموقع)
                 className="object-contain"
+                style={{ maxHeight: "100%", width: "auto" }}
                 unoptimized
               />
             </div>
