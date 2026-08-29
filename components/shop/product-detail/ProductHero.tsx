@@ -20,7 +20,7 @@ interface ProductHeroProps {
 /** عناوين شاعرية مخصصة لمنتجات معيّنة — مُدوّلة (ar/he/en) */
 const HERO_TAGLINES: Record<string, Record<string, string>> = {
   "mommy-journey-box": {
-    ar: "ليس مجرّد صندوق، بل حِضن",
+    ar: "ليس مجرّد صندوق، بل حضن",
     he: "לא רק מארז — חיבוק",
     en: "Not just a box — an embrace",
   },
