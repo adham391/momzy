@@ -235,8 +235,6 @@ export default function ServiceCTASection({
               <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
                 <TrustLine icon="🔒" text={t("trust.privacy")} />
                 <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
-                <TrustLine icon="💬" text={t("trust.consultNoCommitment")} />
-                <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
                 <TrustLine icon="✓" text={t("credentials.nurse")} />
               </div>
 

@@ -51,6 +51,15 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
         }}
       />
 
+      {/* رابط ممتد يغطي البطاقة — الضغط في أي مكان يفتح صفحة الخدمة.
+          مخفي عن القارئ الصوتي ولوحة المفاتيح: رابط «التفاصيل» يكفيهما. */}
+      <Link
+        href={`/services/${service.slug}`}
+        aria-hidden="true"
+        tabIndex={-1}
+        className="absolute inset-0 z-[1]"
+      />
+
       <div className="relative flex flex-col flex-1 p-4 pt-5 sm:p-5">
 
         {/* ── الرأس: شعار النوع + التسمية ── */}
@@ -96,16 +105,18 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
 
         {/* ── الأزرار — مثبّتة بالأسفل ── */}
         <div className="mt-auto">
-          {/* التسجيل الإلكتروني — الإجراء الأساسي */}
-          <ServiceCardCTA
-            serviceTitle={service.title}
-            serviceSlug={service.slug}
-            seatsLeft={seatsLeft}
-            ageGate={service}
-          />
+          {/* التسجيل الإلكتروني — الإجراء الأساسي (z-2 يبقيه فوق الرابط الممتد) */}
+          <div className="relative z-[2]">
+            <ServiceCardCTA
+              serviceTitle={service.title}
+              serviceSlug={service.slug}
+              seatsLeft={seatsLeft}
+              ageGate={service}
+            />
+          </div>
 
           {/* روابط ثانوية: التفاصيل + استفسار واتساب */}
-          <div className="flex items-center justify-center gap-2.5 mt-2.5">
+          <div className="relative z-[2] flex items-center justify-center gap-2.5 mt-2.5">
             <Link
               href={`/services/${service.slug}`}
               className="font-bold hover:opacity-70 transition-opacity"

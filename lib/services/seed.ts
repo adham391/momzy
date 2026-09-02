@@ -59,6 +59,7 @@ export const SEED_SERVICES: Service[] = [
     maxParticipants: 5,
     color: "yellow",
     order: 1,
+    price: 250,
     faqs: COMMON_FAQS,
     shortDescription:
       "ورشة داعمة ومليئة بالاحتواء للأمهات في المرحلة الأولى بعد الولادة، مع توجيه مهني يساعدك تفهمي طفلك وتتعاملين معه بثقة أكبر.",
@@ -97,6 +98,7 @@ export const SEED_SERVICES: Service[] = [
     maxParticipants: 5,
     color: "rose",
     order: 2,
+    price: 250,
     faqs: COMMON_FAQS,
     shortDescription:
       "ورشة مصممة خصيصاً لدعم تطور طفلك من خلال اللعب والاستكشاف بطريقة آمنة وممتعة، مع تجارب حسية متنوعة.",
@@ -134,6 +136,7 @@ export const SEED_SERVICES: Service[] = [
     maxParticipants: 5,
     color: "teal",
     order: 3,
+    price: 250,
     faqs: COMMON_FAQS,
     shortDescription:
       "ورشة تركز على دعم تطور الطفل الحركي والمهارات الأساسية في هذه المرحلة المهمة من عمره.",
@@ -173,6 +176,7 @@ export const SEED_SERVICES: Service[] = [
     ageRange: "للحوامل والأمهات الجدد",
     color: "yellow",
     order: 4,
+    price: 350,
     faqs: COMMON_FAQS,
     shortDescription:
       "لقاء فردي شامل ومركّز يساعدك على الاستعداد لمرحلة ما بعد الولادة بثقة ووضوح.",
@@ -244,6 +248,7 @@ export const SEED_SERVICES: Service[] = [
     ageMaxMonths: 12,
     color: "teal",
     order: 6,
+    price: 350,
     faqs: COMMON_FAQS,
     shortDescription:
       "لقاءات شخصية مخصصة وتهدف إلى تقديم دعم عملي ومباشر للأم والطفل، وفقاً لاحتياجات كل حالة.",
@@ -274,11 +279,11 @@ export const SEED_SERVICES: Service[] = [
     title: "استشارة فردية مع هبة",
     type: "online",
     category: "individual",
-    duration: "30 دقيقة",
+    duration: "حتى ساعة",
     location: "عبر تطبيق Zoom",
     color: "mint",
     order: 7,
-    price: 150,
+    price: 250,
     faqs: COMMON_FAQS,
     shortDescription:
       "جلسة فردية عبر زوم تسألين فيها هبة عمّا يشغلك — رضاعة، نوم، بكاء، روتين، أو أي تحدٍّ يومي — وتخرجين بإجابات عملية وخطة واضحة.",
