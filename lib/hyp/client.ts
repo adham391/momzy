@@ -10,6 +10,8 @@
  * وبدونها يبقى الطلب pending ويكمل الـ checkout لصفحة التأكيد.
  */
 
+import { toHypText } from "./text";
+
 const HYP_BASE = "https://pay.hyp.co.il/p/";
 
 /** هل ضُبطت مفاتيح HYP؟ */
@@ -18,6 +20,20 @@ export function isHypConfigured(): boolean {
 }
 
 /** يحوّل هاتفًا دوليًا (+972…) لصيغة إسرائيلية محلية (0…) التي يتوقّعها HYP */
+/**
+ * لغة صفحة HYP حسب لغة الموقع.
+ *
+ * HYP توثّق لغتين فقط: عبري وإنجليزي — ولا عربية. وحتى لو أتيحت اسمًا،
+ * الصفحة تُخدَم windows-1255 (فحصنا HEB وENG وARB وRUS فأعادتها كلها)
+ * وهو ترميز عبري لا يحوي الحرف العربي إطلاقًا.
+ *
+ * لذلك تُخدَم زائرة العربية بالعبرية لا بالإنجليزية: جمهور Momzy أمهات في
+ * إسرائيل، والعبرية لغة تعاملهنّ التجاري والبنكي اليومي.
+ */
+function pageLangFor(locale: string | undefined): "HEB" | "ENG" {
+  return locale === "en" ? "ENG" : "HEB";
+}
+
 function toLocalPhone(phone: string): string {
   return phone.replace(/\s/g, "").replace(/^\+972/, "0");
 }
@@ -40,6 +56,8 @@ export interface HypPaymentInput {
   zip?: string;
   /** وصف مختصر */
   info?: string;
+  /** لغة الموقع (ar | he | en) — تحدّد لغة صفحة الدفع */
+  locale?: string;
 }
 
 /**
@@ -49,7 +67,9 @@ export interface HypPaymentInput {
 export async function createHypPaymentUrl(input: HypPaymentInput): Promise<string | null> {
   if (!isHypConfigured()) return null;
 
-  const [firstName, ...rest] = input.customerName.trim().split(/\s+/);
+  // كل نصّ يمرّ بـ toHypText: صفحة HYP تُخدَم بـ windows-1255 فلا تحتمل
+  // العربية — وبدونه ترى العميلة اسمها «???» لحظة إدخال البطاقة
+  const [firstName, ...rest] = toHypText(input.customerName).split(/\s+/);
   const params = new URLSearchParams({
     action: "APISign",
     What: "SIGN",
@@ -60,13 +80,13 @@ export async function createHypPaymentUrl(input: HypPaymentInput): Promise<strin
     Amount: String(input.amount),
     Coin: "1", // شيكل ILS
     Order: input.orderNumber,
-    Info: input.info ?? `Momzy Order ${input.orderNumber}`,
-    ClientName: firstName ?? input.customerName,
+    Info: toHypText(input.info) || `Momzy Order ${input.orderNumber}`,
+    ClientName: firstName ?? "",
     ClientLName: rest.join(" "),
     email: input.email,
     cell: toLocalPhone(input.phone),
     Fild1: input.orderId, // يُعاد كما هو للتوجيه بعد الدفع
-    PageLang: "HEB", // لغة صفحة دفع HYP — عبري (جمهور إسرائيل)
+    PageLang: pageLangFor(input.locale),
     UTF8: "True",
     UTF8out: "True",
     sendemail: "True",
@@ -74,8 +94,10 @@ export async function createHypPaymentUrl(input: HypPaymentInput): Promise<strin
   });
 
   // تعبئة العنوان مسبقًا في صفحة HYP (جُمع في نموذج التوصيل) — فلا تُدخله العميلة مجددًا
-  if (input.street) params.set("street", input.street);
-  if (input.city) params.set("city", input.city);
+  const street = toHypText(input.street);
+  const city = toHypText(input.city);
+  if (street) params.set("street", street);
+  if (city) params.set("city", city);
   if (input.zip) params.set("zip", input.zip);
 
   try {

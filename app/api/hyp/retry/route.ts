@@ -14,13 +14,16 @@ export async function GET(request: Request) {
   const bookingId = searchParams.get("booking");
   const orderId = searchParams.get("order");
 
-  if (bookingId) return payBooking(bookingId, origin);
-  if (orderId) return payOrder(orderId, origin);
+  // لغة الموقع تصل كبارامتر لأن ‏/api خارج شجرة اللغات
+  const locale = searchParams.get("locale") ?? undefined;
+
+  if (bookingId) return payBooking(bookingId, origin, locale);
+  if (orderId) return payOrder(orderId, origin, locale);
   return NextResponse.redirect(new URL("/", origin));
 }
 
 /** دفع طلب متجر */
-async function payOrder(id: string, origin: string) {
+async function payOrder(id: string, origin: string, locale?: string) {
   const order = await getOrderById(id);
   if (!order) return NextResponse.redirect(new URL("/", origin));
 
@@ -37,6 +40,7 @@ async function payOrder(id: string, origin: string) {
     email: order.customer_email,
     phone: order.customer_phone,
     // تعبئة العنوان مسبقًا في صفحة HYP
+    locale,
     street: order.customer_address,
     city: order.customer_city,
     zip: order.customer_postal_code ?? undefined,
@@ -46,7 +50,7 @@ async function payOrder(id: string, origin: string) {
 }
 
 /** دفع تسجيل ورشة/خدمة */
-async function payBooking(id: string, origin: string) {
+async function payBooking(id: string, origin: string, locale?: string) {
   const booking = await getBookingById(id);
   if (!booking) return NextResponse.redirect(new URL("/", origin));
 
@@ -62,6 +66,7 @@ async function payBooking(id: string, origin: string) {
     customerName: booking.customer_name,
     email: booking.customer_email,
     phone: booking.customer_phone,
+    locale,
   });
 
   return NextResponse.redirect(new URL(paymentUrl ?? `/booking/${id}?payment=failed`, origin));

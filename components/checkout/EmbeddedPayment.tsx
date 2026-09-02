@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
 import { formatILS } from "@/lib/utils/format";
 
@@ -31,10 +31,12 @@ export default function EmbeddedPayment({
   onEdit,
 }: EmbeddedPaymentProps) {
   const t = useTranslations("checkout");
+  const locale = useLocale();
   const [loaded, setLoaded] = useState(false);
   const isBooking = kind === "booking";
   const hasSummary = reference && total != null;
-  const src = `/api/hyp/retry?${isBooking ? "booking" : "order"}=${id}`;
+  // اللغة تُمرَّر صراحةً: مسارات ‏/api خارج شجرة اللغات فلا تُستنتج منها
+  const src = `/api/hyp/retry?${isBooking ? "booking" : "order"}=${id}&locale=${locale}`;
 
   return (
     <div className="max-w-[680px] mx-auto">

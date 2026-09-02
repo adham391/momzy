@@ -104,6 +104,7 @@ export async function POST(request: Request) {
         // تعبئة العنوان مسبقًا في صفحة HYP — فلا تُدخله العميلة مجددًا
         street: c.address?.trim(),
         city: c.city?.trim(),
+        locale: typeof (b as { locale?: unknown }).locale === "string" ? (b as { locale: string }).locale : undefined,
         zip: typeof c.postalCode === "string" ? c.postalCode.trim() : undefined,
       });
     }

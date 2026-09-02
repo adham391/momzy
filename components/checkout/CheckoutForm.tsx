@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart } from "@/lib/store/cart";
@@ -105,6 +105,7 @@ export default function CheckoutForm({
   onProceedToPayment?: (orderId: string) => void;
 }) {
   const t         = useTranslations("checkout");
+  const locale    = useLocale();
   const router    = useRouter();
   const cartItems     = useCart((s) => s.items);
   const getTotal      = useCart((s) => s.getTotal);
@@ -184,6 +185,8 @@ export default function CheckoutForm({
           // نرسل slug + الكمية فقط — الأسعار تُحسب على السيرفر
           items: cartItems.map((i) => ({ slug: i.slug, quantity: i.quantity, gift: i.gift ?? null })),
           couponCode: appliedCoupon?.code ?? null,
+          // لغة الموقع — تحدّد لغة صفحة دفع HYP
+          locale,
           hasMarketingConsent: agreedMarketing,
           notes: form.notes,
           utm: getStoredUTM(),
