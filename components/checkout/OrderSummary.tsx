@@ -290,21 +290,24 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           </div>
         )}
 
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <div className="font-label text-[14px] text-mid">{t("shipping")}</div>
-            {shippingCost > 0 && (
-              <div className="font-label text-[11px] text-light mt-0.5">
-                {t("deliveryNote")}
-              </div>
+        {/* الشحن — يُخفى في الطلب الرقمي البحت (لا شيء يُشحن) */}
+        {physicalCount > 0 && (
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <div className="font-label text-[14px] text-mid">{t("shipping")}</div>
+              {shippingCost > 0 && (
+                <div className="font-label text-[11px] text-light mt-0.5">
+                  {t("deliveryNote")}
+                </div>
+              )}
+            </div>
+            {shippingCost === 0 ? (
+              <span className="font-label font-bold text-teal text-[14px]">{t("free")}</span>
+            ) : (
+              <span className="font-label font-bold text-dark text-[14px]">₪{shippingCost}</span>
             )}
           </div>
-          {shippingCost === 0 ? (
-            <span className="font-label font-bold text-teal text-[14px]">{t("free")}</span>
-          ) : (
-            <span className="font-label font-bold text-dark text-[14px]">₪{shippingCost}</span>
-          )}
-        </div>
+        )}
 
         <div
           className="flex justify-between items-center pt-3"

@@ -16,6 +16,9 @@ interface CheckoutStepsProps {
 /** تسميات مراحل تسجيل الورشات — علامة مرجعية تُترجم داخل المكوّن */
 export const BOOKING_STEP_LABELS = ["التسجيل", "الدفع", "التأكيد"] as const;
 
+/** تسميات مراحل الطلب الرقمي البحت — «بياناتك» بدل «التوصيل» (لا شحن) */
+export const DIGITAL_STEP_LABELS = ["بياناتك", "الدفع", "التأكيد"] as const;
+
 function CheckIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -30,7 +33,9 @@ export default function CheckoutSteps({ current, labels }: CheckoutStepsProps) {
   const resolvedLabels: readonly [string, string, string] =
     labels === BOOKING_STEP_LABELS
       ? [t("stepRegistration"), t("stepPayment"), t("stepConfirmation")]
-      : labels ?? [t("stepDelivery"), t("stepPayment"), t("stepConfirmation")];
+      : labels === DIGITAL_STEP_LABELS
+        ? [t("contactInfo"), t("stepPayment"), t("stepConfirmation")]
+        : labels ?? [t("stepDelivery"), t("stepPayment"), t("stepConfirmation")];
   return (
     <div className="flex items-start justify-center mx-auto" style={{ maxWidth: 440 }}>
       {resolvedLabels.map((label, i) => {

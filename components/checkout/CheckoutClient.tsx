@@ -8,7 +8,7 @@ import { useCart } from "@/lib/store/cart";
 import CheckoutForm from "@/components/checkout/CheckoutForm";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import CheckoutUpsell from "@/components/checkout/CheckoutUpsell";
-import CheckoutSteps from "@/components/checkout/CheckoutSteps";
+import CheckoutSteps, { DIGITAL_STEP_LABELS } from "@/components/checkout/CheckoutSteps";
 import TrustBadges from "@/components/checkout/TrustBadges";
 import EmbeddedPayment from "@/components/checkout/EmbeddedPayment";
 import Container from "@/components/ui/Container";
@@ -30,6 +30,9 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
   const [orderId, setOrderId]   = useState<string | null>(null);
 
   const items  = useCart((s) => s.items);
+
+  /** الطلب الرقمي البحت لا يُشحن — عناوين المراحل ونصوصها تتبدّل تبعاً لذلك */
+  const needsShipping = items.some((i) => !i.isDigital);
   const router = useRouter();
 
   /* hydration + استعادة مرحلة الدفع من الرابط عند التحديث (?order=) */
@@ -117,7 +120,7 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
             {isPayment ? t("securePayment") : t("completePurchase")}
           </h1>
           <p className="font-body text-[15px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            {isPayment ? t("paymentSubtitle") : t("deliverySubtitle")}
+            {isPayment ? t("paymentSubtitle") : t(needsShipping ? "deliverySubtitle" : "digitalSubtitle")}
           </p>
         </Container>
         <PageHeaderWave fillColor="var(--offwh)" />
@@ -126,7 +129,10 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
       {/* ── شريط التقدّم ── */}
       <Container>
         <div className="mt-8">
-          <CheckoutSteps current={isPayment ? 2 : 1} />
+          <CheckoutSteps
+            current={isPayment ? 2 : 1}
+            labels={needsShipping ? undefined : DIGITAL_STEP_LABELS}
+          />
         </div>
       </Container>
 

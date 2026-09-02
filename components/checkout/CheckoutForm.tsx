@@ -125,6 +125,8 @@ export default function CheckoutForm({
 
   /** حساب الشحن — للعناصر الفيزيائية فقط (الرقمية تُرسل بالبريد بلا شحن) */
   const physicalCount = cartItems.filter((i) => !i.isDigital).length;
+  /** الطلب الرقمي البحت (كتيّب) يصل على البريد — فلا نسأل عن البلدة والعنوان */
+  const needsShipping = physicalCount > 0;
   const shippingCost = computeShipping(getTotal(), physicalCount, shipping);
   const discount     = couponDiscount(appliedCoupon, getTotal());
   const grandTotal   = getTotal() + shippingCost - discount;
@@ -159,8 +161,7 @@ export default function CheckoutForm({
     !validators.name(form.name) &&
     !validators.email(form.email) &&
     !validators.phone(form.phone) &&
-    !validators.city(form.city) &&
-    !validators.address(form.address) &&
+    (!needsShipping || (!validators.city(form.city) && !validators.address(form.address))) &&
     agreedPolicy &&
     agreedTerms;
 
@@ -221,7 +222,7 @@ export default function CheckoutForm({
           className="font-heading font-bold text-dark"
           style={{ padding: "18px 24px", borderBottom: "1.5px solid var(--bord)", fontSize: 17 }}
         >
-          {t("deliveryInfo")}
+          {t(needsShipping ? "deliveryInfo" : "contactInfo")}
         </div>
 
         {/* ── الحقول ── */}
@@ -277,67 +278,72 @@ export default function CheckoutForm({
             </div>
           </div>
 
-          {/* البلدة + الرمز البريدي */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label style={labelStyle}>{t("cityLabel")}</label>
-              <input
-                type="text"
-                value={form.city}
-                onChange={(e) => updateField("city", e.target.value)}
-                placeholder={t("cityPlaceholder")}
-                autoComplete="address-level2"
-                style={{ ...inputBase, border: `1.5px solid ${borderColor("city")}` }}
-                onFocus={() => setFocusedField("city")}
-                onBlur={() => handleBlur("city")}
-              />
-              {fieldError("city") && <FieldError msg={fieldError("city")!} />}
+          {/* حقول التوصيل — للطلبات الفيزيائية فقط */}
+          {needsShipping && (
+            <>
+            {/* البلدة + الرمز البريدي */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={labelStyle}>{t("cityLabel")}</label>
+                <input
+                  type="text"
+                  value={form.city}
+                  onChange={(e) => updateField("city", e.target.value)}
+                  placeholder={t("cityPlaceholder")}
+                  autoComplete="address-level2"
+                  style={{ ...inputBase, border: `1.5px solid ${borderColor("city")}` }}
+                  onFocus={() => setFocusedField("city")}
+                  onBlur={() => handleBlur("city")}
+                />
+                {fieldError("city") && <FieldError msg={fieldError("city")!} />}
+              </div>
+              <div>
+                <label style={labelStyle}>{t("postalLabel")}</label>
+                <input
+                  type="text"
+                  value={form.postalCode}
+                  onChange={(e) => updateField("postalCode", e.target.value)}
+                  placeholder={t("postalPlaceholder")}
+                  autoComplete="postal-code"
+                  dir="ltr"
+                  inputMode="numeric"
+                  style={{ ...inputBase, border: `1.5px solid ${focusedField === "postalCode" ? "var(--teal)" : "var(--bord)"}`, textAlign: "right" }}
+                  onFocus={() => setFocusedField("postalCode")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
             </div>
+  
+            {/* العنوان */}
             <div>
-              <label style={labelStyle}>{t("postalLabel")}</label>
+              <label style={labelStyle}>{t("addressLabel")}</label>
+              <textarea
+                value={form.address}
+                onChange={(e) => updateField("address", e.target.value)}
+                placeholder={t("addressPlaceholder")}
+                rows={2}
+                style={{ ...inputBase, border: `1.5px solid ${borderColor("address")}`, resize: "none" }}
+                onFocus={() => setFocusedField("address")}
+                onBlur={() => handleBlur("address")}
+              />
+              {fieldError("address") && <FieldError msg={fieldError("address")!} />}
+            </div>
+  
+            {/* طابق / شقة / مدخل */}
+            <div>
+              <label style={labelStyle}>{t("buildingLabel")}</label>
               <input
                 type="text"
-                value={form.postalCode}
-                onChange={(e) => updateField("postalCode", e.target.value)}
-                placeholder={t("postalPlaceholder")}
-                autoComplete="postal-code"
-                dir="ltr"
-                inputMode="numeric"
-                style={{ ...inputBase, border: `1.5px solid ${focusedField === "postalCode" ? "var(--teal)" : "var(--bord)"}`, textAlign: "right" }}
-                onFocus={() => setFocusedField("postalCode")}
+                value={form.building}
+                onChange={(e) => updateField("building", e.target.value)}
+                placeholder={t("buildingPlaceholder")}
+                style={{ ...inputBase, border: `1.5px solid ${focusedField === "building" ? "var(--teal)" : "var(--bord)"}` }}
+                onFocus={() => setFocusedField("building")}
                 onBlur={() => setFocusedField(null)}
               />
             </div>
-          </div>
-
-          {/* العنوان */}
-          <div>
-            <label style={labelStyle}>{t("addressLabel")}</label>
-            <textarea
-              value={form.address}
-              onChange={(e) => updateField("address", e.target.value)}
-              placeholder={t("addressPlaceholder")}
-              rows={2}
-              style={{ ...inputBase, border: `1.5px solid ${borderColor("address")}`, resize: "none" }}
-              onFocus={() => setFocusedField("address")}
-              onBlur={() => handleBlur("address")}
-            />
-            {fieldError("address") && <FieldError msg={fieldError("address")!} />}
-          </div>
-
-          {/* طابق / شقة / مدخل */}
-          <div>
-            <label style={labelStyle}>{t("buildingLabel")}</label>
-            <input
-              type="text"
-              value={form.building}
-              onChange={(e) => updateField("building", e.target.value)}
-              placeholder={t("buildingPlaceholder")}
-              style={{ ...inputBase, border: `1.5px solid ${focusedField === "building" ? "var(--teal)" : "var(--bord)"}` }}
-              onFocus={() => setFocusedField("building")}
-              onBlur={() => setFocusedField(null)}
-            />
-          </div>
+            </>
+          )}
         </div>
 
         {/* ── معلومات إضافية ── */}

@@ -5,10 +5,12 @@ interface OrderTotalsProps {
   shippingCost: number;
   discount:     number;
   total:        number;
+  /** إظهار سطر الشحن — false في الطلب الرقمي البحت (لا شيء يُشحن) */
+  showShipping?: boolean;
 }
 
 /** ملخص الأرقام — مجموع، شحن، خصم، إجمالي */
-export default function OrderTotals({ subtotal, shippingCost, discount, total }: OrderTotalsProps) {
+export default function OrderTotals({ subtotal, shippingCost, discount, total, showShipping = true }: OrderTotalsProps) {
   const t = useTranslations("order");
   return (
     <div
@@ -47,22 +49,24 @@ export default function OrderTotals({ subtotal, shippingCost, discount, total }:
           </div>
         )}
 
-        {/* الشحن */}
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <div className="font-label text-[14px] text-mid">{t("shipping")}</div>
-            {shippingCost > 0 && (
-              <div className="font-label text-[11px] text-light mt-0.5">
-                {t("shippingNote")}
-              </div>
+        {/* الشحن — يُخفى في الطلب الرقمي البحت */}
+        {showShipping && (
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <div className="font-label text-[14px] text-mid">{t("shipping")}</div>
+              {shippingCost > 0 && (
+                <div className="font-label text-[11px] text-light mt-0.5">
+                  {t("shippingNote")}
+                </div>
+              )}
+            </div>
+            {shippingCost === 0 ? (
+              <span className="font-label font-bold text-teal text-[14px]">{t("freeShipping")}</span>
+            ) : (
+              <span className="font-label font-bold text-dark text-[14px]">₪{shippingCost}</span>
             )}
           </div>
-          {shippingCost === 0 ? (
-            <span className="font-label font-bold text-teal text-[14px]">{t("freeShipping")}</span>
-          ) : (
-            <span className="font-label font-bold text-dark text-[14px]">₪{shippingCost}</span>
-          )}
-        </div>
+        )}
 
         {/* الإجمالي */}
         <div

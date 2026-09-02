@@ -1,6 +1,7 @@
 import type { Product, ProductFilters } from "./types";
 import { getAllProducts, getProductCategories as getSanityCategories } from "@/lib/sanity/queries/products";
 import { SEED_PRODUCTS } from "./seed";
+import { isDigitalProduct } from "./helpers";
 
 /**
  * إحضار قائمة المنتجات مع فلترة اختيارية.
@@ -67,4 +68,23 @@ function applyFiltersToSeed(filters?: ProductFilters): Product[] {
   }
 
   return products;
+}
+
+/**
+ * هل يحتاج الطلب عنوان توصيل؟
+ *
+ * نعم إن كان فيه منتج فيزيائي واحد على الأقل. الطلب الرقمي البحت (كتيّب مثلاً)
+ * يصل على البريد الإلكتروني فلا معنى لطلب البلدة والعنوان من العميلة.
+ *
+ * يُحسب من المصدر الموثوق (Sanity) لا من بيانات العميل — فلا يستطيع أحد
+ * تخطّي العنوان بادّعاء أنّ منتجه رقمي.
+ */
+export async function orderNeedsShipping(slugs: string[]): Promise<boolean> {
+  const products = await getProducts();
+  const bySlug = new Map(products.map((p) => [p.slug, p]));
+  return slugs.some((slug) => {
+    const product = bySlug.get(slug);
+    // slug غير معروف — يتجاهله createOrder لاحقاً، فلا يفرض عنواناً هنا
+    return product ? !isDigitalProduct(product) : false;
+  });
 }

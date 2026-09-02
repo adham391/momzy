@@ -11,7 +11,7 @@ import OrderDownloads from "@/components/order/OrderDownloads";
 import OrderTotals from "@/components/order/OrderTotals";
 import OrderActions from "@/components/order/OrderActions";
 import PaymentRetryCard from "@/components/order/PaymentRetryCard";
-import CheckoutSteps from "@/components/checkout/CheckoutSteps";
+import CheckoutSteps, { DIGITAL_STEP_LABELS } from "@/components/checkout/CheckoutSteps";
 import ClearCart from "@/components/order/ClearCart";
 import TrackEvent from "@/components/analytics/TrackEvent";
 import { getOrderById } from "@/lib/db/orders";
@@ -54,6 +54,9 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
   const awaitingPayment = !isPaid && isHypConfigured();
   const orderComplete   = !awaitingPayment;
   const paymentFailed   = payment === "failed";
+
+  // الطلب الرقمي البحت لا يُشحن — نخفي سطر الشحن ونسمّي المرحلة الأولى «بياناتك»
+  const hasPhysical = order.items.some((it) => it.product_type !== "digital");
 
   // خريطة الصور من المصدر (الصور غير مخزّنة في order_items)
   const imageMap = await getProductImageMap();
@@ -102,7 +105,10 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
       {/* ── المحتوى ── */}
       <Container>
         <div className="mt-8 max-w-[920px] mx-auto flex flex-col gap-6">
-          <CheckoutSteps current={awaitingPayment ? 2 : 3} />
+          <CheckoutSteps
+            current={awaitingPayment ? 2 : 3}
+            labels={hasPhysical ? undefined : DIGITAL_STEP_LABELS}
+          />
           <OrderHeader orderNumber={order.order_number} createdAt={order.created_at} paid={!awaitingPayment} />
           {awaitingPayment && (
             <PaymentRetryCard orderId={order.id} amount={order.total_amount} failed={paymentFailed} />
@@ -126,6 +132,7 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
             shippingCost={order.shipping_cost}
             discount={order.discount_amount}
             total={order.total_amount}
+            showShipping={hasPhysical}
           />
           <OrderActions />
         </div>
