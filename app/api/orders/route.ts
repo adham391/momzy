@@ -1,6 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { createOrder, getOrderById } from "@/lib/db/orders";
 import { decrementStock } from "@/lib/products/stock";
+import { orderNeedsShipping } from "@/lib/products/getProducts";
 import { isWhatsAppConfigured } from "@/lib/whatsapp/client";
 import { notifyHebaNewOrder } from "@/lib/whatsapp/notify";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
@@ -11,8 +12,7 @@ import {
   orderAdminEmailHtml,
   orderAdminSubject,
 } from "@/lib/resend/emails/orderEmail";
-import { getDownloadsByOrder } from "@/lib/db/downloads";
-import { downloadEmailHtml, downloadEmailSubject } from "@/lib/resend/emails/downloadEmail";
+import { sendDigitalDelivery } from "@/lib/notifications/digital";
 import type { CreateOrderInput } from "@/lib/db/types";
 import type { GiftOptions } from "@/lib/store/cart";
 
@@ -47,11 +47,18 @@ export async function POST(request: Request) {
   if (typeof c.phone !== "string" || c.phone.trim().length < 9) {
     return NextResponse.json({ error: "رقم هاتف غير صحيح" }, { status: 400 });
   }
-  if (typeof c.city !== "string" || !c.city.trim() || typeof c.address !== "string" || c.address.trim().length < 5) {
-    return NextResponse.json({ error: "العنوان مطلوب" }, { status: 400 });
-  }
   if (!Array.isArray(b.items) || b.items.length === 0) {
     return NextResponse.json({ error: "السلة فارغة" }, { status: 400 });
+  }
+  // العنوان مطلوب للطلبات الفيزيائية فقط — الطلب الرقمي البحت يصل على البريد.
+  // النوع يُقرأ من Sanity لا من العميل، فلا يُتخطّى العنوان بادّعاء كاذب.
+  const needsShipping = await orderNeedsShipping(b.items.map((i) => String(i.slug)));
+  if (
+    needsShipping &&
+    (typeof c.city !== "string" || !c.city.trim() ||
+     typeof c.address !== "string" || c.address.trim().length < 5)
+  ) {
+    return NextResponse.json({ error: "العنوان مطلوب" }, { status: 400 });
   }
 
   try {
@@ -60,8 +67,8 @@ export async function POST(request: Request) {
         name: c.name.trim(),
         email: c.email.trim(),
         phone: c.phone.trim(),
-        city: c.city.trim(),
-        address: c.address.trim(),
+        city: typeof c.city === "string" ? c.city.trim() : "",
+        address: typeof c.address === "string" ? c.address.trim() : "",
         building: typeof c.building === "string" ? c.building.trim() : undefined,
         postalCode: typeof c.postalCode === "string" ? c.postalCode.trim() : undefined,
       },
@@ -119,24 +126,11 @@ export async function POST(request: Request) {
             html: orderAdminEmailHtml(full),
           });
 
-          // التسليم الرقمي — فور إنشاء الطلب في التدفّق اليدوي، وبعد الدفع عند تفعيل HYP
-          const canDeliver = full.payment_status === "paid" || !isHypConfigured();
-          if (canDeliver) {
+          // التسليم الرقمي — هنا فقط في التدفّق اليدوي؛ مع HYP يُرسَل من
+          // /api/hyp/callback بعد نجاح الدفع (وإلا سُلّم الكتيب بلا دفع)
+          if (!isHypConfigured()) {
             const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
-            const downloads = await getDownloadsByOrder(result.id);
-            for (const d of downloads) {
-              await sendEmail({
-                to: d.customer_email,
-                subject: downloadEmailSubject(d.product_name, d.is_gift),
-                html: downloadEmailHtml({
-                  productName: d.product_name,
-                  readUrl: `${siteUrl}/read/${d.token}`,
-                  isGift: d.is_gift,
-                  gifterName: d.is_gift ? full.customer_name : undefined,
-                  expiresAt: d.expires_at,
-                }),
-              });
-            }
+            await sendDigitalDelivery(result.id, siteUrl);
           }
         }
         await notifyHebaNewOrder(full);

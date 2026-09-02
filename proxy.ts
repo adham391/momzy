@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
 import { routing } from "@/lib/i18n/routing";
+import { LIBRARY_SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "@/lib/library/constants";
 
 /** موجّه اللغات — يعيد كتابة / → /ar داخليًا ويخدم /he و /en */
 const intlMiddleware = createIntlMiddleware(routing);
@@ -76,6 +77,14 @@ function isNotAvailablePath(pathname: string): boolean {
   return /^\/(he\/|en\/)?not-available\/?$/.test(pathname);
 }
 
+/** مسارات المكتبة بكل اللغات — عندها فقط نجدّد كوكي الجلسة */
+function isLibraryPath(pathname: string): boolean {
+  const parts = pathname.split("/").filter(Boolean);
+  // نتخطّى بادئة اللغة إن وُجدت: /he/library و /library كلاهما مكتبة
+  const head = parts[0] === "he" || parts[0] === "en" ? parts[1] : parts[0];
+  return head === "library";
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -114,7 +123,22 @@ export async function proxy(request: NextRequest) {
   }
 
   /* ── 4. توجيه اللغات — يعيد كتابة / → /ar داخليًا ويخدم /he و /en ── */
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+
+  /* ── 5. تمديد جلسة المكتبة — الصلاحية تنزلق في DB، والكوكي يجب أن ينزلق
+         معها وإلا مات بعد 400 يومًا من أول دخول مهما زارت المكتبة ── */
+  const librarySession = request.cookies.get(LIBRARY_SESSION_COOKIE)?.value;
+  if (librarySession && isLibraryPath(request.nextUrl.pathname)) {
+    response.cookies.set(LIBRARY_SESSION_COOKIE, librarySession, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_MAX_AGE_SECONDS,
+    });
+  }
+
+  return response;
 }
 
 export const config = {

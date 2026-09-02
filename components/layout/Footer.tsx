@@ -8,6 +8,21 @@ interface FooterProps {
   settings: SiteSettings;
 }
 
+/** أيقونة قناة واتساب — مكبّر صوت يميّزها عن أيقونة المحادثة العادية */
+function ChannelIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 9.5h3l5-3.8v12.6L7 14.5H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1z" />
+      <path d="M16.4 9a4.3 4.3 0 0 1 0 6" />
+      <path d="M19.2 6.2a8.3 8.3 0 0 1 0 11.6" />
+    </svg>
+  );
+}
+
 /** الفوتر الرئيسي — البيانات ديناميكية من Sanity */
 export default function Footer({ settings }: FooterProps) {
   const t = useTranslations();
@@ -23,6 +38,7 @@ export default function Footer({ settings }: FooterProps) {
     { label: t("nav.about"),    href: "/about" },
   ];
   const usefulLinks = [
+    { label: t("footer.library"), href: "/library" },
     { label: t("footer.privacy"), href: "/privacy" },
     { label: t("footer.terms"),   href: "/terms" },
   ];
@@ -61,6 +77,15 @@ export default function Footer({ settings }: FooterProps) {
         </svg>
       ),
     },
+    // قناة واتساب — تُضاف فقط إن ضُبط رابطها في Sanity
+    ...(socialLinks.whatsappChannel
+      ? [{
+          key: "whatsapp-channel",
+          href: socialLinks.whatsappChannel,
+          label: t("footer.channelTitle"),
+          svg: <ChannelIcon size={20} />,
+        }]
+      : []),
   ];
 
   const whatsappDisplay = contact.whatsappNumber ?? "+972 50-000-0000";
@@ -197,6 +222,32 @@ export default function Footer({ settings }: FooterProps) {
                 {t("footer.newsletterText")}
               </p>
               <NewsletterForm />
+
+              {/* دعوة قناة واتساب — تظهر فقط إن ضُبط الرابط في Sanity */}
+              {socialLinks.whatsappChannel && (
+                <a
+                  href={socialLinks.whatsappChannel}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 flex items-center gap-3 rounded-[14px] p-3 active:scale-[0.98] [transition:transform_160ms_var(--ease-out),background-color_200ms_ease]"
+                  style={{ background: "rgba(37,211,102,0.10)", border: "1px solid rgba(37,211,102,0.32)" }}
+                >
+                  <span
+                    className="flex items-center justify-center shrink-0 rounded-full text-white"
+                    style={{ width: 36, height: 36, background: "#25D366" }}
+                  >
+                    <ChannelIcon size={18} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-label font-bold text-[12.5px] md:text-[13.5px] text-white">
+                      {t("footer.channelTitle")}
+                    </span>
+                    <span className="block font-bold text-[11.5px] md:text-[12.5px]" style={{ color: "#25D366" }}>
+                      {t("footer.channelCta")}
+                    </span>
+                  </span>
+                </a>
+              )}
 
               <Link
                 href="/contact"

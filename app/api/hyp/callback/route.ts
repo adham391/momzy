@@ -3,6 +3,7 @@ import { verifyHypPayment } from "@/lib/hyp/client";
 import { markOrderPaid, getOrderIdByNumber } from "@/lib/db/orders";
 import { markBookingPaid, getBookingIdByNumber } from "@/lib/db/bookings";
 import { sendBookingNotifications } from "@/lib/notifications/booking";
+import { sendDigitalDelivery } from "@/lib/notifications/digital";
 
 /**
  * GET /api/hyp/callback — عنوان العودة من صفحة دفع HYP.
@@ -37,6 +38,11 @@ export async function GET(request: Request) {
   } else {
     if (result.valid) {
       const orderId = await markOrderPaid(result.orderNumber, result.transactionId);
+      // التسليم الرقمي + دعوة المكتبة — بعد نجاح الدفع لا قبله
+      if (orderId) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
+        after(() => sendDigitalDelivery(orderId, siteUrl));
+      }
       dest = orderId ? `/order/${orderId}` : "/";
     } else {
       const orderId = await getOrderIdByNumber(result.orderNumber);

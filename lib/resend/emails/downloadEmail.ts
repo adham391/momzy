@@ -13,6 +13,30 @@ interface DownloadEmailOptions {
   /** اسم المُهدية — للهدايا فقط */
   gifterName?: string;
   expiresAt: string;
+  /** رابط إنشاء كلمة مرور المكتبة — لمن لم تُنشئ حسابها بعد */
+  librarySetupUrl?: string;
+  /** رابط المكتبة — لمن لديها حساب فعّال */
+  libraryUrl?: string;
+}
+
+/**
+ * كتلة المكتبة داخل إيميل التسليم — دعوة إنشاء كلمة المرور (أول مرة)
+ * أو رابط الدخول (حساب قائم). تُحذف كليًا إن لم يُمرَّر أي رابط.
+ */
+function libraryBlock(opts: DownloadEmailOptions): string {
+  if (!opts.librarySetupUrl && !opts.libraryUrl) return "";
+  const isSetup = !!opts.librarySetupUrl;
+  const url = opts.librarySetupUrl ?? opts.libraryUrl;
+  const text = isSetup
+    ? "أنشئي كلمة مرورك مرة واحدة، وبعدها تجدين كل كتيباتك (وورشاتك المسجّلة لاحقًا) في مكتبتك الدائمة — حتى لو انتهى رابط القراءة أعلاه."
+    : "هذا الكتيب أُضيف تلقائيًا إلى مكتبتك الدائمة — تجدين فيها كل مشترياتك في أي وقت.";
+  const cta = isSetup ? "🔑 أنشئي كلمة مرور مكتبتك" : "📚 ادخلي مكتبتك";
+  return `
+        <div style="margin:26px 0 0;padding:18px 16px;background:#EFF8F8;border:1px solid #A8D8D5;border-radius:14px;">
+          <p style="font-size:14px;font-weight:bold;color:#252220;margin:0 0 8px;">📚 مكتبتك الدائمة في Momzy</p>
+          <p style="font-size:12.5px;color:#55504C;line-height:1.9;margin:0 0 14px;">${text}</p>
+          <a href="${url}" style="display:inline-block;background:#82C9C4;color:#ffffff;text-decoration:none;font-weight:bold;font-size:13.5px;padding:11px 26px;border-radius:50px;">${cta}</a>
+        </div>`;
 }
 
 /** قالب HTML لإيميل تسليم الكتيب الرقمي (RTL) — قراءة flipbook على الموقع، بلا تحميل */
@@ -37,6 +61,7 @@ export function downloadEmailHtml(opts: DownloadEmailOptions): string {
           تُقرأ النسخة على الموقع بتجربة تقليب صفحات مريحة — من أي جهاز، في أي وقت.<br/>
           هذا الرابط خاصٌّ بكِ ولا يُشارَك — صالح حتى ${expStr}.
         </p>
+        ${libraryBlock(opts)}
       </div>
       <div style="padding:14px;text-align:center;font-size:12px;color:#9A9490;border-top:1px solid #EDE9E4;">
         لأي استفسار راسلينا على <a href="mailto:hello@momzyworld.com" style="color:#82C9C4;">hello@momzyworld.com</a>

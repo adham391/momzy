@@ -55,7 +55,8 @@ export async function createDownloadTokens(
     order_id: orderId,
     product_slug: it.productSlug,
     product_name: it.productName,
-    customer_email: it.customerEmail,
+    // lowercase دائمًا — المكتبة تطابق البريد بـ «=» لا بـ ILIKE
+    customer_email: it.customerEmail.trim().toLowerCase(),
     token: generateToken(),
     expires_at: expiresAt,
     is_gift: it.isGift,
