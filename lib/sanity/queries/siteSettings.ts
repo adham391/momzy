@@ -13,6 +13,8 @@ export interface SiteSettingsSocialLinks {
   instagram?: string;
   tiktok?: string;
   whatsapp?: string;
+  /** رابط قناة WhatsApp — فارغ = لا تظهر في الفوتر */
+  whatsappChannel?: string;
 }
 
 export interface SiteSettingsContact {
@@ -42,6 +44,7 @@ const SOCIAL_LINKS: SiteSettingsSocialLinks = {
   instagram: "https://www.instagram.com/hebahasan._",
   tiktok:    "https://www.tiktok.com/@heba.the.nurse",
   whatsapp:  "#",
+  whatsappChannel: "https://whatsapp.com/channel/0029Vb7W941KWEKrvB5s7B3Q",
 };
 
 const CONTACT: SiteSettingsContact = {
@@ -99,6 +102,40 @@ const DEFAULTS: Record<AppLocale, SiteSettings> = {
 };
 
 /**
+ * هل القيمة فارغة بمعنى «لم تُملأ»؟
+ * false و 0 قيمتان صالحتان لا فارغتان — فلا يُعيدهما الدمج للافتراضي.
+ */
+function isBlank(value: unknown): boolean {
+  return value === null || value === undefined || (typeof value === "string" && value.trim() === "");
+}
+
+/**
+ * دمج كتلة إعدادات من Studio فوق الافتراضية.
+ *
+ * **القاعدة:** ما إن تُنشئ هبة الإعدادات، تصبح Studio مصدر الحقيقة —
+ * فالحقل الذي تتركه فارغاً يعني «لا تعرض هذا العنصر»، ولا يُعاد ملؤه من الكود.
+ * بهذا يعمل فعلاً ما وعدت به الحقول: «أفرغي الرابط ليختفي من الفوتر».
+ *
+ * **الاستثناء (fallbackKeys):** نصوص لا يصحّ أن تظهر فارغة في الواجهة
+ * (رسالة الشريط العلوي، نصوص الفوتر) — هذه وحدها تعود للافتراضي إن تُركت فارغة،
+ * كي لا يُصاب الموقع بفراغات لأنّ هبة لم تصل لذلك الحقل بعد.
+ *
+ * والكتلة الغائبة كلياً (لم تُلمس في Studio) تعود للافتراضي كاملةً.
+ */
+function mergeBlock<T extends object>(
+  defaults: T,
+  data: Partial<T> | null | undefined,
+  fallbackKeys: readonly (keyof T)[] = []
+): T {
+  if (!data) return { ...defaults };
+  const merged = { ...(data as T) };
+  for (const key of fallbackKeys) {
+    if (isBlank(merged[key])) merged[key] = defaults[key];
+  }
+  return merged;
+}
+
+/**
  * جلب إعدادات الموقع — Singleton
  * يعود بالـ defaults المُدوّلة (حسب اللغة الفعّالة) إذا لم يُنشأ document بعد في Studio.
  * الحقول النصّية تُحلّ للغة الفعّالة ($loc) مع سقوط للعربية عبر tf().
@@ -117,7 +154,8 @@ export async function getSiteSettings(locale?: string): Promise<SiteSettings> {
     socialLinks {
       instagram,
       tiktok,
-      whatsapp
+      whatsapp,
+      whatsappChannel
     },
     contact {
       email,
@@ -136,11 +174,12 @@ export async function getSiteSettings(locale?: string): Promise<SiteSettings> {
   // إذا فشل الاتصال أو لم يُعدّ الـ singleton بعد → الـ defaults المُدوّلة
   if (!data) return D;
 
-  // دمج القيم الافتراضية مع البيانات الفعلية (حماية من الحقول الفارغة)
   return {
-    topBar:      { ...D.topBar,      ...(data.topBar      ?? {}) },
-    socialLinks: { ...D.socialLinks, ...(data.socialLinks ?? {}) },
-    contact:     { ...D.contact,     ...(data.contact     ?? {}) },
-    footer:      { ...D.footer,      ...(data.footer      ?? {}) },
+    // نصوص لا يصحّ أن تظهر فارغة → تعود للافتراضي؛ والباقي (المنتج المميّز) بيد هبة
+    topBar:      mergeBlock(D.topBar,      data.topBar,   ["enabled", "badge", "message"]),
+    // روابط ومعلومات تواصل → فراغها يعني «لا تعرضها»، فلا افتراضي يعيدها
+    socialLinks: mergeBlock(D.socialLinks, data.socialLinks),
+    contact:     mergeBlock(D.contact,     data.contact),
+    footer:      mergeBlock(D.footer,      data.footer,   ["tagline", "description", "copyright"]),
   };
 }

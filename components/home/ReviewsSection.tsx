@@ -18,7 +18,7 @@ export default async function ReviewsSection({ content }: { content: HomePageCon
 
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية ArticlesSection ─ */
-    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 6 }}>
+    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 7 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <SectionWave fill="#F5D98E" />

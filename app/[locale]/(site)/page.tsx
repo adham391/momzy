@@ -3,6 +3,7 @@ import WhyMomzySection    from "@/components/home/WhyMomzySection";
 import BestSellersSection from "@/components/home/BestSellersSection";
 import HebaSection        from "@/components/home/HebaSection";
 import ArticlesSection    from "@/components/home/ArticlesSection";
+import ChannelSection     from "@/components/home/ChannelSection";
 import ReviewsSection     from "@/components/home/ReviewsSection";
 import SectionsReveal     from "@/components/ui/SectionsReveal";
 import { getHomePage }    from "@/lib/sanity/queries/homePage";
@@ -24,6 +25,7 @@ export default async function HomePage({
       <BestSellersSection content={home} />
       <HebaSection content={home} />
       <ArticlesSection content={home} />
+      <ChannelSection />
       <ReviewsSection content={home} />
 
       {/* fadeInUp عند الـ scroll — يراقب كل .reveal-section */}

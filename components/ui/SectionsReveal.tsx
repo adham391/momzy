@@ -50,6 +50,8 @@ export default function SectionsReveal() {
           const el = entry.target as HTMLElement;
           el.style.opacity   = "1";
           el.style.transform = "translateY(0)";
+          // إشارة للـ CSS كي تتتابع العناصر الداخلية (.stagger-item)
+          el.dataset.revealed = "true";
           revealObserver.unobserve(el); // مرة واحدة فقط
         });
       },

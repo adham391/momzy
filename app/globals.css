@@ -366,3 +366,18 @@ body[data-menu-open] {
   animation: dropIn 0.22s cubic-bezier(0.23, 1, 0.32, 1) both;
   transform-origin: top center;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   تتابع ظهور العناصر داخل قسم (stagger)
+   يبدأ حين يعلّم SectionsReveal القسم بـ data-revealed="true".
+   بلا العلامة — أي عند تفضيل تقليل الحركة — تبقى العناصر ظاهرة كما هي،
+   فلا تختفي أبداً على من أوقف الحركة.
+   ───────────────────────────────────────────────────────────── */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+[data-revealed="true"] .stagger-item {
+  animation: stagger-in 0.45s var(--ease-out) both;
+}
