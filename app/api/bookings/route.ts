@@ -28,6 +28,8 @@ export async function POST(request: Request) {
     customer?: { name?: string; email?: string; phone?: string };
     notes?: string;
     babyBirthDate?: string;
+    /** لغة الموقع (ar | he | en) — تحدّد لغة صفحة دفع HYP */
+    locale?: string;
   };
   const c = b.customer;
 
@@ -61,6 +63,7 @@ export async function POST(request: Request) {
       customerName: c.name.trim(),
       email: c.email.trim(),
       phone: c.phone.trim(),
+      locale: typeof b.locale === "string" ? b.locale : undefined,
     });
   }
 

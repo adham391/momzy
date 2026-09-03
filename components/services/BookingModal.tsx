@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
 import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
@@ -111,6 +111,7 @@ export default function BookingModal({
   ageGate,
 }: BookingModalProps) {
   const t = useTranslations("booking");
+  const locale = useLocale();
   const router = useRouter();
   const [step, setStep] = useState<Step>("loading");
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -231,6 +232,8 @@ export default function BookingModal({
           customer: { name: form.name, email: form.email, phone: form.phone },
           notes: form.message,
           babyBirthDate: form.babyBirthDate || null,
+          // لغة الموقع — تحدّد لغة صفحة دفع HYP للورشة
+          locale,
         }),
       });
       const data = await res.json();
