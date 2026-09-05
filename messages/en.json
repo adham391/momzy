@@ -802,8 +802,7 @@
     },
     "trust": {
       "privacy": "Your info is protected",
-      "reply24h": "Reply within 24 hours",
-      "noCommitment": "No commitment"
+      "reply24h": "Reply within 24 hours"
     },
     "waCardMessage": "Hi Heba 🌸\nI have a question about: {title}",
     "waBookMessage": "Hi, I'd like to book \"{title}\"",

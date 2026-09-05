@@ -802,8 +802,7 @@
     },
     "trust": {
       "privacy": "معلوماتك محمية",
-      "reply24h": "رد خلال 24 ساعة",
-      "noCommitment": "بدون التزام"
+      "reply24h": "رد خلال 24 ساعة"
     },
     "waCardMessage": "مرحباً هبة 🌸\nعندي استفسار عن: {title}",
     "waBookMessage": "مرحباً، أرغب بحجز \"{title}\"",

@@ -802,8 +802,7 @@
     },
     "trust": {
       "privacy": "המידע שלך מוגן",
-      "reply24h": "מענה תוך 24 שעות",
-      "noCommitment": "ללא התחייבות"
+      "reply24h": "מענה תוך 24 שעות"
     },
     "waCardMessage": "היי היבה 🌸\nיש לי שאלה לגבי: {title}",
     "waBookMessage": "שלום, אני רוצה להזמין \"{title}\"",

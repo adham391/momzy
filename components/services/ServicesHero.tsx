@@ -136,8 +136,6 @@ export default function ServicesHero() {
             <TrustLine icon="🔒" text={t("trust.privacy")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
             <TrustLine icon="💬" text={t("trust.reply24h")} />
-            <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.25)" }} />
-            <TrustLine icon="✓" text={t("trust.noCommitment")} />
           </div>
 
         </div>
