@@ -1,5 +1,6 @@
 import type { BookingRow } from "@/lib/db/bookings";
 import { ageInMonthsAt, monthsLabel } from "@/lib/utils/age";
+import { emailHeader, emailFooter } from "./brand";
 
 const ils = (n: number) => `${Number(n).toLocaleString("en-US")} ₪`;
 const fmtTime = (t: string) => t.slice(0, 5);
@@ -15,12 +16,11 @@ function shell(badge: string, title: string, body: string): string {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF5;padding:32px 16px;"><tr><td align="center">
     <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
       <tr><td style="background:linear-gradient(135deg,#EFF8F8,#FFF5F7);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;border-bottom:3px solid #82C9C4;">
-        <div style="font-size:13px;font-weight:700;color:#82C9C4;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Momzy — ${badge}</div>
-        <h1 style="margin:0;font-size:24px;font-weight:700;color:#252220;">${title}</h1>
+        ${emailHeader(badge, title, "#82C9C4")}
       </td></tr>
       <tr><td style="background:white;padding:32px 40px;border-right:1.5px solid #EDE9E4;border-left:1.5px solid #EDE9E4;">${body}</td></tr>
       <tr><td style="background:#F8F4EE;border-radius:0 0 16px 16px;padding:20px 40px;text-align:center;border:1.5px solid #EDE9E4;border-top:none;">
-        <p style="margin:0;font-size:12px;color:#9A9490;">Momzy — <a href="https://momzyworld.com" style="color:#82C9C4;text-decoration:none;">momzyworld.com</a></p>
+        ${emailFooter()}
       </td></tr>
     </table>
   </td></tr></table>

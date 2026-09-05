@@ -1,4 +1,5 @@
 import type { OrderWithItems } from "@/lib/db/types";
+import { emailHeader, emailFooter } from "./brand";
 
 const ils = (n: number) => `${Number(n).toLocaleString("en-US")} ₪`;
 
@@ -42,12 +43,11 @@ function shell(badge: string, title: string, body: string): string {
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF5;padding:32px 16px;"><tr><td align="center">
     <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
       <tr><td style="background:linear-gradient(135deg,#FFF5F7,#EFF8F8);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;border-bottom:3px solid #F2A7B5;">
-        <div style="font-size:13px;font-weight:700;color:#F2A7B5;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Momzy — ${badge}</div>
-        <h1 style="margin:0;font-size:24px;font-weight:700;color:#252220;">${title}</h1>
+        ${emailHeader(badge, title, "#F2A7B5")}
       </td></tr>
       <tr><td style="background:white;padding:32px 40px;border-right:1.5px solid #EDE9E4;border-left:1.5px solid #EDE9E4;">${body}</td></tr>
       <tr><td style="background:#F8F4EE;border-radius:0 0 16px 16px;padding:20px 40px;text-align:center;border:1.5px solid #EDE9E4;border-top:none;">
-        <p style="margin:0;font-size:12px;color:#9A9490;">Momzy — <a href="https://momzyworld.com" style="color:#82C9C4;text-decoration:none;">momzyworld.com</a></p>
+        ${emailFooter()}
       </td></tr>
     </table>
   </td></tr></table>
@@ -80,6 +80,31 @@ export function orderCustomerEmailHtml(order: OrderWithItems): string {
     </div>
     <p style="font-size:13px;color:#9A9490;line-height:1.8;margin:24px 0 0;text-align:center;">سنتواصل معك عند شحن طلبك. لأي استفسار راسلينا على <a href="mailto:hello@momzyworld.com" style="color:#82C9C4;">hello@momzyworld.com</a></p>`;
   return shell("تأكيد الطلب", "تم استلام طلبك! ✓", body);
+}
+
+/* ── تذكير استرداد — يُرسل بعد مهلة، لمن بقي طلبها غير مدفوع ── */
+
+export const orderPendingSubject = (order: OrderWithItems) =>
+  `طلبكِ ${order.order_number} ما زال محفوظًا — أتمّي الدفع`;
+
+/**
+ * لا يقول «تأكيد» ولا «شكرًا لطلبك»: الطلب لم يُدفع.
+ * لا يُرسَل لحظة الإنشاء بل بعد نصف ساعة وفقط إن بقي معلّقًا — فمن دفعت
+ * لا يصلها إلا التأكيد. الصياغة صياغة تذكير لا إشعار فوري.
+ */
+export function orderPendingEmailHtml(order: OrderWithItems, payUrl: string): string {
+  const body = `
+    <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 8px;">مرحباً ${order.customer_name} 🌸</p>
+    <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 24px;">لاحظنا أنّ الدفع لم يكتمل، وطلبكِ ما زال محفوظًا لديكِ كما تركتِه. يمكنكِ إتمامه بأمان من الزر أدناه متى شئتِ — لن يُشحن أو يُسلَّم قبل ذلك.</p>
+    ${orderNumberBox(order)}
+    <table width="100%" cellpadding="0" cellspacing="0">${itemRows(order)}</table>
+    ${totalsBlock(order)}
+    <div style="text-align:center;margin:28px 0 0;">
+      <a href="${payUrl}" style="display:inline-block;background:#F2A7B5;color:#252220;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 34px;border-radius:50px;">إتمام الدفع — ${ils(order.total_amount)}</a>
+    </div>
+    <p style="font-size:12px;color:#9A9490;line-height:1.8;margin:18px 0 0;text-align:center;">إن غيّرتِ رأيكِ فلا حاجة لأي إجراء — يكفي تجاهل هذه الرسالة.</p>
+    <p style="font-size:13px;color:#9A9490;line-height:1.8;margin:24px 0 0;text-align:center;">لأي استفسار راسلينا على <a href="mailto:hello@momzyworld.com" style="color:#82C9C4;">hello@momzyworld.com</a></p>`;
+  return shell("طلب محفوظ", "طلبكِ ينتظركِ 🌸", body);
 }
 
 /* ── إشعار هبة ── */

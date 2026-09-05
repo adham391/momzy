@@ -4,6 +4,7 @@ import { markOrderPaid, getOrderIdByNumber } from "@/lib/db/orders";
 import { markBookingPaid, getBookingIdByNumber } from "@/lib/db/bookings";
 import { sendBookingNotifications } from "@/lib/notifications/booking";
 import { sendDigitalDelivery } from "@/lib/notifications/digital";
+import { sendOrderConfirmation } from "@/lib/notifications/order";
 import { logPaymentAttempt } from "@/lib/db/paymentLogs";
 
 /**
@@ -45,11 +46,14 @@ export async function GET(request: Request) {
   } else {
     if (result.valid) {
       entityId = await markOrderPaid(result.orderNumber, result.transactionId);
-      // التسليم الرقمي + دعوة المكتبة — بعد نجاح الدفع لا قبله
+      // التأكيد وإشعار هبة والتسليم الرقمي — كلها بعد نجاح الدفع لا قبله
       if (entityId) {
         const orderId = entityId;
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
-        after(() => sendDigitalDelivery(orderId, siteUrl));
+        after(async () => {
+          await sendOrderConfirmation(orderId);
+          await sendDigitalDelivery(orderId, siteUrl);
+        });
       }
       dest = entityId ? `/order/${entityId}` : "/";
     } else {

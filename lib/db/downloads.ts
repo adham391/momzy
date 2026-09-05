@@ -3,10 +3,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 /**
  * التسليم الرقمي — نموذج «قراءة على الموقع» (flipbook):
  * التوكن يفتح قارئ الكتيب في /read/[token] — لا تحميل PDF إطلاقًا.
- * الصلاحية سنة كاملة من الشراء، والقراءة غير محدودة العدد.
+ * الصلاحية **دائمة** والقراءة غير محدودة العدد.
+ *
+ * `expires_at = null` تعني «لا تنتهي» — نفس اصطلاح الكوبونات. العمود
+ * يبقى موجودًا كي يمكن ضبط تاريخ لصفٍّ بعينه لو لزم استثناء يومًا ما،
+ * ولذلك يبقى فحص الانتهاء قائمًا بدل حذفه.
  */
-const EXPIRY_DAYS = 365;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** مدخل إنشاء توكن لعنصر رقمي */
 export interface DigitalDownloadInput {
@@ -25,7 +27,8 @@ export interface DigitalDownloadRow {
   product_name: string;
   customer_email: string;
   token: string;
-  expires_at: string;
+  /** null = لا تنتهي */
+  expires_at: string | null;
   is_gift: boolean;
 }
 
@@ -35,7 +38,8 @@ function generateToken(): string {
 }
 
 /** هل انتهت صلاحية التوكن؟ — نقطة القرار الوحيدة للصلاحية */
-function isExpired(expiresAt: string): boolean {
+function isExpired(expiresAt: string | null): boolean {
+  if (expiresAt === null) return false;
   return new Date(expiresAt).getTime() <= Date.now();
 }
 
@@ -49,7 +53,6 @@ export async function createDownloadTokens(
 ): Promise<DigitalDownloadRow[]> {
   if (!items.length) return [];
   const supabase = createAdminClient();
-  const expiresAt = new Date(Date.now() + EXPIRY_DAYS * DAY_MS).toISOString();
 
   const rows = items.map((it) => ({
     order_id: orderId,
@@ -58,7 +61,7 @@ export async function createDownloadTokens(
     // lowercase دائمًا — المكتبة تطابق البريد بـ «=» لا بـ ILIKE
     customer_email: it.customerEmail.trim().toLowerCase(),
     token: generateToken(),
-    expires_at: expiresAt,
+    expires_at: null,
     is_gift: it.isGift,
   }));
 
@@ -99,7 +102,7 @@ export async function getTokenAccess(token: string): Promise<{ productSlug: stri
     .eq("token", token)
     .maybeSingle();
   if (!data) return null;
-  const row = data as { product_slug: string; expires_at: string };
+  const row = data as { product_slug: string; expires_at: string | null };
   if (isExpired(row.expires_at)) return null;
   return { productSlug: row.product_slug };
 }

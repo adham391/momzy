@@ -116,7 +116,7 @@
 
 ### أنواع المنتجات
 1. **فيزيائي** — الصندوق (شحن داخل إسرائيل كاملة)
-2. **رقمي** — كتيبات تُقرأ على الموقع فقط بقارئ flipbook (`/read/[token]`) — لا تحميل PDF؛ التوكن صالح سنة، قراءة غير محدودة
+2. **رقمي** — كتيبات تُقرأ على الموقع فقط بقارئ flipbook (`/read/[token]`) — لا تحميل PDF؛ التوكن لا ينتهي — قراءة غير محدودة مدى الحياة
 3. **ورشة مسجلة** — فيديو/رابط مشاهدة
 
 ### Product Interface (constants.ts)
@@ -183,7 +183,7 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 - صفحات الكتيب صور WebP في bucket **خاص** على Supabase Storage (`booklets`) — تُبثّ حصرًا عبر `/api/booklet/[token]/[page]` بعد التحقق من توكن الشراء
 - الرفع/التحديث: `npx tsx scripts/booklet-upload.ts "<pdf>" <slug>` (idempotent)
 - فيديو المنتج: `npx tsx scripts/video-upload.ts "<video>" <slug>` — يضغط لـ1080 عموديًا (faststart) ويرفعه لـSanity ويربط `videoUrl`
-- التوكن (جدول `digital_downloads`) صالح **سنة** — قراءة غير محدودة العدد
+- التوكن (جدول `digital_downloads`) **لا ينتهي** — قراءة غير محدودة العدد مدى الحياة (`expires_at = null`)
 - القارئ: `components/booklet/FlipbookReader.tsx` (react-pageflip — تقليب RTL بعكس ترتيب الصفحات)
 - شروط قانونية: لا نشر أو توزيع بدون إذن هبة
 
@@ -255,7 +255,7 @@ id, order_id, old_status, new_status, note, changed_by, created_at
 
 **09. digital_downloads**
 id, order_id, product_slug, product_name, customer_email, token,
-expires_at (سنة), is_gift, created_at
+expires_at (null = لا تنتهي), is_gift, created_at
 -- توكن قراءة flipbook (لا تحميل)؛ download_count صار عدّاد مشاهدات للرصد،
 -- و max_downloads عمود قديم غير مُستخدَم
 

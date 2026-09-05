@@ -1,3 +1,5 @@
+import { logoUrl } from "./brand";
+
 /** بيانات رسالة التواصل */
 export interface ContactEmailData {
   name:    string;
@@ -33,8 +35,10 @@ export function contactEmailHtml(data: ContactEmailData): string {
           <!-- هيدر -->
           <tr>
             <td style="background:linear-gradient(135deg,#FFF5F7,#EFF8F8);border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;border-bottom:3px solid #F2A7B5;">
+              <img src="${logoUrl()}" alt="Momzy" width="150" height="83"
+                   style="display:block;margin:0 auto 14px;width:150px;height:auto;border:0;" />
               <div style="font-size:13px;font-weight:700;color:#F2A7B5;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">
-                Momzy — رسالة جديدة
+                رسالة جديدة
               </div>
               <h1 style="margin:0;font-size:24px;font-weight:700;color:#252220;">
                 📩 رسالة تواصل جديدة

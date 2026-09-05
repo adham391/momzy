@@ -25,9 +25,6 @@ const SESSION_TOUCH_MS = HOUR_MS;
 const LOCKOUT_ATTEMPTS = 8;
 const LOCKOUT_MINUTES = 15;
 
-/** توكن القراءة يُجدَّد من المكتبة إذا بقي أقل من 30 يومًا — لسنة جديدة */
-const RENEW_BELOW_DAYS = 30;
-const RENEW_TO_DAYS = 365;
 
 /** صف حساب المكتبة */
 export interface LibraryAccount {
@@ -44,7 +41,8 @@ export interface LibraryItem {
   productSlug: string;
   productName: string;
   token: string;
-  expiresAt: string;
+  /** null = لا تنتهي — وهو الحال دائمًا اليوم */
+  expiresAt: string | null;
   isGift: boolean;
   purchasedAt: string;
 }
@@ -291,8 +289,7 @@ export async function hasDigitalPurchases(email: string): Promise<boolean> {
 
 /**
  * محتويات مكتبة العميلة — كل مشترياتها الرقمية ببريدها.
- * التوكنات التي شارفت على الانتهاء (أو انتهت) تُجدَّد لسنة كاملة تلقائيًا:
- * المكتبة هي مصدر الوصول الدائم، ورابط الإيميل القديم مجرد اختصار.
+ * لا تجديد هنا: التوكنات لا تنتهي أصلًا (0016)، فالمكتبة عرضٌ لا صيانة.
  */
 export async function getLibraryItems(email: string): Promise<LibraryItem[]> {
   const supabase = createAdminClient();
@@ -303,18 +300,6 @@ export async function getLibraryItems(email: string): Promise<LibraryItem[]> {
     .order("created_at", { ascending: false });
 
   const rows = (data ?? []) as (DigitalDownloadRow & { created_at: string })[];
-
-  // تجديد ما شارف على الانتهاء — دفعة واحدة
-  const renewThreshold = Date.now() + RENEW_BELOW_DAYS * DAY_MS;
-  const newExpiry = new Date(Date.now() + RENEW_TO_DAYS * DAY_MS).toISOString();
-  const toRenew = rows.filter((r) => new Date(r.expires_at).getTime() < renewThreshold);
-  if (toRenew.length > 0) {
-    await supabase
-      .from("digital_downloads")
-      .update({ expires_at: newExpiry })
-      .in("id", toRenew.map((r) => r.id));
-    for (const r of toRenew) r.expires_at = newExpiry;
-  }
 
   return rows.map((r) => ({
     id: r.id,

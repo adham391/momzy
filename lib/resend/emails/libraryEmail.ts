@@ -4,6 +4,8 @@
  * فيه العميلة كلمتها بنفسها.
  */
 
+import { logoUrl } from "./brand";
+
 interface LibraryEmailOptions {
   /** رابط إنشاء/استعادة كلمة المرور — /library/setup/[token] */
   setupUrl: string;
@@ -29,7 +31,9 @@ export function libraryEmailHtml(opts: LibraryEmailOptions): string {
   return `
   <div dir="rtl" style="font-family:Tajawal,Arial,sans-serif;background:#FDFAF5;padding:24px;">
     <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #EDE9E4;">
-      <div style="background:#82C9C4;padding:20px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;">Momzy</div>
+      <div style="background:linear-gradient(135deg,#FFF5F7,#EFF8F8);padding:22px;text-align:center;border-bottom:3px solid #82C9C4;">
+        <img src="${logoUrl()}" alt="Momzy" width="150" height="83" style="display:block;margin:0 auto;width:150px;height:auto;border:0;" />
+      </div>
       <div style="padding:28px 24px;text-align:center;color:#252220;">
         <p style="font-size:18px;font-weight:bold;margin:0 0 14px;">${isSetup ? "مكتبتك الخاصة 📚" : "استعادة كلمة المرور"}</p>
         <p style="font-size:15px;line-height:1.9;color:#55504C;margin:0 0 22px;">${intro}</p>

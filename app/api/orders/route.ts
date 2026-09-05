@@ -1,17 +1,12 @@
 import { NextResponse, after } from "next/server";
-import { createOrder, getOrderById } from "@/lib/db/orders";
+import { createOrder } from "@/lib/db/orders";
 import { decrementStock } from "@/lib/products/stock";
 import { orderNeedsShipping } from "@/lib/products/getProducts";
 import { isWhatsAppConfigured } from "@/lib/whatsapp/client";
-import { notifyHebaNewOrder } from "@/lib/whatsapp/notify";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
-import { TO_EMAIL, isEmailConfigured, sendEmail } from "@/lib/resend/client";
-import {
-  orderCustomerEmailHtml,
-  orderCustomerSubject,
-  orderAdminEmailHtml,
-  orderAdminSubject,
-} from "@/lib/resend/emails/orderEmail";
+import { isEmailConfigured } from "@/lib/resend/client";
+import { sendOrderConfirmation } from "@/lib/notifications/order";
+import { sweepAbandonedOrders } from "@/lib/notifications/recovery";
 import { sendDigitalDelivery } from "@/lib/notifications/digital";
 import type { CreateOrderInput } from "@/lib/db/types";
 import type { GiftOptions } from "@/lib/store/cart";
@@ -109,32 +104,19 @@ export async function POST(request: Request) {
       });
     }
 
-    // إشعارات ما بعد الرد — إيميل (Resend) + واتساب لهبة (Meta) — best-effort، لا تعطّل الـ checkout
+    // إشعارات ما بعد الرد — best-effort، لا تعطّل الـ checkout.
+    // مع الدفع الإلكتروني لا يُرسَل شيء هنا: الطلب لم يُدفع بعد. التأكيد
+    // وإشعار هبة والتسليم من /api/hyp/callback، وتذكير الاسترداد يتكفّل
+    // به المسح أدناه بعد مهلة — فمن تدفع فورًا لا يصلها إلا التأكيد.
     if (isEmailConfigured() || isWhatsAppConfigured()) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
       after(async () => {
-        const full = await getOrderById(result.id);
-        if (!full) return;
-        if (isEmailConfigured()) {
-          await sendEmail({
-            to: full.customer_email,
-            subject: orderCustomerSubject(full),
-            html: orderCustomerEmailHtml(full),
-          });
-          await sendEmail({
-            to: TO_EMAIL,
-            replyTo: full.customer_email,
-            subject: orderAdminSubject(full),
-            html: orderAdminEmailHtml(full),
-          });
-
-          // التسليم الرقمي — هنا فقط في التدفّق اليدوي؛ مع HYP يُرسَل من
-          // /api/hyp/callback بعد نجاح الدفع (وإلا سُلّم الكتيب بلا دفع)
-          if (!isHypConfigured()) {
-            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
-            await sendDigitalDelivery(result.id, siteUrl);
-          }
+        if (!paymentUrl) {
+          await sendOrderConfirmation(result.id);
+          await sendDigitalDelivery(result.id, siteUrl);
         }
-        await notifyHebaNewOrder(full);
+        // مسح عابر: كل طلب جديد يفحص الطلبات المتروكة الناضجة
+        await sweepAbandonedOrders(siteUrl);
       });
     }
 

@@ -22,7 +22,7 @@ interface ReadPageProps {
 
 /**
  * قارئ الكتيب — flipbook على الموقع فقط (بلا تحميل).
- * التوكن يصل المشترية بالإيميل بعد الطلب؛ صالح لسنة، قراءة غير محدودة.
+ * التوكن يصل المشترية بالإيميل بعد الطلب؛ لا ينتهي، وقراءة غير محدودة.
  */
 export default async function ReadPage({ params }: ReadPageProps) {
   const { token } = await params;

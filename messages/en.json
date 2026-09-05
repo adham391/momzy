@@ -572,7 +572,7 @@
     "invalidTitle": "Invalid link",
     "invalidBody": "This reading link is incorrect or no longer exists. Check the full link, or contact us.",
     "unavailableTitle": "The link is no longer available",
-    "expiredBody": "This reading link has expired (one year from the order date). Contact us and we will renew it.",
+    "expiredBody": "This reading link is no longer valid. Contact us and we will restore it right away.",
     "contactUs": "Contact us"
   },
   "library": {
