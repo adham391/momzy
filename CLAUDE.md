@@ -565,6 +565,7 @@ momzy/
 │   │   └── server.ts               ✅
 │   ├── hyp/                        ⬜
 │   ├── resend/
+│   │   ├── i18n.ts                 ✅ ترجمة الإيميلات — تقرأ messages مباشرة (لا next-intl: الإرسال بلا سياق طلب)
 │   │   ├── client.ts               ✅ Resend client + FROM_EMAIL + TO_EMAIL
 │   │   └── emails/
 │   │       └── contactEmail.ts     ✅ قالب إيميل التواصل HTML (RTL)

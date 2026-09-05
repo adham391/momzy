@@ -71,7 +71,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
                 className="absolute top-3 font-label font-bold text-[12px] px-3 py-1.5 rounded-full"
                 style={{ insetInlineStart: 12, background: "var(--teal)", color: "white", boxShadow: "0 4px 12px rgba(130,201,196,0.45)" }}
               >
-                {t("badgePdf")}
+                {t("badgeFormat")}
               </span>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function BookletHero({ product }: BookletHeroProps) {
               className="rounded-[16px] overflow-hidden flex flex-col md:flex-row md:items-center md:justify-around md:py-4 md:px-3 md:gap-2"
               style={{ background: "rgba(255,255,255,0.6)", border: "1px solid var(--bord)" }}
             >
-              <TrustSignal emoji="📄" label={t("trustPdf")} />
+              <TrustSignal emoji="📖" label={t("trustFormat")} />
               <Divider />
               <TrustSignal emoji="✉️" label={t("trustDelivery")} />
               <Divider />
@@ -205,7 +205,7 @@ export function BookletFinalCTA({ product }: BookletHeroProps) {
           </button>
 
           <div className="flex items-center justify-center gap-4 mt-5 flex-wrap">
-            <TrustLine icon="📄" text={t("ctaTrustPdf")} />
+            <TrustLine icon="📖" text={t("ctaTrustFormat")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.30)" }} />
             <TrustLine icon="✉️" text={t("ctaTrustDelivery")} />
             <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(37,34,32,0.30)" }} />

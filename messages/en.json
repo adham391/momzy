@@ -189,7 +189,7 @@
     "digitalRecipientTitle": "📧 Who should receive the booklet?",
     "recipientName": "Recipient's name",
     "recipientEmail": "Recipient's email",
-    "digitalRecipientNote": "We'll email the booklet (PDF) to the recipient after the order is complete.",
+    "digitalRecipientNote": "A link to read the booklet reaches the recipient's inbox as soon as payment completes.",
     "physicalRecipientTitle": "📦 Recipient details",
     "recipientPhone": "Recipient's phone",
     "recipientAddress": "Address (street, house number)",
@@ -476,7 +476,7 @@
         },
         "digitalTitle": "Digital products and recorded workshops:",
         "digitalItems": {
-          "0": "Returns are not possible after the file has been downloaded or the workshop viewed",
+          "0": "Returns are not possible once the booklet has been opened or the workshop viewed",
           "1": "In the event of a technical issue, we are committed to finding an alternative solution"
         }
       },
@@ -486,7 +486,7 @@
         "items": {
           "0": "Publishing, distributing or sharing the content with any other party is strictly prohibited",
           "1": "Reselling the content or using it for commercial purposes is prohibited",
-          "2": "Download links are valid for 7 days and up to 5 downloads maximum",
+          "2": "Your reading link is personal and never expires — reading is unlimited",
           "3": "Use is limited to personal purposes only"
         },
         "note": "Any violation of these rights exposes the offender to legal liability."
@@ -739,15 +739,15 @@
     "giftEyebrow": "🎁 An unforgettable gift for every new mom"
   },
   "booklet": {
-    "badgePdf": "Digital booklet · PDF",
+    "badgeFormat": "Digital booklet · yours for life",
     "tagline": "📘 A digital guide at your fingertips",
-    "trustPdf": "PDF format — easy to read",
-    "trustDelivery": "Sent to you after checkout",
+    "trustFormat": "Read on the site, on any device",
+    "trustDelivery": "Reading link arrives on payment",
     "trustSecure": "Secure, encrypted payment",
     "ctaTitle": "Start tummy time <i>with confidence</i>",
     "ctaSubtitle": "Get the booklet now and practice tummy time safely and correctly from day one.",
     "ctaButton": "Get the booklet",
-    "ctaTrustPdf": "PDF format",
+    "ctaTrustFormat": "Read on the site",
     "ctaTrustDelivery": "Sent after purchase",
     "aboutLabel": "About the booklet",
     "aboutTitle": "Why <i>tummy time?</i>",
@@ -820,6 +820,9 @@
     "fullJoinWaitlist": "Fully booked — join the waitlist",
     "registerNow": "Register now",
     "registerNowPriced": "Register now — <amt>₪{price}</amt>",
+    "arrangeWhatsApp": "Arrange on WhatsApp",
+    "arrangeNote": "The time and price are agreed directly with Heba",
+    "waArrangeMessage": "Hi Heba 🌸 I'd like to book \"{title}\" — what times are available, and what is the price for my town?",
     "ctaReadyHeading": "Ready for the next step?",
     "ctaReadySubheading": "Save your seat now — your spot is booked instantly, and confirmation lands in your inbox.",
     "orWhatsapp": "Or chat with me on WhatsApp",
@@ -916,5 +919,79 @@
     "loadError": "Some pages failed to load — check your connection and refresh; if it persists, contact us.",
     "muteSound": "Mute page-flip sound",
     "unmuteSound": "Unmute page-flip sound"
+  },
+  "emails": {
+    "common": {
+      "greeting": "Hi {name} 🌸",
+      "supportLine": "Any questions? Write to us at <a href=\"mailto:{email}\" style=\"color:#82C9C4;\">{email}</a>",
+      "orderNumberLabel": "Order number:",
+      "free": "Free"
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "total": "Total"
+    },
+    "order": {
+      "subject": "Your order {number} is confirmed — Momzy",
+      "badge": "Order confirmed",
+      "title": "We've got your order! ✓",
+      "intro": "Thank you for ordering from Momzy. We've received your order and are getting it ready. Here are the details:",
+      "shipTo": "Delivering to",
+      "closing": "We'll be in touch as soon as your order ships."
+    },
+    "recovery": {
+      "subject": "Your order {number} is still saved — complete the payment",
+      "badge": "Order saved",
+      "title": "Your order is waiting 🌸",
+      "intro": "We noticed the payment didn't go through, and your order is still saved exactly as you left it. You can complete it safely from the button below whenever you like — nothing ships or is delivered before then.",
+      "cta": "Complete payment — {amount}",
+      "ignore": "If you've changed your mind, there's nothing to do — just ignore this message."
+    },
+    "booking": {
+      "subject": "Your booking {number} is confirmed — Momzy",
+      "badge": "Booking confirmed",
+      "title": "Your place is booked! ✓",
+      "intro": "Your booking is confirmed — your place is reserved and waiting for you.",
+      "service": "Service",
+      "date": "Date",
+      "time": "Time",
+      "amount": "Amount",
+      "onlineLabel": "Online workshop",
+      "joinCta": "Join the session →",
+      "keepEmail": "Keep this email — you'll need the link at workshop time.",
+      "locationLabel": "Where it takes place",
+      "detailsLater": "We'll send you the details for attending before the workshop."
+    },
+    "booklet": {
+      "subject": "Your booklet is ready to read: {product}",
+      "subjectGift": "🎁 A gift for you from Momzy: {product}",
+      "intro": "Thank you for ordering from Momzy. Your digital booklet is ready to read on the site.",
+      "introGift": "<b>{gifter}</b> sent you a digital booklet from Momzy 🎁",
+      "introGiftAnon": "A digital booklet from Momzy was sent to you as a gift 🎁",
+      "cta": "📖 Read the booklet",
+      "note": "It reads on the site with a comfortable page-turning experience — on any device, any time.",
+      "validity": "This link is yours and not for sharing — and it has no expiry date, so read it whenever you like.",
+      "validityUntil": "This link is yours and not for sharing — valid until {date}.",
+      "libraryTitle": "📚 Your permanent library at Momzy",
+      "librarySetup": "Set a password once, and every booklet you buy (and recorded workshops later) waits for you in your permanent library — no digging through old email.",
+      "libraryExisting": "This booklet was added to your permanent library automatically — all your purchases live there, any time.",
+      "librarySetupCta": "🔑 Set your library password",
+      "libraryOpenCta": "📚 Open your library"
+    },
+    "library": {
+      "subjectSetup": "Your Momzy library is ready — set a password",
+      "subjectReset": "Password reset — your Momzy library",
+      "titleSetup": "Your own library 📚",
+      "titleReset": "Password reset",
+      "introSetup": "You now have a permanent library at Momzy — every booklet you buy (and recorded workshops later) in one place, open to you from any device, any time.",
+      "introReset": "We received a request to reset the password for your Momzy library. If it wasn't you, ignore this message and nothing changes.",
+      "ctaSetup": "🔑 Set your password",
+      "ctaReset": "🔑 Choose a new password",
+      "validitySetup": "The link is valid for 7 days and can be used once.",
+      "validityReset": "The link is valid for two hours and can be used once.",
+      "afterwards": "After that you'll always sign in with your email and password."
+    }
   }
 }

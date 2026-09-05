@@ -46,6 +46,8 @@ export async function POST(request: Request) {
     customer: { name: c.name.trim(), email: c.email.trim(), phone: c.phone.trim() },
     notes: typeof b.notes === "string" ? b.notes : "",
     babyBirthDate: typeof b.babyBirthDate === "string" ? b.babyBirthDate : null,
+    // لغة الصفحة — تُحفظ لتحديد لغة إيميل التأكيد
+    locale: typeof b.locale === "string" ? b.locale : undefined,
   });
 
   // 400 = بيانات مرفوضة (فئة عمرية) · 409 = امتلأ الموعد

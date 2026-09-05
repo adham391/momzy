@@ -74,6 +74,8 @@ export async function POST(request: Request) {
       })),
       couponCode: b.couponCode ?? null,
       hasMarketingConsent: Boolean(b.hasMarketingConsent),
+      // لغة الصفحة — تُحفظ لتحديد لغة كل إيميل يصل العميلة لاحقًا
+      locale: typeof (b as { locale?: unknown }).locale === "string" ? (b as { locale: string }).locale : undefined,
       notes: typeof b.notes === "string" ? b.notes : "",
       utm: b.utm ?? null,
     });

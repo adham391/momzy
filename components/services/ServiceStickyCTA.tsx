@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import BookingModal from "./BookingModal";
+import CTAAction from "./CTAAction";
+import { serviceContactTarget } from "@/lib/services/contactLink";
 import type { AgeGate } from "@/lib/utils/age";
 
 interface ServiceStickyCTAProps {
@@ -14,6 +16,10 @@ interface ServiceStickyCTAProps {
   seatsLeft?: number;
   /** الفئة العمرية للورشة — تُمرَّر لنموذج التسجيل */
   ageGate?: AgeGate;
+  /** لا حجز إلكتروني — الزرّ يفتح واتساب للاتفاق مع هبة */
+  whatsappOnly?: boolean;
+  /** رقم هبة — بدونه يذهب الزرّ إلى صفحة التواصل */
+  whatsappNumber?: string;
 }
 
 /**
@@ -26,10 +32,16 @@ export default function ServiceStickyCTA({
   price,
   seatsLeft,
   ageGate,
+  whatsappOnly,
+  whatsappNumber,
 }: ServiceStickyCTAProps) {
   const t = useTranslations("services");
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const contact = whatsappOnly
+    ? serviceContactTarget(whatsappNumber, t("waArrangeMessage", { title: serviceTitle }))
+    : null;
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);
@@ -57,14 +69,16 @@ export default function ServiceStickyCTA({
           <div className="flex-1 min-w-0">
             <div className="font-label font-bold text-dark text-[13px] truncate">{serviceTitle}</div>
             <div className="font-label text-[11.5px] text-light">
-              {price > 0 ? `₪${price}` : t("onRequest")}
+              {price > 0 ? `₪${price}` : t(whatsappOnly ? "arrangeNote" : "onRequest")}
               {typeof seatsLeft === "number" && ` · ${t("seatsLeft", { count: seatsLeft })}`}
             </div>
           </div>
 
-          <button
+          <CTAAction
+            href={contact?.href}
+            disabled={!!contact && !contact.href}
             onClick={() => setOpen(true)}
-            className="font-label font-bold text-[14px] shrink-0 active:scale-[0.97] [transition:transform_160ms_ease-out]"
+            className="inline-flex items-center font-label font-bold text-[14px] shrink-0 active:scale-[0.97] [transition:transform_160ms_ease-out]"
             style={{
               background: isFull ? "var(--cream)" : "linear-gradient(135deg,#F2A7B5,#E88FA2)",
               color: isFull ? "var(--mid)" : "white",
@@ -75,18 +89,24 @@ export default function ServiceStickyCTA({
               boxShadow: isFull ? "none" : "0 6px 18px rgba(242,167,181,0.38)",
             }}
           >
-            {isFull ? t("waitlist") : t("registerNow")}
-          </button>
+            {contact
+              ? t("arrangeWhatsApp")
+              : isFull
+              ? t("waitlist")
+              : t("registerNow")}
+          </CTAAction>
         </div>
       </div>
 
-      <BookingModal
-        open={open}
-        onClose={() => setOpen(false)}
-        serviceTitle={serviceTitle}
-        serviceSlug={serviceSlug}
-        ageGate={ageGate}
-      />
+      {!contact && (
+        <BookingModal
+          open={open}
+          onClose={() => setOpen(false)}
+          serviceTitle={serviceTitle}
+          serviceSlug={serviceSlug}
+          ageGate={ageGate}
+        />
+      )}
     </>
   );
 }

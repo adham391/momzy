@@ -34,6 +34,8 @@ export interface OrderRow {
   customer_city: string;
   customer_building: string | null;
   customer_postal_code: string | null;
+  /** لغة العميلة — null للطلبات السابقة لهجرة 0017 (تُعامَل بالعربية) */
+  locale: string | null;
   subtotal: number;
   shipping_cost: number;
   discount_amount: number;
@@ -76,5 +78,7 @@ export interface CreateOrderInput {
   couponCode?: string | null;
   hasMarketingConsent: boolean;
   notes?: string;
+  /** لغة الصفحة وقت الطلب — تحدّد لغة كل إيميل يصل العميلة لاحقًا */
+  locale?: string;
   utm?: { source?: string; medium?: string; campaign?: string } | null;
 }

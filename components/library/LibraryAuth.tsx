@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import { LibraryCard, FormError, SubmitButton, fieldStyle, fieldLabelStyle } from "./ui";
 
@@ -15,6 +15,8 @@ type Status = "idle" | "submitting" | "sent" | "error";
  */
 export default function LibraryAuth() {
   const t = useTranslations("library");
+  // لغة الصفحة — تُرسَل مع الطلب فيصل إيميل الرابط بلغتها
+  const locale = useLocale();
   const router = useRouter();
 
   const [mode, setMode] = useState<Mode>("login");
@@ -55,7 +57,7 @@ export default function LibraryAuth() {
         const res = await fetch("/api/library/request", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email, locale }),
         });
         if (!res.ok) {
           const data = (await res.json()) as { error?: string };

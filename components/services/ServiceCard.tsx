@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import ServiceCardCTA from "./ServiceCardCTA";
+import CTAAction from "./CTAAction";
+import { whatsappLink } from "@/lib/utils/whatsapp";
 import type { Service, ServiceColor } from "@/lib/services/types";
 
 interface ServiceCardProps {
@@ -28,8 +30,9 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
   const waMessage = encodeURIComponent(
     t("waCardMessage", { title: service.title })
   );
-  const waDigits = (whatsappNumber ?? "972500000000").replace(/\D/g, "") || "972500000000";
-  const waLink = `https://wa.me/${waDigits}?text=${waMessage}`;
+  // بلا رقم صالح لا رابط أصلًا — يختفي الاستفسار بدل أن يقود إلى لا شيء
+  const inquiryHref = whatsappLink(whatsappNumber);
+
 
   return (
     <div
@@ -110,7 +113,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
           {!service.price && (
             <div className="mb-2.5 text-center">
               <span className="font-label font-bold text-body-sm" style={{ color: "var(--light)" }}>
-                {t("onRequest")}
+                {service.whatsappOnly ? t("arrangeNote") : t("onRequest")}
               </span>
             </div>
           )}
@@ -122,6 +125,8 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
               seatsLeft={seatsLeft}
               ageGate={service}
               price={service.price}
+              whatsappOnly={service.whatsappOnly}
+              whatsappNumber={whatsappNumber}
             />
           </div>
 
@@ -134,17 +139,20 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
             >
               {t("details")}
             </Link>
-            <span style={{ color: "var(--bord)", fontSize: 12 }}>·</span>
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-bold hover:opacity-70 transition-opacity"
-              style={{ color: "#1EBE5A", fontSize: 12.5 }}
-            >
-              <WhatsAppIcon size={13} />
-              {t("inquiry")}
-            </a>
+            {/* زائد حين يكون الزرّ الأساسي نفسه واتساب، ومستحيل بلا رقم */}
+            {!service.whatsappOnly && inquiryHref && (
+              <>
+                <span style={{ color: "var(--bord)", fontSize: 12 }}>·</span>
+                <CTAAction
+                  href={`${inquiryHref}?text=${waMessage}`}
+                  className="inline-flex items-center gap-1 font-bold hover:opacity-70 transition-opacity"
+                  style={{ color: "#1EBE5A", fontSize: 12.5 }}
+                >
+                  <WhatsAppIcon size={13} />
+                  {t("inquiry")}
+                </CTAAction>
+              </>
+            )}
           </div>
         </div>
       </div>

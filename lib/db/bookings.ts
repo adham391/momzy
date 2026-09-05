@@ -47,6 +47,8 @@ export interface BookingRow {
   admin_notes: string | null;
   /** تاريخ ميلاد الطفل — للورشات ذات الفئة العمرية فقط */
   baby_birth_date: string | null;
+  /** لغة العميلة — null للحجوزات السابقة لهجرة 0017 (تُعامَل بالعربية) */
+  locale: string | null;
   created_at: string;
   updated_at: string;
   /** من الفتحة — رابط اللقاء (أونلاين). يُقرأ وقت العرض لا وقت الحجز
@@ -196,6 +198,8 @@ export interface CreateBookingInput {
   notes?: string;
   /** تاريخ ميلاد الطفل (أو الموعد المتوقّع) — إلزامي للورشات ذات فئة عمرية */
   babyBirthDate?: string | null;
+  /** لغة الصفحة وقت التسجيل — تحدّد لغة إيميل التأكيد */
+  locale?: string;
 }
 
 /** فشل الحجز — status يميّز سبب الرفض (400 بيانات · 409 امتلاء) */
@@ -252,6 +256,7 @@ export async function createBooking(
       amount: slot.price,
       notes: input.notes ?? null,
       baby_birth_date: input.babyBirthDate || null,
+      locale: input.locale === "ar" || input.locale === "he" || input.locale === "en" ? input.locale : null,
     })
     .select("id, booking_number")
     .single();

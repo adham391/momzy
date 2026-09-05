@@ -25,6 +25,7 @@ const SERVICE_FIELDS = `{
   faqs[]{ ${tf("question")}, ${tf("answer")} },
   color,
   price,
+  whatsappOnly,
   order,
   "coverImage":       coverImage.asset->url,
   "coverAspect":      coverImage.asset->metadata.dimensions.aspectRatio,

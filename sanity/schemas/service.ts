@@ -165,6 +165,16 @@ export const service = defineType({
       validation: (r) => r.min(0),
     }),
 
+    defineField({
+      name: "whatsappOnly",
+      title: "التسجيل عبر واتساب لا عبر الموقع",
+      type: "boolean",
+      initialValue: false,
+      description:
+        "للخدمات التي لا يصلح لها سعر ثابت ولا حجز آلي — كالزيارة البيتية التي يختلف سعرها بحسب البلدة. " +
+        "يُستبدل زر التسجيل برسالة واتساب لكِ، فتتفقان على الموعد والسعر مباشرة.",
+    }),
+
     // ─── المحتوى التفصيلي ─────────────────────────────────────────
     defineField({
       name: "longDescription",

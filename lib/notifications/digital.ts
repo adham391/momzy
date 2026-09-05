@@ -49,7 +49,7 @@ export async function sendDigitalDelivery(orderId: string, siteUrl: string): Pro
     const lib = libraryLinks.get(d.customer_email.toLowerCase()) ?? {};
     await sendEmail({
       to: d.customer_email,
-      subject: downloadEmailSubject(d.product_name, d.is_gift),
+      subject: downloadEmailSubject(d.product_name, d.is_gift, order?.locale),
       html: downloadEmailHtml({
         productName: d.product_name,
         readUrl: `${siteUrl}/read/${d.token}`,
@@ -58,6 +58,9 @@ export async function sendDigitalDelivery(orderId: string, siteUrl: string): Pro
         expiresAt: d.expires_at,
         librarySetupUrl: lib.setupUrl,
         libraryUrl: lib.libraryUrl,
+        // لغة الطلب — حتى إيميل الهدية يتبع لغة من اشترت، فهي من كتبت
+        // بريد المستلِمة ولا نعرف لغة المستلِمة نفسها
+        locale: order?.locale,
       }),
     });
   }

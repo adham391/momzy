@@ -8,6 +8,8 @@ import SectionWave from "@/components/ui/SectionWave";
 import SectionLabel from "@/components/ui/SectionLabel";
 import PolkaDots from "@/components/ui/PolkaDots";
 import BookingModal from "./BookingModal";
+import CTAAction from "./CTAAction";
+import { serviceContactTarget } from "@/lib/services/contactLink";
 import type { ServiceColor } from "@/lib/services/types";
 import type { AgeGate } from "@/lib/utils/age";
 
@@ -70,6 +72,8 @@ interface ServiceCTASectionProps {
   ageGate?: AgeGate;
   /** ترتيب التداخل — يزداد مع عدد الأقسام قبله في الصفحة */
   zIndex?: number;
+  /** لا حجز إلكتروني — الزرّ يفتح واتساب للاتفاق مع هبة */
+  whatsappOnly?: boolean;
 }
 
 /**
@@ -85,6 +89,7 @@ export default function ServiceCTASection({
   whatsappNumber,
   ageGate,
   zIndex = 5,
+  whatsappOnly,
 }: ServiceCTASectionProps) {
   const t = useTranslations("services");
   const isRtl = useLocale() !== "en";
@@ -94,6 +99,10 @@ export default function ServiceCTASection({
   // القيم الافتراضية للعنوان والنص الفرعي — من ملف الترجمة إن لم تُمرَّر من الصفحة
   const resolvedHeading = heading ?? t("ctaReadyHeading");
   const resolvedSubheading = subheading ?? t("ctaReadySubheading");
+
+  const contact = whatsappOnly
+    ? serviceContactTarget(whatsappNumber, t("waArrangeMessage", { title: serviceTitle }))
+    : null;
 
   const waMessage = encodeURIComponent(t("waBookMessage", { title: serviceTitle }));
   const waLink    = whatsappNumber
@@ -177,7 +186,9 @@ export default function ServiceCTASection({
               </p>
 
               {/* CTA رئيسي — تيل (لون البراند، يتباين مع خلفية الوردي) */}
-              <button
+              <CTAAction
+                href={contact?.href}
+                disabled={!!contact && !contact.href}
                 onClick={() => setOpen(true)}
                 className="inline-flex items-center justify-center gap-2 font-label font-extrabold mb-4 [transition:transform_220ms_cubic-bezier(0.23,1,0.32,1),box-shadow_220ms_ease] hover:-translate-y-[3px] hover:shadow-[0_18px_44px_rgba(130,201,196,0.55)]"
                 style={{
@@ -192,12 +203,16 @@ export default function ServiceCTASection({
                   minWidth: 240,
                 }}
               >
-                <span>{t("registerNow")}</span>
+                <span>
+                  {contact
+                    ? t("arrangeWhatsApp")
+                    : t("registerNow")}
+                </span>
                 <span style={{ fontSize: "1.2em" }}>{isRtl ? "←" : "→"}</span>
-              </button>
+              </CTAAction>
 
-              {/* WhatsApp — أبرز قليلاً */}
-              {waLink && (
+              {/* WhatsApp — أبرز قليلاً (زائد حين يكون الزرّ نفسه واتساب) */}
+              {waLink && !contact && (
                 <div className="mb-5">
                   <a
                     href={waLink}
@@ -256,13 +271,15 @@ export default function ServiceCTASection({
         </div>
       </section>
 
-      <BookingModal
-        open={open}
-        onClose={() => setOpen(false)}
-        serviceTitle={serviceTitle}
-        serviceSlug={serviceSlug}
-        ageGate={ageGate}
-      />
+      {!contact && (
+        <BookingModal
+          open={open}
+          onClose={() => setOpen(false)}
+          serviceTitle={serviceTitle}
+          serviceSlug={serviceSlug}
+          ageGate={ageGate}
+        />
+      )}
     </>
   );
 }

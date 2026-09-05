@@ -5,6 +5,7 @@ import Container from "@/components/ui/Container";
 import { getService } from "@/lib/services/getService";
 import { getServices } from "@/lib/services/getServices";
 import { getAllServiceSlugs } from "@/lib/sanity/queries/services";
+import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import { SEED_SERVICES } from "@/lib/services/seed";
 import ServiceDetailHero from "@/components/services/ServiceDetailHero";
 import ServiceDetailContent from "@/components/services/ServiceDetailContent";
@@ -78,8 +79,10 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
     : service.color === "mint" ? "#6BB5B0"
     : "var(--rose)";
 
-  // رقم واتساب من env (اختياري)
-  const whatsapp = process.env.HEBA_WHATSAPP_NUMBER;
+  // رقم واتساب من إعدادات الموقع — نفس مصدر صفحة القائمة والفوتر، وهو ما
+  // يحرّره الأدمن. كان يُقرأ من env فبقي placeholder وأُرسلت العميلات إلى
+  // رابط واتساب فارغ.
+  const whatsapp = (await getSiteSettings()).contact.whatsappNumber;
 
   return (
     <div style={{ background: "var(--offwh)" }}>
@@ -104,6 +107,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         serviceSlug={service.slug}
         color={service.color}
         whatsappNumber={whatsapp}
+        whatsappOnly={service.whatsappOnly}
         ageGate={service}
         zIndex={6}
       />
@@ -153,6 +157,8 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         price={minPrice}
         seatsLeft={seatsLeft}
         ageGate={service}
+        whatsappOnly={service.whatsappOnly}
+        whatsappNumber={whatsapp}
       />
 
       <SectionsReveal />

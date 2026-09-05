@@ -7,6 +7,8 @@ import Image from "next/image";
 import Container from "@/components/ui/Container";
 import ServiceMeta from "./ServiceMeta";
 import BookingModal from "./BookingModal";
+import CTAAction from "./CTAAction";
+import { serviceContactTarget } from "@/lib/services/contactLink";
 import type { Service } from "@/lib/services/types";
 
 interface ServiceDetailHeroProps {
@@ -32,6 +34,11 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
   const [bookingOpen, setBookingOpen] = useState(false);
 
   const waMessage = encodeURIComponent(t("waInquireMessage", { title: service.title }));
+  // خدمة تُتّفق مباشرة (كالزيارة البيتية): الزرّ الأساسي نفسه واتساب
+  const contact = service.whatsappOnly
+    ? serviceContactTarget(whatsappNumber, t("waArrangeMessage", { title: service.title }))
+    : null;
+
   const waLink = whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${waMessage}`
     : null;
@@ -164,7 +171,9 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
               </p>
 
               {/* CTA الرئيسي */}
-              <button
+              <CTAAction
+                href={contact?.href}
+                disabled={!!contact && !contact.href}
                 onClick={() => setBookingOpen(true)}
                 className="w-full inline-flex items-center justify-center gap-2 font-label font-extrabold mb-3 btn-wobble [transition:transform_220ms_cubic-bezier(0.23,1,0.32,1),box-shadow_220ms_ease] hover:-translate-y-[3px]"
                 style={{
@@ -178,12 +187,23 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
                   boxShadow: "0 12px 32px rgba(130,201,196,0.45)",
                 }}
               >
-                <span>{t("registerNow")}</span>
+                <span>
+                  {contact
+                    ? t("arrangeWhatsApp")
+                    : t("registerNow")}
+                </span>
                 <span style={{ fontSize: "1.1em" }}>{isRtl ? "←" : "→"}</span>
-              </button>
+              </CTAAction>
 
-              {/* WhatsApp — link خفيف تحت الزر */}
-              {waLink && (
+              {/* ملاحظة: لماذا لا يوجد سعر ولا حجز فوري */}
+              {contact && (
+                <p className="text-center text-body-sm mb-4" style={{ color: "var(--light)" }}>
+                  {t("arrangeNote")}
+                </p>
+              )}
+
+              {/* WhatsApp — link خفيف تحت الزر (زائد حين يكون الزرّ نفسه واتساب) */}
+              {waLink && !contact && (
                 <div className="flex items-center justify-center mb-5">
                   <a
                     href={waLink}
@@ -214,13 +234,16 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
         </Container>
       </section>
 
-      <BookingModal
-        open={bookingOpen}
-        onClose={() => setBookingOpen(false)}
-        serviceTitle={service.title}
-        serviceSlug={service.slug}
-        ageGate={service}
-      />
+      {/* النموذج لا يُركَّب للخدمات التي تُتّفق على واتساب */}
+      {!contact && (
+        <BookingModal
+          open={bookingOpen}
+          onClose={() => setBookingOpen(false)}
+          serviceTitle={service.title}
+          serviceSlug={service.slug}
+          ageGate={service}
+        />
+      )}
     </>
   );
 }

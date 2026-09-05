@@ -19,6 +19,14 @@ import type {
 
 /* ── mappers: تحويل صفوف Supabase (numeric كنصوص) لأرقام ── */
 
+/**
+ * لغة مقبولة أو null. القيد في القاعدة يرفض أي قيمة أخرى، فنُصفّيها هنا
+ * بدل أن يفشل الإدراج كلّه بسبب لغة غريبة في جسم الطلب.
+ */
+function normalizeLocale(value: string | undefined): string | null {
+  return value === "ar" || value === "he" || value === "en" ? value : null;
+}
+
 /** يوحّد نصًا اختياريًا (يبقيه null إن كان فارغًا) */
 const nz = (s: string | null | undefined) => (s ? toLatinDigits(s) : s ?? null);
 
@@ -146,6 +154,7 @@ export async function createOrder(
     coupon_code: couponCode,
     has_marketing_consent: input.hasMarketingConsent,
     notes: input.notes ?? null,
+    locale: normalizeLocale(input.locale),
     utm_source: input.utm?.source ?? null,
     utm_medium: input.utm?.medium ?? null,
     utm_campaign: input.utm?.campaign ?? null,
