@@ -9,6 +9,7 @@ import { productTestimonial }   from "./objects/productTestimonial";
 import { productFAQ }           from "./objects/productFAQ";
 import { productStory }         from "./objects/productStory";
 import productTag               from "./objects/productTag";
+import { articleBody }          from "./objects/articleBody";
 
 /** Document types */
 import { product }       from "./product";
@@ -33,6 +34,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   productFAQ,
   productStory,
   productTag,
+  articleBody,
 
   // Documents
   product,

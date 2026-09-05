@@ -7,14 +7,19 @@ import PolkaDots from "@/components/ui/PolkaDots";
 import SectionWave from "@/components/ui/SectionWave";
 import MomzyText from "@/components/ui/MomzyText";
 import { getHomeArticles } from "@/lib/sanity/queries/articles";
-import { getTranslations } from "next-intl/server";
+import { getArticleLabeller } from "@/lib/articles/labels";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
 /** قسم أحدث المقالات — من Sanity (مع fallback ثابت) */
 export default async function ArticlesSection({ content }: { content: HomePageContent }) {
   const t = await getTranslations("home");
-  const articles = await getHomeArticles();
+  const locale = await getLocale();
+  const articles = await getHomeArticles(locale);
   if (articles.length === 0) return null;
+
+  // التصنيف يُخزَّن كمفتاح ثابت — الاسم المعروض يأتي من الترجمة
+  const { categoryLabel } = await getArticleLabeller(locale);
 
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية HebaSection ─ */
@@ -66,7 +71,7 @@ export default async function ArticlesSection({ content }: { content: HomePageCo
 
                 {/* المحتوى */}
                 <div className="p-[22px]">
-                  <Chip variant={article.chipColor}>{article.category}</Chip>
+                  <Chip variant={article.chipColor}>{categoryLabel(article)}</Chip>
                   <div className="font-heading text-h4 text-dark my-2.5 leading-[1.4]">
                     {article.title}
                   </div>

@@ -445,8 +445,8 @@ momzy/
 │   │   │   ├── page.tsx            ✅ قسمان: ورشات جماعية + لقاءات فردية + CTA
 │   │   │   └── [slug]/page.tsx     ✅ صفحة تفاصيل خدمة + BookingModal
 │   │   ├── articles/
-│   │   │   ├── page.tsx            ⬜
-│   │   │   └── [slug]/page.tsx     ⬜
+│   │   │   ├── page.tsx            ✅ هيدر + فلتر تصنيفات + شبكة بطاقات
+│   │   │   └── [slug]/page.tsx     ✅ هيرو + غلاف + Portable Text + مصادر + مقترحة
 │   │   ├── about/page.tsx          ✅ عن هبة حسن فقط — bio + خدمات + أرقام + CTA
 │   │   ├── contact/page.tsx        ✅ نموذج تواصل — يرسل إيميل لهبة عبر Resend
 │   │   ├── privacy/page.tsx        ✅ سياسة الخصوصية — 8 بنود
@@ -523,6 +523,15 @@ momzy/
 │   │   ├── OrderItemsList.tsx      ✅ عناصر الطلب — للقراءة + ملاحظة digital
 │   │   ├── OrderTotals.tsx         ✅ المجموع/الشحن/الخصم/الإجمالي + شعار أمان
 │   │   └── OrderActions.tsx        ✅ مواصلة التسوق + تواصلي معنا
+│   ├── articles/
+│   │   ├── ArticlesHeader.tsx      ✅ هيدر /articles — تدرّج تركوازي يميّز المكتبة عن المتجر
+│   │   ├── ArticleFilters.tsx      ✅ Client — أزرار التصنيفات الموجودة فعلًا + الشبكة
+│   │   ├── ArticleCard.tsx         ✅ بطاقة مقال — مكوّن أصمّ يستقبل النصوص مترجَمة
+│   │   ├── ArticleCover.tsx        ✅ الغلاف — صورة، أو تدرّج التصنيف مع إيموجيه
+│   │   ├── ArticleHero.tsx         ✅ رأس صفحة المقال + ArticleHeroCover المتداخل
+│   │   ├── ArticleBody.tsx         ✅ Portable Text — قياسات مضبوطة للقراءة العربية الطويلة
+│   │   ├── ArticleSources.tsx      ✅ صندوق المراجع (LTR داخل RTL) + تنبيه «تثقيف لا تشخيص»
+│   │   └── RelatedArticles.tsx     ✅ «اقرئي أيضًا» — نفس التصنيف ثم الأحدث
 │   ├── contact/
 │   │   └── ContactForm.tsx         ✅ نموذج التواصل — validation + fetch /api/contact + شاشة نجاح
 │   ├── booking/                    ⬜ قيد البناء
@@ -536,6 +545,9 @@ momzy/
 │       ├── PolkaDots.tsx           ✅
 │       └── SectionsReveal.tsx      ✅
 ├── lib/
+│   ├── articles/
+│   │   ├── categories.ts           ✅ قائمة تصنيفات مغلقة + لون chip + غلاف احتياطي لكل تصنيف
+│   │   └── labels.ts               ✅ getArticleLabeller — الموضع الوحيد الذي يصوغ «٥ دقائق للقراءة»
 │   ├── products/
 │   │   ├── types.ts                ✅ Product + ProductContent + ProductStory + ProductGiftTarget + ProductTestimonial + ProductFAQ + ProductShippingInfo + ProductSpecification + ProductFilters + ProductSort
 │   │   ├── seed.ts                 ✅ SEED_PRODUCTS — صندوق مشوار أم فقط (fallback في dev)
@@ -545,6 +557,7 @@ momzy/
 │   │   ├── client.ts               ✅ sanityClient + sanityWriteClient + sanityFetch (ISR revalidate + try-catch)
 │   │   ├── image.ts                ✅
 │   │   └── queries/
+│   │       ├── articles.ts         ✅ getArticles + getArticleBySlug + getRelatedArticles + getHomeArticles + readingMinutes
 │   │       ├── products.ts         ✅ PRODUCT_FIELDS + getProductBySlug + getAllProducts + getAllProductSlugs + getProductCategories
 │   │       └── siteSettings.ts     ✅ getSiteSettings — singleton مع DEFAULT_SETTINGS fallback
 │   ├── supabase/
@@ -575,7 +588,12 @@ momzy/
 │           ├── productFAQ.ts            ✅ question + answer
 │           └── productStory.ts          ✅ title + paragraphs[] + image
 ├── scripts/
-│   └── migrate-seed-to-sanity.ts   ✅ يرفع seed products لـ Sanity — idempotent، يُشغَّل مرة واحدة
+│   ├── migrate-seed-to-sanity.ts   ✅ يرفع seed products لـ Sanity — idempotent، يُشغَّل مرة واحدة
+│   ├── seed-articles.ts            ✅ يرفع كل المقالات (أو واحدًا بالاسم) — idempotent
+│   └── articles/
+│       ├── builders.ts             ✅ أدوات Portable Text + seedArticle — المقال الجديد ملفّ محتوى فقط
+│       ├── swaddling.ts            ✅ تقميط الطفل (نوم الطفل) — ar/he/en
+│       └── teething.ts             ✅ التسنين (تطوّر الطفل) — ar/he/en
 ├── sanity.config.ts                ✅ Studio config — singleton structure + visionTool + schemas
 ├── reference/
 │   ├── momzy-prototype.html        المرجع البصري الإلزامي
@@ -747,7 +765,11 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
   □ Resend + Twilio WhatsApp
 
 المرحلة 4 — المحتوى (الأسبوع 4-5)
-  □ المقالات
+  ✅ المقالات — /articles + /articles/[slug] بثلاث لغات
+     · التصنيف مفتاح ثابت في Sanity والاسم يُترجَم من messages
+     · المحتوى Portable Text مُدوّل (internationalizedArrayArticleBody)
+     · زمن القراءة يُحسب من النص، والتاريخ يتبع لغة الصفحة
+     · صندوق مصادر + تنبيه «تثقيف لا تشخيص» في كل مقال
   □ صفحات الورشات
   □ عن هبة + تواصل
   □ سياسة الخصوصية + الشروط

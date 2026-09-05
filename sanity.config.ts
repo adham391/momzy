@@ -89,7 +89,9 @@ export default defineConfig({
     internationalizedArray({
       languages: CONTENT_LANGUAGES,
       defaultLanguages: ["ar"],
-      fieldTypes: ["string", "text"],
+      // articleBody نوع مسجَّل في schemas — الإضافة تغلّفه فيصير
+      // internationalizedArrayArticleBody: محتوى مقال كامل لكل لغة
+      fieldTypes: ["string", "text", "articleBody"],
     }),
     visionTool(), // GROQ playground للتطوير
   ],

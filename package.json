@@ -12,6 +12,8 @@
     "clear:test": "tsx scripts/clear-test-data.ts"
   },
   "dependencies": {
+    "@portabletext/react": "^8.0.1",
+    "@portabletext/types": "^4.0.2",
     "@sanity/client": "^7.20.0",
     "@sanity/image-url": "^2.1.1",
     "@sanity/vision": "^5.22.0",

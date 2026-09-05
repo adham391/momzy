@@ -875,6 +875,34 @@
     "addToCartAria": "Add to cart",
     "addedToCart": "Added “{title}” to cart"
   },
+  "articles": {
+    "metaTitle": "Articles | Momzy",
+    "metaDescription": "Trusted articles on breastfeeding, newborn care, infant sleep and development — by Heba Hasan, registered nurse and lactation consultant.",
+    "headerLabel": "The Momzy library",
+    "headerTitle": "Guidance you can <em>trust</em>",
+    "headerSubtitle": "Every article here rests on recognised medical sources and is written in a mother's language, not a textbook's — so you know what to do, and why.",
+    "all": "All articles",
+    "empty": "No articles in this category yet — coming soon.",
+    "emptyAll": "Articles are on the way. The first one publishes soon.",
+    "readTime": "{minutes, plural, one {1 min read} other {# min read}}",
+    "read": "Read ←",
+    "backToAll": "← All articles",
+    "sourcesTitle": "Sources",
+    "sourcesNote": "This article is for education, not diagnosis. Talk to your doctor or consultant about anything concerning your baby.",
+    "relatedTitle": "Read next",
+    "shareTitle": "Share this article",
+    "notFoundTitle": "We couldn't find this article",
+    "notFoundBody": "The link may be old, or the article was hidden. Browse the rest.",
+    "categories": {
+      "pregnancy": "Pregnancy",
+      "postpartum": "Postpartum",
+      "breastfeeding": "Breastfeeding",
+      "newborn-care": "Newborn care",
+      "sleep": "Sleep",
+      "development": "Development",
+      "nutrition": "Nutrition"
+    }
+  },
   "ui": {},
   "common": {
     "prev": "Previous",
