@@ -24,7 +24,7 @@ export default async function SiteLayout({
   return (
     <>
       <TopBar settings={settings.topBar} />
-      <Header products={products} />
+      <Header products={products} whatsappNumber={settings.contact.whatsappNumber} />
       <main>{children}</main>
       <Footer settings={settings} />
 

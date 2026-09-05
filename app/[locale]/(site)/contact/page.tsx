@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { useTranslations } from "next-intl";
+import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import { getTranslations } from "next-intl/server";
+import { whatsappLink } from "@/lib/utils/whatsapp";
 import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
@@ -59,8 +60,12 @@ function InfoCard({
   );
 }
 
-export default function ContactPage() {
-  const t = useTranslations("contact");
+export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "contact" });
+
+  // بطاقة واتساب لا تُعرض بلا رقم مضبوط — كانت تقود إلى رقم وهمي
+  const whatsappHref = whatsappLink((await getSiteSettings(locale)).contact.whatsappNumber);
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh" }}>
 
@@ -165,6 +170,7 @@ export default function ContactPage() {
                 href="mailto:heba@momzyworld.com"
               />
 
+              {whatsappHref && (
               <InfoCard
                 icon={
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366">
@@ -173,8 +179,9 @@ export default function ContactPage() {
                 }
                 title={t("whatsappTitle")}
                 value={t("whatsappValue")}
-                href="https://wa.me/972500000000"
+                href={whatsappHref}
               />
+              )}
 
               <InfoCard
                 icon={

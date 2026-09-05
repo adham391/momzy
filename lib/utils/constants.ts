@@ -364,6 +364,15 @@ export interface MobileNavItem {
 
 export const MOBILE_NAV_ITEMS: MobileNavItem[] = [
   {
+    // الرئيسية أولًا — اللوقو في الهيدر يقود إليها لكنّه غير بديهي على الجوال.
+    // لونها mint: التوكن الوحيد غير المستعمل هنا، فلا تتشابه بطاقتان متجاورتان.
+    id: "home",
+    label: "الرئيسية",
+    href: "/",
+    icon: "/icons/home-icon.png",
+    iconBg: "bg-gradient-to-br from-[#ddf0ee] to-[#a8d8d5]",
+  },
+  {
     id: "services",
     label: "خدماتنا",
     href: "/services",

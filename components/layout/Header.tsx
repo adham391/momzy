@@ -18,7 +18,14 @@ const MEGA_CLOSE_DELAY = 150;
 // لصفحة المنتج (forest/gold). قرار تصميمي مستقبلي: نسخة monochrome أو تحديث شامل للوجو.
 
 /** الهيدر الرئيسي — sticky مع blur و نافبار تفاعلي */
-export default function Header({ products = [] }: { products?: Product[] }) {
+export default function Header({
+  products = [],
+  whatsappNumber,
+}: {
+  products?: Product[];
+  /** رقم هبة — تمرّره القائمة إلى أيقونة واتساب، وتُخفيها بدونه */
+  whatsappNumber?: string;
+}) {
   const t = useTranslations("nav");
   const tMenu = useTranslations("menu");
   const [scrolled, setScrolled] = useState(false);
@@ -152,7 +159,7 @@ export default function Header({ products = [] }: { products?: Product[] }) {
       </header>
 
       {/* قائمة الموبايل */}
-      <MobileMenu isOpen={isMenuOpen} onClose={closeMenu} products={products} />
+      <MobileMenu isOpen={isMenuOpen} onClose={closeMenu} products={products} whatsappNumber={whatsappNumber} />
     </>
   );
 }
