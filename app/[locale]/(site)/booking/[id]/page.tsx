@@ -112,16 +112,18 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
         {isAwaiting ? (
           /* ── مرحلة الدفع — تخطيط /checkout نفسه: الدفع + ملخّص جانبي ملتصق ── */
           <div className="mt-8 grid gap-8 grid-cols-1 md:[grid-template-columns:1fr_380px]">
-            {/* الملخّص + الثقة — أول على الموبايل، العمود الأيسر على الديسكتوب */}
-            <div className="md:order-2 md:sticky md:top-24 md:self-start">
+            {/* الملخّص + الثقة — العمود الأيسر على الديسكتوب، وأخير على
+                الموبايل: لو تصدّر لدُفع نموذج البطاقة تحت الطيّة فتظنّ
+                المسجِّلة أنّ صفحة الدفع لم تظهر */}
+            <div className="order-2 md:order-2 md:sticky md:top-24 md:self-start">
               <BookingSummary booking={booking} />
               <div className="mt-5">
                 <TrustBadges />
               </div>
             </div>
 
-            {/* الدفع المدمج */}
-            <div className="md:order-1">
+            {/* الدفع المدمج — أول على الموبايل */}
+            <div className="order-1 md:order-1">
               {paymentFailed && (
                 <div
                   className="rounded-[16px] text-center mb-5 max-w-[680px] mx-auto"

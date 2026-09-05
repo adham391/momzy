@@ -139,10 +139,15 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
       {/* ── المحتوى — شبكة واحدة متجاوبة (نسخة واحدة من كل قسم) ── */}
       <Container>
         <div className="mt-8 grid gap-8 grid-cols-1 md:[grid-template-columns:1fr_380px]">
-          {/* الملخّص + الثقة — أول على الموبايل، العمود الأيسر (track 2) الملتصق على الديسكتوب */}
-          <div className="md:order-2 md:sticky md:top-24 md:self-start">{summaryAside}</div>
-          {/* الخطوة (نموذج ↔ دفع) — أخير على الموبايل، العمود الأيمن (track 1) على الديسكتوب */}
-          <div className="md:order-1">{stepSection}</div>
+          {/* الملخّص + الثقة — العمود الأيسر الملتصق على الديسكتوب.
+              على الموبايل: أول في مرحلة التوصيل (تراجع ما تشتريه قبل تعبئة
+              بياناتك)، وأخير في مرحلة الدفع — وإلا دُفع نموذج البطاقة تحت
+              الطيّة فتظنّ العميلة أنّ صفحة الدفع لم تظهر أصلًا. */}
+          <div className={`md:order-2 md:sticky md:top-24 md:self-start ${isPayment ? "order-2" : "order-1"}`}>
+            {summaryAside}
+          </div>
+          {/* الخطوة (نموذج ↔ دفع) — العمود الأيمن على الديسكتوب */}
+          <div className={`md:order-1 ${isPayment ? "order-1" : "order-2"}`}>{stepSection}</div>
         </div>
 
         {/* منتجات مقترحة — مرحلة التوصيل فقط */}
