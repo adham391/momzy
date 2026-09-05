@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { updateSettings } from "@/lib/db/settings";
+import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
 import { sanityWriteClient } from "@/lib/sanity/client";
 
 /** إعدادات تشغيلية → جدول Supabase settings */
@@ -19,6 +20,19 @@ export async function updateOperationalSettingsAction(formData: FormData) {
 
   revalidatePath("/admin/settings");
   revalidatePath("/checkout"); // رسوم الشحن تؤثر على الـ checkout
+}
+
+/**
+ * وجهات إشعارات الأدمن → جدول Supabase settings.
+ * الحقل الفارغ يُحفظ فارغًا عمدًا — ومعناه «استعمل البريد الافتراضي».
+ */
+export async function updateNotifyEmailsAction(formData: FormData) {
+  const updates: Record<string, string> = {};
+  for (const key of Object.values(NOTIFY_EMAIL_SETTING_KEYS)) {
+    updates[key] = String(formData.get(key) ?? "").trim();
+  }
+  await updateSettings(updates);
+  revalidatePath("/admin/settings");
 }
 
 /** محتوى الموقع (TopBar + تواصل) → Sanity siteSettings singleton */

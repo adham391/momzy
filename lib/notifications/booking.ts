@@ -1,5 +1,6 @@
 import { getBookingById } from "@/lib/db/bookings";
-import { TO_EMAIL, isEmailConfigured, sendEmail } from "@/lib/resend/client";
+import { isEmailConfigured, sendEmail } from "@/lib/resend/client";
+import { getNotifyEmail } from "./recipients";
 import {
   bookingCustomerEmailHtml,
   bookingCustomerSubject,
@@ -24,7 +25,7 @@ export async function sendBookingNotifications(bookingId: string): Promise<void>
 
   if (isEmailConfigured()) {
     await sendEmail({
-      to: TO_EMAIL,
+      to: await getNotifyEmail("bookings"),
       replyTo: full.customer_email,
       subject: bookingAdminSubject(full),
       html: bookingAdminEmailHtml(full),

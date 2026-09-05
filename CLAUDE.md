@@ -387,7 +387,10 @@ id, key, value, type, description, updated_by, updated_at
 -- keys: site_name, contact_email, whatsapp_number,
 --       free_shipping_min, default_shipping_cost,
 --       shop_is_open, booking_is_open, instagram_url,
---       order_prefix, whatsapp_notifications_enabled
+--       order_prefix, whatsapp_notifications_enabled,
+--       notify_email_orders, notify_email_bookings,
+--       notify_email_booklets, notify_email_contact
+--         (صندوق لكل نوع إشعار؛ الفارغ يعود إلى RESEND_TO_EMAIL)
 
 **41. email_logs**
 id, type, to_email, subject, status, error_message,

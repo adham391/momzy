@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { resend, FROM_EMAIL, TO_EMAIL } from "@/lib/resend/client";
+import { resend, FROM_EMAIL } from "@/lib/resend/client";
+import { getNotifyEmail } from "@/lib/notifications/recipients";
 import { contactEmailHtml, contactEmailSubject } from "@/lib/resend/emails/contactEmail";
 
 /** التحقق من صحة الحقول المطلوبة */
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     const { error: resendError } = await resend.emails.send({
       from:    FROM_EMAIL,
-      to:      TO_EMAIL,
+      to:      await getNotifyEmail("contact"),
       replyTo: data.email,
       subject: contactEmailSubject(data.name, data.subject),
       html:    contactEmailHtml(data),

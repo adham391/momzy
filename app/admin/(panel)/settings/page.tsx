@@ -1,6 +1,7 @@
 import { getSettingsMap, boolSetting } from "@/lib/db/settings";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
-import { updateOperationalSettingsAction, updateSiteContentAction } from "./actions";
+import { updateOperationalSettingsAction, updateSiteContentAction, updateNotifyEmailsAction } from "./actions";
+import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "الإعدادات — لوحة Momzy" };
@@ -48,6 +49,47 @@ export default async function AdminSettingsPage() {
               ltr
               placeholder="+972501234567"
             />
+            <SaveButton />
+          </form>
+        </Card>
+
+        {/* ── وجهات الإشعارات (Supabase) ── */}
+        <Card title="وجهات الإشعارات">
+          <p className="text-mid text-body-sm mb-4 leading-relaxed">
+            صندوق لكل نوع كي يبقى الوارد مرتّبًا. اتركي الحقل فارغًا ليذهب نوعه إلى
+            البريد الافتراضي. الطلب الذي يجمع منتجًا وكتيبًا يصل الصندوقين معًا.
+          </p>
+          <form action={updateNotifyEmailsAction} className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <TextField
+                name={NOTIFY_EMAIL_SETTING_KEYS.orders}
+                label="طلبات المتجر"
+                defaultValue={settings[NOTIFY_EMAIL_SETTING_KEYS.orders] ?? ""}
+                ltr
+                placeholder="orders@momzyworld.com"
+              />
+              <TextField
+                name={NOTIFY_EMAIL_SETTING_KEYS.bookings}
+                label="تسجيلات الورشات"
+                defaultValue={settings[NOTIFY_EMAIL_SETTING_KEYS.bookings] ?? ""}
+                ltr
+                placeholder="workshops@momzyworld.com"
+              />
+              <TextField
+                name={NOTIFY_EMAIL_SETTING_KEYS.booklets}
+                label="الكتيبات الرقمية"
+                defaultValue={settings[NOTIFY_EMAIL_SETTING_KEYS.booklets] ?? ""}
+                ltr
+                placeholder="booklets@momzyworld.com"
+              />
+              <TextField
+                name={NOTIFY_EMAIL_SETTING_KEYS.contact}
+                label="رسائل التواصل"
+                defaultValue={settings[NOTIFY_EMAIL_SETTING_KEYS.contact] ?? ""}
+                ltr
+                placeholder="hello@momzyworld.com"
+              />
+            </div>
             <SaveButton />
           </form>
         </Card>

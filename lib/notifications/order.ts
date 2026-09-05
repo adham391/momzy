@@ -1,5 +1,6 @@
 import { getOrderById } from "@/lib/db/orders";
-import { isEmailConfigured, sendEmail, TO_EMAIL } from "@/lib/resend/client";
+import { isEmailConfigured, sendEmail } from "@/lib/resend/client";
+import { getNotifyEmails, orderNotificationKinds } from "./recipients";
 import {
   orderCustomerEmailHtml,
   orderCustomerSubject,
@@ -27,6 +28,10 @@ import { notifyHebaNewOrder } from "@/lib/whatsapp/notify";
 /**
  * تأكيد الطلب — للعميلة، ولهبة (إيميل + واتساب).
  * يُستدعى بعد نجاح الدفع، أو عند الإنشاء في التدفّق اليدوي.
+ *
+ * إشعار هبة يذهب لصندوق يطابق محتوى الطلب: الفيزيائي لصندوق الطلبات
+ * والرقمي لصندوق الكتيبات. والطلب المختلط يخصّ الصندوقين فيصل لكليهما
+ * (مرة واحدة لو كان العنوانان واحدًا).
  */
 export async function sendOrderConfirmation(orderId: string): Promise<void> {
   const order = await getOrderById(orderId);
@@ -38,12 +43,14 @@ export async function sendOrderConfirmation(orderId: string): Promise<void> {
       subject: orderCustomerSubject(order),
       html: orderCustomerEmailHtml(order),
     });
-    await sendEmail({
-      to: TO_EMAIL,
-      replyTo: order.customer_email,
-      subject: orderAdminSubject(order),
-      html: orderAdminEmailHtml(order),
-    });
+    for (const to of await getNotifyEmails(orderNotificationKinds(order.items))) {
+      await sendEmail({
+        to,
+        replyTo: order.customer_email,
+        subject: orderAdminSubject(order),
+        html: orderAdminEmailHtml(order),
+      });
+    }
   }
 
   await notifyHebaNewOrder(order);
