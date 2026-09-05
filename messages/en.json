@@ -819,6 +819,7 @@
     "inquiry": "Ask",
     "fullJoinWaitlist": "Fully booked — join the waitlist",
     "registerNow": "Register now",
+    "registerNowPriced": "Register now — <amt>₪{price}</amt>",
     "ctaReadyHeading": "Ready for the next step?",
     "ctaReadySubheading": "Save your seat now — your spot is booked instantly, and confirmation lands in your inbox.",
     "orWhatsapp": "Or chat with me on WhatsApp",

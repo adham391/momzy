@@ -12,13 +12,15 @@ interface ServiceCardCTAProps {
   seatsLeft?: number;
   /** الفئة العمرية للورشة — تُمرَّر لنموذج التسجيل */
   ageGate?: AgeGate;
+  /** السعر بالشيكل — يظهر داخل الزر. بلا سعر يبقى النص وحده */
+  price?: number;
 }
 
 /**
  * زر التسجيل الإلكتروني في بطاقة الخدمة — يفتح نموذج التسجيل مباشرةً.
  * عند اكتمال المقاعد يتحوّل لزرّ قائمة انتظار (النموذج نفسه يعرض خطوة الانتظار).
  */
-export default function ServiceCardCTA({ serviceTitle, serviceSlug, seatsLeft, ageGate }: ServiceCardCTAProps) {
+export default function ServiceCardCTA({ serviceTitle, serviceSlug, seatsLeft, ageGate, price }: ServiceCardCTAProps) {
   const t = useTranslations("services");
   const [open, setOpen] = useState(false);
   const isFull = seatsLeft === 0;
@@ -39,7 +41,20 @@ export default function ServiceCardCTA({ serviceTitle, serviceSlug, seatsLeft, a
           boxShadow: isFull ? "none" : "0 6px 18px rgba(242,167,181,0.38)",
         }}
       >
-        {isFull ? t("fullJoinWaitlist") : t("registerNow")}
+        {isFull
+          ? t("fullJoinWaitlist")
+          : price
+            ? t.rich("registerNowPriced", {
+                price: String(price),
+                // أرقام Tajawal اللاتينية أقصر بصريًا من حروفه العربية — رفعٌ
+                // طفيف يوازن الارتفاع الظاهر مع «سجّلي الآن» بلا تكبير فعلي
+                amt: (chunks) => (
+                  <span dir="ltr" style={{ fontSize: "1.14em" }}>
+                    {chunks}
+                  </span>
+                ),
+              })
+            : t("registerNow")}
       </button>
 
       <BookingModal

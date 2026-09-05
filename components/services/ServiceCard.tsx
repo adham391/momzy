@@ -62,7 +62,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
 
       <div className="relative flex flex-col flex-1 p-4 pt-5 sm:p-5">
 
-        {/* ── الرأس: شعار النوع + التسمية ── */}
+        {/* ── الرأس: شعار النوع + التسمية + السعر ── */}
         <div className="flex items-center gap-2.5 mb-3.5">
           <span
             className="flex items-center justify-center shrink-0 shadow-sm"
@@ -103,8 +103,17 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
           {service.shortDescription}
         </p>
 
-        {/* ── الأزرار — مثبّتة بالأسفل ── */}
+        {/* ── الأزرار — مثبّتة بالأسفل لتساوي ارتفاع كل البطاقات ── */}
         <div className="mt-auto">
+          {/* بلا سعر (الزيارة البيتية: التسعيرة حسب البلدة) نصرّح بذلك فوق
+              الزر — فالزر عندها لا يحمل رقمًا */}
+          {!service.price && (
+            <div className="mb-2.5 text-center">
+              <span className="font-label font-bold text-body-sm" style={{ color: "var(--light)" }}>
+                {t("onRequest")}
+              </span>
+            </div>
+          )}
           {/* التسجيل الإلكتروني — الإجراء الأساسي (z-2 يبقيه فوق الرابط الممتد) */}
           <div className="relative z-[2]">
             <ServiceCardCTA
@@ -112,6 +121,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
               serviceSlug={service.slug}
               seatsLeft={seatsLeft}
               ageGate={service}
+              price={service.price}
             />
           </div>
 

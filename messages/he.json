@@ -819,6 +819,7 @@
     "inquiry": "שאלה",
     "fullJoinWaitlist": "המקומות מלאו — הצטרפי להמתנה",
     "registerNow": "הירשמי עכשיו",
+    "registerNowPriced": "הירשמי עכשיו — <amt>₪{price}</amt>",
     "ctaReadyHeading": "מוכנה לצעד הבא?",
     "ctaReadySubheading": "שמרי את מקומך עכשיו — המקום נשמר מיד, והאישור נשלח למייל שלך.",
     "orWhatsapp": "או דברי איתי בוואטסאפ",

@@ -819,6 +819,7 @@
     "inquiry": "استفسار",
     "fullJoinWaitlist": "اكتمل العدد — انضمي للانتظار",
     "registerNow": "سجّلي الآن",
+    "registerNowPriced": "سجّلي الآن — <amt>₪{price}</amt>",
     "ctaReadyHeading": "جاهزة للخطوة التالية؟",
     "ctaReadySubheading": "سجّلي مكانك الآن — مقعدكِ يُحجز فورًا، ويصلكِ التأكيد على بريدكِ.",
     "orWhatsapp": "أو تحدّثي معي على واتساب",
