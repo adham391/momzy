@@ -4,6 +4,7 @@ import { markOrderPaid, getOrderIdByNumber } from "@/lib/db/orders";
 import { markBookingPaid, getBookingIdByNumber } from "@/lib/db/bookings";
 import { sendBookingNotifications } from "@/lib/notifications/booking";
 import { sendDigitalDelivery } from "@/lib/notifications/digital";
+import { logPaymentAttempt } from "@/lib/db/paymentLogs";
 
 /**
  * GET /api/hyp/callback — عنوان العودة من صفحة دفع HYP.
@@ -25,30 +26,50 @@ export async function GET(request: Request) {
 
   let dest: string;
 
+  // المعرّف يُحلّ في الحالتين — نحتاجه للتوجيه وللسجلّ معًا
+  let entityId: string | null = null;
+
   if (isBooking) {
     if (result.valid) {
-      const bookingId = await markBookingPaid(result.orderNumber, result.transactionId);
+      entityId = await markBookingPaid(result.orderNumber, result.transactionId);
       // التأكيد (إيميل + واتساب) يُرسل الآن — بعد نجاح الدفع لا قبله
-      if (bookingId) after(() => sendBookingNotifications(bookingId));
-      dest = bookingId ? `/booking/${bookingId}` : "/services";
+      if (entityId) {
+        const bookingId = entityId;
+        after(() => sendBookingNotifications(bookingId));
+      }
+      dest = entityId ? `/booking/${entityId}` : "/services";
     } else {
-      const bookingId = await getBookingIdByNumber(result.orderNumber);
-      dest = bookingId ? `/booking/${bookingId}?payment=failed` : "/services";
+      entityId = await getBookingIdByNumber(result.orderNumber);
+      dest = entityId ? `/booking/${entityId}?payment=failed` : "/services";
     }
   } else {
     if (result.valid) {
-      const orderId = await markOrderPaid(result.orderNumber, result.transactionId);
+      entityId = await markOrderPaid(result.orderNumber, result.transactionId);
       // التسليم الرقمي + دعوة المكتبة — بعد نجاح الدفع لا قبله
-      if (orderId) {
+      if (entityId) {
+        const orderId = entityId;
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
         after(() => sendDigitalDelivery(orderId, siteUrl));
       }
-      dest = orderId ? `/order/${orderId}` : "/";
+      dest = entityId ? `/order/${entityId}` : "/";
     } else {
-      const orderId = await getOrderIdByNumber(result.orderNumber);
-      dest = orderId ? `/order/${orderId}?payment=failed` : "/checkout?payment=failed";
+      entityId = await getOrderIdByNumber(result.orderNumber);
+      dest = entityId ? `/order/${entityId}?payment=failed` : "/checkout?payment=failed";
     }
   }
+
+  // سجلّ المحاولة — بعد الرد كي لا يؤخّر العميلة، وبلا أي أثر على التوجيه
+  after(() =>
+    logPaymentAttempt({
+      reference: result.orderNumber,
+      kind: isBooking ? "booking" : "order",
+      entityId,
+      outcome: result.valid ? "paid" : "failed",
+      ccode: result.ccode,
+      transactionId: result.transactionId,
+      params: searchParams,
+    })
+  );
 
   return breakoutResponse(new URL(dest, origin).toString());
 }
