@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { validateNewAdminPassword } from "@/lib/admin/passwordPolicy";
+import { passwordUpdateErrorMessage, validateNewAdminPassword } from "@/lib/admin/passwordPolicy";
 
 /** حالة نموذج تغيير كلمة المرور — تُعاد لـ useActionState */
 export interface ChangePasswordState {
@@ -56,24 +56,7 @@ export async function changePasswordAction(
   if (verifyError) return fail("كلمة المرور الحالية غير صحيحة");
 
   const { error } = await supabase.auth.updateUser({ password: next });
-  if (error) return fail(updateErrorMessage(error.code));
+  if (error) return fail(passwordUpdateErrorMessage(error.code));
 
   return { status: "success", message: "تغيّرت كلمة المرور ✓ — استعمليها في الدخول القادم" };
-}
-
-/**
- * رسائل رفض Supabase بالعربية — تُطابَق بالرمز لا بالنصّ الإنجليزي،
- * فالنصّ قد يتغيّر بين إصدارات المكتبة والرمز ثابت.
- */
-function updateErrorMessage(code: string | undefined): string {
-  switch (code) {
-    case "same_password":
-      return "الكلمة الجديدة مطابقة للحالية — اختاري كلمة مختلفة";
-    case "weak_password":
-      return "رفض Supabase الكلمة لضعفها — جرّبي كلمة أطول تمزج أحرفًا وأرقامًا ورموزًا";
-    case "reauthentication_needed":
-      return "يتطلّب التغيير إعادة الدخول — اخرجي وادخلي من جديد ثم أعيدي المحاولة";
-    default:
-      return "تعذّر تغيير كلمة المرور — حاولي مجددًا";
-  }
 }

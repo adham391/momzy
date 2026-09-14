@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import AdminAuthCard from "@/components/admin/AdminAuthCard";
 import LoginForm from "./LoginForm";
 
 export const metadata = {
@@ -18,22 +20,22 @@ export default async function AdminLoginPage() {
   if (user) redirect("/admin");
 
   return (
-    <main className="min-h-screen bg-cream flex items-center justify-center p-5">
-      <div className="w-full max-w-sm">
-        {/* اللوقو */}
-        <div className="text-center mb-6">
-          <div className="font-heading text-4xl text-dark">Momzy</div>
-          <div className="text-body-sm text-light mt-1">لوحة التحكم</div>
-        </div>
+    <AdminAuthCard
+      title="تسجيل الدخول"
+      footer={<p className="text-center text-micro text-light mt-5">الدخول للمصرّح لهم فقط</p>}
+    >
+      <LoginForm />
 
-        {/* البطاقة */}
-        <div className="bg-white rounded-[var(--rl)] border border-bord p-7 shadow-[0_10px_40px_rgba(0,0,0,0.06)]">
-          <h1 className="font-heading text-h4 text-dark text-center mb-5">تسجيل الدخول</h1>
-          <LoginForm />
-        </div>
-
-        <p className="text-center text-micro text-light mt-5">الدخول للمصرّح لهم فقط</p>
+      {/* نسيت كلمة المرور — اللون inline: قاعدة `a { color: inherit }` تتفوّق على Tailwind */}
+      <div className="text-center mt-4">
+        <Link
+          href="/admin/forgot"
+          className="text-body-sm font-bold underline underline-offset-4"
+          style={{ color: "var(--mid)" }}
+        >
+          نسيت كلمة المرور؟
+        </Link>
       </div>
-    </main>
+    </AdminAuthCard>
   );
 }

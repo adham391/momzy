@@ -34,6 +34,13 @@ const BLOCKED_REGIONS: Record<string, Set<string>> = {
   PS: new Set(["GZ"]),
 };
 
+/**
+ * صفحات لوحة الأدمن المفتوحة بلا جلسة. الدخول نفسه (وإلا حلقة redirect
+ * لا نهائية)، و«نسيت كلمة المرور» والكلمة الجديدة — من يصلهما لا يملك
+ * جلسة أصلًا، والحماية فيهما رابط البريد لا الجلسة.
+ */
+const ADMIN_PUBLIC_PATHS = new Set(["/admin/login", "/admin/forgot", "/admin/reset-password"]);
+
 /** هل الطلب قادم من منطقة محظورة؟ */
 function isBlocked(country: string, region: string): boolean {
   // دولة محظورة كلياً
@@ -98,9 +105,9 @@ export async function proxy(request: NextRequest) {
 
   /* ── 2. حماية لوحة الأدمن (خارج شجرة اللغات) ── */
   const isAdminArea = pathname.startsWith("/admin");
-  // صفحة الدخول مستثناة من الفحص (وإلا حلقة redirect لا نهائية).
+  // صفحات الدخول مستثناة من الفحص (انظر ADMIN_PUBLIC_PATHS).
   // الخروج = server action (يُنفَّذ على مسار اللوحة نفسه)، لا يحتاج استثناء.
-  const isAuthPath = pathname === "/admin/login";
+  const isAuthPath = ADMIN_PUBLIC_PATHS.has(pathname);
 
   if (isAdminArea && !isAuthPath) {
     const { supabase, response } = createMiddlewareClient(request);
@@ -117,7 +124,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  /* ── 3. الأدمن (login) والاستوديو خارج نظام اللغات ── */
+  /* ── 3. صفحات دخول الأدمن والاستوديو خارج نظام اللغات ── */
   if (isAdminArea || pathname.startsWith("/studio")) {
     return NextResponse.next();
   }

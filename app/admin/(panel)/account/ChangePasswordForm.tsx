@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import PasswordField from "@/components/admin/PasswordField";
 import { changePasswordAction, type ChangePasswordState } from "./actions";
 import { MIN_ADMIN_PASSWORD_LENGTH } from "@/lib/admin/passwordPolicy";
 
@@ -52,38 +53,5 @@ export default function ChangePasswordForm() {
         {pending ? "جارٍ الحفظ..." : "تغيير كلمة المرور"}
       </button>
     </form>
-  );
-}
-
-/** حقل كلمة مرور — LTR، بنمط حقول صفحة الدخول */
-function PasswordField({
-  name,
-  label,
-  hint,
-  autoComplete,
-  minLength,
-}: {
-  name: string;
-  label: string;
-  hint?: string;
-  autoComplete: "current-password" | "new-password";
-  minLength?: number;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-body-sm font-bold text-dark">
-        {label}
-        {hint && <span className="font-normal text-light"> — {hint}</span>}
-      </span>
-      <input
-        name={name}
-        type="password"
-        required
-        minLength={minLength}
-        autoComplete={autoComplete}
-        dir="ltr"
-        className="w-full px-4 py-2.5 rounded-xl border border-bord bg-offwh text-body text-dark text-left placeholder:text-light focus:outline-none focus:border-rose focus:ring-2 focus:ring-rose/30 transition"
-      />
-    </label>
   );
 }

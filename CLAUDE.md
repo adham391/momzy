@@ -651,7 +651,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 
 > واجهة إدارة كاملة لهبة تدير كل شيء بدون مبرمج. محمية بـ **Supabase Auth + جدول `admins` بأدوار**.
 
-**البنية:** `app/admin/(panel)/` (سايدبار داكن يمين RTL، خلفية cream) + `app/admin/login/` (خارج الـ shell). الحماية في `middleware.ts` (بعد الحجب الجغرافي: `getUser` → غير مسجّل ⇒ `/admin/login`) + تفويض "أدمن نشط" في `(panel)/layout.tsx`. الخروج = server action (`app/admin/actions.ts`).
+**البنية:** `app/admin/(panel)/` (سايدبار داكن يمين RTL، خلفية cream) + `app/admin/login/` (خارج الـ shell). الحماية في `proxy.ts` (بعد الحجب الجغرافي: `getUser` → غير مسجّل ⇒ `/admin/login`؛ المفتوح بلا جلسة: `ADMIN_PUBLIC_PATHS` — الدخول ونسيت كلمة المرور والكلمة الجديدة) + تفويض "أدمن نشط" في `(panel)/layout.tsx`. الخروج = server action (`app/admin/actions.ts`).
 
 | الصفحة | الوظيفة |
 |--------|---------|
@@ -663,6 +663,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 | `/admin/customers` | مُجمَّعون من الطلبات (بحث + إجمالي الإنفاق) |
 | `/admin/settings` | تشغيلية (Supabase `settings`) + محتوى (Sanity `siteSettings`) |
 | `/admin/account` | حسابي — تغيير كلمة المرور (تُطلب الحالية أولًا · ١٢ حرفًا حدًّا أدنى من `lib/admin/passwordPolicy.ts`) |
+| `/admin/forgot` ← `/admin/reset-password` | نسيت كلمة المرور — رابط لمرة واحدة إلى بريد الأدمن عبر Resend (`lib/admin/passwordReset.ts`)؛ الرد موحّد فلا يكشف الحسابات، والرابط من `NEXT_PUBLIC_SITE_URL` لا من ترويسة Host، والرمز يُتحقَّق منه عند الحفظ لا عند الفتح. **يعمل فقط حين يستقبل بريدُ الأدمن الرسائل** |
 | `/admin/analytics` | مصادر UTM + مبيعات حسب المصدر + أفضل المنتجات + رسم 30 يوم (SVG) + معدل تحويل + مولّد UTM |
 
 **طبقة البيانات:** `lib/db/` (`orders`, `bookings`, `coupons`, `customers`, `settings`, `analytics`, `dashboard`) — كلها عبر service-role (`lib/supabase/admin.ts`)؛ RLS يقفل anon. التتبّع: `lib/analytics/track.ts` (عميل) → `POST /api/track` → `analytics_events`.
