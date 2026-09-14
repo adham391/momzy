@@ -13,7 +13,7 @@
  * متطلبات في .env.local:
  *   NEXT_PUBLIC_SUPABASE_URL=...
  *   SUPABASE_SERVICE_ROLE_KEY=...   (سرّي — service role)
- *   SEED_ADMIN_PASSWORD=...         (اختياري — كلمة المرور المؤقتة؛ الافتراضي أدناه)
+ *   SEED_ADMIN_PASSWORD=...         (مطلوب فقط حين يُنشأ حساب جديد — لا كلمة مرور في الكود)
  */
 
 import * as dotenv from "dotenv";
@@ -30,9 +30,6 @@ const ADMINS = [
   { name: "هبة حسن", email: "heba@momzyworld.com",  role: "admin" as const },
   { name: "أدمن",    email: "admin@momzyworld.com", role: "admin" as const },
 ];
-
-// كلمة مرور مؤقتة موحّدة — تُغيَّر بعد أول تسجيل دخول
-const TEMP_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "Momzy@2026";
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -58,6 +55,15 @@ async function main() {
   }
   const byEmail = new Map(existing.users.map((u) => [u.email, u.id]));
 
+  // كلمة المرور المؤقتة من .env.local فقط — تُطلب حين يوجد حساب سيُنشأ، لا قبل
+  const toCreate = ADMINS.filter((a) => !byEmail.has(a.email));
+  const tempPassword = process.env.SEED_ADMIN_PASSWORD?.trim() ?? "";
+  if (toCreate.length > 0 && !tempPassword) {
+    console.error("❌ SEED_ADMIN_PASSWORD مفقود في .env.local — مطلوب لإنشاء:");
+    for (const a of toCreate) console.error(`   ${a.email}`);
+    process.exit(1);
+  }
+
   const results = { created: 0, existed: 0, failed: 0 };
 
   for (const admin of ADMINS) {
@@ -70,7 +76,7 @@ async function main() {
       } else {
         const { data, error } = await supabase.auth.admin.createUser({
           email: admin.email,
-          password: TEMP_PASSWORD,
+          password: tempPassword,
           email_confirm: true, // مؤكَّد — يستطيع الدخول فوراً بلا إيميل تحقّق
           user_metadata: { name: admin.name },
         });
@@ -106,8 +112,8 @@ async function main() {
   if (results.failed) console.log(`❌ فشل:    ${results.failed}`);
   console.log("─────────────────────────────────────────");
   if (results.created > 0) {
-    console.log(`\n🔑 كلمة المرور المؤقتة: ${TEMP_PASSWORD}`);
-    console.log("   غيّريها بعد أول تسجيل دخول من /admin.\n");
+    console.log(`\n🔑 الحسابات الجديدة تدخل بكلمة المرور من SEED_ADMIN_PASSWORD`);
+    console.log("   غيّريها بعد أول دخول من /admin/account.\n");
   }
 }
 

@@ -23,14 +23,14 @@
 
 ## بعد تطبيق كل الملفات
 
-أنشئ حسابات الأدمن الثلاثة (يتطلب `SUPABASE_SERVICE_ROLE_KEY` في `.env.local`):
+أنشئ حسابات الأدمن الثلاثة (يتطلب `SUPABASE_SERVICE_ROLE_KEY` و`SEED_ADMIN_PASSWORD` في `.env.local`):
 
 ```bash
 npm run seed:admins
 ```
 
 يُنشئ: `adham@momzyworld.com` (super_admin)، `heba@momzyworld.com`، `admin@momzyworld.com`
-بكلمة مرور مؤقتة موحّدة (تُغيَّر بعد أول دخول).
+بكلمة المرور المؤقتة من `SEED_ADMIN_PASSWORD` (تُغيَّر بعد أول دخول). كلمات مرور الحسابات الموجودة لا تُمسّ، فالمتغيّر مطلوب فقط حين يُنشأ حساب جديد.
 
 ## نموذج الأمان (RLS)
 
