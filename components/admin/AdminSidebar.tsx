@@ -12,6 +12,7 @@ import {
   BarChart3,
   Users,
   Settings,
+  UserCog,
   LogOut,
   Menu,
   X,
@@ -146,6 +147,19 @@ export default function AdminSidebar({
               <div className="text-micro text-white/50">{ROLE_LABEL[role] ?? role}</div>
             </div>
           </div>
+          {/* حسابي — تغيير كلمة المرور. هنا لا في التنقّل: إعداد شخصي لا قسم إدارة */}
+          <Link
+            href="/admin/account"
+            onClick={() => setOpen(false)}
+            style={{ color: isActive("/admin/account") ? "var(--dark)" : "rgba(255,255,255,0.75)" }}
+            className={cn(
+              "w-full mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-sm transition-colors",
+              isActive("/admin/account") ? "bg-rose font-bold" : "hover:bg-white/10"
+            )}
+          >
+            <UserCog size={19} strokeWidth={isActive("/admin/account") ? 2.4 : 2} />
+            <span>حسابي وكلمة المرور</span>
+          </Link>
           <form action={logoutAction}>
             <button
               type="submit"

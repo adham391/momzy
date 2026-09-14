@@ -662,11 +662,12 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 | `/admin/coupons` | CRUD كوبونات + تفعيل/إيقاف + إحصائيات |
 | `/admin/customers` | مُجمَّعون من الطلبات (بحث + إجمالي الإنفاق) |
 | `/admin/settings` | تشغيلية (Supabase `settings`) + محتوى (Sanity `siteSettings`) |
+| `/admin/account` | حسابي — تغيير كلمة المرور (تُطلب الحالية أولًا · ١٢ حرفًا حدًّا أدنى من `lib/admin/passwordPolicy.ts`) |
 | `/admin/analytics` | مصادر UTM + مبيعات حسب المصدر + أفضل المنتجات + رسم 30 يوم (SVG) + معدل تحويل + مولّد UTM |
 
 **طبقة البيانات:** `lib/db/` (`orders`, `bookings`, `coupons`, `customers`, `settings`, `analytics`, `dashboard`) — كلها عبر service-role (`lib/supabase/admin.ts`)؛ RLS يقفل anon. التتبّع: `lib/analytics/track.ts` (عميل) → `POST /api/track` → `analytics_events`.
 
-**Supabase:** migrations `supabase/migrations/0001→0010` (مُطبَّقة). إنشاء الأدمن: `npm run seed:admins` · تنظيف بيانات الاختبار: `npm run clear:test`.
+**Supabase:** migrations `supabase/migrations/0001→0010` (مُطبَّقة). إنشاء الأدمن: `npm run seed:admins` · نسيان كلمة المرور: `npm run admin:password -- <الإيميل>` (في طرفية — الكلمة تُكتب مخفيّة) · تنظيف بيانات الاختبار: `npm run clear:test`.
 
 ---
 

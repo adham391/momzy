@@ -9,6 +9,7 @@
     "lint": "eslint",
     "migrate:seed": "tsx scripts/migrate-seed-to-sanity.ts",
     "seed:admins": "tsx scripts/seed-admins.ts",
+    "admin:password": "tsx scripts/set-admin-password.ts",
     "clear:test": "tsx scripts/clear-test-data.ts"
   },
   "dependencies": {
