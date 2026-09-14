@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 
 /** عميل Resend — يُستخدم في API Routes فقط (server-side) */
 export const resend = new Resend(process.env.RESEND_API_KEY);
@@ -14,7 +15,13 @@ export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
-/** يرسل إيميلاً ويسجّل أخطاء Resend (best-effort — لا يرمي) */
+/**
+ * يرسل إيميلاً ويسجّل أخطاء Resend (best-effort — لا يرمي).
+ *
+ * الردّ يذهب إلى SUPPORT_EMAIL ما لم يُمرَّر replyTo: المرسِل noreply@ بلا صندوق،
+ * فالعميلة التي تضغط «ردّ» كانت تتلقّى «العنوان غير موجود».
+ * إشعارات الأدمن تمرّر إيميل العميلة، فيذهب الردّ إليها مباشرة.
+ */
 export async function sendEmail(opts: {
   to: string;
   subject: string;
@@ -28,7 +35,7 @@ export async function sendEmail(opts: {
       to: opts.to,
       subject: opts.subject,
       html: opts.html,
-      replyTo: opts.replyTo,
+      replyTo: opts.replyTo ?? SUPPORT_EMAIL,
     });
     if (error) {
       console.error("[email] Resend رفض:", opts.subject, JSON.stringify(error));

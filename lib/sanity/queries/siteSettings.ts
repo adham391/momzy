@@ -1,5 +1,6 @@
 import { sanityFetch } from "@/lib/sanity/client";
 import { tf, activeLocale, type AppLocale } from "@/lib/sanity/i18n";
+import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 
 /** TypeScript types لإعدادات الموقع */
 export interface SiteSettingsTopBar {
@@ -48,7 +49,7 @@ const SOCIAL_LINKS: SiteSettingsSocialLinks = {
 };
 
 const CONTACT: SiteSettingsContact = {
-  email: "hello@momzyworld.com",
+  email: SUPPORT_EMAIL,
 };
 
 /**

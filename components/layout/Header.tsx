@@ -21,10 +21,13 @@ const MEGA_CLOSE_DELAY = 150;
 export default function Header({
   products = [],
   whatsappNumber,
+  contactEmail,
 }: {
   products?: Product[];
   /** رقم هبة — تمرّره القائمة إلى أيقونة واتساب، وتُخفيها بدونه */
   whatsappNumber?: string;
+  /** عنوان التواصل — تمرّره القائمة إلى أيقونة البريد */
+  contactEmail: string;
 }) {
   const t = useTranslations("nav");
   const tMenu = useTranslations("menu");
@@ -159,7 +162,13 @@ export default function Header({
       </header>
 
       {/* قائمة الموبايل */}
-      <MobileMenu isOpen={isMenuOpen} onClose={closeMenu} products={products} whatsappNumber={whatsappNumber} />
+      <MobileMenu
+        isOpen={isMenuOpen}
+        onClose={closeMenu}
+        products={products}
+        whatsappNumber={whatsappNumber}
+        contactEmail={contactEmail}
+      />
     </>
   );
 }

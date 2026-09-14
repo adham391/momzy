@@ -20,6 +20,8 @@ interface MobileMenuProps {
   products?: Product[];
   /** رقم هبة — بدونه تُخفى أيقونة واتساب */
   whatsappNumber?: string;
+  /** عنوان التواصل المعروض — من إعدادات الموقع، كالفوتر وصفحة التواصل */
+  contactEmail: string;
 }
 
 /** قائمة الموبايل — overlay كامل الشاشة مع CTA + footer */
@@ -28,6 +30,7 @@ export default function MobileMenu({
   onClose,
   products = [],
   whatsappNumber,
+  contactEmail,
 }: MobileMenuProps) {
   // بلا رقم صالح لا أيقونة — رابط wa.me فارغ أسوأ من غيابه
   const whatsappHref = whatsappLink(whatsappNumber);
@@ -219,7 +222,7 @@ export default function MobileMenu({
 
           {/* إيميل */}
           <a
-            href="mailto:heba@momzyworld.com"
+            href={`mailto:${contactEmail}`}
             aria-label={t("menu.emailAria")}
             className="w-12 h-12 rounded-full bg-white border-[1.5px] border-bord flex items-center justify-center hover:border-rose transition-colors"
           >

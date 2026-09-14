@@ -1,8 +1,7 @@
 import type { OrderWithItems } from "@/lib/db/types";
+import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { emailHeader, emailFooter } from "./brand";
 import { emailLocale, emailTranslator, isRtl, type EmailLocale, type EmailT } from "../i18n";
-
-const SUPPORT_EMAIL = "hello@momzyworld.com";
 
 const ils = (n: number) => `${Number(n).toLocaleString("en-US")} ₪`;
 

@@ -1,8 +1,7 @@
 import { formatDate } from "@/lib/utils/format";
+import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { logoUrl } from "./brand";
 import { emailLocale, emailTranslator, isRtl, type EmailT } from "../i18n";
-
-const SUPPORT_EMAIL = "hello@momzyworld.com";
 
 /** عنوان إيميل التسليم الرقمي — قراءة على الموقع */
 export function downloadEmailSubject(

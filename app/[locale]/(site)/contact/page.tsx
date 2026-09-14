@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import { getTranslations } from "next-intl/server";
 import { whatsappLink } from "@/lib/utils/whatsapp";
+import { publicContactEmail } from "@/lib/utils/contactEmail";
 import { Link } from "@/lib/i18n/navigation";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
@@ -64,8 +65,11 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "contact" });
 
+  const { contact } = await getSiteSettings(locale);
   // بطاقة واتساب لا تُعرض بلا رقم مضبوط — كانت تقود إلى رقم وهمي
-  const whatsappHref = whatsappLink((await getSiteSettings(locale)).contact.whatsappNumber);
+  const whatsappHref = whatsappLink(contact.whatsappNumber);
+  // العنوان نفسه الذي يعرضه الفوتر وقائمة الجوال
+  const email = publicContactEmail(contact.email);
   return (
     <div style={{ background: "var(--offwh)", minHeight: "100vh" }}>
 
@@ -166,8 +170,8 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                   </svg>
                 }
                 title={t("emailTitle")}
-                value="heba@momzyworld.com"
-                href="mailto:heba@momzyworld.com"
+                value={email}
+                href={`mailto:${email}`}
               />
 
               {whatsappHref && (

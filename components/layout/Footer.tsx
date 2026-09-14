@@ -4,6 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import type { SiteSettings } from "@/lib/sanity/queries/siteSettings";
 import NewsletterForm from "./NewsletterForm";
 import { whatsappLink } from "@/lib/utils/whatsapp";
+import { publicContactEmail } from "@/lib/utils/contactEmail";
 
 interface FooterProps {
   settings: SiteSettings;
@@ -99,7 +100,7 @@ export default function Footer({ settings }: FooterProps) {
   ];
 
   const whatsappDisplay = contact.whatsappNumber ?? "";
-  const emailDisplay    = contact.email ?? "hello@momzyworld.com";
+  const emailDisplay    = publicContactEmail(contact.email);
 
   return (
     <>

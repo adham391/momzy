@@ -4,10 +4,9 @@
  * فيه العميلة كلمتها بنفسها.
  */
 
+import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { logoUrl } from "./brand";
 import { emailLocale, emailTranslator, isRtl } from "../i18n";
-
-const SUPPORT_EMAIL = "hello@momzyworld.com";
 
 interface LibraryEmailOptions {
   /** رابط إنشاء/استعادة كلمة المرور — /library/setup/[token] */

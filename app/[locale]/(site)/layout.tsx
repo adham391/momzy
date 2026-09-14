@@ -6,6 +6,7 @@ import FloatingCartButton from "@/components/shop/FloatingCartButton";
 import CartAddedModal from "@/components/shop/CartAddedModal";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import { getProducts } from "@/lib/products/getProducts";
+import { publicContactEmail } from "@/lib/utils/contactEmail";
 
 /**
  * تخطيط صفحات الموقع العامة
@@ -24,7 +25,11 @@ export default async function SiteLayout({
   return (
     <>
       <TopBar settings={settings.topBar} />
-      <Header products={products} whatsappNumber={settings.contact.whatsappNumber} />
+      <Header
+        products={products}
+        whatsappNumber={settings.contact.whatsappNumber}
+        contactEmail={publicContactEmail(settings.contact.email)}
+      />
       <main>{children}</main>
       <Footer settings={settings} />
 
