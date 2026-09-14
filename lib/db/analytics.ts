@@ -1,4 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { buildSeries, periodQueryStart, type SeriesPoint, type StatsPeriod } from "@/lib/stats/period";
+import { isSettled, SETTLED_ORDER_FILTER } from "@/lib/stats/settlement";
+import { fetchAllRows } from "./fetchAllRows";
 
 const DAY_MS = 86400000;
 const DIRECT = "مباشر"; // تسمية الزيارات بلا مصدر
@@ -25,7 +28,40 @@ export async function logEvent(e: Record<string, unknown>): Promise<void> {
   }
 }
 
-/* ── استعلامات لوحة التحليلات ── */
+/* ── استعلامات «نظرة عامة» ──
+ * المبيعات هنا للطلبات المدفوعة (أو المجانية) غير الملغاة فقط — القاعدة نفسها
+ * في لوحة التحكم وتبويبات الفئات (lib/stats/settlement.ts).
+ * كل استعلام يُجلب على دفعات: Supabase يقطع النتيجة عند 1000 صف بصمت. */
+
+/** بداية نافذة N يوم (ISO) */
+function sinceISO(days: number): string {
+  return new Date(Date.now() - days * DAY_MS).toISOString();
+}
+
+/** زيارة صفحة مختصرة — مصدرها وجلستها */
+interface PageViewSession {
+  source: string;
+  sessionId: string | null;
+}
+
+/** زيارات الصفحات في الفترة */
+async function fetchPageViewSessions(days: number): Promise<PageViewSession[]> {
+  const supabase = createAdminClient();
+  const since = sinceISO(days);
+  const rows = await fetchAllRows((from, to) =>
+    supabase
+      .from("analytics_events")
+      .select("id, utm_source, session_id")
+      .eq("event_type", "page_view")
+      .gte("created_at", since)
+      .order("id")
+      .range(from, to)
+  );
+  return rows.map((row) => ({
+    source: (row.utm_source as string | null) || DIRECT,
+    sessionId: row.session_id ? String(row.session_id) : null,
+  }));
+}
 
 export interface SourceStat {
   source: string;
@@ -34,20 +70,11 @@ export interface SourceStat {
 
 /** مصادر الزيارات — عدد الجلسات لكل مصدر UTM */
 export async function getTrafficSources(days = 30): Promise<SourceStat[]> {
-  const supabase = createAdminClient();
-  const since = new Date(Date.now() - days * DAY_MS).toISOString();
-  const { data } = await supabase
-    .from("analytics_events")
-    .select("utm_source, session_id")
-    .eq("event_type", "page_view")
-    .gte("created_at", since);
-
   const sessionsBySource = new Map<string, Set<string>>();
-  for (const e of data ?? []) {
-    const src = (e.utm_source as string | null) || DIRECT;
-    const set = sessionsBySource.get(src) ?? new Set<string>();
-    if (e.session_id) set.add(String(e.session_id));
-    sessionsBySource.set(src, set);
+  for (const view of await fetchPageViewSessions(days)) {
+    const set = sessionsBySource.get(view.source) ?? new Set<string>();
+    if (view.sessionId) set.add(view.sessionId);
+    sessionsBySource.set(view.source, set);
   }
   return Array.from(sessionsBySource.entries())
     .map(([source, set]) => ({ source, count: set.size }))
@@ -60,21 +87,26 @@ export interface SalesSourceStat {
   orders: number;
 }
 
-/** المبيعات حسب المصدر — من طلبات غير ملغاة */
+/** المبيعات حسب المصدر — الطلبات المدفوعة فقط */
 export async function getSalesBySource(days = 30): Promise<SalesSourceStat[]> {
   const supabase = createAdminClient();
-  const since = new Date(Date.now() - days * DAY_MS).toISOString();
-  const { data } = await supabase
-    .from("orders")
-    .select("utm_source, total_amount, order_status")
-    .gte("created_at", since);
+  const since = sinceISO(days);
+  const rows = await fetchAllRows((from, to) =>
+    supabase
+      .from("orders")
+      .select("id, utm_source, total_amount")
+      .or(SETTLED_ORDER_FILTER)
+      .neq("order_status", "cancelled")
+      .gte("created_at", since)
+      .order("id")
+      .range(from, to)
+  );
 
   const map = new Map<string, { revenue: number; orders: number }>();
-  for (const o of data ?? []) {
-    if (o.order_status === "cancelled") continue;
-    const src = (o.utm_source as string | null) || DIRECT;
+  for (const order of rows) {
+    const src = (order.utm_source as string | null) || DIRECT;
     const cur = map.get(src) ?? { revenue: 0, orders: 0 };
-    cur.revenue += Number(o.total_amount ?? 0);
+    cur.revenue += Number(order.total_amount ?? 0);
     cur.orders += 1;
     map.set(src, cur);
   }
@@ -89,23 +121,27 @@ export interface ProductStat {
   revenue: number;
 }
 
-/** أفضل المنتجات مبيعاً */
+/** أفضل المنتجات مبيعًا — من الطلبات المدفوعة فقط */
 export async function getBestSellers(days = 30, limit = 5): Promise<ProductStat[]> {
   const supabase = createAdminClient();
-  const sinceDate = new Date(Date.now() - days * DAY_MS);
-  const { data } = await supabase
-    .from("order_items")
-    .select("product_name, quantity, total_price, orders(order_status, created_at)");
+  const since = sinceISO(days);
+  const rows = await fetchAllRows((from, to) =>
+    supabase
+      .from("order_items")
+      .select("id, product_name, quantity, total_price, orders!inner(payment_status, order_status, total_amount)")
+      .gte("orders.created_at", since)
+      .order("id")
+      .range(from, to)
+  );
 
   const map = new Map<string, { quantity: number; revenue: number }>();
-  for (const it of data ?? []) {
-    const order = it.orders as { order_status?: string; created_at?: string } | null;
-    if (!order || order.order_status === "cancelled") continue;
-    if (order.created_at && new Date(order.created_at) < sinceDate) continue;
-    const name = String(it.product_name);
+  for (const item of rows) {
+    const order = item.orders as { payment_status: string; order_status: string; total_amount: number | string | null };
+    if (!isSettled(order.payment_status, Number(order.total_amount ?? 0), order.order_status === "cancelled")) continue;
+    const name = String(item.product_name);
     const cur = map.get(name) ?? { quantity: 0, revenue: 0 };
-    cur.quantity += Number(it.quantity ?? 0);
-    cur.revenue += Number(it.total_price ?? 0);
+    cur.quantity += Number(item.quantity ?? 0);
+    cur.revenue += Number(item.total_price ?? 0);
     map.set(name, cur);
   }
   return Array.from(map.entries())
@@ -114,39 +150,26 @@ export async function getBestSellers(days = 30, limit = 5): Promise<ProductStat[
     .slice(0, limit);
 }
 
-export interface DailySales {
-  date: string;
-  revenue: number;
-  orders: number;
-}
-
-/** مبيعات يومية على مدى N يوم (مع تعبئة الأيام الفارغة) */
-export async function getDailySales(days = 30): Promise<DailySales[]> {
+/** مبيعات يومية على مدى الفترة — الطلبات المدفوعة، بأيام إسرائيل، والأيام الخالية صفر */
+export async function getDailySales(period: StatsPeriod = 30): Promise<SeriesPoint[]> {
   const supabase = createAdminClient();
-  const sinceDate = new Date(Date.now() - (days - 1) * DAY_MS);
-  sinceDate.setHours(0, 0, 0, 0);
-  const { data } = await supabase
-    .from("orders")
-    .select("created_at, total_amount, order_status")
-    .gte("created_at", sinceDate.toISOString());
+  const start = periodQueryStart(period);
+  const rows = await fetchAllRows((from, to) => {
+    let query = supabase
+      .from("orders")
+      .select("id, created_at, total_amount")
+      .or(SETTLED_ORDER_FILTER)
+      .neq("order_status", "cancelled")
+      .order("id")
+      .range(from, to);
+    if (start) query = query.gte("created_at", start);
+    return query;
+  });
 
-  const map = new Map<string, { revenue: number; orders: number }>();
-  for (const o of data ?? []) {
-    if (o.order_status === "cancelled") continue;
-    const day = String(o.created_at).slice(0, 10);
-    const cur = map.get(day) ?? { revenue: 0, orders: 0 };
-    cur.revenue += Number(o.total_amount ?? 0);
-    cur.orders += 1;
-    map.set(day, cur);
-  }
-
-  const result: DailySales[] = [];
-  for (let i = 0; i < days; i++) {
-    const key = new Date(sinceDate.getTime() + i * DAY_MS).toISOString().slice(0, 10);
-    const v = map.get(key) ?? { revenue: 0, orders: 0 };
-    result.push({ date: key, ...v });
-  }
-  return result;
+  return buildSeries(
+    rows.map((order) => ({ at: String(order.created_at), revenue: Number(order.total_amount ?? 0), count: 1 })),
+    period
+  );
 }
 
 export interface ConversionStat {
@@ -155,25 +178,21 @@ export interface ConversionStat {
   rate: number;
 }
 
-/** معدّل التحويل — طلبات ÷ جلسات */
+/** معدّل التحويل — طلبات مدفوعة ÷ جلسات */
 export async function getConversionRate(days = 30): Promise<ConversionStat> {
   const supabase = createAdminClient();
-  const since = new Date(Date.now() - days * DAY_MS).toISOString();
+  const [views, { count }] = await Promise.all([
+    fetchPageViewSessions(days),
+    supabase
+      .from("orders")
+      .select("*", { count: "exact", head: true })
+      .or(SETTLED_ORDER_FILTER)
+      .neq("order_status", "cancelled")
+      .gte("created_at", sinceISO(days)),
+  ]);
 
-  const { data: events } = await supabase
-    .from("analytics_events")
-    .select("session_id")
-    .eq("event_type", "page_view")
-    .gte("created_at", since);
-  const sessions = new Set((events ?? []).map((e) => String(e.session_id)).filter(Boolean)).size;
-
-  const { count } = await supabase
-    .from("orders")
-    .select("*", { count: "exact", head: true })
-    .neq("order_status", "cancelled")
-    .gte("created_at", since);
+  const sessions = new Set(views.map((view) => view.sessionId).filter((id): id is string => Boolean(id))).size;
   const purchases = count ?? 0;
-
   const rate = sessions > 0 ? (purchases / sessions) * 100 : 0;
   return { sessions, purchases, rate };
 }

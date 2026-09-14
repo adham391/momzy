@@ -18,7 +18,7 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
     <div>
       <h1 className="font-heading text-h2 font-bold text-dark mb-1">العملاء</h1>
       <p className="text-mid text-body-sm mb-6">
-        {customers.length} عميل — مُجمَّعون من الطلبات
+        {customers.length} عميل — مُجمَّعون من الطلبات المدفوعة
       </p>
 
       <SearchInput defaultValue={q ?? ""} placeholder="بحث بالاسم أو الإيميل أو الهاتف" />
@@ -26,7 +26,7 @@ export default async function AdminCustomersPage({ searchParams }: PageProps) {
       {customers.length === 0 ? (
         <div className="bg-white rounded-[var(--rl)] border border-bord py-16 text-center">
           <Users size={40} className="mx-auto text-light mb-3" strokeWidth={1.5} />
-          <p className="text-mid text-body-sm">لا يوجد عملاء بعد</p>
+          <p className="text-mid text-body-sm">لا عملاء بعد — تظهر العميلة هنا بعد أول طلب مدفوع</p>
         </div>
       ) : (
         <>

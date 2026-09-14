@@ -16,14 +16,14 @@ export default async function AdminHomePage() {
   return (
     <div>
       <h1 className="font-heading text-h2 font-bold text-dark mb-1">لوحة التحكم</h1>
-      <p className="text-mid text-body-sm mb-6">نظرة سريعة على متجر Momzy</p>
+      <p className="text-mid text-body-sm mb-6">نظرة سريعة على متجر Momzy · الطلبات والحجوزات المدفوعة فقط</p>
 
       {/* ── بطاقات الإحصائيات ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         <StatCard icon={TrendingUp} label="مبيعات اليوم" value={formatILS(stats.salesToday)} />
         <StatCard icon={TrendingUp} label="مبيعات الأسبوع" value={formatILS(stats.salesWeek)} />
         <StatCard icon={TrendingUp} label="مبيعات الشهر" value={formatILS(stats.salesMonth)} />
-        <StatCard icon={ShoppingBag} label="طلبات جديدة" value={String(stats.newOrdersCount)} accent />
+        <StatCard icon={ShoppingBag} label="طلبات اليوم" value={String(stats.ordersToday)} accent />
       </div>
 
       {/* ── تنبيهات ── */}
@@ -32,8 +32,8 @@ export default async function AdminHomePage() {
           {stats.unshippedCount > 0 && (
             <AlertCard
               icon={Truck}
-              href="/admin/orders?status=pending"
-              text={`${stats.unshippedCount} طلب بحاجة للمتابعة والشحن`}
+              href="/admin/orders?status=confirmed"
+              text={`${stats.unshippedCount} طلب مدفوع بانتظار الشحن`}
             />
           )}
           {stats.todayBookingsCount > 0 && (
@@ -51,7 +51,7 @@ export default async function AdminHomePage() {
         {/* أحدث الطلبات */}
         <Panel title="أحدث الطلبات" href="/admin/orders">
           {stats.recentOrders.length === 0 ? (
-            <Empty text="لا توجد طلبات بعد" />
+            <Empty text="لا طلبات مدفوعة بعد" />
           ) : (
             <ul className="flex flex-col divide-y divide-bord">
               {stats.recentOrders.map((o) => (
@@ -80,7 +80,7 @@ export default async function AdminHomePage() {
         {/* أحدث الحجوزات */}
         <Panel title="أحدث الحجوزات" href="/admin/bookings">
           {stats.recentBookings.length === 0 ? (
-            <Empty text="نظام الحجوزات قيد الإنشاء" />
+            <Empty text="لا حجوزات مدفوعة بعد" />
           ) : (
             <ul className="flex flex-col divide-y divide-bord">
               {stats.recentBookings.map((b) => (

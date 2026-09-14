@@ -41,6 +41,12 @@ export function formatSlotDate(dateStr: string): string {
   return ltr(dmy(new Date(dateStr + "T00:00:00")));
 }
 
+/** شهر وسنة: "9/2026" (من "YYYY-MM-DD") */
+export function formatMonth(dateStr: string): string {
+  const [year, month] = dateStr.split("-");
+  return ltr(`${Number(month)}/${year}`);
+}
+
 /** وقت مختصر: "10:00:00" → "10:00" */
 export function formatTimeShort(t: string): string {
   return t.slice(0, 5);

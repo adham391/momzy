@@ -8,6 +8,7 @@ import { effectivePrice } from "@/lib/bundles";
 import { isDigitalProduct } from "@/lib/products/helpers";
 import { createDownloadTokens, type DigitalDownloadInput } from "./downloads";
 import { toLatinDigits } from "@/lib/utils/format";
+import { SETTLED_ORDER_FILTER } from "@/lib/stats/settlement";
 import type { GiftOptions } from "@/lib/store/cart";
 import type {
   CreateOrderInput,
@@ -278,6 +279,8 @@ export interface OrderListFilters {
   status?: OrderStatus | "all";
   search?: string;
   limit?: number;
+  /** المدفوع (أو المجاني) فقط، بلا الملغى — للوحة التحكم (lib/stats/settlement.ts) */
+  settledOnly?: boolean;
 }
 
 /** قائمة الطلبات للأدمن — فلترة بالحالة + بحث برقم/اسم/هاتف/إيميل */
@@ -287,6 +290,9 @@ export async function listOrders(filters: OrderListFilters = {}): Promise<OrderR
 
   if (filters.status && filters.status !== "all") {
     query = query.eq("order_status", filters.status);
+  }
+  if (filters.settledOnly) {
+    query = query.or(SETTLED_ORDER_FILTER).neq("order_status", "cancelled");
   }
   if (filters.search && filters.search.trim()) {
     // تنظيف من رموز PostgREST الخاصة لمنع حقن الفلتر
@@ -417,37 +423,6 @@ export async function getShippingRows(filters: OrderListFilters = {}): Promise<S
       createdAt: String(o.created_at),
     };
   });
-}
-
-/** صف مبيعات مختصر — لتجميع لوحة التحكم */
-export interface OrderSalesRow {
-  total_amount: number;
-  order_status: OrderStatus;
-  created_at: string;
-}
-
-/** طلبات منذ تاريخ (ISO) — للمبيعات في لوحة التحكم */
-export async function getOrdersSince(sinceISO: string): Promise<OrderSalesRow[]> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("orders")
-    .select("total_amount, order_status, created_at")
-    .gte("created_at", sinceISO);
-
-  return (data ?? []).map((r) => ({
-    total_amount: Number(r.total_amount ?? 0),
-    order_status: String(r.order_status) as OrderStatus,
-    created_at: String(r.created_at),
-  }));
-}
-
-/** عدّ الطلبات حسب حالات معيّنة (أو الكل) */
-export async function countOrders(statuses?: OrderStatus[]): Promise<number> {
-  const supabase = createAdminClient();
-  let query = supabase.from("orders").select("*", { count: "exact", head: true });
-  if (statuses && statuses.length) query = query.in("order_status", statuses);
-  const { count } = await query;
-  return count ?? 0;
 }
 
 /* ── تحديثات الأدمن ─────────────────────────────────────── */
