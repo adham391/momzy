@@ -66,7 +66,7 @@ export default function AdminSidebar({
   return (
     <>
       {/* ── شريط علوي (جوال فقط) ── */}
-      <header className="md:hidden fixed top-0 inset-x-0 h-14 bg-dark z-30 flex items-center justify-between px-4">
+      <header className="md:hidden fixed top-0 inset-x-0 h-14 bg-dark z-30 flex items-center justify-between px-4 print:hidden">
         <button
           onClick={() => setOpen(true)}
           aria-label="فتح القائمة"
@@ -78,12 +78,12 @@ export default function AdminSidebar({
         <span className="w-8" aria-hidden />
       </header>
       {/* فراغ يعوّض الشريط العلوي الثابت على الجوال */}
-      <div className="md:hidden h-14" aria-hidden />
+      <div className="md:hidden h-14 print:hidden" aria-hidden />
 
       {/* ── طبقة معتمة خلف السايدبار (جوال) ── */}
       {open && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          className="md:hidden fixed inset-0 bg-black/50 z-40 print:hidden"
           onClick={() => setOpen(false)}
           aria-hidden
         />
@@ -92,7 +92,8 @@ export default function AdminSidebar({
       {/* ── السايدبار ── */}
       <aside
         className={cn(
-          "fixed top-0 right-0 h-screen w-64 bg-dark text-white z-50 flex flex-col",
+          // عند الطباعة (שטר מטען مثلًا) تُطبع الصفحة وحدها بلا السايدبار
+          "fixed top-0 right-0 h-screen w-64 bg-dark text-white z-50 flex flex-col print:hidden",
           "transition-transform duration-300 [transition-timing-function:var(--ease-out)] md:translate-x-0",
           open ? "translate-x-0" : "translate-x-full md:translate-x-0"
         )}

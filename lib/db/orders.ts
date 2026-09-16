@@ -313,6 +313,8 @@ export async function listOrders(filters: OrderListFilters = {}): Promise<OrderR
 export interface OrderListRow extends OrderRow {
   itemCount: number;
   productSummary: string;
+  /** فيه منتج يُشحن — يحدّد ظهور زر שטר המטען */
+  hasPhysicalItems: boolean;
 }
 
 /** قائمة الطلبات للأدمن مع ملخّص المنتجات (nested select — استعلام واحد) */
@@ -320,7 +322,7 @@ export async function listOrdersForAdmin(filters: OrderListFilters = {}): Promis
   const supabase = createAdminClient();
   let query = supabase
     .from("orders")
-    .select("*, order_items(product_name, quantity)")
+    .select("*, order_items(product_name, quantity, product_type)")
     .order("created_at", { ascending: false });
 
   if (filters.status && filters.status !== "all") {
@@ -339,14 +341,19 @@ export async function listOrdersForAdmin(filters: OrderListFilters = {}): Promis
   const { data } = await query;
   return (data ?? []).map((row) => {
     const items =
-      (row.order_items as { product_name: string; quantity: number }[] | null) ?? [];
+      (row.order_items as { product_name: string; quantity: number; product_type: string }[] | null) ?? [];
     const itemCount = items.reduce((sum, i) => sum + Number(i.quantity), 0);
     const productSummary = toLatinDigits(
       items
         .map((i) => (Number(i.quantity) > 1 ? `${i.product_name} ×${i.quantity}` : i.product_name))
         .join("، ")
     );
-    return { ...toOrderRow(row), itemCount, productSummary };
+    return {
+      ...toOrderRow(row),
+      itemCount,
+      productSummary,
+      hasPhysicalItems: items.some((i) => i.product_type === "physical"),
+    };
   });
 }
 

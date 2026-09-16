@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { PackageOpen, Download } from "lucide-react";
+import { PackageOpen, Download, Printer } from "lucide-react";
 import { listOrdersForAdmin } from "@/lib/db/orders";
 import type { OrderStatus } from "@/lib/db/types";
 import OrdersFilterBar from "@/components/admin/orders/OrdersFilterBar";
 import { OrderStatusBadge } from "@/components/admin/StatusBadge";
 import { formatILS, formatDate } from "@/lib/utils/format";
+import { canPrintWaybill } from "@/lib/orders/waybill";
 
 // قائمة لحظية — الطلبات الجديدة تظهر فورًا بلا تخزين مؤقت
 export const dynamic = "force-dynamic";
@@ -61,6 +62,9 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                   <Th>الإجمالي</Th>
                   <Th>الحالة</Th>
                   <Th>التاريخ</Th>
+                  <Th>
+                    <span className="sr-only">שטר מטען</span>
+                  </Th>
                 </tr>
               </thead>
               <tbody>
@@ -88,6 +92,20 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                     <td className="p-3.5 font-label font-extrabold text-teal">{formatILS(o.total_amount)}</td>
                     <td className="p-3.5"><OrderStatusBadge status={o.order_status} /></td>
                     <td className="p-3.5 text-light whitespace-nowrap">{formatDate(o.created_at)}</td>
+                    <td className="p-3.5 w-10">
+                      {canPrintWaybill(o, o.hasPhysicalItems) && (
+                        <Link
+                          href={`/admin/orders/${o.id}/waybill?print=1`}
+                          target="_blank"
+                          title="طباعة שטר מטען"
+                          aria-label={`طباعة שטר מטען للطلب ${o.order_number}`}
+                          style={{ color: "var(--mid)" }}
+                          className="inline-flex"
+                        >
+                          <Printer size={17} />
+                        </Link>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

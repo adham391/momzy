@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Printer } from "lucide-react";
 import { getOrderById, getOrderStatusHistory } from "@/lib/db/orders";
 import { getProductImageMap } from "@/lib/products/getProductImageMap";
+import { buildWaybills, canPrintWaybill } from "@/lib/orders/waybill";
 import type { OrderStatus } from "@/lib/db/types";
 import type { GiftOptions } from "@/lib/store/cart";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/admin/StatusBadge";
@@ -43,6 +44,9 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
     getProductImageMap(),
   ]);
 
+  // שטר מטען — للطلب المدفوع الذي فيه ما يُشحن
+  const printable = canPrintWaybill(order, buildWaybills(order).length > 0);
+
   return (
     <div>
       {/* رجوع */}
@@ -61,7 +65,18 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
           </h1>
           <p className="text-light text-body-sm mt-0.5">{formatDateTime(order.created_at)}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {printable && (
+            <Link
+              href={`/admin/orders/${order.id}/waybill?print=1`}
+              target="_blank"
+              // اللون inline: قاعدة `a { color: inherit }` تتفوّق على Tailwind
+              style={{ color: "white" }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-dark text-body-sm font-bold hover:brightness-125 transition"
+            >
+              <Printer size={15} /> طباعة שטר מטען
+            </Link>
+          )}
           <OrderStatusBadge status={order.order_status} />
           <PaymentStatusBadge status={order.payment_status} />
         </div>

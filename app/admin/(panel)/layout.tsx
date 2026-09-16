@@ -35,12 +35,12 @@ export default async function AdminPanelLayout({
   if (!admin || !admin.is_active) redirect("/admin/login");
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-cream print:min-h-0 print:bg-white">
       <AdminSidebar adminName={admin.name} role={admin.role} />
 
-      {/* المحتوى — هامش يمين على الديسكتوب ليفسح للسايدبار الثابت */}
-      <main className="md:mr-64 min-h-screen">
-        <div className="max-w-6xl mx-auto p-5 md:p-8">{children}</div>
+      {/* المحتوى — هامش يمين على الديسكتوب ليفسح للسايدبار الثابت؛ وعند الطباعة الصفحة وحدها */}
+      <main className="md:mr-64 min-h-screen print:mr-0 print:min-h-0">
+        <div className="max-w-6xl mx-auto p-5 md:p-8 print:max-w-none print:p-0">{children}</div>
       </main>
     </div>
   );
