@@ -109,6 +109,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         whatsappNumber={whatsapp}
         whatsappOnly={service.whatsappOnly}
         ageGate={service}
+        askTopic={service.askTopic}
         zIndex={6}
       />
 
@@ -157,6 +158,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         price={minPrice}
         seatsLeft={seatsLeft}
         ageGate={service}
+        askTopic={service.askTopic}
         whatsappOnly={service.whatsappOnly}
         whatsappNumber={whatsapp}
       />

@@ -240,6 +240,7 @@ export default function ServiceDetailHero({ service, whatsappNumber }: ServiceDe
           serviceTitle={service.title}
           serviceSlug={service.slug}
           ageGate={service}
+          askTopic={service.askTopic}
         />
       )}
     </>

@@ -14,6 +14,8 @@ interface ServiceCardCTAProps {
   seatsLeft?: number;
   /** الفئة العمرية للورشة — تُمرَّر لنموذج التسجيل */
   ageGate?: AgeGate;
+  /** يسأل نموذج التسجيل عن موضوع اللقاء — للّقاءات الفردية */
+  askTopic?: boolean;
   /** السعر بالشيكل — يظهر داخل الزر. بلا سعر يبقى النص وحده */
   price?: number;
   /** لا حجز إلكتروني — الزرّ يفتح واتساب للاتفاق مع هبة */
@@ -31,6 +33,7 @@ export default function ServiceCardCTA({
   serviceSlug,
   seatsLeft,
   ageGate,
+  askTopic,
   price,
   whatsappOnly,
   whatsappNumber,
@@ -88,6 +91,7 @@ export default function ServiceCardCTA({
           serviceTitle={serviceTitle}
           serviceSlug={serviceSlug}
           ageGate={ageGate}
+          askTopic={askTopic}
         />
       )}
     </>

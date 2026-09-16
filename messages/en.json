@@ -80,6 +80,8 @@
       "babyBirthDateLabel": "Your baby's birth date *",
       "babyAgeOk": "Your baby's age on the workshop day: {age} ✓",
       "babyAgeHint": "This workshop is for {range} — and if you're pregnant, enter your due date.",
+      "topicLabel": "Meeting topic *",
+      "topicPlaceholder": "Briefly, what would you like to talk about with Heba — breastfeeding, baby sleep, postpartum recovery...",
       "notesLabel": "Additional notes (optional)",
       "notesPlaceholderAge": "Specific questions, health notes...",
       "notesPlaceholder": "Your baby's age, specific questions...",
@@ -122,6 +124,7 @@
       "name": "Name",
       "email": "Email",
       "phone": "Phone number",
+      "topic": "Meeting topic",
       "notes": "Notes"
     },
     "summary": {

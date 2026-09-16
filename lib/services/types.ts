@@ -50,6 +50,8 @@ export interface Service {
   ageMaxMonths?: number;
   /** عدد المشاركين الأقصى — للورشات الجماعية */
   maxParticipants?: number;
+  /** يسأل نموذج التسجيل عن موضوع اللقاء (خانة إلزامية) — للّقاءات الفردية */
+  askTopic?: boolean;
   /** الوصف الطويل — paragraphs */
   longDescription?: string[];
   /** المواضيع التي تُغطّى — bullets */

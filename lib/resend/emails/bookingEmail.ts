@@ -102,6 +102,12 @@ function babyAgeLine(b: BookingRow): string {
   return `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 عمر الطفل يوم الورشة: <strong style="color:#252220;">${age}</strong> <span style="color:#9A9490;">(مواليد <span style="direction:ltr;">${fmtDate(b.baby_birth_date)}</span>)</span></div>`;
 }
 
+/** نصّ حرّ كتبته العميلة (موضوع اللقاء، ملاحظات) — مُهرَّب، وأسطره تبقى — لهبة فقط */
+function customerTextLine(label: string, text: string | null): string {
+  if (!text) return "";
+  return `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">${label}: <strong style="color:#252220;">${esc(text).replace(/\n/g, "<br>")}</strong></div>`;
+}
+
 export const bookingAdminSubject = (b: BookingRow) => `📅 حجز جديد ${b.booking_number}`;
 
 export function bookingAdminEmailHtml(b: BookingRow): string {
@@ -112,8 +118,10 @@ export function bookingAdminEmailHtml(b: BookingRow): string {
     ${detailsBox(b, t)}
     <div style="margin-top:16px;padding:16px 20px;background:#FEF5F7;border-radius:10px;border:1.5px solid #F7C4CE;">
       <div style="font-size:11px;font-weight:700;color:#F2A7B5;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">العميلة</div>
-      <div style="font-size:14px;color:#252220;line-height:1.8;">${b.customer_name} · <a href="tel:${b.customer_phone}" style="color:#82C9C4;direction:ltr;">${b.customer_phone}</a> · <a href="mailto:${b.customer_email}" style="color:#82C9C4;">${b.customer_email}</a></div>
+      <div style="font-size:14px;color:#252220;line-height:1.8;">${esc(b.customer_name)} · <a href="tel:${esc(b.customer_phone)}" style="color:#82C9C4;direction:ltr;">${esc(b.customer_phone)}</a> · <a href="mailto:${esc(b.customer_email)}" style="color:#82C9C4;">${esc(b.customer_email)}</a></div>
       ${babyAgeLine(b)}
+      ${customerTextLine("📝 موضوع اللقاء", b.topic)}
+      ${customerTextLine("ملاحظات", b.notes)}
     </div>`;
   return shell("ar", "حجز جديد", "📅 حجز جديد", body);
 }

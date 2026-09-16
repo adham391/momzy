@@ -16,6 +16,8 @@ interface ServiceStickyCTAProps {
   seatsLeft?: number;
   /** الفئة العمرية للورشة — تُمرَّر لنموذج التسجيل */
   ageGate?: AgeGate;
+  /** يسأل نموذج التسجيل عن موضوع اللقاء — للّقاءات الفردية */
+  askTopic?: boolean;
   /** لا حجز إلكتروني — الزرّ يفتح واتساب للاتفاق مع هبة */
   whatsappOnly?: boolean;
   /** رقم هبة — بدونه يذهب الزرّ إلى صفحة التواصل */
@@ -32,6 +34,7 @@ export default function ServiceStickyCTA({
   price,
   seatsLeft,
   ageGate,
+  askTopic,
   whatsappOnly,
   whatsappNumber,
 }: ServiceStickyCTAProps) {
@@ -105,6 +108,7 @@ export default function ServiceStickyCTA({
           serviceTitle={serviceTitle}
           serviceSlug={serviceSlug}
           ageGate={ageGate}
+          askTopic={askTopic}
         />
       )}
     </>

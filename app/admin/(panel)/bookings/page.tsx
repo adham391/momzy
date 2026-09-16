@@ -93,6 +93,9 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
               </span>
             </div>
           )}
+          {/* ما كتبته الأم عند التسجيل — موضوع اللقاء (للّقاءات الفردية) وملاحظاتها */}
+          {b.topic && <CustomerText label="موضوع اللقاء" text={b.topic} strong />}
+          {b.notes && <CustomerText label="ملاحظات" text={b.notes} />}
         </div>
 
         {/* إجراءات */}
@@ -116,6 +119,16 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
           </a>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** نصّ حرّ كتبته الأم — تسمية + نصّ بأسطره كما كُتب */
+function CustomerText({ label, text, strong }: { label: string; text: string; strong?: boolean }) {
+  return (
+    <div className={`mt-1.5 whitespace-pre-line text-body-sm ${strong ? "text-dark" : "text-mid"}`}>
+      <span className="font-bold">{label}: </span>
+      {text}
     </div>
   );
 }

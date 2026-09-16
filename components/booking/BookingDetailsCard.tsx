@@ -103,6 +103,7 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
         <Row label={t("details.phone")}>
           <span dir="ltr">{booking.customer_phone}</span>
         </Row>
+        {booking.topic && <Row label={t("details.topic")}>{booking.topic}</Row>}
         {booking.notes && <Row label={t("details.notes")}>{booking.notes}</Row>}
       </div>
     </div>

@@ -70,6 +70,8 @@ interface ServiceCTASectionProps {
   whatsappNumber?: string;
   /** الفئة العمرية للورشة — تُمرَّر لنموذج التسجيل */
   ageGate?: AgeGate;
+  /** يسأل نموذج التسجيل عن موضوع اللقاء — للّقاءات الفردية */
+  askTopic?: boolean;
   /** ترتيب التداخل — يزداد مع عدد الأقسام قبله في الصفحة */
   zIndex?: number;
   /** لا حجز إلكتروني — الزرّ يفتح واتساب للاتفاق مع هبة */
@@ -88,6 +90,7 @@ export default function ServiceCTASection({
   subheading,
   whatsappNumber,
   ageGate,
+  askTopic,
   zIndex = 5,
   whatsappOnly,
 }: ServiceCTASectionProps) {
@@ -278,6 +281,7 @@ export default function ServiceCTASection({
           serviceTitle={serviceTitle}
           serviceSlug={serviceSlug}
           ageGate={ageGate}
+          askTopic={askTopic}
         />
       )}
     </>

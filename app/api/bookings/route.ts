@@ -9,7 +9,7 @@ function isValidEmail(email: string): boolean {
 
 /**
  * POST /api/bookings — تسجيل في ورشة/خدمة.
- * body: { slotId, customer: { name, email, phone }, notes? }
+ * body: { slotId, customer: { name, email, phone }, notes?, topic? }
  * يعيد 409 لو امتلأ الموعد (السعة تُحجز ذرّياً).
  *
  * الورشة المدفوعة: يُنشأ الحجز ويُحجز المقعد، ويُعاد `paymentUrl` لإتمام الدفع.
@@ -27,6 +27,8 @@ export async function POST(request: Request) {
     slotId?: string;
     customer?: { name?: string; email?: string; phone?: string };
     notes?: string;
+    /** موضوع اللقاء — إلزامي للخدمات التي تسأل عنه (يُتحقَّق منه في createBooking) */
+    topic?: string;
     babyBirthDate?: string;
     /** لغة الموقع (ar | he | en) — تحدّد لغة صفحة دفع HYP */
     locale?: string;
@@ -45,12 +47,13 @@ export async function POST(request: Request) {
     slotId: b.slotId,
     customer: { name: c.name.trim(), email: c.email.trim(), phone: c.phone.trim() },
     notes: typeof b.notes === "string" ? b.notes : "",
+    topic: typeof b.topic === "string" ? b.topic : null,
     babyBirthDate: typeof b.babyBirthDate === "string" ? b.babyBirthDate : null,
     // لغة الصفحة — تُحفظ لتحديد لغة إيميل التأكيد
     locale: typeof b.locale === "string" ? b.locale : undefined,
   });
 
-  // 400 = بيانات مرفوضة (فئة عمرية) · 409 = امتلأ الموعد
+  // 400 = بيانات مرفوضة (فئة عمرية، موضوع اللقاء) · 409 = امتلأ الموعد
   if ("error" in result) {
     return NextResponse.json({ error: result.error }, { status: result.status ?? 409 });
   }

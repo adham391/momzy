@@ -18,6 +18,7 @@ const SERVICE_FIELDS = `{
   ageMinMonths,
   ageMaxMonths,
   maxParticipants,
+  askTopic,
   ${tf("shortDescription")},
   ${tl("longDescription")},
   ${tl("topics")},

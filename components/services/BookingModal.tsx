@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
 import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
+import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
 
 interface BookingModalProps {
   open: boolean;
@@ -20,6 +21,8 @@ interface BookingModalProps {
   forceWaitlist?: boolean;
   /** الفئة العمرية للورشة — وجود حدّ رقمي يُفعّل سؤال تاريخ ميلاد الطفل والتحقق منه */
   ageGate?: AgeGate;
+  /** يسأل عن موضوع اللقاء (خانة إلزامية) — للّقاءات الفردية (askTopic في Sanity) */
+  askTopic?: boolean;
 }
 
 interface Slot {
@@ -55,9 +58,11 @@ interface BookingFormData {
   message: string;
   /** تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */
   babyBirthDate: string;
+  /** موضوع اللقاء — للخدمات التي تسأل عنه فقط */
+  topic: string;
 }
 
-const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", message: "", babyBirthDate: "" };
+const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", message: "", babyBirthDate: "", topic: "" };
 
 /**
  * الخطوات: تحميل المواعيد ← اختيار موعد ← بيانات ← (انتقال لصفحة التأكيد/الدفع)
@@ -109,6 +114,7 @@ export default function BookingModal({
   preselectedSlotId,
   forceWaitlist,
   ageGate,
+  askTopic,
 }: BookingModalProps) {
   const t = useTranslations("booking");
   const locale = useLocale();
@@ -213,7 +219,13 @@ export default function BookingModal({
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) &&
     form.phone.trim().length >= 8;
 
-  const isValid = contactValid && (!needsBabyAge || ageCheck?.ok === true);
+  /** موضوع اللقاء — يُسأل في خطوة الحجز الفعلي فقط، كالفئة العمرية */
+  const needsTopic = step === "form" && Boolean(askTopic);
+
+  const isValid =
+    contactValid &&
+    (!needsBabyAge || ageCheck?.ok === true) &&
+    (!needsTopic || isBookingTopicValid(form.topic.trim()));
 
   const borderFor = (field: string) => (focused === field ? "var(--teal)" : "var(--bord)");
 
@@ -231,6 +243,7 @@ export default function BookingModal({
           slotId: selected.id,
           customer: { name: form.name, email: form.email, phone: form.phone },
           notes: form.message,
+          topic: form.topic,
           babyBirthDate: form.babyBirthDate || null,
           // لغة الموقع — تحدّد لغة صفحة دفع HYP للورشة
           locale,
@@ -492,6 +505,23 @@ export default function BookingModal({
                         ? t("modal.babyAgeOk", { age: monthsLabel(ageCheck.months) })
                         : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                   </p>
+                </div>
+              )}
+
+              {/* موضوع اللقاء — للّقاءات الفردية فقط */}
+              {needsTopic && (
+                <div>
+                  <label style={labelStyle}>{t("modal.topicLabel")}</label>
+                  <textarea
+                    value={form.topic}
+                    onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                    placeholder={t("modal.topicPlaceholder")}
+                    maxLength={BOOKING_TOPIC_MAX_LENGTH}
+                    rows={3}
+                    style={{ ...inputBase, border: `1.5px solid ${borderFor("topic")}`, resize: "none" }}
+                    onFocus={() => setFocused("topic")}
+                    onBlur={() => setFocused(null)}
+                  />
                 </div>
               )}
 

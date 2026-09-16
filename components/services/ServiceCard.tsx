@@ -124,6 +124,7 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
               serviceSlug={service.slug}
               seatsLeft={seatsLeft}
               ageGate={service}
+              askTopic={service.askTopic}
               price={service.price}
               whatsappOnly={service.whatsappOnly}
               whatsappNumber={whatsappNumber}

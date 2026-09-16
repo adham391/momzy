@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getService } from "@/lib/services/getService";
 import { checkBabyAge, hasAgeGate } from "@/lib/utils/age";
+import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingTopic";
 import { toLatinDigits } from "@/lib/utils/format";
 import type { PaymentStatus } from "./types";
 import type { StatusHistoryRow } from "./orders";
@@ -45,6 +46,8 @@ export interface BookingRow {
   amount: number;
   notes: string | null;
   admin_notes: string | null;
+  /** موضوع اللقاء كما كتبته الأم — للخدمات التي تسأل عنه (askTopic) فقط */
+  topic: string | null;
   /** تاريخ ميلاد الطفل — للورشات ذات الفئة العمرية فقط */
   baby_birth_date: string | null;
   /** لغة العميلة — null للحجوزات السابقة لهجرة 0017 (تُعامَل بالعربية) */
@@ -76,6 +79,7 @@ function toBooking(r: Record<string, unknown>): BookingRow {
     service_name: row.service_name ? toLatinDigits(row.service_name) : null,
     notes: row.notes ? toLatinDigits(row.notes) : null,
     admin_notes: row.admin_notes ? toLatinDigits(row.admin_notes) : null,
+    topic: row.topic ? toLatinDigits(row.topic) : null,
     amount: Number(r.amount ?? 0),
   };
 }
@@ -196,6 +200,8 @@ export interface CreateBookingInput {
   slotId: string;
   customer: { name: string; email: string; phone: string };
   notes?: string;
+  /** موضوع اللقاء — إلزامي للخدمات التي تسأل عنه (askTopic)، ويُتجاهل في غيرها */
+  topic?: string | null;
   /** تاريخ ميلاد الطفل (أو الموعد المتوقّع) — إلزامي للورشات ذات فئة عمرية */
   babyBirthDate?: string | null;
   /** لغة الصفحة وقت التسجيل — تحدّد لغة إيميل التأكيد */
@@ -206,9 +212,9 @@ export interface CreateBookingInput {
 type BookingError = { error: string; status?: number };
 
 /**
- * ينشئ حجزاً — يتحقق من الفئة العمرية، ثم يحجز الفتحة ذرّياً
+ * ينشئ حجزاً — يتحقق من الفئة العمرية وموضوع اللقاء، ثم يحجز الفتحة ذرّياً
  * (يمنع تجاوز السعة) ثم يُدرج الحجز.
- * التحقق العمري هنا لا في الواجهة فقط — الواجهة قابلة للتجاوز.
+ * التحقق هنا لا في الواجهة فقط — الواجهة قابلة للتجاوز.
  */
 export async function createBooking(
   input: CreateBookingInput
@@ -223,7 +229,9 @@ export async function createBooking(
   if (!slotRaw) return { error: "الموعد غير موجود", status: 404 };
   const slot = toSlot(slotRaw);
 
-  // ── الفئة العمرية — قبل حجز المقعد كي لا نحجز ثم نتراجع ──
+  // ── الفئة العمرية وموضوع اللقاء — قبل حجز المقعد كي لا نحجز ثم نتراجع ──
+  /** يُحفظ فقط للخدمات التي تسأل عنه — فلا تلمس حجوزاتُ غيرها عمودَ topic */
+  let topic: string | null = null;
   if (slot.service_slug) {
     const service = await getService(slot.service_slug);
     if (service && hasAgeGate(service)) {
@@ -233,6 +241,12 @@ export async function createBooking(
       const check = checkBabyAge(input.babyBirthDate, slot.date, service);
       if (!check.ok) {
         return { error: check.message ?? "عمر الطفل خارج الفئة العمرية للورشة", status: 400 };
+      }
+    }
+    if (service?.askTopic) {
+      topic = normalizeBookingTopic(input.topic);
+      if (!isBookingTopicValid(topic)) {
+        return { error: "اكتبي موضوع اللقاء", status: 400 };
       }
     }
   }
@@ -255,6 +269,7 @@ export async function createBooking(
       end_time: slot.end_time,
       amount: slot.price,
       notes: input.notes ?? null,
+      ...(topic ? { topic } : {}),
       baby_birth_date: input.babyBirthDate || null,
       locale: input.locale === "ar" || input.locale === "he" || input.locale === "en" ? input.locale : null,
     })
