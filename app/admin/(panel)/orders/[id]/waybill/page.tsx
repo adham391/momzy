@@ -10,8 +10,13 @@ import PrintWaybillButton from "@/components/admin/orders/PrintWaybillButton";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "שטר מטען — لوحة Momzy" };
 
-/** ورقة A4 بهوامش صغيرة — الملصق في أعلاها، والسايدبار مخفي عند الطباعة */
-const PRINT_PAGE_CSS = "@page { size: A4 portrait; margin: 12mm; }";
+/**
+ * ورقة A4 بهوامش صغيرة — الملصق في أعلاها، والسايدبار مخفي عند الطباعة.
+ * والورقة بيضاء: خلفية الصفحة الكريمية كانت تُطبع مستطيلًا تحت الملصق
+ * حين يكون خيار طباعة الخلفيات مفعّلًا.
+ */
+const PRINT_PAGE_CSS =
+  "@page { size: A4 portrait; margin: 12mm; } @media print { html, body { background: #fff !important; } }";
 
 /** اسم المرسِل على كل ملصق */
 const SENDER_NAME = "Momzy";
