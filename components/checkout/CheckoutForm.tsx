@@ -120,7 +120,8 @@ export default function CheckoutForm({
 
   const [agreedPolicy,    setAgreedPolicy]    = useState(false);
   const [agreedTerms,     setAgreedTerms]     = useState(false);
-  const [agreedMarketing, setAgreedMarketing] = useState(true);
+  // فارغة افتراضيًا: الموافقة على الرسائل الدعائية تكون بفعلٍ من العميلة لا بخانةٍ مؤشَّرة سلفًا
+  const [agreedMarketing, setAgreedMarketing] = useState(false);
   const [focusedField,    setFocusedField]    = useState<string | null>(null);
   const [status,          setStatus]          = useState<FormStatus>("idle");
 
