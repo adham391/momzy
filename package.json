@@ -10,7 +10,8 @@
     "migrate:seed": "tsx scripts/migrate-seed-to-sanity.ts",
     "seed:admins": "tsx scripts/seed-admins.ts",
     "admin:password": "tsx scripts/set-admin-password.ts",
-    "clear:test": "tsx scripts/clear-test-data.ts"
+    "clear:test": "tsx scripts/clear-test-data.ts",
+    "newsletter": "tsx scripts/newsletter.ts"
   },
   "dependencies": {
     "@portabletext/react": "^8.0.1",
