@@ -629,6 +629,7 @@ HYP_PASSP=      # كلمة مرور API (PassP)
 # Resend
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=noreply@momzyworld.com
+RESEND_NEWSLETTER_SEGMENT_ID=   # قائمة «Momzy Newsletter» في Resend — بدونها لا يُضاف المشتركون إليها
 
 # WhatsApp (Meta Cloud API)
 WHATSAPP_PHONE_NUMBER_ID=
@@ -686,7 +687,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 - صفحة التأكيد `/order/[id]` تقرأ من Supabase بالـ **UUID** (غير قابل للتخمين).
 - بيانات الهدية تُحفظ JSONB في `order_items.gift`.
   **الرسالة الشخصية لهدية الصندوق وشارة «بطاقة إهداء مجانية» مخفيتان مؤقتًا** (هدية الكتيب تُبقي رسالتها): لإعادتهما `PHYSICAL_GIFT_MESSAGE_ENABLED = true` في `lib/products/giftMessage.ts`، وأزيلي «إخفاء من الموقع» عن سؤال البطاقة الشخصية في أسئلة الصندوق في Studio (حقل `hidden` في `productFAQ` — تُطبَّق على أسئلة المنتجات والخدمات).
-- النشرة البريدية فعّالة (`/api/newsletter` → جدول `newsletter_subscribers`).
+- النشرة البريدية فعّالة (`/api/newsletter` → جدول `newsletter_subscribers`)، وكل مشتركة تُضاف بعد الرد إلى قائمة **«Momzy Newsletter»** في Resend (`lib/resend/newsletter.ts` — مشروطة بـ`RESEND_NEWSLETTER_SEGMENT_ID`). **الإرسال من لوحة Resend (Broadcasts)**، وإلغاء الاشتراك يُدار هناك (الجدول لا يعكسه). كل نشرة: العنوان يبدأ بـ«פרסומת» + رابط `{{{RESEND_UNSUBSCRIBE_URL}}}` (قانون الرسائل الدعائية) — التفاصيل في `LAUNCH-CHECKLIST.md` بند 4.4. خانة الموافقة على الرسائل الدعائية في الدفع تبدأ فارغة، وتُحفظ في `orders.has_marketing_consent` فقط.
 - إيميلات تأكيد الطلب والحجز تلقائية عبر Resend (للعميل + إشعار لهبة).
 - **الدفع بـ HYP مُدمج ومُختبَر end-to-end** على ترمينال الاختبار (SIGN مقبول + صفحة الدفع تُعرض بالمبلغ الصحيح + VERIFY): `lib/hyp/client.ts` (SIGN/VERIFY) + `POST /api/orders` يولّد رابط الدفع + `CheckoutForm` → **مرحلة الدفع في نفس الصفحة** (تدفّق مرحلي سلس عبر `CheckoutClient`: التوصيل ↔ `EmbeddedPayment` بلا انتقال، شريط تقدّم `CheckoutSteps` + ملخّص readOnly + شارات ثقة، والرابط يُزامَن `?order=`) — صفحة HYP في **iframe داخل الموقع** (العميلة لا تغادر Momzy، يبقى الامتثال SAQ A؛ مصدره `/api/hyp/retry`؛ `/checkout/pay/[id]` صفحة استرداد مستقلة) + `/api/hyp/callback` يتحقّق ويُعلّم الطلب مدفوعًا ثم **يخرج من الـ iframe** للنافذة الأعلى (`window.top`). صفحة `/order/[id]` تعرض حالة **"بانتظار الدفع"** (لا نجاح كاذب) مع زر إتمام الدفع حين لا يكتمل. **مشروط بوجود المفاتيح** — بدونها يبقى التدفّق اليدوي الحالي (الطلب `pending` → صفحة التأكيد مباشرة).
 - **المخزون يُخصم تلقائيًا في Sanity مع كل طلب** (`lib/products/stock.ts`) — ذرّي عبر `dec()`، يُثبّت على 0 ويُخفي المنتج (`inStock=false`) عند النفاد، ويُرجَع تلقائيًا عند إلغاء الطلب (`updateOrderStatus`). المنتجات بلا `stockQuantity` (رقمية) تُتخطّى.

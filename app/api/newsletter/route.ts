@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { subscribeNewsletter } from "@/lib/db/newsletter";
+import { syncNewsletterSubscriber } from "@/lib/resend/newsletter";
 
-/** POST /api/newsletter — اشتراك في النشرة البريدية (يحفظ في Supabase) */
+/**
+ * POST /api/newsletter — اشتراك في النشرة البريدية.
+ * يُحفظ في Supabase، ثم يُضاف بعد الرد إلى قائمة النشرة في Resend (منها تُرسَل النشرات)،
+ * فلا يتأخّر الرد ولا يفشل الاشتراك إن تعثّر Resend.
+ */
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -18,5 +23,9 @@ export async function POST(request: Request) {
   }
 
   const result = await subscribeNewsletter(email, typeof source === "string" ? source : "footer");
+  if (result.ok) {
+    const subscribed = result.email;
+    after(() => syncNewsletterSubscriber(subscribed));
+  }
   return NextResponse.json({ success: result.ok });
 }

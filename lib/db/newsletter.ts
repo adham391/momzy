@@ -2,12 +2,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * يشترك إيميلاً في النشرة (upsert — إعادة الاشتراك تُعيد التفعيل).
- * يُبقي البريد فريدًا.
+ * يُبقي البريد فريدًا، ويعيده منظَّفًا كي تُزامَن القائمة في Resend بالعنوان نفسه.
  */
 export async function subscribeNewsletter(
   email: string,
   source = "footer"
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: true; email: string } | { ok: false; error: string }> {
   const supabase = createAdminClient();
   const clean = email.trim().toLowerCase();
 
@@ -17,7 +17,7 @@ export async function subscribeNewsletter(
   );
 
   if (error) return { ok: false, error: error.message };
-  return { ok: true };
+  return { ok: true, email: clean };
 }
 
 /** قائمة المشتركين النشطين (للأدمن/التصدير لاحقًا) */
