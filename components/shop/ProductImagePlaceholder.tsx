@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils/cn";
 
-type Size = "card" | "hero" | "gallery" | "story" | "testimonial" | "thumb";
+type Size = "card" | "hero" | "story" | "testimonial" | "thumb";
 
 interface ProductImagePlaceholderProps {
   src?: string;

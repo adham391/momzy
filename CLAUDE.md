@@ -493,8 +493,7 @@ momzy/
 │   │   ├── Toast.tsx                   ✅ إشعار إضافة للسلة
 │   │   └── product-detail/
 │   │       ├── ProductPageLayout.tsx       ✅ المنسّق — يرتب 11 قسماً، أقسام شرطية حسب البيانات
-│   │       ├── ProductHero.tsx             ✅ Hero — صورة + tagline + سعر gold + CTAs forest/gold + 3 trust signals ديناميكية
-│   │       ├── ProductGallery.tsx          ✅ Grid 2/3 cols + lightbox + دعم فيديو (videoUrl أول عنصر)
+│   │       ├── ProductHero.tsx             ✅ Hero — ميديا (videoUrl أولًا + mainImage + صور gallery في شريط thumbnails، بلا lightbox) + tagline + سعر gold + CTAs forest/gold + 3 trust signals ديناميكية
 │   │       ├── ProductShortDescription.tsx ✅ نص شاعري وسط ivory
 │   │       ├── ProductContents.tsx         ✅ "كل قطعةٍ جمعناها لكِ" — Grid بطاقات (client)، كل بطاقة تعرض سطرين + زر «المزيد/أقل» خاص بها (items-start فلا يمدّ توسّعُها الصفَّ)
 │   │       ├── ProductStory.tsx            ✅ "من قلب هبة" — صورة دائرية + نص
@@ -742,7 +741,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
   ✅ صفحة /shop/[slug] — قالب موحد + 11 قسم (إلزامي + شرطي حسب البيانات)
   ✅ مكونات تفاصيل المنتج (12 component في components/shop/product-detail/)
   ✅ Sticky mobile CTA — يظهر بعد scroll
-  ✅ Lightbox للـ Gallery + دعم فيديو (videoUrl كأول عنصر)
+  ✅ ميديا الـ Hero — شريط thumbnails + دعم فيديو (videoUrl كأول عنصر)
   ✅ نظام السلة (Zustand + persist localStorage) — schema جديد بـ slug + mainImage
   ✅ CartSidebar + FloatingCartButton + Toast + CartAddedModal
   ✅ نموذج الشراء + قبول الشروط (/checkout) — CheckoutForm + OrderSummary + redirect
