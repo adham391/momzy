@@ -6,6 +6,7 @@ import { tf, tl, activeLocale } from "@/lib/sanity/i18n";
  * GROQ projection — يحوّل Sanity assets إلى URL strings ويحلّ الحقول المُدوّلة
  * إلى نص اللغة الفعّالة ($loc) مع سقوط للعربية.
  * المكونات تتلقى نفس string paths — لا تغيير في الـ UI layer.
+ * الأسئلة الشائعة المعلَّمة «إخفاء من الموقع» في Studio لا تُجلب.
  */
 const PRODUCT_FIELDS = `{
   "id":            _id,
@@ -50,7 +51,7 @@ const PRODUCT_FIELDS = `{
     rating,
     "image": image.asset->url
   },
-  faqs[] {
+  faqs[hidden != true] {
     ${tf("question")},
     ${tf("answer")}
   },

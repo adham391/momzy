@@ -22,7 +22,7 @@ const SERVICE_FIELDS = `{
   ${tl("longDescription")},
   ${tl("topics")},
   ${tl("benefits")},
-  faqs[]{ ${tf("question")}, ${tf("answer")} },
+  faqs[hidden != true]{ ${tf("question")}, ${tf("answer")} },
   color,
   price,
   whatsappOnly,

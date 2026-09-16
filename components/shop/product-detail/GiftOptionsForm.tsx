@@ -20,6 +20,12 @@ interface GiftOptionsFormProps {
 const MESSAGE_MAX = 200;
 
 /**
+ * الرسالة الشخصية مع هدية الصندوق (بطاقة تُكتب وتُرفق بالطرد) — مخفية مؤقتًا.
+ * الحقل وترجماته باقية كما هي: true يعيدها. هدية الكتيب تُبقي رسالتها (تصل بالبريد).
+ */
+const PHYSICAL_GIFT_MESSAGE_ENABLED = false;
+
+/**
  * نموذج خيارات الهدية — يظهر على صفحة المنتج قبل أزرار الشراء
  * يسمح للمُهدية بإدخال رسالة + تفاصيل المستلِمة
  */
@@ -32,6 +38,10 @@ export default function GiftOptionsForm({
 }: GiftOptionsFormProps) {
   const t = useTranslations("gift");
   const [charCount, setCharCount] = useState(value.message?.length ?? 0);
+  const showMessage = digital || PHYSICAL_GIFT_MESSAGE_ENABLED;
+  const toggleHint = digital
+    ? t("toggleHintDigital")
+    : t(showMessage ? "toggleHintPhysical" : "toggleHintPhysicalNoMessage");
 
   function update<K extends keyof GiftOptions>(key: K, val: GiftOptions[K]) {
     onChange({ ...value, [key]: val });
@@ -58,7 +68,7 @@ export default function GiftOptionsForm({
             {t("toggleTitle")}
           </div>
           <div className="text-[12px] mt-0.5" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-            {digital ? t("toggleHintDigital") : t("toggleHintPhysical")}
+            {toggleHint}
           </div>
         </div>
       </label>
@@ -69,33 +79,35 @@ export default function GiftOptionsForm({
           className="mt-3 p-5 rounded-[14px] flex flex-col gap-4"
           style={{ background: "white", border: "1.5px solid var(--bord)" }}
         >
-          {/* رسالة شخصية */}
-          <div>
-            <label className="block font-label font-bold text-[13px] mb-1.5" style={{ color: "var(--dark)" }}>
-              {t("messageLabel")}
-              <span className="font-normal text-[11px] ms-2" style={{ color: "var(--light)" }}>
-                ({charCount}/{MESSAGE_MAX})
-              </span>
-            </label>
-            <textarea
-              value={value.message ?? ""}
-              maxLength={MESSAGE_MAX}
-              onChange={(e) => {
-                update("message", e.target.value);
-                setCharCount(e.target.value.length);
-              }}
-              placeholder={digital ? t("messagePlaceholderDigital") : t("messagePlaceholderPhysical")}
-              rows={3}
-              className="w-full px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none [transition:border-color_150ms_ease] focus:border-rose"
-              style={{
-                background: "var(--offwh)",
-                color: "var(--dark)",
-                border: "1.5px solid var(--bord)",
-                fontFamily: "'Tajawal', sans-serif",
-                resize: "vertical",
-              }}
-            />
-          </div>
+          {/* رسالة شخصية — لهدية الصندوق فقط حين PHYSICAL_GIFT_MESSAGE_ENABLED */}
+          {showMessage && (
+            <div>
+              <label className="block font-label font-bold text-[13px] mb-1.5" style={{ color: "var(--dark)" }}>
+                {t("messageLabel")}
+                <span className="font-normal text-[11px] ms-2" style={{ color: "var(--light)" }}>
+                  ({charCount}/{MESSAGE_MAX})
+                </span>
+              </label>
+              <textarea
+                value={value.message ?? ""}
+                maxLength={MESSAGE_MAX}
+                onChange={(e) => {
+                  update("message", e.target.value);
+                  setCharCount(e.target.value.length);
+                }}
+                placeholder={digital ? t("messagePlaceholderDigital") : t("messagePlaceholderPhysical")}
+                rows={3}
+                className="w-full px-3.5 py-2.5 rounded-[10px] text-[14px] outline-none [transition:border-color_150ms_ease] focus:border-rose"
+                style={{
+                  background: "var(--offwh)",
+                  color: "var(--dark)",
+                  border: "1.5px solid var(--bord)",
+                  fontFamily: "'Tajawal', sans-serif",
+                  resize: "vertical",
+                }}
+              />
+            </div>
+          )}
 
           {/* بيانات المستلِمة — رقمي: بريد لإرسال الـ PDF · فيزيائي: عنوان الشحن */}
           {digital ? (

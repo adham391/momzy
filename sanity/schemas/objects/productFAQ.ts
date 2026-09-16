@@ -7,9 +7,9 @@ export const productFAQ = defineType({
   title: "سؤال شائع",
   type: "object",
   preview: {
-    select: { question: "question" },
-    prepare({ question }) {
-      return { title: arValue(question) ?? "—" };
+    select: { question: "question", hidden: "hidden" },
+    prepare({ question, hidden }) {
+      return { title: arValue(question) ?? "—", subtitle: hidden ? "مخفي من الموقع" : undefined };
     },
   },
   fields: [
@@ -24,6 +24,13 @@ export const productFAQ = defineType({
       title: "الإجابة",
       type: "internationalizedArrayText",
       validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "hidden",
+      title: "إخفاء من الموقع",
+      description: "يبقى السؤال محفوظًا هنا ولا يظهر في الموقع — أزيلي العلامة ليعود.",
+      type: "boolean",
+      initialValue: false,
     }),
   ],
 });

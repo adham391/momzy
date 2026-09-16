@@ -183,6 +183,7 @@
     "toggleTitle": "🎁 ההזמנה הזו היא מתנה",
     "toggleHintDigital": "הודעה אישית + שליחת החוברת למייל של המקבלת",
     "toggleHintPhysical": "הודעה אישית + משלוח ישירות למקבלת",
+    "toggleHintPhysicalNoMessage": "משלוח ישירות למקבלת",
     "messageLabel": "✏️ הודעה אישית",
     "messagePlaceholderDigital": "כתבי את ההודעה שלך... נשלח אותה יחד עם החוברת למקבלת.",
     "messagePlaceholderPhysical": "כתבי את הברכה האישית שלך... נצרף אותה למארז.",

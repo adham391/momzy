@@ -183,6 +183,7 @@
     "toggleTitle": "🎁 هذه الطلبية هدية",
     "toggleHintDigital": "رسالة شخصية + إرسال الكتيب لبريد المستلِمة",
     "toggleHintPhysical": "رسالة شخصية + شحن مباشر للمستلِمة",
+    "toggleHintPhysicalNoMessage": "شحن مباشر للمستلِمة",
     "messageLabel": "✏️ رسالة شخصية",
     "messagePlaceholderDigital": "اكتبي رسالتك... سنرسلها مع الكتيب للمستلِمة.",
     "messagePlaceholderPhysical": "اكتبي بطاقتك الشخصية... سنُرفقها مع الصندوق.",

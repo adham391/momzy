@@ -183,6 +183,7 @@
     "toggleTitle": "🎁 This order is a gift",
     "toggleHintDigital": "A personal message + the booklet sent to the recipient's email",
     "toggleHintPhysical": "A personal message + shipping straight to the recipient",
+    "toggleHintPhysicalNoMessage": "Shipping straight to the recipient",
     "messageLabel": "✏️ Personal message",
     "messagePlaceholderDigital": "Write your message... we'll send it along with the booklet.",
     "messagePlaceholderPhysical": "Write your personal card... we'll tuck it inside the box.",

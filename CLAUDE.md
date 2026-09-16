@@ -683,6 +683,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 - checkout يستدعي API حقيقيًا (بلا `setTimeout`)؛ الشحن يُقرأ من `settings`.
 - صفحة التأكيد `/order/[id]` تقرأ من Supabase بالـ **UUID** (غير قابل للتخمين).
 - بيانات الهدية تُحفظ JSONB في `order_items.gift`.
+  **الرسالة الشخصية لهدية الصندوق مخفية مؤقتًا** (هدية الكتيب تُبقيها): لإعادتها `PHYSICAL_GIFT_MESSAGE_ENABLED = true` في `GiftOptionsForm.tsx`، وأزيلي «إخفاء من الموقع» عن سؤال البطاقة الشخصية في أسئلة الصندوق في Studio (حقل `hidden` في `productFAQ` — تُطبَّق على أسئلة المنتجات والخدمات).
 - النشرة البريدية فعّالة (`/api/newsletter` → جدول `newsletter_subscribers`).
 - إيميلات تأكيد الطلب والحجز تلقائية عبر Resend (للعميل + إشعار لهبة).
 - **الدفع بـ HYP مُدمج ومُختبَر end-to-end** على ترمينال الاختبار (SIGN مقبول + صفحة الدفع تُعرض بالمبلغ الصحيح + VERIFY): `lib/hyp/client.ts` (SIGN/VERIFY) + `POST /api/orders` يولّد رابط الدفع + `CheckoutForm` → **مرحلة الدفع في نفس الصفحة** (تدفّق مرحلي سلس عبر `CheckoutClient`: التوصيل ↔ `EmbeddedPayment` بلا انتقال، شريط تقدّم `CheckoutSteps` + ملخّص readOnly + شارات ثقة، والرابط يُزامَن `?order=`) — صفحة HYP في **iframe داخل الموقع** (العميلة لا تغادر Momzy، يبقى الامتثال SAQ A؛ مصدره `/api/hyp/retry`؛ `/checkout/pay/[id]` صفحة استرداد مستقلة) + `/api/hyp/callback` يتحقّق ويُعلّم الطلب مدفوعًا ثم **يخرج من الـ iframe** للنافذة الأعلى (`window.top`). صفحة `/order/[id]` تعرض حالة **"بانتظار الدفع"** (لا نجاح كاذب) مع زر إتمام الدفع حين لا يكتمل. **مشروط بوجود المفاتيح** — بدونها يبقى التدفّق اليدوي الحالي (الطلب `pending` → صفحة التأكيد مباشرة).
