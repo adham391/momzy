@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from "@/lib/i18n/navigation";
 import { useCart, type GiftOptions } from "@/lib/store/cart";
 import { categoryLabel } from "@/lib/products/categoryLabels";
+import { PHYSICAL_GIFT_MESSAGE_ENABLED } from "@/lib/products/giftMessage";
 import Container from "@/components/ui/Container";
 import QuantityInput from "@/components/shop/QuantityInput";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
@@ -494,8 +495,13 @@ export default function ProductHero({ product }: ProductHeroProps) {
               <TrustSignal icon="/icons/shipping-icon.png" label={shippingLabel} />
               <Divider />
               <TrustSignal icon="/icons/products-icon.png" label={t("trustGiftWrapped")} />
-              <Divider />
-              <TrustSignal icon="/icons/heart-icon.png" label={t("trustGiftCard")} />
+              {/* بطاقة الإهداء تعود مع الرسالة الشخصية — المفتاح نفسه */}
+              {PHYSICAL_GIFT_MESSAGE_ENABLED && (
+                <>
+                  <Divider />
+                  <TrustSignal icon="/icons/heart-icon.png" label={t("trustGiftCard")} />
+                </>
+              )}
             </div>
 
           </div>

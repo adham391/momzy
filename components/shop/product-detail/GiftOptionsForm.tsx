@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { GiftOptions } from "@/lib/store/cart";
+import { PHYSICAL_GIFT_MESSAGE_ENABLED } from "@/lib/products/giftMessage";
 
 interface GiftOptionsFormProps {
   /** القيم الحالية */
@@ -18,12 +19,6 @@ interface GiftOptionsFormProps {
 }
 
 const MESSAGE_MAX = 200;
-
-/**
- * الرسالة الشخصية مع هدية الصندوق (بطاقة تُكتب وتُرفق بالطرد) — مخفية مؤقتًا.
- * الحقل وترجماته باقية كما هي: true يعيدها. هدية الكتيب تُبقي رسالتها (تصل بالبريد).
- */
-const PHYSICAL_GIFT_MESSAGE_ENABLED = false;
 
 /**
  * نموذج خيارات الهدية — يظهر على صفحة المنتج قبل أزرار الشراء
