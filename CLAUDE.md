@@ -550,9 +550,9 @@ momzy/
 │   │   └── labels.ts               ✅ getArticleLabeller — الموضع الوحيد الذي يصوغ «٥ دقائق للقراءة»
 │   ├── products/
 │   │   ├── types.ts                ✅ Product + ProductContent + ProductStory + ProductGiftTarget + ProductTestimonial + ProductFAQ + ProductShippingInfo + ProductSpecification + ProductFilters + ProductSort
-│   │   ├── seed.ts                 ✅ SEED_PRODUCTS — صندوق مشوار أم فقط (fallback في dev)
-│   │   ├── getProduct.ts           ✅ async getProduct(slug) — Sanity أولاً، seed fallback في dev
-│   │   └── getProducts.ts          ✅ async getProducts(filters?) + getProductCategories() — Sanity أولاً، seed fallback
+│   │   ├── seed.ts                 ✅ SEED_PRODUCTS — صندوق مشوار أم فقط (fallback في dev حين لا يُرجع Sanity شيئًا)
+│   │   ├── getProduct.ts           ✅ async getProduct(slug) — Sanity أولاً، seed fallback في dev حين لا يُرجع Sanity شيئًا
+│   │   └── getProducts.ts          ✅ async getProducts(filters?) + getProductCategories() — Sanity أولاً، seed fallback في dev حين لا يُرجع Sanity شيئًا
 │   ├── sanity/
 │   │   ├── client.ts               ✅ sanityClient + sanityWriteClient + sanityFetch (ISR revalidate + try-catch)
 │   │   ├── image.ts                ✅
@@ -644,6 +644,8 @@ NEXT_PUBLIC_GTM_ID=
 # App
 NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 ```
+
+> **بلا مفاتيح Sanity لا يعمل الموقع، حتى في dev:** `lib/sanity/client.ts` ينشئ العميل عند تحميله، و`createClient` يرفض `projectId` الفارغ، فتفشل كل صفحة (500). بيانات seed الاحتياطية تُستخدم فقط حين تكون المفاتيح مضبوطة ولا يُرجع Sanity شيئًا. أي نسخة جديدة من المشروع (git worktree) تحتاج نسخة من `.env.local`.
 
 ---
 
@@ -752,7 +754,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
   ✅ Sanity Studio على /studio — واجهة هبة لإدارة المحتوى
   ✅ Schemas: product (document) + siteSettings (singleton) + 7 objects
   ✅ Query layer: lib/sanity/queries/products.ts + siteSettings.ts
-  ✅ getProduct/getProducts تقرآن من Sanity أولاً، seed fallback في dev
+  ✅ getProduct/getProducts تقرآن من Sanity أولاً، seed fallback في dev حين لا يُرجع Sanity شيئًا (بلا مفاتيح Sanity لا يعمل الموقع أصلًا — انظر متغيرات البيئة)
   ✅ TopBar + Footer ديناميكيان من Sanity siteSettings
   ✅ Migration script جاهز (npx tsx scripts/migrate-seed-to-sanity.ts)
   ✅ ISR revalidate 60s — تحديثات Studio تظهر خلال دقيقة
