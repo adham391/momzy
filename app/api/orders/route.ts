@@ -8,6 +8,7 @@ import { isEmailConfigured } from "@/lib/resend/client";
 import { sendOrderConfirmation } from "@/lib/notifications/order";
 import { sweepAbandonedOrders } from "@/lib/notifications/recovery";
 import { sendDigitalDelivery } from "@/lib/notifications/digital";
+import { subscribeConsentingBuyer } from "@/lib/newsletter/checkoutConsent";
 import type { CreateOrderInput } from "@/lib/db/types";
 import type { GiftOptions } from "@/lib/store/cart";
 
@@ -120,6 +121,12 @@ export async function POST(request: Request) {
         // مسح عابر: كل طلب جديد يفحص الطلبات المتروكة الناضجة
         await sweepAbandonedOrders(siteUrl);
       });
+    }
+
+    // بلا دفع إلكتروني يتأكّد الطلب الآن — فمن وافقت على الرسائل الدعائية تدخل قائمة النشرة الآن.
+    // مع الدفع تدخلها بعد نجاحه من /api/hyp/callback. مستقلّ عن ضبط الإيميل/واتساب أعلاه.
+    if (!paymentUrl) {
+      after(() => subscribeConsentingBuyer(result.id));
     }
 
     return NextResponse.json({ ...result, paymentUrl }, { status: 201 });
