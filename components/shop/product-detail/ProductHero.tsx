@@ -149,7 +149,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
               {media.length > 1 && (
                 <div
                   className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-y-auto order-2 md:order-1"
-                  style={{ maxHeight: "min(78vh, 600px)", scrollbarWidth: "thin" }}
+                  style={{ maxHeight: "min(72vh, 640px)", scrollbarWidth: "thin" }}
                 >
                   {media.map((m, idx) => {
                     const isActive = idx === activeIdx;
@@ -196,9 +196,12 @@ export default function ProductHero({ product }: ProductHeroProps) {
                 </div>
               )}
 
-              {/* Main media area — موبايل: عرض كامل / ديسكتوب: ارتفاع مقيّد */}
+              {/* Main media area — موبايل: عرض كامل بإطار 4:5.
+                  ديسكتوب: عرض صريح (≤ 40% من الشاشة) يعطي بنسبة 4:5 ارتفاعًا ≤ min(72vh, 640px) —
+                  نفس أقصى ارتفاع لشريط المصغّرات، فيتساوى العمودان.
+                  الصورة داخله absolute بلا عرض ذاتي: بلا عرض صريح ينكمش الإطار إلى حدوده (2px) */}
               <div
-                className="relative rounded-[20px] overflow-hidden order-1 md:order-2 w-full md:w-auto aspect-[4/5] md:aspect-auto md:h-[min(72vh,640px)]"
+                className="relative rounded-[20px] overflow-hidden order-1 md:order-2 w-full aspect-[4/5] md:w-[min(40vw,512px,calc(72vh*4/5))]"
                 style={{
                   border: "1.5px solid var(--bord)",
                   boxShadow: "0 16px 48px rgba(0,0,0,0.08)",
