@@ -88,10 +88,11 @@ export async function POST(request: Request) {
     }));
     after(() => decrementStock(orderedItems));
 
-    // إن ضُبطت مفاتيح HYP → أنشئ رابط الدفع لتحويل العميل إليه.
-    // وإلا يبقى الطلب pending ويكمل الـ checkout لصفحة التأكيد (الوضع الحالي).
+    // عليه مبلغ و HYP مضبوط → رابط الدفع لتحويل العميلة إليه.
+    // مجاني، أو HYP غير مضبوط (تدفّق يدوي) → لا دفع إلكتروني، ويتأكّد الطلب الآن.
+    const needsOnlinePayment = result.total > 0 && isHypConfigured();
     let paymentUrl: string | null = null;
-    if (isHypConfigured()) {
+    if (needsOnlinePayment) {
       paymentUrl = await createHypPaymentUrl({
         orderId: result.id,
         orderNumber: result.orderNumber,
@@ -107,14 +108,18 @@ export async function POST(request: Request) {
       });
     }
 
+    // التأكيد الآن فقط حين لا دفع إلكتروني. فشلُ إنشاء رابط الدفع لا يؤكّد طلبًا غير مدفوع —
+    // كان يُعامَل كغياب HYP فيصل التأكيد ورابط الكتيب بلا دفع. يبقى الطلب pending، وتعيد
+    // العميلة المحاولة من صفحة الطلب، ويصلها تذكير الاسترداد كأي طلب متروك.
+    const confirmNow = !needsOnlinePayment;
+
     // إشعارات ما بعد الرد — best-effort، لا تعطّل الـ checkout.
-    // مع الدفع الإلكتروني لا يُرسَل شيء هنا: الطلب لم يُدفع بعد. التأكيد
-    // وإشعار هبة والتسليم من /api/hyp/callback، وتذكير الاسترداد يتكفّل
-    // به المسح أدناه بعد مهلة — فمن تدفع فورًا لا يصلها إلا التأكيد.
+    // مع الدفع الإلكتروني لا يُرسَل شيء هنا: التأكيد وإشعار هبة والتسليم من
+    // /api/hyp/callback بعد نجاح الدفع، وتذكير الاسترداد يتكفّل به المسح أدناه بعد مهلة.
     if (isEmailConfigured() || isWhatsAppConfigured()) {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
       after(async () => {
-        if (!paymentUrl) {
+        if (confirmNow) {
           await sendOrderConfirmation(result.id);
           await sendDigitalDelivery(result.id, siteUrl);
         }
@@ -123,9 +128,9 @@ export async function POST(request: Request) {
       });
     }
 
-    // بلا دفع إلكتروني يتأكّد الطلب الآن — فمن وافقت على الرسائل الدعائية تدخل قائمة النشرة الآن.
-    // مع الدفع تدخلها بعد نجاحه من /api/hyp/callback. مستقلّ عن ضبط الإيميل/واتساب أعلاه.
-    if (!paymentUrl) {
+    // النشرة لمن وافقت — مع التأكيد نفسه (مع الدفع: من /api/hyp/callback بعد نجاحه).
+    // مستقلّ عن ضبط الإيميل/واتساب أعلاه.
+    if (confirmNow) {
       after(() => subscribeConsentingBuyer(result.id));
     }
 

@@ -1,5 +1,6 @@
 import { after } from "next/server";
 import { verifyHypPayment } from "@/lib/hyp/client";
+import { breakoutResponse } from "@/lib/hyp/breakout";
 import { markOrderPaid, getOrderIdByNumber } from "@/lib/db/orders";
 import { markBookingPaid, getBookingIdByNumber } from "@/lib/db/bookings";
 import { sendBookingNotifications } from "@/lib/notifications/booking";
@@ -78,21 +79,4 @@ export async function GET(request: Request) {
   );
 
   return breakoutResponse(new URL(dest, origin).toString());
-}
-
-/** صفحة HTML تنقل النافذة الأعلى (تخرج من الـ iframe) إلى الوجهة */
-function breakoutResponse(dest: string): Response {
-  const j = JSON.stringify(dest); // تهريب آمن للحقن داخل السكربت
-  const html = `<!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8" />
-<title>جارٍ إتمام العملية…</title>
-<style>body{font-family:'Tajawal',Arial,sans-serif;background:#FDFAF5;color:#55504C;text-align:center;padding:56px 20px;margin:0}</style>
-</head><body>
-<p style="font-size:15px">جارٍ إتمام العملية…</p>
-<script>(function(){var d=${j};try{(window.top||window).location.replace(d);}catch(e){window.location.replace(d);}})();</script>
-<noscript><a href=${j}>اضغطي هنا للمتابعة</a></noscript>
-</body></html>`;
-  return new Response(html, {
-    headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
-  });
 }

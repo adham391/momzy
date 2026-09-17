@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { canFulfill } from "@/lib/orders/fulfillment";
 
 /**
  * التسليم الرقمي — نموذج «قراءة على الموقع» (flipbook):
@@ -35,6 +36,29 @@ export interface DigitalDownloadRow {
 /** توكن URL-safe */
 function generateToken(): string {
   return crypto.randomUUID().replace(/-/g, "");
+}
+
+/** حال طلب التوكن كما يُضمَّن معه — لقرار الوصول */
+export interface DownloadOrderAccess {
+  payment_status: string;
+  total_amount: number;
+  order_status: string;
+}
+
+/**
+ * يُضمَّن مع كل قراءة للتوكنات: التوكن يُنشأ مع الطلب قبل الدفع، فوجوده وحده لا يعني
+ * شراءً — القارئ والمكتبة لا يفتحان إلا كتيب طلب مدفوع (أو مجاني) غير ملغى.
+ */
+export const DOWNLOAD_ORDER_ACCESS = "orders!inner(payment_status, total_amount, order_status)";
+
+/** الطلب المضمَّن كما يعيده Supabase — كائن لعلاقة «لكل توكن طلب واحد»، وأنواع العميل تفترضه مصفوفة */
+export type EmbeddedDownloadOrder = DownloadOrderAccess | DownloadOrderAccess[] | null | undefined;
+
+/** هل يُفتح كتيب هذا الطلب؟ — القاعدة نفسها للتأكيد والتسليم */
+export function downloadOrderAllowsReading(embedded: EmbeddedDownloadOrder): boolean {
+  const order = Array.isArray(embedded) ? embedded[0] : embedded;
+  if (!order) return false;
+  return canFulfill(order.payment_status, Number(order.total_amount), order.order_status === "cancelled");
 }
 
 /** هل انتهت صلاحية التوكن؟ — نقطة القرار الوحيدة للصلاحية */
@@ -85,9 +109,15 @@ export async function getDownloadStatus(
   token: string
 ): Promise<{ row: DigitalDownloadRow; valid: boolean } | null> {
   const supabase = createAdminClient();
-  const { data } = await supabase.from("digital_downloads").select("*").eq("token", token).maybeSingle();
+  const { data } = await supabase
+    .from("digital_downloads")
+    .select(`*, ${DOWNLOAD_ORDER_ACCESS}`)
+    .eq("token", token)
+    .maybeSingle();
   if (!data) return null;
-  const row = data as DigitalDownloadRow;
+  const { orders, ...row } = data as DigitalDownloadRow & { orders: EmbeddedDownloadOrder };
+  // توكن طلبٍ لم يُدفع = كأنه غير موجود
+  if (!downloadOrderAllowsReading(orders)) return null;
   return { row, valid: !isExpired(row.expires_at) };
 }
 
@@ -98,12 +128,12 @@ export async function getTokenAccess(token: string): Promise<{ productSlug: stri
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("digital_downloads")
-    .select("product_slug, expires_at")
+    .select(`product_slug, expires_at, ${DOWNLOAD_ORDER_ACCESS}`)
     .eq("token", token)
     .maybeSingle();
   if (!data) return null;
-  const row = data as { product_slug: string; expires_at: string | null };
-  if (isExpired(row.expires_at)) return null;
+  const row = data as { product_slug: string; expires_at: string | null; orders: EmbeddedDownloadOrder };
+  if (isExpired(row.expires_at) || !downloadOrderAllowsReading(row.orders)) return null;
   return { productSlug: row.product_slug };
 }
 

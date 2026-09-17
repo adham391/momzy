@@ -1,4 +1,5 @@
 import { getOrderById } from "@/lib/db/orders";
+import { canFulfill } from "@/lib/orders/fulfillment";
 import { isEmailConfigured, sendEmail } from "@/lib/resend/client";
 import { getNotifyEmails, orderNotificationKinds } from "./recipients";
 import {
@@ -36,6 +37,11 @@ import { notifyHebaNewOrder } from "@/lib/whatsapp/notify";
 export async function sendOrderConfirmation(orderId: string): Promise<void> {
   const order = await getOrderById(orderId);
   if (!order) return;
+  // حارس أخير: لا تأكيد لطلب لم يُدفع ولو استُدعيت الدالة خطأً
+  if (!canFulfill(order.payment_status, order.total_amount, order.order_status === "cancelled")) {
+    console.warn("[order] تأكيد مرفوض لطلب غير مدفوع:", order.order_number);
+    return;
+  }
 
   if (isEmailConfigured()) {
     await sendEmail({

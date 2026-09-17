@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { getOrderById } from "@/lib/db/orders";
 import { getBookingById } from "@/lib/db/bookings";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
+import { breakoutResponse } from "@/lib/hyp/breakout";
 
 /**
  * GET /api/hyp/retry?order={uuid}  أو  ?booking={uuid}
  * يولّد رابط دفع HYP موقّعًا ويحوّل إليه — مصدر الـ iframe في صفحة الدفع المدمجة،
  * ويُستخدم أيضًا لإعادة الدفع حين لا يكتمل.
  * يقرأ بالـ UUID (غير قابل للتخمين). (‏/api مستثنى من middleware — عام.)
+ *
+ * صفحة HYP وحدها تبقى داخل الإطار؛ أي وجهة أخرى (مدفوع، تعذّر فتح الدفع، غير موجود)
+ * تخرج إلى الصفحة الكاملة — وإلا ظهر الموقع كله داخل بطاقة الدفع.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -19,17 +23,22 @@ export async function GET(request: Request) {
 
   if (bookingId) return payBooking(bookingId, origin, locale);
   if (orderId) return payOrder(orderId, origin, locale);
-  return NextResponse.redirect(new URL("/", origin));
+  return leaveFrame("/", origin);
+}
+
+/** وجهة داخل الموقع — في الصفحة الكاملة لا داخل إطار الدفع */
+function leaveFrame(path: string, origin: string): Response {
+  return breakoutResponse(new URL(path, origin).toString());
 }
 
 /** دفع طلب متجر */
 async function payOrder(id: string, origin: string, locale?: string) {
   const order = await getOrderById(id);
-  if (!order) return NextResponse.redirect(new URL("/", origin));
+  if (!order) return leaveFrame("/", origin);
 
   // مدفوع مسبقًا أو HYP غير مضبوط → صفحة التأكيد
   if (order.payment_status === "paid" || !isHypConfigured()) {
-    return NextResponse.redirect(new URL(`/order/${id}`, origin));
+    return leaveFrame(`/order/${id}`, origin);
   }
 
   const paymentUrl = await createHypPaymentUrl({
@@ -46,17 +55,17 @@ async function payOrder(id: string, origin: string, locale?: string) {
     zip: order.customer_postal_code ?? undefined,
   });
 
-  return NextResponse.redirect(new URL(paymentUrl ?? `/order/${id}?payment=failed`, origin));
+  return paymentUrl ? NextResponse.redirect(paymentUrl) : leaveFrame(`/order/${id}?payment=failed`, origin);
 }
 
 /** دفع تسجيل ورشة/خدمة */
 async function payBooking(id: string, origin: string, locale?: string) {
   const booking = await getBookingById(id);
-  if (!booking) return NextResponse.redirect(new URL("/", origin));
+  if (!booking) return leaveFrame("/", origin);
 
   // مدفوع، أو مجاني، أو HYP غير مضبوط → صفحة تأكيد التسجيل
   if (booking.payment_status === "paid" || booking.amount <= 0 || !isHypConfigured()) {
-    return NextResponse.redirect(new URL(`/booking/${id}`, origin));
+    return leaveFrame(`/booking/${id}`, origin);
   }
 
   const paymentUrl = await createHypPaymentUrl({
@@ -69,5 +78,5 @@ async function payBooking(id: string, origin: string, locale?: string) {
     locale,
   });
 
-  return NextResponse.redirect(new URL(paymentUrl ?? `/booking/${id}?payment=failed`, origin));
+  return paymentUrl ? NextResponse.redirect(paymentUrl) : leaveFrame(`/booking/${id}?payment=failed`, origin);
 }

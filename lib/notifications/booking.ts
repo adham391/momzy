@@ -1,4 +1,5 @@
 import { getBookingById } from "@/lib/db/bookings";
+import { canFulfill } from "@/lib/orders/fulfillment";
 import { isEmailConfigured, sendEmail } from "@/lib/resend/client";
 import { getNotifyEmail } from "./recipients";
 import {
@@ -22,6 +23,11 @@ import { notifyHebaNewBooking } from "@/lib/whatsapp/notify";
 export async function sendBookingNotifications(bookingId: string): Promise<void> {
   const full = await getBookingById(bookingId);
   if (!full) return;
+  // حارس أخير: التأكيد يكشف رابط اللقاء/المكان — لحجز مدفوع (أو مجاني) فقط
+  if (!canFulfill(full.payment_status, full.amount, full.status === "cancelled")) {
+    console.warn("[booking] تأكيد مرفوض لحجز غير مدفوع:", full.booking_number);
+    return;
+  }
 
   if (isEmailConfigured()) {
     await sendEmail({

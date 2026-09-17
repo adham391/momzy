@@ -1,7 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sha256, generateSecureToken } from "@/lib/library/password";
 import { SESSION_MAX_AGE_SECONDS } from "@/lib/library/constants";
-import type { DigitalDownloadRow } from "@/lib/db/downloads";
+import {
+  DOWNLOAD_ORDER_ACCESS,
+  downloadOrderAllowsReading,
+  type DigitalDownloadRow,
+  type EmbeddedDownloadOrder,
+} from "@/lib/db/downloads";
 
 /**
  * طبقة بيانات المكتبة — حسابات، توكنات إنشاء/استعادة، جلسات، ومحتويات الرفّ.
@@ -280,11 +285,13 @@ export async function destroySession(rawToken: string): Promise<void> {
  */
 export async function hasDigitalPurchases(email: string): Promise<boolean> {
   const supabase = createAdminClient();
-  const { count } = await supabase
+  const { data } = await supabase
     .from("digital_downloads")
-    .select("id", { count: "exact", head: true })
+    .select(`id, ${DOWNLOAD_ORDER_ACCESS}`)
     .eq("customer_email", normalizeEmail(email));
-  return (count ?? 0) > 0;
+  // الشراء = طلب مدفوع (أو مجاني): توكن طلبٍ لم يُدفع لا يفتح المكتبة
+  const rows = (data ?? []) as { orders: EmbeddedDownloadOrder }[];
+  return rows.some((r) => downloadOrderAllowsReading(r.orders));
 }
 
 /**
@@ -295,11 +302,14 @@ export async function getLibraryItems(email: string): Promise<LibraryItem[]> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("digital_downloads")
-    .select("*")
+    .select(`*, ${DOWNLOAD_ORDER_ACCESS}`)
     .eq("customer_email", normalizeEmail(email))
     .order("created_at", { ascending: false });
 
-  const rows = (data ?? []) as (DigitalDownloadRow & { created_at: string })[];
+  // الرفّ لكتيبات الطلبات المدفوعة (أو المجانية) فقط — التوكن يُنشأ مع الطلب قبل الدفع
+  const rows = ((data ?? []) as (DigitalDownloadRow & { created_at: string; orders: EmbeddedDownloadOrder })[]).filter(
+    (r) => downloadOrderAllowsReading(r.orders)
+  );
 
   return rows.map((r) => ({
     id: r.id,

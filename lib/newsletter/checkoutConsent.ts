@@ -1,4 +1,5 @@
 import { getOrderById } from "@/lib/db/orders";
+import { canFulfill } from "@/lib/orders/fulfillment";
 import { subscribeNewsletter } from "@/lib/db/newsletter";
 import { syncNewsletterSubscriber } from "@/lib/resend/newsletter";
 
@@ -16,6 +17,8 @@ export async function subscribeConsentingBuyer(orderId: string): Promise<void> {
   try {
     const order = await getOrderById(orderId);
     if (!order?.has_marketing_consent) return;
+    // حارس أخير: طلب مؤكَّد فقط (مدفوع أو مجاني) — كالتأكيد والتسليم
+    if (!canFulfill(order.payment_status, order.total_amount, order.order_status === "cancelled")) return;
 
     const result = await subscribeNewsletter(order.customer_email, CHECKOUT_SOURCE);
     if (!result.ok) {

@@ -1,5 +1,6 @@
 import { getDownloadsByOrder } from "@/lib/db/downloads";
 import { getOrderById } from "@/lib/db/orders";
+import { canFulfill } from "@/lib/orders/fulfillment";
 import { ensureAccount, createLibraryToken } from "@/lib/db/library";
 import { isEmailConfigured, sendEmail } from "@/lib/resend/client";
 import { downloadEmailHtml, downloadEmailSubject } from "@/lib/resend/emails/downloadEmail";
@@ -19,12 +20,19 @@ import { downloadEmailHtml, downloadEmailSubject } from "@/lib/resend/emails/dow
 export async function sendDigitalDelivery(orderId: string, siteUrl: string): Promise<void> {
   if (!isEmailConfigured()) return;
 
+  const order = await getOrderById(orderId);
+  if (!order) return;
+  // حارس أخير: رابط الكتيب لطلب مدفوع (أو مجاني) فقط، ولو استُدعيت الدالة خطأً
+  if (!canFulfill(order.payment_status, order.total_amount, order.order_status === "cancelled")) {
+    console.warn("[digital] تسليم مرفوض لطلب غير مدفوع:", order.order_number);
+    return;
+  }
+
   const downloads = await getDownloadsByOrder(orderId);
   if (downloads.length === 0) return;
 
   // اسم المشترية — يظهر في إيميل الهدية للمستلِمة («أهدتكِ ...»)
-  const order = await getOrderById(orderId);
-  const gifterName = order?.customer_name;
+  const gifterName = order.customer_name;
 
   // رابط المكتبة لكل بريد مستلِم — مرة واحدة (فشله لا يمنع إيميل التسليم)
   const libraryLinks = new Map<string, { setupUrl?: string; libraryUrl?: string }>();
@@ -49,7 +57,7 @@ export async function sendDigitalDelivery(orderId: string, siteUrl: string): Pro
     const lib = libraryLinks.get(d.customer_email.toLowerCase()) ?? {};
     await sendEmail({
       to: d.customer_email,
-      subject: downloadEmailSubject(d.product_name, d.is_gift, order?.locale),
+      subject: downloadEmailSubject(d.product_name, d.is_gift, order.locale),
       html: downloadEmailHtml({
         productName: d.product_name,
         readUrl: `${siteUrl}/read/${d.token}`,
@@ -60,7 +68,7 @@ export async function sendDigitalDelivery(orderId: string, siteUrl: string): Pro
         libraryUrl: lib.libraryUrl,
         // لغة الطلب — حتى إيميل الهدية يتبع لغة من اشترت، فهي من كتبت
         // بريد المستلِمة ولا نعرف لغة المستلِمة نفسها
-        locale: order?.locale,
+        locale: order.locale,
       }),
     });
   }

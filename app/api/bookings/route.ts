@@ -59,8 +59,9 @@ export async function POST(request: Request) {
   }
 
   // ورشة مدفوعة + مفاتيح HYP موجودة → رابط الدفع (المقعد محجوز بانتظار الدفع)
+  const needsOnlinePayment = result.amount > 0 && isHypConfigured();
   let paymentUrl: string | null = null;
-  if (result.amount > 0 && isHypConfigured()) {
+  if (needsOnlinePayment) {
     paymentUrl = await createHypPaymentUrl({
       orderId: result.id,
       orderNumber: result.bookingNumber, // BK-… — يميّزه الـ callback عن طلبات المتجر
@@ -72,8 +73,9 @@ export async function POST(request: Request) {
     });
   }
 
-  // بلا دفع مطلوب → أكّدي فورًا. مع دفع → التأكيد بعد نجاحه في /api/hyp/callback
-  if (!paymentUrl) {
+  // بلا دفع إلكتروني (مجانية أو HYP غير مضبوط) → أكّدي فورًا. مع دفع → بعد نجاحه في
+  // /api/hyp/callback فقط — وفشلُ إنشاء رابط الدفع لا يؤكّد، فلا يُكشف رابط اللقاء بلا دفع
+  if (!needsOnlinePayment) {
     after(() => sendBookingNotifications(result.id));
   }
 

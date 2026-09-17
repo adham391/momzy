@@ -11,6 +11,7 @@
  */
 
 import { toHypText } from "./text";
+import { logPaymentAttempt } from "@/lib/db/paymentLogs";
 
 const HYP_BASE = "https://pay.hyp.co.il/p/";
 
@@ -106,13 +107,39 @@ export async function createHypPaymentUrl(input: HypPaymentInput): Promise<strin
     // نجاح التوقيع: يحوي signature= ؛ الفشل يعيد CCode=رمز خطأ
     if (!body || !body.includes("signature=")) {
       console.error("[HYP] APISign فشل:", body.slice(0, 200));
+      await logSignFailure(input, body);
       return null;
     }
     return `${HYP_BASE}?${body}`;
   } catch (err) {
     console.error("[HYP] تعذّر إنشاء رابط الدفع:", err);
+    await logSignFailure(input, err instanceof Error ? err.message : String(err));
     return null;
   }
+}
+
+/** أقصى طول يُحفظ من ردّ HYP */
+const SIGN_REPLY_MAX = 300;
+
+/**
+ * فشل توقيع رابط الدفع ← payment_logs، كي يُعرف ردّ HYP (رمز الخطأ) دون سجلات Vercel:
+ * فشلٌ صامت هنا يعني عميلة لا تستطيع الدفع ولا أثر يشرح السبب.
+ * المفاتيح والتوقيع تُحجب إن ظهرت في الردّ. best-effort — لا يرمي.
+ */
+async function logSignFailure(input: HypPaymentInput, reply: string): Promise<void> {
+  const safeReply = reply.replace(/\b(KEY|PassP|signature)=[^&\s]*/gi, "$1=[redacted]").slice(0, SIGN_REPLY_MAX);
+  const params = new URLSearchParams();
+  params.set("stage", "APISign");
+  params.set("reply", safeReply);
+  await logPaymentAttempt({
+    reference: input.orderNumber,
+    kind: input.orderNumber.startsWith("BK-") ? "booking" : "order",
+    entityId: input.orderId,
+    outcome: "failed",
+    ccode: new URLSearchParams(safeReply).get("CCode") ?? "",
+    transactionId: "",
+    params,
+  });
 }
 
 export interface HypVerifyResult {
