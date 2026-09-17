@@ -20,6 +20,16 @@ export async function subscribeNewsletter(
   return { ok: true, email: clean };
 }
 
+/** يُعلّم المشتركة ملغاة الاشتراك (من صفحة إلغاء الاشتراك) — الصفّ يبقى سجلًّا */
+export async function unsubscribeNewsletter(email: string): Promise<{ ok: boolean }> {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("newsletter_subscribers")
+    .update({ is_active: false, unsubscribed_at: new Date().toISOString() })
+    .eq("email", email.trim().toLowerCase());
+  return { ok: !error };
+}
+
 /** قائمة المشتركين النشطين (للأدمن/التصدير لاحقًا) */
 export async function listSubscribers(): Promise<{ email: string; source: string | null; subscribed_at: string }[]> {
   const supabase = createAdminClient();

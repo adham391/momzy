@@ -39,6 +39,23 @@
     "success": "✓ Subscribed! Heba's latest articles and tips are on their way",
     "error": "Something went wrong — please try again"
   },
+  "newsletterUnsubscribe": {
+    "metaTitle": "Unsubscribe from the newsletter | Momzy",
+    "label": "Momzy newsletter",
+    "confirmTitle": "Unsubscribe from the newsletter",
+    "confirmText": "Stop sending the Momzy newsletter to this address?",
+    "confirmButton": "Yes, unsubscribe me",
+    "keep": "No, keep me subscribed",
+    "failed": "We couldn't unsubscribe you right now — please try again in a few minutes.",
+    "doneTitle": "You're unsubscribed",
+    "doneText": "You won't receive the Momzy newsletter anymore. If you change your mind, you can subscribe again at the bottom of any page on the site.",
+    "alreadyTitle": "You're already unsubscribed",
+    "alreadyText": "The Momzy newsletter isn't sent to this address.",
+    "invalidTitle": "This link isn't valid",
+    "invalidText": "We couldn't verify this link. Use the unsubscribe link at the bottom of the latest newsletter you received, or write to us and we'll remove you.",
+    "contactUs": "Contact us",
+    "backHome": "Back to the site"
+  },
   "lang": {
     "switch": "Language"
   },

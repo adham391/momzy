@@ -1,4 +1,5 @@
 import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
+import { UNSUBSCRIBE_TOKEN_PROPERTY } from "@/lib/resend/newsletterContact";
 import { logoUrl, siteOrigin } from "./brand";
 
 /**
@@ -6,7 +7,7 @@ import { logoUrl, siteOrigin } from "./brand";
  *
  * متطلبات قانون الرسائل الدعائية مبنية في القالب نفسه، فلا تُنسى في أي عدد:
  * كلمة «פרסומת» في بداية العنوان، واسم المرسِل ووسيلة التواصل، ورابط إلغاء
- * الاشتراك (يستبدله Resend برابط شخصي لكل مستلِمة).
+ * الاشتراك إلى صفحة الموقع (يملأ Resend فيه بريد كل مستلِمة ورمزها).
  */
 
 /** بطاقة في النشرة — مقال أو منتج أو ورشة */
@@ -44,8 +45,8 @@ export interface NewsletterIssue {
 
 /** بادئة إلزامية لعنوان الرسائل الدعائية في إسرائيل */
 const AD_SUBJECT_PREFIX = "פרסומת";
-/** Resend يستبدلها برابط إلغاء اشتراك شخصي لكل مستلِمة — تعمل في Broadcasts فقط */
-const UNSUBSCRIBE_PLACEHOLDER = "{{{RESEND_UNSUBSCRIBE_URL}}}";
+/** صفحة إلغاء الاشتراك في الموقع */
+const UNSUBSCRIBE_PATH = "/newsletter/unsubscribe";
 /** عرض الصورة المعروض (600 − هوامش البطاقة) — والملف بضعفه لشاشات الجوال الحادّة */
 const CARD_IMAGE_WIDTH = 536;
 
@@ -110,13 +111,21 @@ function tipBox(tip: string): string {
     </table>`;
 }
 
+/**
+ * رابط إلغاء الاشتراك لكل مستلِمة — متغيّرات جهة الاتصال يملؤها Resend عند الإرسال:
+ * بريدها ورمزها المحفوظ على جهة اتصالها (تتحقّق منه الصفحة قبل أي إلغاء).
+ */
+function unsubscribeUrl(): string {
+  return `${siteOrigin()}${UNSUBSCRIBE_PATH}?e={{{contact.email}}}&t={{{contact.${UNSUBSCRIBE_TOKEN_PROPERTY}}}}`;
+}
+
 /** التذييل القانوني: لماذا وصلت، من المرسِل وكيف يُتواصل معه، وإلغاء الاشتراك */
 function legalFooter(): string {
   const site = siteOrigin();
   return `
     <p style="margin:0 0 6px;font-size:12px;line-height:1.8;color:#9A9490;">وصلتكِ هذه الرسالة لأنكِ اشتركتِ في نشرة Momzy.</p>
     <p style="margin:0 0 6px;font-size:12px;line-height:1.8;color:#9A9490;">Momzy · هبة حسن · <a href="mailto:${SUPPORT_EMAIL}" style="color:#82C9C4;text-decoration:none;">${SUPPORT_EMAIL}</a> · <a href="${site}" style="color:#82C9C4;text-decoration:none;">momzyworld.com</a></p>
-    <p style="margin:0;font-size:12px;line-height:1.8;"><a href="${UNSUBSCRIBE_PLACEHOLDER}" style="color:#55504C;text-decoration:underline;">إلغاء الاشتراك في النشرة</a></p>`;
+    <p style="margin:0;font-size:12px;line-height:1.8;"><a href="${esc(unsubscribeUrl())}" style="color:#55504C;text-decoration:underline;">إلغاء الاشتراك في النشرة</a></p>`;
 }
 
 /** HTML عدد النشرة — RTL، جداول وأنماط مضمَّنة كما تحتاج برامج البريد */

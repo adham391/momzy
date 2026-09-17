@@ -25,6 +25,7 @@ import {
   newsletterSubject,
   type NewsletterIssue,
 } from "@/lib/resend/emails/newsletterEmail";
+import { upsertNewsletterContact } from "@/lib/resend/newsletterContact";
 
 process.loadEnvFile(path.resolve(process.cwd(), ".env.local"));
 
@@ -79,16 +80,10 @@ async function fillTestSegment(resend: Resend, segmentId: string, emails: string
     }
   }
 
+  // برمز إلغاء الاشتراك نفسه الذي تحمله المشتركات — فرابط التذييل في التجربة يعمل كالحقيقي
   for (const email of emails) {
-    const existing = await resend.contacts.get({ email });
-    if (existing.data) {
-      if (existing.data.unsubscribed) await resend.contacts.update({ email, unsubscribed: false });
-      const added = await resend.contacts.segments.add({ email, segmentId });
-      if (added.error) throw new Error(`تعذّر إضافة ${email}: ${added.error.message}`);
-    } else {
-      const created = await resend.contacts.create({ email, unsubscribed: false, segments: [{ id: segmentId }] });
-      if (created.error) throw new Error(`تعذّر إضافة ${email}: ${created.error.message}`);
-    }
+    const error = await upsertNewsletterContact(resend, email, segmentId);
+    if (error) throw new Error(`تعذّر إضافة ${email}: ${error.message}`);
   }
 }
 
