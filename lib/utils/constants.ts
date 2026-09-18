@@ -116,7 +116,7 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
       badge: "جديد الآن",
       badgeBg: "bg-gradient-to-br from-rose to-teal",
       title: "صندوق مشوار أم",
-      price: "₪ 549",
+      price: "₪ 490",
       slug: "/shop/mommy-journey-box",
     },
     items: [],

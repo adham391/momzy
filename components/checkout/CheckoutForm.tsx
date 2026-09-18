@@ -134,13 +134,13 @@ export default function CheckoutForm({
   /** السيرفر رفض الطلب لأنه من خارج البلاد — أوثق من تخمين الواجهة */
   const [rejectedAbroad, setRejectedAbroad] = useState(false);
 
-  /** حساب الشحن — للعناصر الفيزيائية فقط (الرقمية تُرسل بالبريد بلا شحن) */
+  /** العناصر الفيزيائية — تحتاج عنوانًا (الرقمية تُرسل بالبريد) */
   const physicalCount = cartItems.filter((i) => !i.isDigital).length;
   /** الطلب الرقمي البحت (كتيّب) يصل على البريد — فلا نسأل عن البلدة والعنوان */
   const needsShipping = physicalCount > 0;
   /** صندوق وزائرة من خارج البلاد — الشحن والدفع من داخل البلاد فقط (السيرفر يرفض أيضًا) */
   const blockedAbroad = needsShipping && ((geo !== null && !geo.domestic) || rejectedAbroad);
-  const shippingCost = computeShipping(getTotal(), physicalCount, shipping);
+  const shippingCost = computeShipping(getTotal(), cartItems, shipping);
   const discount     = couponDiscount(appliedCoupon, getTotal());
   const grandTotal   = getTotal() + shippingCost - discount;
 

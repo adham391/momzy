@@ -906,6 +906,7 @@
     "increaseQty": "Increase quantity",
     "addToCart": "Add to cart",
     "addToCartAria": "Add to cart",
+    "freeShipping": "Free shipping",
     "addedToCart": "Added “{title}” to cart"
   },
   "articles": {

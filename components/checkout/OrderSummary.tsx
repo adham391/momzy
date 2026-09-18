@@ -36,9 +36,9 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
   const total         = getTotal();
   const bundleSavings = getBundleSavings();
   const discount      = couponDiscount(appliedCoupon, total);
-  // الشحن للعناصر الفيزيائية فقط — الرقمية (كتيبات PDF) تُرسل بالبريد بلا شحن
+  // الشحن للعناصر الفيزيائية فقط — الرقمية (كتيبات) تُرسل بالبريد، وما شحنه مجاني في Sanity لا يُحسب
   const physicalCount = items.filter((i) => !i.isDigital).length;
-  const shippingCost = computeShipping(total, physicalCount, shipping);
+  const shippingCost = computeShipping(total, items, shipping);
   const grandTotal   = total + shippingCost - discount;
 
   /** تطبيق الكوبون عبر /api/coupons/validate */

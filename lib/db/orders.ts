@@ -123,13 +123,13 @@ export async function createOrder(
     throw new Error("لا توجد عناصر صالحة في الطلب");
   }
 
-  // الشحن من الإعدادات — للعناصر الفيزيائية فقط (الرقمية تُرسل بالبريد بلا شحن)
+  // الشحن من الإعدادات — للعناصر الفيزيائية فقط (الرقمية تُرسل بالبريد)، وما شحنه مجاني في Sanity لا يُحسب
   const shipping = await getShippingConfig();
-  const physicalCount = lineItems.filter((li) => {
-    const p = bySlug.get(li.product_slug);
-    return p ? !isDigitalProduct(p) : true;
-  }).length;
-  const shippingCost = computeShipping(subtotal, physicalCount, shipping);
+  const shippingCost = computeShipping(
+    subtotal,
+    lineItems.map((li) => ({ slug: li.product_slug, isDigital: li.product_type === "digital" })),
+    shipping
+  );
 
   // الكوبون — إعادة تحقّق على السيرفر (موثوق، لا نثق بقيمة العميل)
   let discount = 0;

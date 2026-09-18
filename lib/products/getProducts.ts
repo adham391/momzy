@@ -30,6 +30,15 @@ export async function getProducts(filters?: ProductFilters, locale?: string): Pr
 }
 
 /**
+ * المنتجات الفيزيائية التي شحنها مجاني (حقل «شحن مجاني» في Sanity) — لحساب الشحن.
+ * من المصدر الموثوق فتتطابق الواجهة والفاتورة.
+ */
+export async function getFreeShippingSlugs(): Promise<string[]> {
+  const products = await getProducts();
+  return products.filter((p) => !isDigitalProduct(p) && p.shippingInfo?.freeShipping === true).map((p) => p.slug);
+}
+
+/**
  * إحضار قائمة الـ categories الفريدة.
  * يستخدم في FilterBar لبناء أزرار الفلترة ديناميكياً.
  */

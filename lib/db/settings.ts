@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_SHIPPING, type ShippingConfig } from "@/lib/shipping";
 import { DEFAULT_USD_RATE, USD_RATE_SETTING } from "@/lib/currency";
+import { getFreeShippingSlugs } from "@/lib/products/getProducts";
 
 /** تحويل نص إعداد لرقم بأمان مع احتياطي */
 function num(v: string | undefined, fallback: number): number {
@@ -32,12 +33,16 @@ export async function getSettingsMap(keys?: string[]): Promise<Record<string, st
   return map;
 }
 
-/** إعدادات الشحن التشغيلية (رسوم + حد الشحن المجاني) */
+/** إعدادات الشحن: الرسوم وحدّ الشحن المجاني من settings، والمنتجات ذات الشحن المجاني من Sanity */
 export async function getShippingConfig(): Promise<ShippingConfig> {
-  const m = await getSettingsMap(["default_shipping_cost", "free_shipping_min"]);
+  const [m, freeShippingSlugs] = await Promise.all([
+    getSettingsMap(["default_shipping_cost", "free_shipping_min"]),
+    getFreeShippingSlugs(),
+  ]);
   return {
     defaultCost: num(m["default_shipping_cost"], DEFAULT_SHIPPING.defaultCost),
     freeMin: num(m["free_shipping_min"], DEFAULT_SHIPPING.freeMin),
+    freeShippingSlugs,
   };
 }
 

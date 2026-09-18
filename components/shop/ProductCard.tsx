@@ -1,6 +1,7 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { Truck } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import AddToCartButton from "@/components/shop/AddToCartButton";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
@@ -25,6 +26,9 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
     ;
 
   const digital = isDigitalProduct(product);
+  const t = useTranslations("shop");
+  /** شارة «شحن مجاني» — من حقل Sanity نفسه الذي يُسقط رسوم الشحن عند الدفع */
+  const freeShipping = !digital && product.shippingInfo?.freeShipping === true;
 
   return (
     <Link
@@ -43,27 +47,44 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
           objectFit={digital ? "contain" : "cover"}
         />
 
-        {/* badge علوي — من Sanity، نفس الصفحة الرئيسية */}
-        {product.badge && (
-          <span
-            className="absolute top-3 start-3 font-label font-extrabold text-[9px] tracking-[1.5px] uppercase px-3 py-[5px] rounded-full z-10"
-            style={{
-              background:
-                product.badgeColor === "rose" ? "var(--rose)" :
-                product.badgeColor === "teal" ? "var(--teal)" :
-                "#F7DF98",
-              color:
-                product.badgeColor === "teal" ? "white" :
-                product.badgeColor === "rose" ? "white" :
-                "var(--dark)",
-              animation:
-                product.badgeColor === "rose" ? "pulse-badge 2s infinite" :
-                product.badgeColor === "teal" ? "none" :
-                "pulse-badge-yellow 2s infinite",
-            }}
+        {/* الشارات العلوية — شارة المنتج من Sanity، و«شحن مجاني» بجانبها (تنزل تحتها في البطاقة الضيقة) */}
+        {(product.badge || freeShipping) && (
+          <div
+            className="absolute top-3 start-3 z-10 flex flex-wrap items-center gap-1.5"
+            // تترك مكانًا لشارة الترتيب في الطرف الآخر (الأكثر مبيعًا)
+            style={{ maxWidth: "calc(100% - 64px)" }}
           >
-            {product.badge}
-          </span>
+            {product.badge && (
+              <span
+                className="font-label font-extrabold text-[9px] tracking-[1.5px] uppercase px-3 py-[5px] rounded-full"
+                style={{
+                  background:
+                    product.badgeColor === "rose" ? "var(--rose)" :
+                    product.badgeColor === "teal" ? "var(--teal)" :
+                    "#F7DF98",
+                  color:
+                    product.badgeColor === "teal" ? "white" :
+                    product.badgeColor === "rose" ? "white" :
+                    "var(--dark)",
+                  animation:
+                    product.badgeColor === "rose" ? "pulse-badge 2s infinite" :
+                    product.badgeColor === "teal" ? "none" :
+                    "pulse-badge-yellow 2s infinite",
+                }}
+              >
+                {product.badge}
+              </span>
+            )}
+            {freeShipping && (
+              <span
+                className="inline-flex items-center gap-1 font-label font-extrabold text-[9px] tracking-[1.5px] uppercase px-3 py-[5px] rounded-full text-white"
+                style={{ background: "var(--teal)", textShadow: "0 1px 2px rgba(0,0,0,0.18)" }}
+              >
+                <Truck aria-hidden className="w-3 h-3 shrink-0 rtl:-scale-x-100" strokeWidth={2.5} />
+                {t("freeShipping")}
+              </span>
+            )}
+          </div>
         )}
 
       </div>

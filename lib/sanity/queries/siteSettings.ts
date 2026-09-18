@@ -1,5 +1,5 @@
-import { sanityFetch } from "@/lib/sanity/client";
-import { tf, activeLocale, type AppLocale } from "@/lib/sanity/i18n";
+import { sanityFetch, sanityWriteClient } from "@/lib/sanity/client";
+import { tf, activeLocale, LOCALES, type AppLocale } from "@/lib/sanity/i18n";
 import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 
 /** TypeScript types لإعدادات الموقع */
@@ -183,4 +183,31 @@ export async function getSiteSettings(locale?: string): Promise<SiteSettings> {
     contact:     mergeBlock(D.contact,     data.contact),
     footer:      mergeBlock(D.footer,      data.footer,   ["tagline", "description", "copyright"]),
   };
+}
+
+/** نصّ مُدوّل خام — قيمة لكل لغة كما حُفظت في Studio (الفارغ = لم تُكتب بعد) */
+export type LocalizedText = Record<AppLocale, string>;
+
+/**
+ * نصوص الشريط العلوي بكل لغاتها — للوحة الأدمن التي تحرّرها معًا.
+ * القيمة المحفوظة نصًّا واحدًا (قبل التدويل) تُعامَل كعربية.
+ * عبر عميل الكتابة (بلا CDN ولا كاش) كي تظهر آخر قيمة فور الحفظ.
+ */
+export async function getTopBarTexts(): Promise<{ message: LocalizedText; badge: LocalizedText }> {
+  const data = await sanityWriteClient
+    .fetch<{ message?: unknown; badge?: unknown } | null>(`*[_type == "siteSettings" && _id == "siteSettings"][0].topBar{ message, badge }`)
+    .catch(() => null);
+  return { message: toLocalizedText(data?.message), badge: toLocalizedText(data?.badge) };
+}
+
+/** قيمة حقل مُدوّل من Sanity → نصّ لكل لغة */
+function toLocalizedText(value: unknown): LocalizedText {
+  const out: LocalizedText = { ar: "", he: "", en: "" };
+  if (typeof value === "string") out.ar = value;
+  if (!Array.isArray(value)) return out;
+  for (const entry of value as { language?: string; value?: unknown }[]) {
+    const language = LOCALES.find((l) => l === entry?.language);
+    if (language && typeof entry.value === "string") out[language] = entry.value;
+  }
+  return out;
 }

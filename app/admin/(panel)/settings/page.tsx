@@ -1,5 +1,6 @@
 import { getSettingsMap, boolSetting } from "@/lib/db/settings";
-import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
+import { getSiteSettings, getTopBarTexts, type LocalizedText } from "@/lib/sanity/queries/siteSettings";
+import type { AppLocale } from "@/lib/sanity/i18n";
 import { updateOperationalSettingsAction, updateSiteContentAction, updateNotifyEmailsAction, updateSessionDefaultsAction } from "./actions";
 import { DEFAULT_USD_RATE } from "@/lib/currency";
 import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "الإعدادات — لوحة Momzy" };
 
 export default async function AdminSettingsPage() {
-  const [settings, site] = await Promise.all([getSettingsMap(), getSiteSettings()]);
+  const [settings, site, topBar] = await Promise.all([getSettingsMap(), getSiteSettings(), getTopBarTexts()]);
 
   return (
     <div className="max-w-3xl">
@@ -129,18 +130,19 @@ export default async function AdminSettingsPage() {
         {/* ── محتوى الموقع (Sanity) ── */}
         <Card title="الشريط العلوي والتواصل">
           <form action={updateSiteContentAction} className="flex flex-col gap-4">
-            <TextField
+            <LocalizedField
               name="topbar_message"
               label="رسالة الشريط العلوي"
-              defaultValue={site.topBar.message ?? ""}
+              values={topBar.message}
               placeholder="صندوق مشوار أم — اطلبي الآن قبل نفاد الكمية"
             />
-            <TextField
+            <LocalizedField
               name="topbar_badge"
               label="شارة الشريط (كلمة صغيرة)"
-              defaultValue={site.topBar.badge ?? ""}
+              values={topBar.badge}
               placeholder="جديد"
             />
+            <p className="text-[12px] text-light -mt-1">لكل لغة خانتها — وما يُترك فارغًا يظهر بالعربية في صفحات تلك اللغة.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <TextField
                 name="contact_email"
@@ -208,6 +210,46 @@ function TextField({
         style={ltr ? { textAlign: "right" } : undefined}
       />
     </label>
+  );
+}
+
+/** لغات الحقل المُدوّل بترتيب العرض */
+const LOCALE_INPUTS: { locale: AppLocale; label: string; dir: "rtl" | "ltr" }[] = [
+  { locale: "ar", label: "عربي", dir: "rtl" },
+  { locale: "he", label: "עברית", dir: "rtl" },
+  { locale: "en", label: "English", dir: "ltr" },
+];
+
+/** حقل نصّ بثلاث لغات — خانة لكل لغة (name_ar / name_he / name_en) */
+function LocalizedField({
+  name,
+  label,
+  values,
+  placeholder,
+}: {
+  name: string;
+  label: string;
+  values: LocalizedText;
+  /** مثال للخانة العربية */
+  placeholder?: string;
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-col gap-2">
+      <span className="text-body-sm font-bold text-dark">{label}</span>
+      {LOCALE_INPUTS.map(({ locale, label: languageLabel, dir }) => (
+        <label key={locale} className="flex items-center gap-2.5">
+          <span className="w-14 shrink-0 text-[12px] font-bold text-light">{languageLabel}</span>
+          <input
+            name={`${name}_${locale}`}
+            defaultValue={values[locale]}
+            placeholder={locale === "ar" ? placeholder : undefined}
+            lang={locale}
+            dir={dir}
+            className="flex-1 min-w-0 px-3.5 py-2.5 rounded-xl border border-bord bg-offwh text-body-sm text-dark placeholder:text-light focus:outline-none focus:border-rose"
+          />
+        </label>
+      ))}
+    </div>
   );
 }
 

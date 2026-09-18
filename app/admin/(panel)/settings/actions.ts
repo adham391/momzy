@@ -5,6 +5,7 @@ import { updateSettings } from "@/lib/db/settings";
 import { DEFAULT_USD_RATE } from "@/lib/currency";
 import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
 import { sanityWriteClient } from "@/lib/sanity/client";
+import { LOCALES, intlValueType } from "@/lib/sanity/i18n";
 
 /** إعدادات تشغيلية → جدول Supabase settings */
 export async function updateOperationalSettingsAction(formData: FormData) {
@@ -49,24 +50,34 @@ export async function updateSessionDefaultsAction(formData: FormData) {
   revalidatePath("/admin/bookings/availability");
 }
 
-/** محتوى الموقع (TopBar + تواصل) → Sanity siteSettings singleton */
+/**
+ * قيم لغات حقل من النموذج (name_ar / name_he / name_en) → مصفوفة Sanity المُدوّلة.
+ * اللغة الفارغة تُحذف فتسقط صفحاتها للعربية.
+ */
+function localizedFromForm(formData: FormData, name: string) {
+  return LOCALES.flatMap((language) => {
+    const value = String(formData.get(`${name}_${language}`) ?? "").trim();
+    return value ? [{ _key: language, _type: intlValueType("string"), language, value }] : [];
+  });
+}
+
+/** محتوى الموقع (TopBar + تواصل) → Sanity siteSettings singleton — نصوص الشريط بكل لغاتها */
 export async function updateSiteContentAction(formData: FormData) {
-  const message = String(formData.get("topbar_message") ?? "").trim();
-  const badge = String(formData.get("topbar_badge") ?? "").trim();
+  const message = localizedFromForm(formData, "topbar_message");
+  const badge = localizedFromForm(formData, "topbar_badge");
   const email = String(formData.get("contact_email") ?? "").trim();
   const whatsapp = String(formData.get("contact_whatsapp") ?? "").trim();
 
   // نضمن وجود الـ singleton قبل الـ patch (patch يفشل لو الوثيقة غير موجودة)
   await sanityWriteClient.createIfNotExists({ _id: "siteSettings", _type: "siteSettings" });
-  await sanityWriteClient
-    .patch("siteSettings")
-    .set({
-      "topBar.message": message,
-      "topBar.badge": badge,
-      "contact.email": email,
-      "contact.whatsappNumber": whatsapp,
-    })
-    .commit();
+  let patch = sanityWriteClient.patch("siteSettings").set({
+    "contact.email": email,
+    "contact.whatsappNumber": whatsapp,
+  });
+  // حقل فارغ في كل اللغات يُزال فيعود الموقع إلى النص الافتراضي
+  patch = message.length > 0 ? patch.set({ "topBar.message": message }) : patch.unset(["topBar.message"]);
+  patch = badge.length > 0 ? patch.set({ "topBar.badge": badge }) : patch.unset(["topBar.badge"]);
+  await patch.commit();
 
   revalidatePath("/admin/settings");
   revalidatePath("/", "layout"); // TopBar + Footer في site layout
