@@ -1,4 +1,6 @@
 import { randomUUID } from "crypto";
+import { readFileSync } from "fs";
+import { basename, resolve } from "path";
 import type { ArticleCategory } from "../../lib/articles/categories";
 
 /**
@@ -60,6 +62,14 @@ export interface Content {
   body: Block[];
 }
 
+/** صورة الغلاف — تُرفع فقط لمقال لا غلاف له بعد */
+export interface CoverSeed {
+  /** مسار الصورة نسبةً إلى جذر المستودع */
+  file: string;
+  /** وصف الصورة للقارئ الضرير — حقل alt في Studio (غير مُدوّل) */
+  alt: string;
+}
+
 /** مقال جاهز للرفع */
 export interface ArticleSeed {
   /** _id ثابت — يجعل إعادة التشغيل تحديثًا لا تكرارًا */
@@ -69,7 +79,11 @@ export interface ArticleSeed {
   /** لا تُترجَم: أسماء المؤسسات والدوريات تبقى بلغتها */
   sources: string[];
   content: Record<Lang, Content>;
+  cover?: CoverSeed;
 }
+
+/** صورة Sanity كما تُخزَّن في المقال — تُمرَّر كما هي دون قراءة حقولها */
+type SanityImage = Record<string, unknown>;
 
 const VALUE_TYPE = {
   string: "internationalizedArrayStringValue",
@@ -91,18 +105,31 @@ function intl(
   }));
 }
 
+/** يرفع ملف الغلاف إلى Sanity — رفع الملف نفسه مرة ثانية يعيد الأصل نفسه لا نسخة جديدة */
+async function uploadCover(cover: CoverSeed): Promise<SanityImage> {
+  const { sanityWriteClient } = await import("../../lib/sanity/client");
+  const file = resolve(process.cwd(), cover.file);
+  const asset = await sanityWriteClient.assets.upload("image", readFileSync(file), {
+    filename: basename(file),
+  });
+  return { _type: "image", asset: { _type: "reference", _ref: asset._id }, alt: cover.alt };
+}
+
 /**
  * يرفع مقالاً — idempotent.
- * `createOrReplace` يمسح ما لا نمرّره، فنقرأ تاريخ النشر أولاً كي لا
- * يُعاد ضبطه في كل تشغيل فيقفز المقال إلى رأس القائمة بلا سبب.
+ * `createOrReplace` يمسح ما لا نمرّره، فنقرأ أولاً ما لا يأتي من ملف المقال:
+ * تاريخ النشر (كي لا يقفز المقال إلى رأس القائمة في كل تشغيل) والغلاف
+ * (تغيّره هبة من Studio — وكان كل تشغيل يمحوه). ملف الغلاف يُرفع فقط لمقال بلا غلاف.
  */
 export async function seedArticle(article: ArticleSeed): Promise<void> {
   const { sanityWriteClient } = await import("../../lib/sanity/client");
 
-  const existing = await sanityWriteClient.fetch<{ publishedAt?: string } | null>(
-    `*[_id == $id][0]{ publishedAt }`,
+  const existing = await sanityWriteClient.fetch<{ publishedAt?: string; coverImage?: SanityImage } | null>(
+    `*[_id == $id][0]{ publishedAt, coverImage }`,
     { id: article.id }
   );
+  const coverImage =
+    existing?.coverImage ?? (article.cover ? await uploadCover(article.cover) : undefined);
 
   await sanityWriteClient.createOrReplace({
     _id: article.id,
@@ -113,13 +140,15 @@ export async function seedArticle(article: ArticleSeed): Promise<void> {
     excerpt: intl("text", article.content, (c) => c.excerpt),
     body: intl("articleBody", article.content, (c) => c.body),
     sources: article.sources,
+    ...(coverImage ? { coverImage } : {}),
     isPublished: true,
     publishedAt: existing?.publishedAt ?? new Date().toISOString(),
   });
 
   const blocks = LANGS.map((l) => article.content[l].body.length).join("/");
+  const cover = existing?.coverImage ? "غلاف محفوظ" : coverImage ? "غلاف مرفوع" : "بلا غلاف";
   console.log(
-    `  ${existing ? "↻" : "＋"} /articles/${article.slug} — ${blocks} كتلة · ${article.sources.length} مصادر`
+    `  ${existing ? "↻" : "＋"} /articles/${article.slug} — ${blocks} كتلة · ${article.sources.length} مصادر · ${cover}`
   );
   console.log(`     ${article.content.ar.title}`);
 }

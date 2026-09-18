@@ -592,9 +592,12 @@ momzy/
 │   ├── migrate-seed-to-sanity.ts   ✅ يرفع seed products لـ Sanity — idempotent، يُشغَّل مرة واحدة
 │   ├── seed-articles.ts            ✅ يرفع كل المقالات (أو واحدًا بالاسم) — idempotent
 │   └── articles/
-│       ├── builders.ts             ✅ أدوات Portable Text + seedArticle — المقال الجديد ملفّ محتوى فقط
+│       ├── builders.ts             ✅ أدوات Portable Text + seedArticle — المقال الجديد ملفّ محتوى فقط؛ يُبقي تاريخ النشر والغلاف الموجودين، ويرفع `cover` فقط لمقال بلا غلاف
+│       ├── covers/                 ✅ صور الأغلفة التي ترفعها ملفات المقالات
 │       ├── swaddling.ts            ✅ تقميط الطفل (نوم الطفل) — ar/he/en
-│       └── teething.ts             ✅ التسنين (تطوّر الطفل) — ar/he/en
+│       ├── teething.ts             ✅ التسنين (تطوّر الطفل) — ar/he/en
+│       ├── screens.ts              ✅ الشاشات في السنة الأولى (تطوّر الطفل) — ar/he/en
+│       └── reading.ts              ✅ القراءة للطفل منذ الولادة (تطوّر الطفل) — ar/he/en + غلاف
 ├── sanity.config.ts                ✅ Studio config — singleton structure + visionTool + schemas
 ├── reference/
 │   ├── momzy-prototype.html        المرجع البصري الإلزامي

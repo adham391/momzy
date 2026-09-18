@@ -15,9 +15,10 @@ import { seedArticle, type ArticleSeed } from "./articles/builders";
 import { swaddling } from "./articles/swaddling";
 import { teething } from "./articles/teething";
 import { screens } from "./articles/screens";
+import { reading } from "./articles/reading";
 
 /** كل المقالات — الترتيب هنا لا يؤثّر على ترتيب العرض (يحكمه publishedAt) */
-const ARTICLES: ArticleSeed[] = [swaddling, teething, screens];
+const ARTICLES: ArticleSeed[] = [swaddling, teething, screens, reading];
 
 async function main() {
   const only = process.argv[2];
