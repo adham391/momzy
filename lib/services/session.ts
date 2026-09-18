@@ -21,7 +21,7 @@ export function isOnlineSession(
   return serviceType === "online";
 }
 
-/** الفتحة كما تراها العميلة قبل الدفع — بلا رابط اللقاء (يُكشف بعد الدفع فقط) */
+/** الفتحة كما تراها العميلة قبل الدفع — بلا رابط اللقاء (يصل في تذكير اليوم السابق) */
 export interface PublicSlot {
   id: string;
   date: string;

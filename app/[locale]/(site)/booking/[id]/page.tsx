@@ -10,6 +10,7 @@ import CheckoutSteps, { BOOKING_STEP_LABELS } from "@/components/checkout/Checko
 import TrustBadges from "@/components/checkout/TrustBadges";
 import BookingHeader from "@/components/booking/BookingHeader";
 import BookingDetailsCard from "@/components/booking/BookingDetailsCard";
+import { REVEAL_HOURS_BEFORE, startsWithinHours } from "@/lib/sessions/time";
 import BookingSummary from "@/components/booking/BookingSummary";
 import { getBookingById } from "@/lib/db/bookings";
 import { isHypConfigured } from "@/lib/hyp/client";
@@ -62,6 +63,8 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
   const awaitingPayment = !isPaid && booking.amount > 0 && isHypConfigured() && !isCancelled;
   const paymentFailed = payment === "failed";
   const state = isCancelled ? "cancelled" : awaitingPayment ? "awaiting" : "confirmed";
+  // رابط اللقاء/المكان لا يُكشفان فور الدفع بل في تذكير اليوم السابق — ويظهران هنا حين تصبح الجلسة خلال يوم
+  const revealSession = state === "confirmed" && startsWithinHours(booking.date, booking.start_time, REVEAL_HOURS_BEFORE);
   const isAwaiting = state === "awaiting";
   /** نصوص الترويسة حسب المرحلة — تطابق تجربة /checkout في المتجر */
   const copy = {
@@ -151,7 +154,7 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
               createdAt={booking.created_at}
               state={state}
             />
-            <BookingDetailsCard booking={booking} revealSession={state === "confirmed"} />
+            <BookingDetailsCard booking={booking} confirmed={state === "confirmed"} revealSession={revealSession} />
 
             <div className="flex flex-wrap justify-center gap-3 mt-2">
               <Link

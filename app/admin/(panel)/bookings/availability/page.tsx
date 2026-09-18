@@ -1,18 +1,54 @@
 import Link from "next/link";
-import { ArrowRight, CalendarPlus } from "lucide-react";
+import { ArrowRight, Settings } from "lucide-react";
 import { getServices } from "@/lib/services/getServices";
 import { listUpcomingSlots } from "@/lib/db/bookings";
-import { createSlotAction, deleteSlotAction } from "../actions";
-import { formatSlotDate, formatTimeShort, formatILS } from "@/lib/utils/format";
+import { getActiveBookingsForSlots, type SessionBooking } from "@/lib/db/sessions";
+import { getSessionDefaults } from "@/lib/db/settings";
+import { israelTodayISO } from "@/lib/sessions/time";
+import SessionsManager from "@/components/admin/sessions/SessionsManager";
+import type { PageNotice, ServiceOption } from "@/components/admin/sessions/types";
+import type { Service } from "@/lib/services/types";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "إتاحة المواعيد — لوحة Momzy" };
+export const metadata = { title: "إدارة المواعيد — لوحة Momzy" };
 
-export default async function AvailabilityPage() {
-  const [services, slots] = await Promise.all([getServices(), listUpcomingSlots()]);
+/** مدّة الجلسة الافتراضية بالدقائق حين لا يُعرف غيرها — الورشة الجماعية أطول من اللقاء الفردي */
+const DEFAULT_DURATION_MIN: Record<Service["type"], number> = { workshop: 120, individual: 60, online: 60, home: 90 };
 
-  const inputCls =
-    "w-full px-3 py-2.5 rounded-xl border border-bord bg-offwh text-body-sm text-dark focus:outline-none focus:border-rose";
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** ما يُعبَّأ تلقائيًا عند اختيار خدمة في نموذج الإضافة */
+function toOption(service: Service, defaults: { zoomLink: string; venueAddress: string }): ServiceOption {
+  const online = service.type === "online";
+  return {
+    slug: service.slug,
+    title: service.title,
+    online,
+    price: service.price ?? 0,
+    capacity: service.maxParticipants ?? 1,
+    durationMin: DEFAULT_DURATION_MIN[service.type] ?? 60,
+    meetingLink: online ? defaults.zoomLink : "",
+    // الزيارة البيتية مكانها بيت الأم (نصّ الخدمة)؛ الحضوري في العنوان الثابت وإلا مدينة الخدمة
+    location: online ? "" : service.type === "home" ? service.location : defaults.venueAddress || service.location,
+  };
+}
+
+export default async function AvailabilityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string; tone?: string; day?: string }>;
+}) {
+  const sp = await searchParams;
+  const notice: PageNotice | null = sp.notice ? { text: sp.notice, tone: sp.tone === "error" ? "error" : "ok" } : null;
+  const initialDay = sp.day && DATE_RE.test(sp.day) ? sp.day : null;
+
+  const [services, defaults, slots] = await Promise.all([getServices(), getSessionDefaults(), listUpcomingSlots()]);
+  const bookingsMap = await getActiveBookingsForSlots(slots.map((s) => s.id));
+  // كائن عادي لا Map — يعبر إلى المكوّن العميل
+  const bookingsBySlot: Record<string, SessionBooking[]> = Object.fromEntries(bookingsMap);
+  // الخدمات التي تُحجز عبر الموقع فقط — ما يُتَّفق عليه في واتساب لا مواعيد له هنا
+  const options = services.filter((s) => !s.whatsappOnly).map((s) => toOption(s, defaults));
+  const totalRegistered = [...bookingsMap.values()].reduce((n, list) => n + list.length, 0);
 
   return (
     <div>
@@ -25,102 +61,53 @@ export default async function AvailabilityPage() {
         </Link>
       </div>
 
-      <h1 className="font-heading text-h2 font-bold text-dark mb-1">إتاحة المواعيد</h1>
-      <p className="text-mid text-body-sm mb-6">أضيفي المواعيد المتاحة للحجز — تظهر للعميلات في صفحة الخدمة.</p>
+      <h1 className="font-heading text-h2 font-bold text-dark mb-1">إدارة المواعيد</h1>
+      <p className="text-mid text-body-sm mb-5">
+        {slots.length === 0
+          ? "لا مواعيد قادمة بعد — اختاري يومًا من الرزنامة وأضيفي."
+          : `${slots.length} ${slots.length === 1 ? "جلسة قادمة" : "جلسات قادمة"} · ${totalRegistered} ${totalRegistered === 1 ? "تسجيل" : "تسجيلات"}. اختاري يومًا من الرزنامة لتعديله. تغيير أي موعد فيه مسجِّلات يرسل لهنّ بريدًا تلقائيًا.`}
+      </p>
 
-      {/* ── نموذج فتحة جديدة ── */}
-      {services.length === 0 ? (
+      {notice && (
+        <div
+          role="status"
+          className={`rounded-xl px-4 py-3 mb-5 text-body-sm font-bold ${
+            notice.tone === "error" ? "bg-rosepale text-rose border border-roselt" : "bg-tealpale text-dark border border-mint"
+          }`}
+        >
+          {notice.text}
+        </div>
+      )}
+
+      {/* ── ثوابت ناقصة ── */}
+      {(!defaults.zoomLink || !defaults.venueAddress) && (
+        <p className="text-body-sm text-mid bg-yellowlt border border-yellow rounded-xl px-4 py-3 mb-5 flex flex-wrap items-center gap-2">
+          <Settings size={15} />
+          {!defaults.zoomLink && !defaults.venueAddress
+            ? "اضبطي رابط زوم الثابت وعنوان اللقاءات الحضورية مرة واحدة"
+            : !defaults.zoomLink
+              ? "اضبطي رابط زوم الثابت مرة واحدة"
+              : "اضبطي عنوان اللقاءات الحضورية مرة واحدة"}{" "}
+          <Link href="/admin/settings" className="font-bold text-teal hover:underline">في الإعدادات ←</Link>{" "}
+          فيُعبَّآن تلقائيًا في كل جلسة جديدة.
+        </p>
+      )}
+
+      {options.length === 0 && (
         <p className="text-mid text-body-sm bg-white rounded-[var(--rl)] border border-bord p-5 mb-6">
           أضيفي خدمة في Studio أولاً كي تتمكّني من فتح مواعيد لها.
         </p>
-      ) : (
-        <form action={createSlotAction} className="bg-white rounded-[var(--rl)] border border-bord p-5 mb-6">
-          <h2 className="font-heading font-bold text-dark text-body mb-4">فتحة موعد جديدة</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <label className="flex flex-col gap-1.5 lg:col-span-3">
-              <span className="text-micro text-light font-label">الخدمة</span>
-              <select name="service" className={inputCls} required defaultValue="">
-                <option value="" disabled>اختاري الخدمة</option>
-                {services.map((s) => (
-                  <option key={s.slug} value={s.slug}>{s.title}</option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-micro text-light font-label">التاريخ</span>
-              <input name="date" type="date" className={inputCls} required />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-micro text-light font-label">من الساعة</span>
-              <input name="start_time" type="time" className={inputCls} required />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-micro text-light font-label">إلى الساعة</span>
-              <input name="end_time" type="time" className={inputCls} required />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-micro text-light font-label">عدد المقاعد</span>
-              <input name="capacity" type="number" min={1} defaultValue={1} className={inputCls} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-micro text-light font-label">السعر ₪ (اختياري)</span>
-              <input name="price" type="number" min={0} placeholder="سعر الخدمة" className={inputCls} />
-            </label>
-            <label className="flex flex-col gap-1.5 lg:col-span-2">
-              <span className="text-micro text-light font-label">رابط اللقاء — للورشة الأونلاين</span>
-              <input name="meeting_link" type="url" dir="ltr" placeholder="https://zoom.us/j/..." className={inputCls} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-micro text-light font-label">المكان — للورشة الحضورية</span>
-              <input name="location" type="text" placeholder="مثال: حيفا، شارع الجبل 12" className={inputCls} />
-            </label>
-          </div>
-          <p className="text-micro text-light mt-3">
-            املئي رابط اللقاء <strong>أو</strong> المكان حسب نوع الورشة — يظهر للمسجِّلة بعد إتمام الدفع فقط.
-          </p>
-          <button type="submit" className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-dark text-white text-body-sm font-bold hover:brightness-125 transition">
-            <CalendarPlus size={16} /> إضافة الموعد
-          </button>
-        </form>
       )}
 
-      {/* ── الفتحات القادمة ── */}
-      <h2 className="font-heading font-bold text-dark text-body mb-3">المواعيد القادمة ({slots.length})</h2>
-      {slots.length === 0 ? (
-        <p className="text-light text-body-sm bg-white rounded-[var(--rl)] border border-bord py-10 text-center">
-          لا مواعيد متاحة — أضيفي فتحة من الأعلى.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {slots.map((slot) => {
-            const full = slot.booked_count >= slot.capacity;
-            return (
-              <div key={slot.id} className="bg-white rounded-[var(--r)] border border-bord p-4 flex items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-dark text-body-sm truncate">{slot.service_name}</div>
-                  <div className="text-micro text-light">
-                    {formatSlotDate(slot.date)} · {formatTimeShort(slot.start_time)}–{formatTimeShort(slot.end_time)}
-                    {slot.price > 0 ? ` · ${formatILS(slot.price)}` : ""}
-                    {slot.meeting_link ? " · 💻 أونلاين" : slot.location ? ` · 📍 ${slot.location}` : ""}
-                  </div>
-                </div>
-                <div className="text-center shrink-0">
-                  <div className={full ? "text-rose font-bold text-body-sm" : "text-dark font-bold text-body-sm"}>
-                    {slot.booked_count}/{slot.capacity}
-                  </div>
-                  <div className="text-micro text-light">محجوز</div>
-                </div>
-                <form action={deleteSlotAction}>
-                  <input type="hidden" name="id" value={slot.id} />
-                  <button type="submit" className="px-3 py-1.5 rounded-lg text-body-sm font-bold text-rose border border-bord hover:bg-rosepale transition">
-                    حذف
-                  </button>
-                </form>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* key: تغيّر ?day= في الرابط يعيد تركيب المدير فيختار اليوم الجديد حتى في التنقّل الناعم */}
+      <SessionsManager
+        key={initialDay ?? "auto"}
+        services={options}
+        slots={slots}
+        bookingsBySlot={bookingsBySlot}
+        initialDay={initialDay}
+        today={israelTodayISO()}
+      />
     </div>
   );
 }

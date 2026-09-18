@@ -20,8 +20,8 @@ function fmtDate(dateStr: string): string {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 }
 
-/** الاتجاه يتبع اللغة — فلا يصل الإيميل الإنجليزي بمحاذاة معكوسة */
-function shell(locale: EmailLocale, badge: string, title: string, body: string): string {
+/** الاتجاه يتبع اللغة — فلا يصل الإيميل الإنجليزي بمحاذاة معكوسة. مُصدَّر لإيميلات تغيّر الجلسة */
+export function bookingEmailShell(locale: EmailLocale, badge: string, title: string, body: string): string {
   const dir = isRtl(locale) ? "rtl" : "ltr";
   return `
 <!DOCTYPE html><html lang="${locale}" dir="${dir}"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
@@ -40,7 +40,7 @@ function shell(locale: EmailLocale, badge: string, title: string, body: string):
 </body></html>`.trim();
 }
 
-function detailsBox(b: BookingRow, t: EmailT): string {
+export function bookingDetailsBox(b: BookingRow, t: EmailT): string {
   const row = (label: string, val: string) =>
     `<tr><td style="padding:6px 0;font-size:13px;color:#9A9490;width:110px;">${label}</td><td style="padding:6px 0;font-size:14px;font-weight:600;color:#252220;">${val}</td></tr>`;
   return `
@@ -60,26 +60,16 @@ function detailsBox(b: BookingRow, t: EmailT): string {
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** كتلة «كيف أحضر؟» — رابط اللقاء (أونلاين) أو المكان (حضوري) */
+/**
+ * كتلة «كيف أحضر؟» — طريقة الحضور فقط. رابط اللقاء والمكان لا يُرسلان هنا عمدًا:
+ * يصلان في تذكير اليوم السابق (lib/notifications/reminders.ts) لأن الجلسة قد تتحرّك.
+ */
 function accessBlock(b: BookingRow, t: EmailT): string {
-  if (b.meeting_link) {
-    const link = esc(b.meeting_link);
-    return `
-    <div style="background:#EFF8F8;border:1.5px solid #D4EDEB;border-radius:12px;padding:18px 20px;margin:16px 0;text-align:center;">
-      <div style="font-size:11px;font-weight:700;color:#82C9C4;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">${t("booking.onlineLabel")}</div>
-      <a href="${link}" style="display:inline-block;background:#82C9C4;color:white;text-decoration:none;border-radius:50px;padding:12px 28px;font-size:15px;font-weight:700;">${t("booking.joinCta")}</a>
-      <div style="font-size:12px;color:#9A9490;margin-top:10px;">${t("booking.keepEmail")}</div>
-    </div>`;
-  }
-  if (b.location) {
-    return `
-    <div style="background:#EFF8F8;border:1.5px solid #D4EDEB;border-radius:12px;padding:18px 20px;margin:16px 0;">
-      <div style="font-size:11px;font-weight:700;color:#82C9C4;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">${t("booking.locationLabel")}</div>
-      <div style="font-size:15px;font-weight:700;color:#252220;line-height:1.7;">${esc(b.location)}</div>
-    </div>`;
-  }
+  const text = b.meeting_link ? t("booking.onlineLater") : b.location ? t("booking.onsiteLater") : t("booking.detailsLater");
   return `
-    <p style="font-size:13.5px;color:#55504C;line-height:1.9;margin:16px 0 0;text-align:center;">${t("booking.detailsLater")}</p>`;
+    <div style="background:#FEFBF0;border:1.5px solid #F7DF98;border-radius:12px;padding:16px 20px;margin:16px 0;text-align:center;">
+      <p style="font-size:13.5px;color:#55504C;line-height:1.9;margin:0;">${text}</p>
+    </div>`;
 }
 
 export const bookingCustomerSubject = (b: BookingRow) =>
@@ -92,10 +82,10 @@ export function bookingCustomerEmailHtml(b: BookingRow): string {
     <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 8px;">${t("common.greeting", { name: b.customer_name })}</p>
     <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 20px;">${t("booking.intro")}</p>
     <div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;background:#FDFAF5;border:1.5px solid #EDE9E4;border-radius:50px;padding:8px 20px;font-size:15px;font-weight:800;color:#252220;direction:ltr;">${b.booking_number}</span></div>
-    ${detailsBox(b, t)}
+    ${bookingDetailsBox(b, t)}
     ${accessBlock(b, t)}
     <p style="font-size:13px;color:#9A9490;line-height:1.8;margin:20px 0 0;text-align:center;">${t("common.supportLine", { email: SUPPORT_EMAIL })}</p>`;
-  return shell(locale, t("booking.badge"), t("booking.title"), body);
+  return bookingEmailShell(locale, t("booking.badge"), t("booking.title"), body);
 }
 
 /* ── إشعار هبة ── */
@@ -121,7 +111,7 @@ export function bookingAdminEmailHtml(b: BookingRow): string {
   const body = `
     <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 16px;">وصل طلب حجز جديد — أكّديه من اللوحة.</p>
     <div style="text-align:center;margin-bottom:16px;"><span style="display:inline-block;background:#FDFAF5;border:1.5px solid #EDE9E4;border-radius:50px;padding:8px 20px;font-size:15px;font-weight:800;color:#252220;direction:ltr;">${b.booking_number}</span></div>
-    ${detailsBox(b, t)}
+    ${bookingDetailsBox(b, t)}
     <div style="margin-top:16px;padding:16px 20px;background:#FEF5F7;border-radius:10px;border:1.5px solid #F7C4CE;">
       <div style="font-size:11px;font-weight:700;color:#F2A7B5;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">العميلة</div>
       <div style="font-size:14px;color:#252220;line-height:1.8;">${esc(b.customer_name)} · <a href="tel:${esc(b.customer_phone)}" style="color:#82C9C4;direction:ltr;">${esc(b.customer_phone)}</a> · <a href="mailto:${esc(b.customer_email)}" style="color:#82C9C4;">${esc(b.customer_email)}</a></div>
@@ -129,5 +119,5 @@ export function bookingAdminEmailHtml(b: BookingRow): string {
       ${customerTextLine("📝 موضوع اللقاء", b.topic)}
       ${customerTextLine("ملاحظات", b.notes)}
     </div>`;
-  return shell("ar", "حجز جديد", "📅 حجز جديد", body);
+  return bookingEmailShell("ar", "حجز جديد", "📅 حجز جديد", body);
 }

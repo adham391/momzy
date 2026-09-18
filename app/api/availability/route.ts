@@ -1,28 +1,21 @@
 import { NextResponse } from "next/server";
-import { getAvailableSlots, getUpcomingSlotsForService } from "@/lib/db/bookings";
+import { getUpcomingSlotsForService } from "@/lib/db/bookings";
 import { getService } from "@/lib/services/getService";
 import { toPublicSlot } from "@/lib/services/session";
 
 /**
- * GET /api/availability?service=slug — الفتحات المتاحة لخدمة.
- * عام (تدفّق الحجز المجهول) — لذا تُعاد الفتحات بصيغتها العامة (`PublicSlot`):
- * بلا رابط اللقاء (يُكشف بعد الدفع فقط)، ومع `online` كي تعرف الواجهة أنّ اللقاء حضوري.
+ * GET /api/availability?service=slug — كل الجلسات القادمة لخدمة، **بما فيها المكتملة**:
+ * تظهر في رزنامة النموذج رمادية بعلامة «اكتمل العدد» ولا تُضغط (لا تختفي)،
+ * وتحتها زر قائمة الانتظار لمن تريد.
  *
- * يعيد أيضاً `totalUpcoming` (بما فيها المكتملة) كي يميّز النموذج بين
- * «لا مواعيد مجدولة» و«المقاعد مكتملة» — رسالتان مختلفتان تمامًا للأم.
+ * عام (تدفّق الحجز المجهول) — لذا تُعاد الفتحات بصيغتها العامة (`PublicSlot`):
+ * بلا رابط اللقاء (يصل في تذكير اليوم السابق)، ومع `online` كي تعرف الواجهة أنّ اللقاء حضوري.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get("service");
-  if (!slug) return NextResponse.json({ slots: [], totalUpcoming: 0 });
+  if (!slug) return NextResponse.json({ slots: [] });
 
-  const [slots, upcoming, service] = await Promise.all([
-    getAvailableSlots(slug),
-    getUpcomingSlotsForService(slug),
-    getService(slug),
-  ]);
-  return NextResponse.json({
-    slots: slots.map((slot) => toPublicSlot(slot, service?.type)),
-    totalUpcoming: upcoming.length,
-  });
+  const [slots, service] = await Promise.all([getUpcomingSlotsForService(slug), getService(slug)]);
+  return NextResponse.json({ slots: slots.map((slot) => toPublicSlot(slot, service?.type)) });
 }

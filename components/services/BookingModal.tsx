@@ -30,7 +30,7 @@ interface BookingModalProps {
   askTopic?: boolean;
 }
 
-/** الفتحة كما يعيدها /api/availability — بلا رابط اللقاء (يُكشف بعد الدفع) */
+/** الفتحة كما يعيدها /api/availability — بلا رابط اللقاء (يصل في تذكير اليوم السابق) */
 type Slot = PublicSlot;
 
 /** تحويل فتحة إلى شكل الرزنامة */
@@ -46,6 +46,9 @@ function toCalendarSession(s: Slot): CalendarSession {
     location: s.location,
   };
 }
+
+/** مكتملة — تُعرض في الرزنامة رمادية ولا تُحجز */
+const isFull = (s: Slot) => s.booked_count >= s.capacity;
 
 interface BookingFormData {
   name: string;
@@ -140,7 +143,7 @@ export default function BookingModal({
       setStep("contact");
       return;
     }
-    // كل الجلسات مكتملة → قائمة الانتظار مباشرة (بلا جلب مواعيد)
+    // زر «انضمي للانتظار» الصريح (البطاقة/الشريط) → قائمة الانتظار مباشرة (بلا جلب مواعيد)
     if (forceWaitlist) {
       setStep("waitlist");
       return;
@@ -148,21 +151,22 @@ export default function BookingModal({
     setStep("loading");
     try {
       const res = await fetch(`/api/availability?service=${encodeURIComponent(serviceSlug)}`);
-      const data = (await res.json()) as { slots: Slot[]; totalUpcoming?: number };
-      // لا مواعيد أصلاً ≠ مواعيد مكتملة — رسالتان مختلفتان في خطوة الانتظار
-      setNoSessionsAtAll((data.totalUpcoming ?? 0) === 0);
-      if (data.slots && data.slots.length > 0) {
-        setSlots(data.slots);
-        // جلسة مُختارة من صفحة الورشة → للنموذج مباشرة (تخطّي اختيار الموعد)
-        const pre = preselectedSlotId ? data.slots.find((s) => s.id === preselectedSlotId) : undefined;
-        if (pre) {
+      const data = (await res.json()) as { slots?: Slot[] };
+      const upcoming = data.slots ?? [];
+      // الجلسات المكتملة تبقى في الرزنامة رمادية (لا تختفي)؛ نموذج الانتظار مباشرةً فقط حين لا جلسة مجدولة أصلًا
+      setNoSessionsAtAll(upcoming.length === 0);
+      if (upcoming.length > 0) {
+        setSlots(upcoming);
+        // جلسة مُختارة من صفحة الورشة وفيها متسع → للنموذج مباشرة (تخطّي اختيار الموعد)
+        const pre = preselectedSlotId ? upcoming.find((s) => s.id === preselectedSlotId) : undefined;
+        if (pre && !isFull(pre)) {
           setSelected(pre);
           setStep("form");
         } else {
           setStep("slots");
         }
       } else {
-        setStep("waitlist"); // لا مقاعد متاحة (مكتملة أو لا جلسات) → قائمة انتظار
+        setStep("waitlist"); // لا جلسات مجدولة → قائمة انتظار لإعلامها عند فتح دورة جديدة
       }
     } catch {
       setStep("contact");
@@ -414,6 +418,25 @@ export default function BookingModal({
                 }
               }}
             />
+            {/* جلسات مكتملة → رمادية في الرزنامة، ومن تريد تنضم لقائمة الانتظار من هنا */}
+            {slots.some(isFull) && (
+              <div
+                className="rounded-xl px-4 py-3.5 mt-5 text-center"
+                style={{ background: "var(--yellowlt)", border: "1.5px solid var(--yellow)" }}
+              >
+                <p className="text-[13px] leading-[1.8] mb-3" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+                  {slots.every(isFull) ? t("modal.fullBody") : t("modal.someFullNote")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setStep("waitlist")}
+                  className="font-label font-bold text-[13px] px-5 py-2.5 rounded-full"
+                  style={{ background: "var(--rose)", color: "white" }}
+                >
+                  {t("modal.joinWaitlist")}
+                </button>
+              </div>
+            )}
             {errorMsg && (
               <p className="text-center text-[13px] mt-4 rounded-[10px] py-2 px-3" style={{ background: "#FEF5F7", color: "var(--rose)" }}>
                 {errorMsg}

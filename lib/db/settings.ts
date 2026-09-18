@@ -74,3 +74,15 @@ export async function getUsdRate(): Promise<number> {
   const rate = num(m[USD_RATE_SETTING], DEFAULT_USD_RATE);
   return rate > 0 ? rate : DEFAULT_USD_RATE;
 }
+
+/** ما يُعبَّأ تلقائيًا في الجلسة الجديدة: رابط زوم الثابت للأونلاين، وعنوان اللقاءات الحضورية */
+export interface SessionDefaults {
+  zoomLink: string;
+  venueAddress: string;
+}
+
+/** من /admin/settings — فارغان حتى تضبطهما هبة */
+export async function getSessionDefaults(): Promise<SessionDefaults> {
+  const m = await getSettingsMap(["zoom_link", "venue_address"]);
+  return { zoomLink: (m["zoom_link"] ?? "").trim(), venueAddress: (m["venue_address"] ?? "").trim() };
+}

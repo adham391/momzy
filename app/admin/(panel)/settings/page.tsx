@@ -1,6 +1,6 @@
 import { getSettingsMap, boolSetting } from "@/lib/db/settings";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
-import { updateOperationalSettingsAction, updateSiteContentAction, updateNotifyEmailsAction } from "./actions";
+import { updateOperationalSettingsAction, updateSiteContentAction, updateNotifyEmailsAction, updateSessionDefaultsAction } from "./actions";
 import { DEFAULT_USD_RATE } from "@/lib/currency";
 import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
 
@@ -56,6 +56,30 @@ export default async function AdminSettingsPage() {
               defaultValue={settings["whatsapp_number"] ?? ""}
               ltr
               placeholder="+972501234567"
+            />
+            <SaveButton />
+          </form>
+        </Card>
+
+        {/* ── ثوابت الجلسات (Supabase) ── */}
+        <Card title="المواعيد">
+          <p className="text-mid text-body-sm mb-4 leading-relaxed">
+            يُعبَّآن تلقائيًا في كل جلسة جديدة من صفحة المواعيد (ويمكن تغييرهما لجلسة بعينها). يصلان المسجِّلة في بريد تذكير اليوم السابق، ويظهران في صفحة تسجيلها قبل الموعد بيوم — لا فور الدفع.
+          </p>
+          <form action={updateSessionDefaultsAction} className="flex flex-col gap-4">
+            <TextField
+              name="zoom_link"
+              label="رابط زوم الثابت — للقاءات الأونلاين"
+              type="url"
+              defaultValue={settings["zoom_link"] ?? ""}
+              ltr
+              placeholder="https://zoom.us/j/..."
+            />
+            <TextField
+              name="venue_address"
+              label="عنوان اللقاءات الحضورية — الناصرة"
+              defaultValue={settings["venue_address"] ?? ""}
+              placeholder="مثال: الناصرة، شارع … رقم …"
             />
             <SaveButton />
           </form>

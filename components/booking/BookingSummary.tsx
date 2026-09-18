@@ -11,7 +11,7 @@ interface BookingSummaryProps {
  * ملخّص التسجيل الجانبي في مرحلة الدفع — نظير OrderSummary في المتجر.
  * يعرض الورشة والموعد وطريقة الحضور والإجمالي.
  *
- * ⚠️ لا يكشف رابط اللقاء ولا العنوان الدقيق — هذه تُكشف بعد الدفع فقط
+ * ⚠️ لا يكشف رابط اللقاء ولا العنوان الدقيق — هذه تصل في تذكير اليوم السابق
  * (كما في BookingDetailsCard)؛ هنا نكتفي بنوع الحضور.
  */
 export default function BookingSummary({ booking }: BookingSummaryProps) {

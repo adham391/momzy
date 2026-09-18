@@ -24,6 +24,8 @@ export interface SlotRow {
   capacity: number;
   booked_count: number;
   is_blocked: boolean;
+  /** سبب الحجب — يُعرض في لوحة المواعيد فقط */
+  block_reason: string | null;
   /** رابط اللقاء للورشات الأونلاين — يُكشف بعد تأكيد الدفع فقط */
   meeting_link: string | null;
   /** مكان اللقاء للورشات الحضورية */
@@ -71,7 +73,7 @@ export interface BookingRow {
   location?: string | null;
 }
 
-function toSlot(r: Record<string, unknown>): SlotRow {
+export function toSlot(r: Record<string, unknown>): SlotRow {
   return {
     ...(r as unknown as SlotRow),
     price: Number(r.price ?? 0),
@@ -154,23 +156,9 @@ export async function deleteSlot(id: string): Promise<void> {
   await supabase.from("availability").delete().eq("id", id);
 }
 
-/** الفتحات المتاحة لخدمة (للعميل) — قادمة، غير محجوبة، فيها متسع */
-export async function getAvailableSlots(serviceSlug: string): Promise<SlotRow[]> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("availability")
-    .select("*")
-    .eq("service_slug", serviceSlug)
-    .eq("is_blocked", false)
-    .gte("date", todayISO())
-    .order("date", { ascending: true })
-    .order("start_time", { ascending: true });
-  return (data ?? []).map(toSlot).filter((s) => s.booked_count < s.capacity);
-}
-
 /**
- * كل الجلسات القادمة لخدمة — **بما فيها المكتملة** (بعكس getAvailableSlots).
- * تُعرض في صفحة الورشة كي ترى الأم المواعيد وحالة كل جلسة («اكتمل العدد»).
+ * كل الجلسات القادمة لخدمة — **بما فيها المكتملة**: غير المحجوبة، من اليوم فصاعدًا.
+ * للرزنامة (تعرض المكتملة رمادية ولا تحجزها) ولعدّاد المقاعد في صفحة الورشة.
  */
 export async function getUpcomingSlotsForService(serviceSlug: string): Promise<SlotRow[]> {
   const supabase = createAdminClient();
@@ -445,4 +433,32 @@ export async function getBookingStatusHistory(bookingId: string): Promise<Status
     note: (r.note as string | null) ?? null,
     created_at: String(r.created_at),
   }));
+}
+
+/* ── تذكير اليوم السابق ── */
+
+/** حجوزات موعدها بين تاريخين (اليوم وغدًا) ولم يصلها التذكير بعد — مع رابط/مكان جلستها الحاليَّين */
+export async function listBookingsAwaitingReminder(fromDate: string, toDate: string): Promise<BookingRow[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("bookings")
+    .select("*, availability(meeting_link, location)")
+    .eq("reminder_24h_sent", false)
+    .neq("status", "cancelled")
+    .gte("date", fromDate)
+    .lte("date", toDate);
+  return (data ?? []).map((row) => {
+    const session = (row as { availability?: { meeting_link: string | null; location: string | null } | null }).availability;
+    return {
+      ...toBooking(row as Record<string, unknown>),
+      meeting_link: session?.meeting_link ?? null,
+      location: session?.location ?? null,
+    };
+  });
+}
+
+/** يُعلّم الحجز بأن تذكير اليوم السابق أُرسل (أو لم يعد لازمًا) */
+export async function markReminderSent(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  await supabase.from("bookings").update({ reminder_24h_sent: true }).eq("id", id);
 }

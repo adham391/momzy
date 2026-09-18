@@ -5,9 +5,14 @@ import type { BookingRow } from "@/lib/db/bookings";
 
 interface BookingDetailsCardProps {
   booking: BookingRow;
-  /** كشف رابط اللقاء/المكان — بعد تثبيت التسجيل (الدفع) فقط */
+  /** التسجيل مثبَّت (مدفوع أو مجاني) */
+  confirmed: boolean;
+  /** كشف رابط اللقاء/المكان — حين تصبح الجلسة خلال يوم (نفس مهلة تذكير اليوم السابق) */
   revealSession: boolean;
 }
+
+/** المكان قد يكون رابط خريطة (Waze) — يُعرض زرًّا لا نصًّا */
+const isUrl = (s: string) => /^https?:\/\//i.test(s.trim());
 
 /** صف بيان: تسمية + قيمة */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -19,11 +24,29 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-/** بطاقة تفاصيل التسجيل — الورشة والموعد وطريقة الحضور وبيانات المسجِّلة */
-export default function BookingDetailsCard({ booking, revealSession }: BookingDetailsCardProps) {
+function ActionLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-block font-label font-bold text-white text-[15px] active:scale-[0.98]"
+      style={{ background: "var(--teal)", borderRadius: 50, padding: "13px 30px", boxShadow: "0 6px 18px rgba(130,201,196,0.45)" }}
+    >
+      {label}
+    </a>
+  );
+}
+
+/**
+ * بطاقة تفاصيل التسجيل — الورشة والموعد وطريقة الحضور وبيانات المسجِّلة.
+ * رابط اللقاء أو المكان لا يظهران فور الدفع: يصلان في تذكير اليوم السابق، ويظهران هنا حينها.
+ */
+export default function BookingDetailsCard({ booking, confirmed, revealSession }: BookingDetailsCardProps) {
   const t = useTranslations("booking");
   const hasOnline = Boolean(booking.meeting_link);
   const hasOnsite = Boolean(booking.location);
+  const revealed = confirmed && revealSession;
 
   return (
     <div className="flex flex-col gap-6">
@@ -48,36 +71,26 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
       <div
         className="rounded-[22px]"
         style={{
-          background: revealSession ? "var(--tealpale)" : "var(--yellowlt)",
-          border: `1.5px solid ${revealSession ? "var(--mint)" : "var(--yellow)"}`,
+          background: revealed ? "var(--tealpale)" : "var(--yellowlt)",
+          border: `1.5px solid ${revealed ? "var(--mint)" : "var(--yellow)"}`,
           padding: "24px 26px",
         }}
       >
         <h2 className="font-heading font-bold text-dark text-[17px] mb-2">{t("details.howToAttend")}</h2>
 
-        {!revealSession ? (
-          <p className="font-label text-[13.5px] text-mid leading-[1.9]">
-            {t("details.revealAfterPayment")}
-          </p>
+        {!confirmed ? (
+          <p className="font-label text-[13.5px] text-mid leading-[1.9]">{t("details.revealAfterPayment")}</p>
+        ) : !revealSession ? (
+          <p className="font-label text-[13.5px] text-mid leading-[1.9]">{t("details.detailsDayBefore")}</p>
         ) : hasOnline ? (
           <>
-            <p className="font-label text-[13.5px] text-mid leading-[1.9] mb-4">
-              {t("details.onlineIntro")}
-            </p>
-            <a
-              href={booking.meeting_link ?? "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block font-label font-bold text-white text-[15px] active:scale-[0.98]"
-              style={{
-                background: "var(--teal)",
-                borderRadius: 50,
-                padding: "13px 30px",
-                boxShadow: "0 6px 18px rgba(130,201,196,0.45)",
-              }}
-            >
-              {t("details.joinMeeting")}
-            </a>
+            <p className="font-label text-[13.5px] text-mid leading-[1.9] mb-4">{t("details.onlineIntro")}</p>
+            <ActionLink href={booking.meeting_link ?? "#"} label={t("details.joinMeeting")} />
+          </>
+        ) : hasOnsite && isUrl(booking.location ?? "") ? (
+          <>
+            <p className="font-label text-[13.5px] text-mid leading-[1.9] mb-4">{t("details.onsiteIntro")}</p>
+            <ActionLink href={booking.location ?? "#"} label={t("details.openMap")} />
           </>
         ) : hasOnsite ? (
           <>
@@ -85,9 +98,7 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
             <p className="font-label text-[15px] font-bold text-dark leading-[1.8]">{booking.location}</p>
           </>
         ) : (
-          <p className="font-label text-[13.5px] text-mid leading-[1.9]">
-            {t("details.attendanceDetailsSoon")}
-          </p>
+          <p className="font-label text-[13.5px] text-mid leading-[1.9]">{t("details.attendanceDetailsSoon")}</p>
         )}
       </div>
 

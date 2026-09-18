@@ -39,6 +39,16 @@ export async function updateNotifyEmailsAction(formData: FormData) {
   revalidatePath("/admin/settings");
 }
 
+/** ثوابت الجلسات — رابط زوم واحد لكل الأونلاين، وعنوان واحد للحضوري → جدول settings */
+export async function updateSessionDefaultsAction(formData: FormData) {
+  await updateSettings({
+    zoom_link: String(formData.get("zoom_link") ?? "").trim(),
+    venue_address: String(formData.get("venue_address") ?? "").trim(),
+  });
+  revalidatePath("/admin/settings");
+  revalidatePath("/admin/bookings/availability");
+}
+
 /** محتوى الموقع (TopBar + تواصل) → Sanity siteSettings singleton */
 export async function updateSiteContentAction(formData: FormData) {
   const message = String(formData.get("topbar_message") ?? "").trim();
