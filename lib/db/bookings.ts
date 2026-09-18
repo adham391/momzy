@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getService } from "@/lib/services/getService";
 import { checkBabyAge, hasAgeGate } from "@/lib/utils/age";
 import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingTopic";
+import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
+import { isOnlineSession } from "@/lib/services/session";
 import { toLatinDigits } from "@/lib/utils/format";
 import type { PaymentStatus } from "./types";
 import type { StatusHistoryRow } from "./orders";
@@ -206,13 +208,15 @@ export interface CreateBookingInput {
   babyBirthDate?: string | null;
   /** لغة الصفحة وقت التسجيل — تحدّد لغة إيميل التأكيد */
   locale?: string;
+  /** هل الزائرة داخل البلاد؟ يُحسب في الـ route من ترويسات Vercel — اللقاء الحضوري يُحجز من داخلها فقط؛ غيابه = داخل البلاد */
+  domestic?: boolean;
 }
 
-/** فشل الحجز — status يميّز سبب الرفض (400 بيانات · 409 امتلاء) */
-type BookingError = { error: string; status?: number };
+/** فشل الحجز — status يميّز سبب الرفض (400 بيانات · 403 من خارج البلاد · 409 امتلاء)، وcode تقرأه الواجهة */
+type BookingError = { error: string; status?: number; code?: string };
 
 /**
- * ينشئ حجزاً — يتحقق من الفئة العمرية وموضوع اللقاء، ثم يحجز الفتحة ذرّياً
+ * ينشئ حجزاً — يتحقق من أن اللقاء الحضوري من داخل البلاد، ومن الفئة العمرية وموضوع اللقاء، ثم يحجز الفتحة ذرّياً
  * (يمنع تجاوز السعة) ثم يُدرج الحجز.
  * التحقق هنا لا في الواجهة فقط — الواجهة قابلة للتجاوز.
  */
@@ -229,25 +233,29 @@ export async function createBooking(
   if (!slotRaw) return { error: "الموعد غير موجود", status: 404 };
   const slot = toSlot(slotRaw);
 
-  // ── الفئة العمرية وموضوع اللقاء — قبل حجز المقعد كي لا نحجز ثم نتراجع ──
+  const service = slot.service_slug ? await getService(slot.service_slug) : null;
+
+  // ── القواعد قبل حجز المقعد — كي لا نحجز ثم نتراجع ──
+  // اللقاء الحضوري (الناصرة أو بيت الأم) من داخل البلاد فقط
+  if (!isOnlineSession(slot, service?.type) && input.domestic === false) {
+    return { error: "اللقاء الحضوري يُحجز من داخل البلاد فقط", status: 403, code: DOMESTIC_ONLY_CODE };
+  }
+
   /** يُحفظ فقط للخدمات التي تسأل عنه — فلا تلمس حجوزاتُ غيرها عمودَ topic */
   let topic: string | null = null;
-  if (slot.service_slug) {
-    const service = await getService(slot.service_slug);
-    if (service && hasAgeGate(service)) {
-      if (!input.babyBirthDate) {
-        return { error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة", status: 400 };
-      }
-      const check = checkBabyAge(input.babyBirthDate, slot.date, service);
-      if (!check.ok) {
-        return { error: check.message ?? "عمر الطفل خارج الفئة العمرية للورشة", status: 400 };
-      }
+  if (service && hasAgeGate(service)) {
+    if (!input.babyBirthDate) {
+      return { error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة", status: 400 };
     }
-    if (service?.askTopic) {
-      topic = normalizeBookingTopic(input.topic);
-      if (!isBookingTopicValid(topic)) {
-        return { error: "اكتبي موضوع اللقاء", status: 400 };
-      }
+    const check = checkBabyAge(input.babyBirthDate, slot.date, service);
+    if (!check.ok) {
+      return { error: check.message ?? "عمر الطفل خارج الفئة العمرية للورشة", status: 400 };
+    }
+  }
+  if (service?.askTopic) {
+    topic = normalizeBookingTopic(input.topic);
+    if (!isBookingTopicValid(topic)) {
+      return { error: "اكتبي موضوع اللقاء", status: 400 };
     }
   }
 

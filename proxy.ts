@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createMiddlewareClient } from "@/lib/supabase/middleware";
+import { countryFromHeaders, regionFromHeaders } from "@/lib/geo/country";
 import { routing } from "@/lib/i18n/routing";
 import { LIBRARY_SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "@/lib/library/constants";
 
@@ -62,20 +63,15 @@ interface GeoInfo {
  * بلد ومنطقة الزائر (ISO 3166-1 / 3166-2).
  * منذ Next.js 16 يعمل Proxy على Node.js runtime افتراضيًا، فلم يعد
  * `request.geo` مضمونًا — لذا نقرأ ترويسات Vercel للموقع الجغرافي
- * (متاحة على Edge وNode معًا)، ونُبقي request.geo كاحتياط.
+ * (متاحة على Edge وNode معًا — القارئ المشترك في lib/geo/country.ts)، ونُبقي request.geo كاحتياط.
  */
 function getGeo(request: NextRequest): { country: string; region: string } {
+  const country = countryFromHeaders(request.headers);
+  if (country) return { country, region: regionFromHeaders(request.headers) };
   const injected = (request as NextRequest & { geo?: GeoInfo }).geo;
-  if (injected?.country) {
-    return {
-      country: injected.country.toUpperCase(),
-      region: (injected.region ?? "").toUpperCase(),
-    };
-  }
-  const h = request.headers;
   return {
-    country: (h.get("x-vercel-ip-country") ?? "").toUpperCase(),
-    region: (h.get("x-vercel-ip-country-region") ?? "").toUpperCase(),
+    country: (injected?.country ?? "").toUpperCase(),
+    region: (injected?.region ?? "").toUpperCase(),
   };
 }
 

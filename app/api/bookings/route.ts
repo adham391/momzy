@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { createBooking } from "@/lib/db/bookings";
 import { sendBookingNotifications } from "@/lib/notifications/booking";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
+import { isDomesticRequest } from "@/lib/geo/country";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -51,11 +52,13 @@ export async function POST(request: Request) {
     babyBirthDate: typeof b.babyBirthDate === "string" ? b.babyBirthDate : null,
     // لغة الصفحة — تُحفظ لتحديد لغة إيميل التأكيد
     locale: typeof b.locale === "string" ? b.locale : undefined,
+    // من ترويسات Vercel — اللقاء الحضوري يُحجز من داخل البلاد فقط
+    domestic: isDomesticRequest(request.headers),
   });
 
-  // 400 = بيانات مرفوضة (فئة عمرية، موضوع اللقاء) · 409 = امتلأ الموعد
+  // 400 = بيانات مرفوضة (فئة عمرية، موضوع اللقاء) · 403 = لقاء حضوري من خارج البلاد · 409 = امتلأ الموعد
   if ("error" in result) {
-    return NextResponse.json({ error: result.error }, { status: result.status ?? 409 });
+    return NextResponse.json({ error: result.error, code: result.code }, { status: result.status ?? 409 });
   }
 
   // ورشة مدفوعة + مفاتيح HYP موجودة → رابط الدفع (المقعد محجوز بانتظار الدفع)

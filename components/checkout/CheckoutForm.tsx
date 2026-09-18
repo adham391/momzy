@@ -8,6 +8,9 @@ import { useCart } from "@/lib/store/cart";
 import { computeShipping, type ShippingConfig } from "@/lib/shipping";
 import { couponDiscount } from "@/lib/coupons";
 import { getStoredUTM } from "@/lib/analytics/track";
+import { useDomestic } from "@/lib/geo/useDomestic";
+import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
+import AbroadNotice from "@/components/ui/AbroadNotice";
 
 /** واجهة بيانات نموذج الدفع */
 interface FormData {
@@ -110,6 +113,7 @@ export default function CheckoutForm({
   const cartItems     = useCart((s) => s.items);
   const getTotal      = useCart((s) => s.getTotal);
   const appliedCoupon = useCart((s) => s.appliedCoupon);
+  const removeItem    = useCart((s) => s.removeItem);
 
   const [form, setForm] = useState<FormData>({
     name: "", email: "", phone: "", city: "", address: "", building: "", postalCode: "", notes: "",
@@ -124,11 +128,17 @@ export default function CheckoutForm({
   const [agreedMarketing, setAgreedMarketing] = useState(false);
   const [focusedField,    setFocusedField]    = useState<string | null>(null);
   const [status,          setStatus]          = useState<FormStatus>("idle");
+  /** هل الزائرة داخل البلاد؟ — الصندوق يُشحن ويُدفع من داخلها فقط */
+  const domestic = useDomestic();
+  /** السيرفر رفض الطلب لأنه من خارج البلاد — أوثق من تخمين الواجهة */
+  const [rejectedAbroad, setRejectedAbroad] = useState(false);
 
   /** حساب الشحن — للعناصر الفيزيائية فقط (الرقمية تُرسل بالبريد بلا شحن) */
   const physicalCount = cartItems.filter((i) => !i.isDigital).length;
   /** الطلب الرقمي البحت (كتيّب) يصل على البريد — فلا نسأل عن البلدة والعنوان */
   const needsShipping = physicalCount > 0;
+  /** صندوق وزائرة من خارج البلاد — الشحن والدفع من داخل البلاد فقط (السيرفر يرفض أيضًا) */
+  const blockedAbroad = needsShipping && (domestic === false || rejectedAbroad);
   const shippingCost = computeShipping(getTotal(), physicalCount, shipping);
   const discount     = couponDiscount(appliedCoupon, getTotal());
   const grandTotal   = getTotal() + shippingCost - discount;
@@ -165,7 +175,13 @@ export default function CheckoutForm({
     !validators.phone(form.phone) &&
     (!needsShipping || (!validators.city(form.city) && !validators.address(form.address))) &&
     agreedPolicy &&
-    agreedTerms;
+    agreedTerms &&
+    !blockedAbroad;
+
+  /** تُبقي الكتيبات الرقمية وحدها — فتكمل الزائرة من خارج البلاد شراءها */
+  function removePhysicalItems() {
+    cartItems.filter((i) => !i.isDigital).forEach((i) => removeItem(i.id));
+  }
 
   /** إرسال الطلب — ينشئه في Supabase عبر /api/orders (الدفع الفعلي بـ HYP لاحقاً) */
   async function handleSubmit(e: React.FormEvent) {
@@ -194,7 +210,15 @@ export default function CheckoutForm({
         }),
       });
 
-      if (!res.ok) throw new Error("order failed");
+      if (!res.ok) {
+        const { code } = (await res.json().catch(() => ({}))) as { code?: string };
+        if (code === DOMESTIC_ONLY_CODE) {
+          setRejectedAbroad(true);
+          setStatus("idle");
+          return;
+        }
+        throw new Error("order failed");
+      }
 
       const { id, paymentUrl } = (await res.json()) as { id: string; paymentUrl?: string | null };
       // وجود paymentUrl = HYP مُفعّل → ننتقل لمرحلة الدفع المدمجة في نفس الصفحة (بلا انتقال)؛
@@ -231,6 +255,22 @@ export default function CheckoutForm({
 
         {/* ── الحقول ── */}
         <div style={{ padding: "24px" }} className="flex flex-col gap-4">
+          {blockedAbroad && (
+            <AbroadNotice
+              title={t("abroadTitle")}
+              body={t("abroadBody")}
+              action={
+                <button
+                  type="button"
+                  onClick={removePhysicalItems}
+                  className="font-label font-bold text-[13px] px-4 py-2 rounded-full"
+                  style={{ background: "var(--rose)", color: "white" }}
+                >
+                  {t("abroadRemove")}
+                </button>
+              }
+            />
+          )}
 
           {/* الاسم الكامل */}
           <div>

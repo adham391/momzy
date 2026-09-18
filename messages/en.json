@@ -102,6 +102,8 @@
       "notesLabel": "Additional notes (optional)",
       "notesPlaceholderAge": "Specific questions, health notes...",
       "notesPlaceholder": "Your baby's age, specific questions...",
+      "abroadTitle": "In-person session — registration from Israel only",
+      "abroadBody": "It looks like you're browsing from outside Israel. This session is in person, and registration and payment for it are available from Israel only. Online sessions are available anywhere.",
       "genericError": "Something went wrong, please try again",
       "submitting": "Sending...",
       "proceedToPayment": "Continue to payment — ₪{price} →",
@@ -263,6 +265,9 @@
     "errorCityRequired": "Please enter your city",
     "errorCityInvalid": "City name is invalid",
     "errorAddressRequired": "Please enter your full address (street and house number)",
+    "abroadTitle": "The box ships within Israel only",
+    "abroadBody": "It looks like you're browsing from outside Israel. Physical products ship within Israel only and can be paid for from Israel only. Digital booklets are available anywhere.",
+    "abroadRemove": "Remove physical products from the cart",
     "alsoLike": "You may also like",
     "bundleOffer": "🎁 Offer with the box",
     "addToOrder": "+ Add to order",
@@ -480,7 +485,7 @@
       "2": {
         "title": "Shipping and delivery",
         "items": {
-          "0": "Shipping is available within Israel only",
+          "0": "Shipping is available within Israel only, and physical products can be ordered and in-person sessions booked from within Israel only",
           "1": "Estimated delivery time: up to 7 business days from order confirmation",
           "2": "Shipping fee: ₪40 for physical products — free for digital products",
           "3": "A tracking number is sent after your order ships",

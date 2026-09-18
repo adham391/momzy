@@ -5,6 +5,7 @@ import { orderNeedsShipping } from "@/lib/products/getProducts";
 import { isWhatsAppConfigured } from "@/lib/whatsapp/client";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
 import { isEmailConfigured } from "@/lib/resend/client";
+import { isDomesticRequest, DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import { sendOrderConfirmation } from "@/lib/notifications/order";
 import { sweepAbandonedOrders } from "@/lib/notifications/recovery";
 import { sendDigitalDelivery } from "@/lib/notifications/digital";
@@ -49,6 +50,14 @@ export async function POST(request: Request) {
   // العنوان مطلوب للطلبات الفيزيائية فقط — الطلب الرقمي البحت يصل على البريد.
   // النوع يُقرأ من Sanity لا من العميل، فلا يُتخطّى العنوان بادّعاء كاذب.
   const needsShipping = await orderNeedsShipping(b.items.map((i) => String(i.slug)));
+  // الصندوق يُشحن داخل البلاد فقط ويُدفع من داخلها — البلد من ترويسة Vercel لا من العميلة،
+  // والواجهة تعرف الرمز فتعرض التنبيه بلغتها بدل خطأ عام
+  if (needsShipping && !isDomesticRequest(request.headers)) {
+    return NextResponse.json(
+      { error: "المنتجات الفيزيائية تُطلب من داخل البلاد فقط", code: DOMESTIC_ONLY_CODE },
+      { status: 403 }
+    );
+  }
   if (
     needsShipping &&
     (typeof c.city !== "string" || !c.city.trim() ||

@@ -7,6 +7,10 @@ import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
 import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
 import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
+import { useDomestic } from "@/lib/geo/useDomestic";
+import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
+import type { PublicSlot } from "@/lib/services/session";
+import AbroadNotice from "@/components/ui/AbroadNotice";
 
 interface BookingModalProps {
   open: boolean;
@@ -25,17 +29,8 @@ interface BookingModalProps {
   askTopic?: boolean;
 }
 
-interface Slot {
-  id: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  price: number;
-  capacity?: number;
-  booked_count?: number;
-  meeting_link?: string | null;
-  location?: string | null;
-}
+/** الفتحة كما يعيدها /api/availability — بلا رابط اللقاء (يُكشف بعد الدفع) */
+type Slot = PublicSlot;
 
 /** تحويل فتحة إلى شكل الرزنامة */
 function toCalendarSession(s: Slot): CalendarSession {
@@ -45,9 +40,9 @@ function toCalendarSession(s: Slot): CalendarSession {
     startTime: s.start_time,
     endTime: s.end_time,
     price: s.price,
-    seatsLeft: Math.max(0, (s.capacity ?? 1) - (s.booked_count ?? 0)),
-    isOnline: Boolean(s.meeting_link),
-    location: s.location ?? null,
+    seatsLeft: Math.max(0, s.capacity - s.booked_count),
+    isOnline: s.online,
+    location: s.location,
   };
 }
 
@@ -130,6 +125,10 @@ export default function BookingModal({
   const [focused, setFocused] = useState<string | null>(null);
   /** لا جلسات مجدولة إطلاقًا (لا «مكتملة») — يغيّر نص خطوة الانتظار */
   const [noSessionsAtAll, setNoSessionsAtAll] = useState(false);
+  /** هل الزائرة داخل البلاد؟ — اللقاء الحضوري يُحجز من داخلها فقط */
+  const domestic = useDomestic();
+  /** السيرفر رفض الحجز لأنه من خارج البلاد — أوثق من تخمين الواجهة */
+  const [rejectedAbroad, setRejectedAbroad] = useState(false);
 
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -188,6 +187,7 @@ export default function BookingModal({
       setSelected(null);
       setForm(EMPTY_FORM);
       setErrorMsg("");
+      setRejectedAbroad(false);
       loadSlots();
     }
   }, [open, loadSlots]);
@@ -222,6 +222,10 @@ export default function BookingModal({
   /** موضوع اللقاء — يُسأل في خطوة الحجز الفعلي فقط، كالفئة العمرية */
   const needsTopic = step === "form" && Boolean(askTopic);
 
+  /** لقاء حضوري وزائرة من خارج البلاد — التسجيل من داخل البلاد فقط (السيرفر يرفض أيضًا) */
+  const blockedAbroad =
+    step === "form" && selected !== null && !selected.online && (domestic === false || rejectedAbroad);
+
   const isValid =
     contactValid &&
     (!needsBabyAge || ageCheck?.ok === true) &&
@@ -253,6 +257,10 @@ export default function BookingModal({
       if (res.ok) {
         // لصفحة تأكيد التسجيل — هناك يتم الدفع إن كانت الورشة مدفوعة
         router.push(`/booking/${data.id}`);
+      } else if (data.code === DOMESTIC_ONLY_CODE) {
+        // لقاء حضوري من خارج البلاد → التنبيه بدل النموذج
+        setRejectedAbroad(true);
+        setStatus("idle");
       } else {
         // الموعد امتلأ → أعد تحميل المواعيد
         setErrorMsg(data.error ?? t("modal.bookingFailed"));
@@ -399,6 +407,7 @@ export default function BookingModal({
                 const slot = slots.find((s) => s.id === id);
                 if (slot) {
                   setSelected(slot);
+                  setRejectedAbroad(false);
                   setStep("form");
                 }
               }}
@@ -450,113 +459,119 @@ export default function BookingModal({
               </p>
             )}
 
-            <div className="flex flex-col gap-4">
-              <div>
-                <label style={labelStyle}>{t("modal.nameLabel")}</label>
-                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("modal.namePlaceholder")} autoComplete="name"
-                  style={{ ...inputBase, border: `1.5px solid ${borderFor("name")}` }} onFocus={() => setFocused("name")} onBlur={() => setFocused(null)} />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label style={labelStyle}>{t("modal.emailLabel")}</label>
-                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="example@email.com" autoComplete="email" dir="ltr"
-                    style={{ ...inputBase, border: `1.5px solid ${borderFor("email")}`, textAlign: "right" }} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} />
-                </div>
-                <div>
-                  <label style={labelStyle}>{t("modal.phoneLabel")}</label>
-                  <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+972 5X-XXXXXXX" autoComplete="tel" dir="ltr"
-                    style={{ ...inputBase, border: `1.5px solid ${borderFor("phone")}`, textAlign: "right" }} onFocus={() => setFocused("phone")} onBlur={() => setFocused(null)} />
-                </div>
-              </div>
-              {/* تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */}
-              {needsBabyAge && (
-                <div>
-                  <label style={labelStyle}>{t("modal.babyBirthDateLabel")}</label>
-                  <input
-                    type="date"
-                    value={form.babyBirthDate}
-                    onChange={(e) => setForm({ ...form, babyBirthDate: e.target.value })}
-                    dir="ltr"
-                    style={{
-                      ...inputBase,
-                      border: `1.5px solid ${
-                        ageCheck && !ageCheck.ok ? "var(--rose)" : borderFor("baby")
-                      }`,
-                      textAlign: "right",
-                    }}
-                    onFocus={() => setFocused("baby")}
-                    onBlur={() => setFocused(null)}
-                  />
-                  <p
-                    className="text-[11.5px] leading-[1.7] mt-1.5"
-                    style={{
-                      color:
-                        ageCheck && !ageCheck.ok
-                          ? "var(--rose)"
-                          : ageCheck?.ok
-                            ? "var(--teal)"
-                            : "var(--light)",
-                      fontFamily: "'Tajawal', sans-serif",
-                    }}
-                  >
-                    {ageCheck && !ageCheck.ok
-                      ? ageCheck.message
-                      : ageCheck?.ok && ageCheck.months !== null
-                        ? t("modal.babyAgeOk", { age: monthsLabel(ageCheck.months) })
-                        : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
-                  </p>
-                </div>
-              )}
+            {blockedAbroad ? (
+              <AbroadNotice title={t("modal.abroadTitle")} body={t("modal.abroadBody")} />
+            ) : (
+              <>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label style={labelStyle}>{t("modal.nameLabel")}</label>
+                    <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("modal.namePlaceholder")} autoComplete="name"
+                      style={{ ...inputBase, border: `1.5px solid ${borderFor("name")}` }} onFocus={() => setFocused("name")} onBlur={() => setFocused(null)} />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label style={labelStyle}>{t("modal.emailLabel")}</label>
+                      <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="example@email.com" autoComplete="email" dir="ltr"
+                        style={{ ...inputBase, border: `1.5px solid ${borderFor("email")}`, textAlign: "right" }} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>{t("modal.phoneLabel")}</label>
+                      <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+972 5X-XXXXXXX" autoComplete="tel" dir="ltr"
+                        style={{ ...inputBase, border: `1.5px solid ${borderFor("phone")}`, textAlign: "right" }} onFocus={() => setFocused("phone")} onBlur={() => setFocused(null)} />
+                    </div>
+                  </div>
+                  {/* تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */}
+                  {needsBabyAge && (
+                    <div>
+                      <label style={labelStyle}>{t("modal.babyBirthDateLabel")}</label>
+                      <input
+                        type="date"
+                        value={form.babyBirthDate}
+                        onChange={(e) => setForm({ ...form, babyBirthDate: e.target.value })}
+                        dir="ltr"
+                        style={{
+                          ...inputBase,
+                          border: `1.5px solid ${
+                            ageCheck && !ageCheck.ok ? "var(--rose)" : borderFor("baby")
+                          }`,
+                          textAlign: "right",
+                        }}
+                        onFocus={() => setFocused("baby")}
+                        onBlur={() => setFocused(null)}
+                      />
+                      <p
+                        className="text-[11.5px] leading-[1.7] mt-1.5"
+                        style={{
+                          color:
+                            ageCheck && !ageCheck.ok
+                              ? "var(--rose)"
+                              : ageCheck?.ok
+                                ? "var(--teal)"
+                                : "var(--light)",
+                          fontFamily: "'Tajawal', sans-serif",
+                        }}
+                      >
+                        {ageCheck && !ageCheck.ok
+                          ? ageCheck.message
+                          : ageCheck?.ok && ageCheck.months !== null
+                            ? t("modal.babyAgeOk", { age: monthsLabel(ageCheck.months) })
+                            : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
+                      </p>
+                    </div>
+                  )}
 
-              {/* موضوع اللقاء — للّقاءات الفردية فقط */}
-              {needsTopic && (
-                <div>
-                  <label style={labelStyle}>{t("modal.topicLabel")}</label>
-                  <textarea
-                    value={form.topic}
-                    onChange={(e) => setForm({ ...form, topic: e.target.value })}
-                    placeholder={t("modal.topicPlaceholder")}
-                    maxLength={BOOKING_TOPIC_MAX_LENGTH}
-                    rows={3}
-                    style={{ ...inputBase, border: `1.5px solid ${borderFor("topic")}`, resize: "none" }}
-                    onFocus={() => setFocused("topic")}
-                    onBlur={() => setFocused(null)}
-                  />
+                  {/* موضوع اللقاء — للّقاءات الفردية فقط */}
+                  {needsTopic && (
+                    <div>
+                      <label style={labelStyle}>{t("modal.topicLabel")}</label>
+                      <textarea
+                        value={form.topic}
+                        onChange={(e) => setForm({ ...form, topic: e.target.value })}
+                        placeholder={t("modal.topicPlaceholder")}
+                        maxLength={BOOKING_TOPIC_MAX_LENGTH}
+                        rows={3}
+                        style={{ ...inputBase, border: `1.5px solid ${borderFor("topic")}`, resize: "none" }}
+                        onFocus={() => setFocused("topic")}
+                        onBlur={() => setFocused(null)}
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label style={labelStyle}>{t("modal.notesLabel")}</label>
+                    <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder={needsBabyAge ? t("modal.notesPlaceholderAge") : t("modal.notesPlaceholder")} rows={3}
+                      style={{ ...inputBase, border: `1.5px solid ${borderFor("message")}`, resize: "none" }} onFocus={() => setFocused("message")} onBlur={() => setFocused(null)} />
+                  </div>
                 </div>
-              )}
 
-              <div>
-                <label style={labelStyle}>{t("modal.notesLabel")}</label>
-                <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder={needsBabyAge ? t("modal.notesPlaceholderAge") : t("modal.notesPlaceholder")} rows={3}
-                  style={{ ...inputBase, border: `1.5px solid ${borderFor("message")}`, resize: "none" }} onFocus={() => setFocused("message")} onBlur={() => setFocused(null)} />
-              </div>
-            </div>
+                {(status === "error" || errorMsg) && (
+                  <div className="text-center text-[13px] mt-5 rounded-[10px] py-2 px-3" style={{ background: "#FEF5F7", color: "var(--rose)", border: "1px solid var(--roselt)" }}>
+                    {errorMsg || t("modal.genericError")}
+                  </div>
+                )}
 
-            {(status === "error" || errorMsg) && (
-              <div className="text-center text-[13px] mt-5 rounded-[10px] py-2 px-3" style={{ background: "#FEF5F7", color: "var(--rose)", border: "1px solid var(--roselt)" }}>
-                {errorMsg || t("modal.genericError")}
-              </div>
+                <button type="submit" disabled={!isValid || status === "submitting"}
+                  className="w-full font-label font-bold text-white text-[16px] mt-6 active:scale-[0.98] [transition:transform_160ms_ease-out,background-color_200ms_ease]"
+                  style={{
+                    background: isValid ? "var(--rose)" : "var(--light)",
+                    border: "none", borderRadius: 50, padding: 15,
+                    cursor: !isValid || status === "submitting" ? "not-allowed" : "pointer",
+                    boxShadow: isValid ? "0 6px 20px rgba(242,167,181,0.4)" : "none",
+                    opacity: status === "submitting" ? 0.8 : 1,
+                  }}>
+                  {status === "submitting"
+                    ? t("modal.submitting")
+                    : step === "form"
+                      ? selected && selected.price > 0
+                        ? t("modal.proceedToPayment", { price: selected.price })
+                        : t("modal.confirmRegistration")
+                      : step === "waitlist"
+                        ? t("modal.joinWaitlist")
+                        : t("modal.sendBookingRequest")}
+                </button>
+              </>
             )}
-
-            <button type="submit" disabled={!isValid || status === "submitting"}
-              className="w-full font-label font-bold text-white text-[16px] mt-6 active:scale-[0.98] [transition:transform_160ms_ease-out,background-color_200ms_ease]"
-              style={{
-                background: isValid ? "var(--rose)" : "var(--light)",
-                border: "none", borderRadius: 50, padding: 15,
-                cursor: !isValid || status === "submitting" ? "not-allowed" : "pointer",
-                boxShadow: isValid ? "0 6px 20px rgba(242,167,181,0.4)" : "none",
-                opacity: status === "submitting" ? 0.8 : 1,
-              }}>
-              {status === "submitting"
-                ? t("modal.submitting")
-                : step === "form"
-                  ? selected && selected.price > 0
-                    ? t("modal.proceedToPayment", { price: selected.price })
-                    : t("modal.confirmRegistration")
-                  : step === "waitlist"
-                    ? t("modal.joinWaitlist")
-                    : t("modal.sendBookingRequest")}
-            </button>
           </form>
         )}
 
