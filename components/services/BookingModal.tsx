@@ -7,7 +7,8 @@ import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
 import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
 import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
-import { useDomestic } from "@/lib/geo/useDomestic";
+import { useGeo } from "@/lib/geo/useGeo";
+import { displayPrice } from "@/lib/currency";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import type { PublicSlot } from "@/lib/services/session";
 import AbroadNotice from "@/components/ui/AbroadNotice";
@@ -125,8 +126,8 @@ export default function BookingModal({
   const [focused, setFocused] = useState<string | null>(null);
   /** لا جلسات مجدولة إطلاقًا (لا «مكتملة») — يغيّر نص خطوة الانتظار */
   const [noSessionsAtAll, setNoSessionsAtAll] = useState(false);
-  /** هل الزائرة داخل البلاد؟ — اللقاء الحضوري يُحجز من داخلها فقط */
-  const domestic = useDomestic();
+  /** موقع الزائرة وعملتها — اللقاء الحضوري من داخل البلاد فقط، والدفع بالدولار من خارجها */
+  const geo = useGeo();
   /** السيرفر رفض الحجز لأنه من خارج البلاد — أوثق من تخمين الواجهة */
   const [rejectedAbroad, setRejectedAbroad] = useState(false);
 
@@ -224,7 +225,7 @@ export default function BookingModal({
 
   /** لقاء حضوري وزائرة من خارج البلاد — التسجيل من داخل البلاد فقط (السيرفر يرفض أيضًا) */
   const blockedAbroad =
-    step === "form" && selected !== null && !selected.online && (domestic === false || rejectedAbroad);
+    step === "form" && selected !== null && !selected.online && ((geo !== null && !geo.domestic) || rejectedAbroad);
 
   const isValid =
     contactValid &&
@@ -402,6 +403,7 @@ export default function BookingModal({
             </p>
             <SessionCalendar
               compact
+              formatPrice={(ils) => displayPrice(ils, geo)}
               sessions={slots.map(toCalendarSession)}
               onPick={(id) => {
                 const slot = slots.find((s) => s.id === id);
@@ -564,7 +566,7 @@ export default function BookingModal({
                     ? t("modal.submitting")
                     : step === "form"
                       ? selected && selected.price > 0
-                        ? t("modal.proceedToPayment", { price: selected.price })
+                        ? t("modal.proceedToPayment", { price: displayPrice(selected.price, geo) })
                         : t("modal.confirmRegistration")
                       : step === "waitlist"
                         ? t("modal.joinWaitlist")

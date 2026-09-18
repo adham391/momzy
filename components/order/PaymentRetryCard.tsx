@@ -1,11 +1,11 @@
 import { useTranslations } from "next-intl";
-import { formatILS } from "@/lib/utils/format";
 
 interface PaymentRetryCardProps {
   /** UUID الطلب — لتوليد رابط دفع جديد */
   orderId: string;
   /** إجمالي المبلغ المطلوب دفعه */
-  amount: number;
+  /** المبلغ مُنسَّقًا بعملة الخصم — «₪67» أو «$18.61 (₪67)» */
+  amount: string;
   /** هل عاد العميل من محاولة دفع فاشلة؟ (يغيّر نبرة الرسالة) */
   failed: boolean;
 }
@@ -44,7 +44,7 @@ export default function PaymentRetryCard({ orderId, amount, failed }: PaymentRet
           boxShadow: "0 6px 20px rgba(242,167,181,0.45)",
         }}
       >
-        {t("payNow", { amount: formatILS(amount) })}
+        {t("payNow", { amount })}
       </a>
 
       <p className="font-label text-[11.5px] text-light mt-4">

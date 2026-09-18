@@ -3,6 +3,7 @@ import { createBooking } from "@/lib/db/bookings";
 import { sendBookingNotifications } from "@/lib/notifications/booking";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
 import { isDomesticRequest } from "@/lib/geo/country";
+import { currencyFor } from "@/lib/currency";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
   if (typeof c.phone !== "string" || c.phone.trim().length < 8)
     return NextResponse.json({ error: "رقم هاتف غير صحيح" }, { status: 400 });
 
+  // من ترويسات Vercel — اللقاء الحضوري من داخل البلاد فقط، والدفع بالدولار من خارجها
+  const domestic = isDomesticRequest(request.headers);
   const result = await createBooking({
     slotId: b.slotId,
     customer: { name: c.name.trim(), email: c.email.trim(), phone: c.phone.trim() },
@@ -52,8 +55,8 @@ export async function POST(request: Request) {
     babyBirthDate: typeof b.babyBirthDate === "string" ? b.babyBirthDate : null,
     // لغة الصفحة — تُحفظ لتحديد لغة إيميل التأكيد
     locale: typeof b.locale === "string" ? b.locale : undefined,
-    // من ترويسات Vercel — اللقاء الحضوري يُحجز من داخل البلاد فقط
-    domestic: isDomesticRequest(request.headers),
+    domestic,
+    currency: currencyFor(domestic),
   });
 
   // 400 = بيانات مرفوضة (فئة عمرية، موضوع اللقاء) · 403 = لقاء حضوري من خارج البلاد · 409 = امتلأ الموعد
@@ -68,7 +71,8 @@ export async function POST(request: Request) {
     paymentUrl = await createHypPaymentUrl({
       orderId: result.id,
       orderNumber: result.bookingNumber, // BK-… — يميّزه الـ callback عن طلبات المتجر
-      amount: result.amount,
+      amount: result.chargedAmount,
+      currency: result.currency,
       customerName: c.name.trim(),
       email: c.email.trim(),
       phone: c.phone.trim(),

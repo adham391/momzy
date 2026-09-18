@@ -1,10 +1,16 @@
 import type { BookingRow } from "@/lib/db/bookings";
+import { formatMoney } from "@/lib/currency";
 import { ageInMonthsAt, monthsLabel } from "@/lib/utils/age";
 import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { emailHeader, emailFooter } from "./brand";
 import { emailLocale, emailTranslator, isRtl, type EmailLocale, type EmailT } from "../i18n";
 
 const ils = (n: number) => `${Number(n).toLocaleString("en-US")} ₪`;
+/** ما خُصم فعلًا — بالدولار من خارج البلاد مع الشيكل بين قوسين */
+const charged = (b: BookingRow) =>
+  b.currency === "USD" && b.charged_amount != null
+    ? `${formatMoney(b.charged_amount, "USD")} (${ils(b.amount)})`
+    : ils(b.amount);
 
 /** لغة الحجز — العربية للحجوزات السابقة لهجرة 0017 */
 const localeOf = (b: BookingRow): EmailLocale => emailLocale(b.locale);
@@ -43,7 +49,7 @@ function detailsBox(b: BookingRow, t: EmailT): string {
         ${row(t("booking.service"), b.service_name ?? "—")}
         ${row(t("booking.date"), `<span style="direction:ltr;">${fmtDate(b.date)}</span>`)}
         ${row(t("booking.time"), `<span style="direction:ltr;">${fmtTime(b.start_time)}${b.end_time ? `–${fmtTime(b.end_time)}` : ""}</span>`)}
-        ${b.amount > 0 ? row(t("booking.amount"), ils(b.amount)) : ""}
+        ${b.amount > 0 ? row(t("booking.amount"), charged(b)) : ""}
       </table>
     </div>`;
 }

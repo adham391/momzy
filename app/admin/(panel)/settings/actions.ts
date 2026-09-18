@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { updateSettings } from "@/lib/db/settings";
+import { DEFAULT_USD_RATE } from "@/lib/currency";
 import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
 import { sanityWriteClient } from "@/lib/sanity/client";
 
@@ -9,12 +10,15 @@ import { sanityWriteClient } from "@/lib/sanity/client";
 export async function updateOperationalSettingsAction(formData: FormData) {
   const shippingCost = Number(formData.get("default_shipping_cost"));
   const freeMin = Number(formData.get("free_shipping_min"));
+  const usdRate = Number(formData.get("usd_rate"));
 
   await updateSettings({
     shop_is_open: formData.get("shop_is_open") === "on" ? "true" : "false",
     booking_is_open: formData.get("booking_is_open") === "on" ? "true" : "false",
     default_shipping_cost: String(Number.isFinite(shippingCost) && shippingCost >= 0 ? shippingCost : 0),
     free_shipping_min: String(Number.isFinite(freeMin) && freeMin >= 0 ? freeMin : 0),
+    // ₪ لكل $1 — سعر غير موجب يعود إلى الاحتياطي بدل أن يعطّل الدفع من الخارج
+    usd_rate: String(Number.isFinite(usdRate) && usdRate > 0 ? usdRate : DEFAULT_USD_RATE),
     whatsapp_number: String(formData.get("whatsapp_number") ?? "").trim(),
   });
 

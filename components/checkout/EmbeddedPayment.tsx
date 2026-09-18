@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
-import { formatILS } from "@/lib/utils/format";
+import { formatMoney, type Currency } from "@/lib/currency";
 
 interface EmbeddedPaymentProps {
   /** نوع الدفع — طلب متجر أو تسجيل ورشة/خدمة */
@@ -14,6 +14,8 @@ interface EmbeddedPaymentProps {
   reference?: string;
   /** المبلغ — يُعرض في الترويسة إن وُجد */
   total?: number;
+  /** عملة المبلغ — الدولار من خارج البلاد */
+  currency?: Currency;
   /** رجوع لتعديل البيانات (وضع الصفحة الواحدة السلسة) */
   onEdit?: () => void;
 }
@@ -28,6 +30,7 @@ export default function EmbeddedPayment({
   id,
   reference,
   total,
+  currency = "ILS",
   onEdit,
 }: EmbeddedPaymentProps) {
   const t = useTranslations("checkout");
@@ -56,7 +59,7 @@ export default function EmbeddedPayment({
             <>
               {isBooking ? t("registrationLabel") : t("orderLabel")}{" "}
               <span dir="ltr" className="font-bold text-dark">{reference}</span> — {t("total")}{" "}
-              <span className="font-bold text-dark">{formatILS(total)}</span>
+              <span className="font-bold text-dark">{formatMoney(total, currency)}</span>
             </>
           ) : (
             t("enterCardDetails")

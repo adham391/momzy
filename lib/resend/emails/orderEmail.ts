@@ -1,9 +1,15 @@
 import type { OrderWithItems } from "@/lib/db/types";
+import { formatMoney } from "@/lib/currency";
 import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { emailHeader, emailFooter } from "./brand";
 import { emailLocale, emailTranslator, isRtl, type EmailLocale, type EmailT } from "../i18n";
 
 const ils = (n: number) => `${Number(n).toLocaleString("en-US")} ₪`;
+/** ما خُصم فعلًا — بالدولار من خارج البلاد مع الشيكل بين قوسين */
+const charged = (o: OrderWithItems) =>
+  o.currency === "USD" && o.charged_amount != null
+    ? `${formatMoney(o.charged_amount, "USD")} (${ils(o.total_amount)})`
+    : ils(o.total_amount);
 
 /** لغة الطلب — العربية للطلبات السابقة لهجرة 0017 */
 const localeOf = (order: OrderWithItems): EmailLocale => emailLocale(order.locale);
@@ -38,7 +44,7 @@ function totalsBlock(order: OrderWithItems, t: EmailT, dir: "rtl" | "ltr"): stri
       ${row(t("totals.subtotal"), ils(order.subtotal))}
       ${order.discount_amount > 0 ? row(t("totals.discount"), `− ${ils(order.discount_amount)}`) : ""}
       ${row(t("totals.shipping"), order.shipping_cost === 0 ? t("common.free") : ils(order.shipping_cost))}
-      ${row(t("totals.total"), ils(order.total_amount), true)}
+      ${row(t("totals.total"), charged(order), true)}
     </table>`;
 }
 
@@ -126,7 +132,7 @@ export function orderPendingEmailHtml(order: OrderWithItems, payUrl: string): st
     <table width="100%" cellpadding="0" cellspacing="0">${itemRows(order, dir)}</table>
     ${totalsBlock(order, t, dir)}
     <div style="text-align:center;margin:28px 0 0;">
-      <a href="${payUrl}" style="display:inline-block;background:#F2A7B5;color:#252220;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 34px;border-radius:50px;">${t("recovery.cta", { amount: ils(order.total_amount) })}</a>
+      <a href="${payUrl}" style="display:inline-block;background:#F2A7B5;color:#252220;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 34px;border-radius:50px;">${t("recovery.cta", { amount: charged(order) })}</a>
     </div>
     <p style="font-size:12px;color:#9A9490;line-height:1.8;margin:18px 0 0;text-align:center;">${t("recovery.ignore")}</p>
     ${supportLine(t)}`;
@@ -136,7 +142,7 @@ export function orderPendingEmailHtml(order: OrderWithItems, payUrl: string): st
 
 /* ── إشعار هبة — عربي دائمًا: مستلِمه واحد ── */
 
-export const orderAdminSubject = (order: OrderWithItems) => `🛍️ طلب جديد ${order.order_number} — ${ils(order.total_amount)}`;
+export const orderAdminSubject = (order: OrderWithItems) => `🛍️ طلب جديد ${order.order_number} — ${charged(order)}`;
 
 export function orderAdminEmailHtml(order: OrderWithItems): string {
   const t = emailTranslator("ar");

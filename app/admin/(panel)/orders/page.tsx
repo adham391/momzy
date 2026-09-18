@@ -4,7 +4,8 @@ import { listOrdersForAdmin } from "@/lib/db/orders";
 import type { OrderStatus } from "@/lib/db/types";
 import OrdersFilterBar from "@/components/admin/orders/OrdersFilterBar";
 import { OrderStatusBadge } from "@/components/admin/StatusBadge";
-import { formatILS, formatDate } from "@/lib/utils/format";
+import { formatDate } from "@/lib/utils/format";
+import { formatCharged } from "@/lib/currency";
 import { canPrintWaybill } from "@/lib/orders/waybill";
 
 // قائمة لحظية — الطلبات الجديدة تظهر فورًا بلا تخزين مؤقت
@@ -89,7 +90,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                       </div>
                     </td>
                     <td className="p-3.5 text-mid max-w-[220px] truncate">{o.productSummary || "—"}</td>
-                    <td className="p-3.5 font-label font-extrabold text-teal">{formatILS(o.total_amount)}</td>
+                    <td className="p-3.5 font-label font-extrabold text-teal">{formatCharged(o.total_amount, o.currency, o.charged_amount)}</td>
                     <td className="p-3.5"><OrderStatusBadge status={o.order_status} /></td>
                     <td className="p-3.5 text-light whitespace-nowrap">{formatDate(o.created_at)}</td>
                     <td className="p-3.5 w-10">
@@ -132,7 +133,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 </div>
                 <div className="text-body-sm text-mid truncate mb-2">{o.productSummary || "—"}</div>
                 <div className="flex items-center justify-between">
-                  <span className="font-label font-extrabold text-teal">{formatILS(o.total_amount)}</span>
+                  <span className="font-label font-extrabold text-teal">{formatCharged(o.total_amount, o.currency, o.charged_amount)}</span>
                   <span className="text-micro text-light">{formatDate(o.created_at)}</span>
                 </div>
               </Link>

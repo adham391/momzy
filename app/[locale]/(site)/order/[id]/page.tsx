@@ -9,6 +9,7 @@ import OrderInfoCard from "@/components/order/OrderInfoCard";
 import OrderItemsList from "@/components/order/OrderItemsList";
 import OrderDownloads from "@/components/order/OrderDownloads";
 import OrderTotals from "@/components/order/OrderTotals";
+import { formatCharged } from "@/lib/currency";
 import OrderActions from "@/components/order/OrderActions";
 import PaymentRetryCard from "@/components/order/PaymentRetryCard";
 import CheckoutSteps, { DIGITAL_STEP_LABELS } from "@/components/checkout/CheckoutSteps";
@@ -111,7 +112,11 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
           />
           <OrderHeader orderNumber={order.order_number} createdAt={order.created_at} paid={!awaitingPayment} />
           {awaitingPayment && (
-            <PaymentRetryCard orderId={order.id} amount={order.total_amount} failed={paymentFailed} />
+            <PaymentRetryCard
+              orderId={order.id}
+              amount={formatCharged(order.total_amount, order.currency, order.charged_amount)}
+              failed={paymentFailed}
+            />
           )}
           <OrderInfoCard
             customer={{
@@ -133,6 +138,9 @@ export default async function OrderPage({ params, searchParams }: OrderPageProps
             discount={order.discount_amount}
             total={order.total_amount}
             showShipping={hasPhysical}
+            currency={order.currency}
+            chargedTotal={order.charged_amount}
+            exchangeRate={order.exchange_rate}
           />
           <OrderActions />
         </div>

@@ -138,7 +138,8 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
                 kind="booking"
                 id={booking.id}
                 reference={booking.booking_number}
-                total={booking.amount}
+                total={booking.charged_amount ?? booking.amount}
+                currency={booking.currency}
               />
             </div>
           </div>

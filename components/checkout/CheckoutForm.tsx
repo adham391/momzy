@@ -8,7 +8,8 @@ import { useCart } from "@/lib/store/cart";
 import { computeShipping, type ShippingConfig } from "@/lib/shipping";
 import { couponDiscount } from "@/lib/coupons";
 import { getStoredUTM } from "@/lib/analytics/track";
-import { useDomestic } from "@/lib/geo/useDomestic";
+import { useGeo } from "@/lib/geo/useGeo";
+import { displayPrice } from "@/lib/currency";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import AbroadNotice from "@/components/ui/AbroadNotice";
 
@@ -128,8 +129,8 @@ export default function CheckoutForm({
   const [agreedMarketing, setAgreedMarketing] = useState(false);
   const [focusedField,    setFocusedField]    = useState<string | null>(null);
   const [status,          setStatus]          = useState<FormStatus>("idle");
-  /** هل الزائرة داخل البلاد؟ — الصندوق يُشحن ويُدفع من داخلها فقط */
-  const domestic = useDomestic();
+  /** موقع الزائرة وعملتها — الصندوق من داخل البلاد فقط، والدفع بالدولار من خارجها */
+  const geo = useGeo();
   /** السيرفر رفض الطلب لأنه من خارج البلاد — أوثق من تخمين الواجهة */
   const [rejectedAbroad, setRejectedAbroad] = useState(false);
 
@@ -138,7 +139,7 @@ export default function CheckoutForm({
   /** الطلب الرقمي البحت (كتيّب) يصل على البريد — فلا نسأل عن البلدة والعنوان */
   const needsShipping = physicalCount > 0;
   /** صندوق وزائرة من خارج البلاد — الشحن والدفع من داخل البلاد فقط (السيرفر يرفض أيضًا) */
-  const blockedAbroad = needsShipping && (domestic === false || rejectedAbroad);
+  const blockedAbroad = needsShipping && ((geo !== null && !geo.domestic) || rejectedAbroad);
   const shippingCost = computeShipping(getTotal(), physicalCount, shipping);
   const discount     = couponDiscount(appliedCoupon, getTotal());
   const grandTotal   = getTotal() + shippingCost - discount;
@@ -495,7 +496,7 @@ export default function CheckoutForm({
           >
             {status === "submitting"
               ? t("preparingPayment")
-              : t("proceedToPayment", { total: grandTotal })}
+              : t("proceedToPayment", { total: displayPrice(grandTotal, geo) })}
           </button>
 
           <p className="text-center text-[12px] text-light mt-3">

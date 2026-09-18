@@ -1,6 +1,7 @@
 import { getSettingsMap, boolSetting } from "@/lib/db/settings";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import { updateOperationalSettingsAction, updateSiteContentAction, updateNotifyEmailsAction } from "./actions";
+import { DEFAULT_USD_RATE } from "@/lib/currency";
 import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +43,13 @@ export default async function AdminSettingsPage() {
                 defaultValue={settings["free_shipping_min"] ?? "0"}
               />
             </div>
+            <TextField
+              name="usd_rate"
+              label="سعر صرف الدولار — ₪ لكل $1 (الدفع من خارج البلاد)"
+              type="number"
+              step="0.01"
+              defaultValue={settings["usd_rate"] ?? String(DEFAULT_USD_RATE)}
+            />
             <TextField
               name="whatsapp_number"
               label="رقم واتساب هبة للإشعارات"
@@ -151,6 +159,7 @@ function TextField({
   type = "text",
   ltr,
   placeholder,
+  step,
 }: {
   name: string;
   label: string;
@@ -158,6 +167,8 @@ function TextField({
   type?: string;
   ltr?: boolean;
   placeholder?: string;
+  /** خطوة الحقل الرقمي — "0.01" للأسعار العشرية */
+  step?: string;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -167,6 +178,7 @@ function TextField({
         type={type}
         defaultValue={defaultValue}
         placeholder={placeholder}
+        step={step}
         dir={ltr ? "ltr" : undefined}
         className="w-full px-3.5 py-2.5 rounded-xl border border-bord bg-offwh text-body-sm text-dark placeholder:text-light focus:outline-none focus:border-rose"
         style={ltr ? { textAlign: "right" } : undefined}

@@ -4,6 +4,7 @@
  */
 
 import type { GiftOptions } from "@/lib/store/cart";
+import type { Currency } from "@/lib/currency";
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
@@ -40,6 +41,12 @@ export interface OrderRow {
   shipping_cost: number;
   discount_amount: number;
   total_amount: number;
+  /** عملة الخصم — الدولار من خارج البلاد */
+  currency: Currency;
+  /** المبلغ المخصوم بعملة currency — null للطلبات القديمة (= total_amount بالشيكل) */
+  charged_amount: number | null;
+  /** ₪ لكل $1 وقت الطلب — للطلبات بالدولار */
+  exchange_rate: number | null;
   coupon_id: string | null;
   coupon_code: string | null;
   payment_status: PaymentStatus;
@@ -81,4 +88,6 @@ export interface CreateOrderInput {
   /** لغة الصفحة وقت الطلب — تحدّد لغة كل إيميل يصل العميلة لاحقًا */
   locale?: string;
   utm?: { source?: string; medium?: string; campaign?: string } | null;
+  /** عملة الخصم — الدولار من خارج البلاد (يحدّدها الـ route من موقع الزائرة) */
+  currency?: Currency;
 }

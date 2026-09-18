@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
-import { formatSlotDate, formatTimeShort, formatILS } from "@/lib/utils/format";
+import { formatSlotDate, formatTimeShort } from "@/lib/utils/format";
+import { formatCharged } from "@/lib/currency";
 import type { BookingRow } from "@/lib/db/bookings";
 
 interface BookingDetailsCardProps {
@@ -40,7 +41,7 @@ export default function BookingDetailsCard({ booking, revealSession }: BookingDe
             {booking.end_time ? ` – ${formatTimeShort(booking.end_time)}` : ""}
           </span>
         </Row>
-        {booking.amount > 0 && <Row label={t("details.amount")}>{formatILS(booking.amount)}</Row>}
+        {booking.amount > 0 && <Row label={t("details.amount")}>{formatCharged(booking.amount, booking.currency, booking.charged_amount)}</Row>}
       </div>
 
       {/* ── كيف أحضر؟ ── */}

@@ -3,6 +3,8 @@ import { getService } from "@/lib/services/getService";
 import { checkBabyAge, hasAgeGate } from "@/lib/utils/age";
 import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingTopic";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
+import { ilsToUsd, type Currency } from "@/lib/currency";
+import { getUsdRate } from "./settings";
 import { isOnlineSession } from "@/lib/services/session";
 import { toLatinDigits } from "@/lib/utils/format";
 import type { PaymentStatus } from "./types";
@@ -46,6 +48,12 @@ export interface BookingRow {
   status: BookingStatus;
   payment_status: PaymentStatus;
   amount: number;
+  /** عملة الخصم — الدولار من خارج البلاد */
+  currency: Currency;
+  /** المبلغ المخصوم بعملة currency — null للحجوزات القديمة (= amount بالشيكل) */
+  charged_amount: number | null;
+  /** ₪ لكل $1 وقت الحجز — للحجوزات بالدولار */
+  exchange_rate: number | null;
   notes: string | null;
   admin_notes: string | null;
   /** موضوع اللقاء كما كتبته الأم — للخدمات التي تسأل عنه (askTopic) فقط */
@@ -83,6 +91,9 @@ function toBooking(r: Record<string, unknown>): BookingRow {
     admin_notes: row.admin_notes ? toLatinDigits(row.admin_notes) : null,
     topic: row.topic ? toLatinDigits(row.topic) : null,
     amount: Number(r.amount ?? 0),
+    currency: (r.currency as Currency | undefined) ?? "ILS",
+    charged_amount: r.charged_amount == null ? null : Number(r.charged_amount),
+    exchange_rate: r.exchange_rate == null ? null : Number(r.exchange_rate),
   };
 }
 
@@ -210,6 +221,8 @@ export interface CreateBookingInput {
   locale?: string;
   /** هل الزائرة داخل البلاد؟ يُحسب في الـ route من ترويسات Vercel — اللقاء الحضوري يُحجز من داخلها فقط؛ غيابه = داخل البلاد */
   domestic?: boolean;
+  /** عملة الخصم — الدولار من خارج البلاد (يحدّدها الـ route من موقع الزائرة) */
+  currency?: Currency;
 }
 
 /** فشل الحجز — status يميّز سبب الرفض (400 بيانات · 403 من خارج البلاد · 409 امتلاء)، وcode تقرأه الواجهة */
@@ -222,7 +235,7 @@ type BookingError = { error: string; status?: number; code?: string };
  */
 export async function createBooking(
   input: CreateBookingInput
-): Promise<{ id: string; bookingNumber: string; amount: number } | BookingError> {
+): Promise<{ id: string; bookingNumber: string; amount: number; currency: Currency; chargedAmount: number } | BookingError> {
   const supabase = createAdminClient();
 
   const { data: slotRaw } = await supabase
@@ -259,6 +272,11 @@ export async function createBooking(
     }
   }
 
+  // عملة الخصم: الدولار من خارج البلاد بسعر الصرف المضبوط في الإعدادات — يُحفظ ليثبت المبلغ
+  const currency: Currency = input.currency ?? "ILS";
+  const exchangeRate = currency === "USD" ? await getUsdRate() : null;
+  const chargedAmount = exchangeRate ? ilsToUsd(slot.price, exchangeRate) : slot.price;
+
   // حجز ذرّي — يعيد false لو امتلأت أو محجوبة
   const { data: booked } = await supabase.rpc("book_slot", { slot_id: input.slotId });
   if (!booked) return { error: "عذراً، هذا الموعد لم يعد متاحاً", status: 409 };
@@ -276,6 +294,9 @@ export async function createBooking(
       start_time: slot.start_time,
       end_time: slot.end_time,
       amount: slot.price,
+      currency,
+      charged_amount: chargedAmount,
+      exchange_rate: exchangeRate,
       notes: input.notes ?? null,
       ...(topic ? { topic } : {}),
       baby_birth_date: input.babyBirthDate || null,
@@ -294,6 +315,8 @@ export async function createBooking(
     id: booking.id as string,
     bookingNumber: booking.booking_number as string,
     amount: slot.price,
+    currency,
+    chargedAmount,
   };
 }
 

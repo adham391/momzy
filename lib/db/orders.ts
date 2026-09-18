@@ -1,13 +1,14 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProducts } from "@/lib/products/getProducts";
 import { restoreStock } from "@/lib/products/stock";
-import { getShippingConfig } from "./settings";
+import { getShippingConfig, getUsdRate } from "./settings";
 import { validateCoupon, incrementCouponUsage } from "./coupons";
 import { computeShipping } from "@/lib/shipping";
 import { effectivePrice } from "@/lib/bundles";
 import { isDigitalProduct } from "@/lib/products/helpers";
 import { createDownloadTokens, type DigitalDownloadInput } from "./downloads";
 import { toLatinDigits } from "@/lib/utils/format";
+import { ilsToUsd, type Currency } from "@/lib/currency";
 import { SETTLED_ORDER_FILTER } from "@/lib/stats/settlement";
 import type { GiftOptions } from "@/lib/store/cart";
 import type {
@@ -48,6 +49,9 @@ function toOrderRow(r: Record<string, unknown>): OrderRow {
     shipping_cost: Number(r.shipping_cost ?? 0),
     discount_amount: Number(r.discount_amount ?? 0),
     total_amount: Number(r.total_amount ?? 0),
+    currency: (r.currency as Currency | undefined) ?? "ILS",
+    charged_amount: r.charged_amount == null ? null : Number(r.charged_amount),
+    exchange_rate: r.exchange_rate == null ? null : Number(r.exchange_rate),
   };
 }
 
@@ -84,7 +88,7 @@ function normalizeGift(g: GiftOptions | null | undefined): GiftOptions | null {
  */
 export async function createOrder(
   input: CreateOrderInput
-): Promise<{ id: string; orderNumber: string; total: number }> {
+): Promise<{ id: string; orderNumber: string; total: number; currency: Currency; chargedAmount: number }> {
   const supabase = createAdminClient();
 
   // أسعار المنتجات من المصدر الموثوق (مرة واحدة)
@@ -139,6 +143,11 @@ export async function createOrder(
   }
   const total = subtotal + shippingCost - discount;
 
+  // عملة الخصم: الدولار من خارج البلاد بسعر الصرف المضبوط في الإعدادات — يُحفظ ليثبت المبلغ
+  const currency: Currency = input.currency ?? "ILS";
+  const exchangeRate = currency === "USD" ? await getUsdRate() : null;
+  const chargedAmount = exchangeRate ? ilsToUsd(total, exchangeRate) : total;
+
   // بيانات الطلب (رقم الطلب عشوائي — يُولَّد مع retry أدناه)
   const orderData = {
     customer_name: input.customer.name,
@@ -152,6 +161,9 @@ export async function createOrder(
     shipping_cost: shippingCost,
     discount_amount: discount,
     total_amount: total,
+    currency,
+    charged_amount: chargedAmount,
+    exchange_rate: exchangeRate,
     coupon_code: couponCode,
     has_marketing_consent: input.hasMarketingConsent,
     notes: input.notes ?? null,
@@ -219,7 +231,7 @@ export async function createOrder(
   // زيادة عدّاد استخدام الكوبون بعد نجاح الطلب
   if (couponCode) await incrementCouponUsage(couponCode);
 
-  return { id: order.id as string, orderNumber: order.order_number as string, total };
+  return { id: order.id as string, orderNumber: order.order_number as string, total, currency, chargedAmount };
 }
 
 /** يُعلّم الطلب مدفوعًا (من HYP callback) — يعيد id الطلب أو null */

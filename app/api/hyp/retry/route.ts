@@ -44,7 +44,9 @@ async function payOrder(id: string, origin: string, locale?: string) {
   const paymentUrl = await createHypPaymentUrl({
     orderId: order.id,
     orderNumber: order.order_number,
-    amount: order.total_amount,
+    // المبلغ المحفوظ بعملة الطلب — لا يُعاد تحويله بسعر اليوم
+    amount: order.charged_amount ?? order.total_amount,
+    currency: order.currency,
     customerName: order.customer_name,
     email: order.customer_email,
     phone: order.customer_phone,
@@ -71,7 +73,8 @@ async function payBooking(id: string, origin: string, locale?: string) {
   const paymentUrl = await createHypPaymentUrl({
     orderId: booking.id,
     orderNumber: booking.booking_number, // BK-… — يميّزه الـ callback
-    amount: booking.amount,
+    amount: booking.charged_amount ?? booking.amount,
+    currency: booking.currency,
     customerName: booking.customer_name,
     email: booking.customer_email,
     phone: booking.customer_phone,

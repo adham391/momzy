@@ -11,6 +11,7 @@
  */
 
 import { toHypText } from "./text";
+import { HYP_COIN, type Currency } from "@/lib/currency";
 import { logPaymentAttempt } from "@/lib/db/paymentLogs";
 
 const HYP_BASE = "https://pay.hyp.co.il/p/";
@@ -59,6 +60,8 @@ export interface HypPaymentInput {
   info?: string;
   /** لغة الموقع (ar | he | en) — تحدّد لغة صفحة الدفع */
   locale?: string;
+  /** عملة الخصم — الدولار من خارج البلاد (المبلغ أعلاه بهذه العملة) */
+  currency?: Currency;
 }
 
 /**
@@ -79,7 +82,7 @@ export async function createHypPaymentUrl(input: HypPaymentInput): Promise<strin
     KEY: process.env.HYP_KEY!,
     PassP: process.env.HYP_PASSP!,
     Amount: String(input.amount),
-    Coin: "1", // شيكل ILS
+    Coin: HYP_COIN[input.currency ?? "ILS"],
     Order: input.orderNumber,
     Info: toHypText(input.info) || `Momzy Order ${input.orderNumber}`,
     ClientName: firstName ?? "",

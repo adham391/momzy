@@ -8,6 +8,8 @@ import { useCart } from "@/lib/store/cart";
 import QuantityInput from "@/components/shop/QuantityInput";
 import { computeShipping, type ShippingConfig } from "@/lib/shipping";
 import { couponDiscount } from "@/lib/coupons";
+import { useGeo } from "@/lib/geo/useGeo";
+import { displayPrice } from "@/lib/currency";
 
 /** حالة الكوبون */
 type CouponStatus = "idle" | "checking" | "valid" | "invalid";
@@ -24,6 +26,8 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
 
   const appliedCoupon = useCart((s) => s.appliedCoupon);
   const setCoupon     = useCart((s) => s.setCoupon);
+  /** عملة الزائرة — الدولار من خارج البلاد؛ كل المبالغ هنا تُعرض بها */
+  const geo = useGeo();
 
   const [couponOpen,   setCouponOpen]   = useState(false);
   const [couponCode,   setCouponCode]   = useState("");
@@ -158,10 +162,10 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
                 const disc = unit < item.price;
                 return (
                   <>
-                    <div>₪{unit * item.quantity}</div>
+                    <div>{displayPrice(unit * item.quantity, geo)}</div>
                     {disc && (
                       <div className="font-normal line-through text-light text-[11px]">
-                        ₪{item.price * item.quantity}
+                        {displayPrice(item.price * item.quantity, geo)}
                       </div>
                     )}
                   </>
@@ -179,7 +183,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           >
             <span>🎁</span>
             <span className="font-label font-bold text-[13px]" style={{ color: "var(--rose)" }}>
-              {t("bundleSavingsNote", { amount: bundleSavings })}
+              {t("bundleSavingsNote", { amount: displayPrice(bundleSavings, geo) })}
             </span>
           </div>
         )}
@@ -194,7 +198,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-label font-bold text-teal text-[13px]">✓ {appliedCoupon.label}</span>
-              <span className="font-label text-[12px] text-teal">{t("couponDiscountNote", { amount: discount })}</span>
+              <span className="font-label text-[12px] text-teal">{t("couponDiscountNote", { amount: displayPrice(discount, geo) })}</span>
             </div>
             {!readOnly && (
               <button
@@ -280,13 +284,13 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
       <div style={{ padding: "12px 22px" }}>
         <div className="flex justify-between items-center mb-2">
           <span className="font-label text-[14px] text-mid">{t("subtotal")}</span>
-          <span className="font-label font-bold text-dark text-[14px]">₪{total}</span>
+          <span className="font-label font-bold text-dark text-[14px]">{displayPrice(total, geo)}</span>
         </div>
 
         {discount > 0 && (
           <div className="flex justify-between items-center mb-2">
             <span className="font-label text-[14px] text-teal">{t("discountLabel")}</span>
-            <span className="font-label font-bold text-teal text-[14px]">− ₪{discount}</span>
+            <span className="font-label font-bold text-teal text-[14px]">− {displayPrice(discount, geo)}</span>
           </div>
         )}
 
@@ -304,7 +308,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
             {shippingCost === 0 ? (
               <span className="font-label font-bold text-teal text-[14px]">{t("free")}</span>
             ) : (
-              <span className="font-label font-bold text-dark text-[14px]">₪{shippingCost}</span>
+              <span className="font-label font-bold text-dark text-[14px]">{displayPrice(shippingCost, geo)}</span>
             )}
           </div>
         )}
@@ -314,8 +318,13 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
           style={{ borderTop: "1.5px solid var(--bord)" }}
         >
           <span className="font-heading font-bold text-dark text-[16px]">{t("total")}</span>
-          <span className="font-label font-extrabold text-teal text-[22px]">₪{grandTotal}</span>
+          <span className="font-label font-extrabold text-teal text-[22px]">{displayPrice(grandTotal, geo)}</span>
         </div>
+        {geo?.currency === "USD" && (
+          <div className="font-label text-[11.5px] text-light text-end mt-1">
+            {t("usdRateNote", { rate: geo.usdRate })}
+          </div>
+        )}
       </div>
 
       {/* شعار الأمان */}

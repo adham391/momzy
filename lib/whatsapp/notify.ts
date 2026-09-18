@@ -1,4 +1,5 @@
 import { sendWhatsAppTemplate, isWhatsAppConfigured } from "./client";
+import { formatCharged } from "@/lib/currency";
 import { getHebaWhatsAppNumber } from "@/lib/db/settings";
 import type { OrderWithItems } from "@/lib/db/types";
 import type { BookingRow } from "@/lib/db/bookings";
@@ -34,7 +35,7 @@ export async function notifyHebaNewOrder(order: OrderWithItems): Promise<void> {
       "طلب جديد",
       order.order_number,
       `${order.customer_name} · ${order.customer_phone}`,
-      `${order.total_amount} ₪ · ${itemCount} منتج`,
+      `${formatCharged(order.total_amount, order.currency, order.charged_amount)} · ${itemCount} منتج`,
     ],
   });
 }

@@ -6,6 +6,7 @@ import { isWhatsAppConfigured } from "@/lib/whatsapp/client";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
 import { isEmailConfigured } from "@/lib/resend/client";
 import { isDomesticRequest, DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
+import { currencyFor } from "@/lib/currency";
 import { sendOrderConfirmation } from "@/lib/notifications/order";
 import { sweepAbandonedOrders } from "@/lib/notifications/recovery";
 import { sendDigitalDelivery } from "@/lib/notifications/digital";
@@ -50,9 +51,10 @@ export async function POST(request: Request) {
   // العنوان مطلوب للطلبات الفيزيائية فقط — الطلب الرقمي البحت يصل على البريد.
   // النوع يُقرأ من Sanity لا من العميل، فلا يُتخطّى العنوان بادّعاء كاذب.
   const needsShipping = await orderNeedsShipping(b.items.map((i) => String(i.slug)));
-  // الصندوق يُشحن داخل البلاد فقط ويُدفع من داخلها — البلد من ترويسة Vercel لا من العميلة،
-  // والواجهة تعرف الرمز فتعرض التنبيه بلغتها بدل خطأ عام
-  if (needsShipping && !isDomesticRequest(request.headers)) {
+  // البلد من ترويسة Vercel لا من العميلة: الصندوق يُشحن داخل البلاد فقط ويُدفع من داخلها،
+  // ومن خارجها يُخصم الكتيب بالدولار. الواجهة تعرف الرمز فتعرض التنبيه بلغتها بدل خطأ عام
+  const domestic = isDomesticRequest(request.headers);
+  if (needsShipping && !domestic) {
     return NextResponse.json(
       { error: "المنتجات الفيزيائية تُطلب من داخل البلاد فقط", code: DOMESTIC_ONLY_CODE },
       { status: 403 }
@@ -88,6 +90,8 @@ export async function POST(request: Request) {
       locale: typeof (b as { locale?: unknown }).locale === "string" ? (b as { locale: string }).locale : undefined,
       notes: typeof b.notes === "string" ? b.notes : "",
       utm: b.utm ?? null,
+      // عملة الخصم — الدولار من خارج البلاد
+      currency: currencyFor(domestic),
     });
 
     // إنقاص المخزون تلقائيًا في Sanity — بعد الرد (best-effort، لا يعطّل الـ checkout)
@@ -105,7 +109,8 @@ export async function POST(request: Request) {
       paymentUrl = await createHypPaymentUrl({
         orderId: result.id,
         orderNumber: result.orderNumber,
-        amount: result.total,
+        amount: result.chargedAmount,
+        currency: result.currency,
         customerName: c.name.trim(),
         email: c.email.trim(),
         phone: c.phone.trim(),

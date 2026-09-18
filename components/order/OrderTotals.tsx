@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { formatMoney, type Currency } from "@/lib/currency";
 
 interface OrderTotalsProps {
   subtotal:     number;
@@ -7,10 +8,26 @@ interface OrderTotalsProps {
   total:        number;
   /** إظهار سطر الشحن — false في الطلب الرقمي البحت (لا شيء يُشحن) */
   showShipping?: boolean;
+  /** عملة الخصم — الدولار من خارج البلاد */
+  currency?: Currency;
+  /** المبلغ المخصوم بالدولار (الأسعار أعلاه بالشيكل) */
+  chargedTotal?: number | null;
+  /** ₪ لكل $1 وقت الطلب */
+  exchangeRate?: number | null;
 }
 
 /** ملخص الأرقام — مجموع، شحن، خصم، إجمالي */
-export default function OrderTotals({ subtotal, shippingCost, discount, total, showShipping = true }: OrderTotalsProps) {
+export default function OrderTotals({
+  subtotal,
+  shippingCost,
+  discount,
+  total,
+  showShipping = true,
+  currency = "ILS",
+  chargedTotal = null,
+  exchangeRate = null,
+}: OrderTotalsProps) {
+  const chargedInUsd = currency === "USD" && chargedTotal != null;
   const t = useTranslations("order");
   return (
     <div
@@ -74,7 +91,16 @@ export default function OrderTotals({ subtotal, shippingCost, discount, total, s
           style={{ borderTop: "1.5px solid var(--bord)" }}
         >
           <span className="font-heading font-bold text-dark text-[16px]">{t("total")}</span>
-          <span className="font-label font-extrabold text-teal text-[24px]">₪{total}</span>
+          {chargedInUsd ? (
+            <span className="text-end">
+              <span className="font-label font-extrabold text-teal text-[24px]">{formatMoney(chargedTotal, "USD")}</span>
+              <span className="block font-label text-[11px] text-light mt-0.5">
+                {t("chargedInUsd", { ils: formatMoney(total, "ILS"), rate: exchangeRate ?? "" })}
+              </span>
+            </span>
+          ) : (
+            <span className="font-label font-extrabold text-teal text-[24px]">₪{total}</span>
+          )}
         </div>
       </div>
 

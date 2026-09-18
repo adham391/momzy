@@ -5,7 +5,8 @@ import type { BookingRow, BookingStatus } from "@/lib/db/bookings";
 import BookingsFilterBar from "@/components/admin/bookings/BookingsFilterBar";
 import { BookingStatusBadge } from "@/components/admin/StatusBadge";
 import { changeBookingStatusAction } from "./actions";
-import { formatSlotDate, formatTimeShort, formatILS } from "@/lib/utils/format";
+import { formatSlotDate, formatTimeShort } from "@/lib/utils/format";
+import { formatCharged } from "@/lib/currency";
 import { ageInMonthsAt, monthsLabel } from "@/lib/utils/age";
 
 export const dynamic = "force-dynamic";
@@ -82,7 +83,7 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
           <div className="text-micro text-light" style={{ direction: "ltr", textAlign: "right" }}>{b.customer_phone}</div>
           <div className="text-body-sm text-mid mt-1">
             {b.service_name} · {formatSlotDate(b.date)} · {formatTimeShort(b.start_time)}
-            {b.amount > 0 ? ` · ${formatILS(b.amount)}` : ""}
+            {b.amount > 0 ? ` · ${formatCharged(b.amount, b.currency, b.charged_amount)}` : ""}
           </div>
           {/* عمر الطفل يوم الورشة — للورشات ذات الفئة العمرية */}
           {b.baby_birth_date && (

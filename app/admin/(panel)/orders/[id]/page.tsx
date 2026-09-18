@@ -9,6 +9,7 @@ import type { OrderStatus } from "@/lib/db/types";
 import type { GiftOptions } from "@/lib/store/cart";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/admin/StatusBadge";
 import { formatILS, formatDateTime } from "@/lib/utils/format";
+import { formatCharged } from "@/lib/currency";
 import {
   changeOrderStatusAction,
   updateTrackingAction,
@@ -158,7 +159,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
               <div className="flex justify-between items-center pt-2 mt-1 border-t border-bord">
                 <span className="font-heading font-bold text-dark">الإجمالي</span>
                 <span className="font-label font-extrabold text-teal text-[18px]">
-                  {formatILS(order.total_amount)}
+                  {formatCharged(order.total_amount, order.currency, order.charged_amount)}
                 </span>
               </div>
             </div>

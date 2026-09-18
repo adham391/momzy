@@ -25,6 +25,8 @@ interface SessionCalendarProps {
   accent?: string;
   /** نسخة مضغوطة — داخل النموذج المنبثق */
   compact?: boolean;
+  /** صياغة السعر — بعملة الزائرة في النموذج (الافتراضي بالشيكل) */
+  formatPrice?: (ils: number) => string;
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -41,6 +43,7 @@ export default function SessionCalendar({
   onPick,
   accent = "var(--rose)",
   compact = false,
+  formatPrice = (ils) => `₪${ils}`,
 }: SessionCalendarProps) {
   const t = useTranslations("booking");
 
@@ -233,7 +236,7 @@ export default function SessionCalendar({
                     </div>
                     <div className="font-label text-light" style={{ fontSize: 11 }}>
                       {full ? t("calendar.full") : seatsLabel(s.seatsLeft)}
-                      {s.price > 0 ? ` · ₪${s.price}` : ""}
+                      {s.price > 0 ? ` · ${formatPrice(s.price)}` : ""}
                     </div>
                     <div className="font-label text-light" style={{ fontSize: 10.5 }}>
                       {s.isOnline ? t("calendar.online") : s.location ? `📍 ${s.location}` : ""}

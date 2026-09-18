@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { formatSlotDate, formatTimeShort, formatILS } from "@/lib/utils/format";
+import { formatCharged } from "@/lib/currency";
 import type { BookingRow } from "@/lib/db/bookings";
 
 interface BookingSummaryProps {
@@ -60,7 +61,7 @@ export default function BookingSummary({ booking }: BookingSummaryProps) {
       <div className="flex items-center justify-between pt-4">
         <span className="font-label font-bold text-dark text-[15px]">{t("summary.total")}</span>
         <span className="font-label font-extrabold text-[19px]" style={{ color: "var(--rose)" }}>
-          {formatILS(booking.amount)}
+          {formatCharged(booking.amount, booking.currency, booking.charged_amount)}
         </span>
       </div>
 
