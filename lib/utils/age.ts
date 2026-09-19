@@ -73,6 +73,41 @@ export function ageInMonthsAt(birthISO: string, sessionISO: string): number | nu
   return months;
 }
 
+/** صياغة عربية لعدد الأيام */
+export function daysLabel(n: number): string {
+  if (n <= 0) return "يومه الأول";
+  if (n === 1) return "يوم واحد";
+  if (n === 2) return "يومان";
+  if (n <= 10) return `${n} أيام`;
+  return `${n} يومًا`;
+}
+
+/** مدة اليوم بالملّي ثانية — للفرق بين تاريخين */
+const MS_PER_DAY = 86_400_000;
+
+/** عدد الأيام بين تاريخين (YYYY-MM-DD) بالتقويم — عبر UTC فلا يزيحه التوقيت الصيفي يومًا */
+export function daysBetween(fromISO: string, toISO: string): number | null {
+  if (!parseISO(fromISO) || !parseISO(toISO)) return null;
+  const utc = (iso: string) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return Date.UTC(y, m - 1, d);
+  };
+  return Math.round((utc(toISO) - utc(fromISO)) / MS_PER_DAY);
+}
+
+/**
+ * عمر الطفل يوم الجلسة كما تراه هبة — بالأيام قبل أن يُكمل شهره الأول، وبالأشهر بعده.
+ * في ورشة الأيام الأولى الفرق بين طفل عمره 3 أيام وآخر عمره 25 يومًا يعني لها الكثير.
+ */
+export function babyAgeAtLabel(birthISO: string, sessionISO: string): string {
+  const months = ageInMonthsAt(birthISO, sessionISO);
+  if (months === null) return "—";
+  if (months < 0) return "لم يُولد بعد يوم الورشة";
+  if (months >= 1) return monthsLabel(months);
+  const days = daysBetween(birthISO, sessionISO);
+  return days === null ? "—" : daysLabel(days);
+}
+
 export interface AgeCheckResult {
   ok: boolean;
   /** عمر الطفل بالأشهر يوم الجلسة (null لتاريخ غير صالح) */

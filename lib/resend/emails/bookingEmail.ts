@@ -1,6 +1,6 @@
 import type { BookingRow } from "@/lib/db/bookings";
 import { formatMoney } from "@/lib/currency";
-import { ageInMonthsAt, monthsLabel } from "@/lib/utils/age";
+import { babyAgeAtLabel } from "@/lib/utils/age";
 import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { emailHeader, emailFooter } from "./brand";
 import { emailLocale, emailTranslator, isRtl, type EmailLocale, type EmailT } from "../i18n";
@@ -93,8 +93,8 @@ export function bookingCustomerEmailHtml(b: BookingRow): string {
 /** سطر الطفل: اسمه وعمره يوم الورشة — لهبة فقط (الورشات ذات الفئة العمرية) */
 function babyAgeLine(b: BookingRow): string {
   if (!b.baby_birth_date) return "";
-  const months = ageInMonthsAt(b.baby_birth_date, b.date);
-  const age = months === null ? "—" : monthsLabel(months);
+  // بالأيام قبل الشهر الأول، وبالأشهر بعده
+  const age = babyAgeAtLabel(b.baby_birth_date, b.date);
   const name = b.baby_name
     ? `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 اسم الطفل: <strong style="color:#252220;">${esc(b.baby_name)}</strong></div>`
     : "";
