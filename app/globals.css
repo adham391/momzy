@@ -269,16 +269,36 @@ button, a {
 }
 
 /* ── badge التنبض في TopBar ──────────────────────────── */
-@keyframes pulse-badge {
-  0%   { box-shadow: 0 0 0 0 rgba(242, 167, 181, 0.7); }
-  70%  { box-shadow: 0 0 0 8px rgba(242, 167, 181, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(242, 167, 181, 0); }
+/* ── نبض الشارات: حلقة تتسع وتتلاشى خلف الشارة ──────────────
+   على طبقة مستقلة (::after) بـ transform/opacity فقط، فيحرّكها كرت الشاشة
+   ولا تُعاد كتابة الصفحة كل إطار (box-shadow المتحرك كان يُعاد رسمه باستمرار
+   ويؤخّر ظهور الصفحة على الجوال). العنصر يجب أن يكون مُموضَعًا (relative/absolute). */
+@keyframes pulse-ring {
+  0%        { transform: scale(1); opacity: 0.7; }
+  70%, 100% { transform: scale(var(--pulse-sx, 1.2), var(--pulse-sy, 1.6)); opacity: 0; }
 }
-
-@keyframes pulse-badge-yellow {
-  0%   { box-shadow: 0 0 0 0 rgba(247, 223, 152, 0.8); }
-  70%  { box-shadow: 0 0 0 8px rgba(247, 223, 152, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(247, 223, 152, 0); }
+.pulse-badge,
+.pulse-badge-yellow {
+  isolation: isolate;
+}
+.pulse-badge::after,
+.pulse-badge-yellow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgb(242 167 181);
+  animation: pulse-ring 2s infinite;
+  pointer-events: none;
+}
+.pulse-badge-yellow::after {
+  background: rgb(247 223 152);
+}
+/* نقطة دائرية («متوفر الآن») — تتسع بالتساوي */
+.pulse-dot {
+  --pulse-sx: 2.2;
+  --pulse-sy: 2.2;
 }
 
 /* ── خلفيات كاردات المنتجات pi1–pi6 ─────────────────── */

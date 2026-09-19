@@ -425,7 +425,7 @@ exchange_rate, is_default, is_active, updated_at
 momzy/
 ├── app/
 │   ├── layout.tsx                  ✅ Root layout — خطوط + dir="rtl"
-│   ├── globals.css                 ✅ Tailwind v4 @theme + design tokens + keyframes (wobble, wobble-light, pulse-badge, pulse-badge-yellow)
+│   ├── globals.css                 ✅ Tailwind v4 @theme + design tokens + keyframes (wobble, wobble-light, pulse-ring) + `.pulse-badge`/`.pulse-badge-yellow` (نبض بحلقة ::after — transform/opacity فقط)
 │   ├── studio/[[...tool]]/
 │   │   ├── page.tsx                ✅ Server Component — يصدّر metadata/viewport من next-sanity/studio
 │   │   └── StudioClient.tsx        ✅ Client Component — يعرض NextStudio (يحتاج "use client")
@@ -851,8 +851,9 @@ button:hover, a:hover { animation: wobble 0.6s ease; }
 .btn-wobble-light:hover { animation: wobble-light 0.5s ease; }
 
 /* pulse للـ badges */
-@keyframes pulse-badge        /* وردي — TopBar */
-@keyframes pulse-badge-yellow /* أصفر — جديد الآن في LatestSection */
+.pulse-badge        /* وردي — TopBar وشارات البطاقات: حلقة ::after بـ transform/opacity (لا box-shadow متحرك — كان يُعاد رسمه كل إطار) */
+.pulse-badge-yellow /* أصفر — «جديد الآن» */
+.pulse-dot          /* مع pulse-badge على نقطة دائرية — تتسع بالتساوي */
 ```
 
 ---

@@ -50,7 +50,7 @@ export default function TopBar({ settings }: TopBarProps) {
         {/* badge متنبض */}
         {settings.badge && (
           <span
-            className="font-label uppercase tracking-[1.2px] shrink-0"
+            className="pulse-badge relative font-label uppercase tracking-[1.2px] shrink-0"
             style={{
               background: "#F2A7B5",
               color: "white",
@@ -58,7 +58,6 @@ export default function TopBar({ settings }: TopBarProps) {
               fontWeight: 800,
               borderRadius: 20,
               padding: "4px 10px",
-              animation: "pulse-badge 2s infinite",
             }}
           >
             {settings.badge}

@@ -428,8 +428,8 @@ export default function ProductHero({ product }: ProductHeroProps) {
               <div className="flex items-center gap-2">
                 <span className="relative flex items-center justify-center" style={{ width: 10, height: 10 }}>
                   <span
-                    className="absolute inline-flex h-full w-full rounded-full opacity-75"
-                    style={{ background: "#10B981", animation: "pulse-badge 2s infinite" }}
+                    className="pulse-badge pulse-dot absolute inline-flex h-full w-full rounded-full opacity-75"
+                    style={{ background: "#10B981" }}
                   />
                   <span
                     className="relative inline-flex rounded-full"

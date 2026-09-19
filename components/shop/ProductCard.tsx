@@ -56,7 +56,9 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
           >
             {product.badge && (
               <span
-                className="font-label font-extrabold text-[9px] tracking-[1.5px] uppercase px-3 py-[5px] rounded-full"
+                className={`relative font-label font-extrabold text-[9px] tracking-[1.5px] uppercase px-3 py-[5px] rounded-full ${
+                  product.badgeColor === "teal" ? "" : product.badgeColor === "rose" ? "pulse-badge" : "pulse-badge-yellow"
+                }`}
                 style={{
                   background:
                     product.badgeColor === "rose" ? "var(--rose)" :
@@ -66,10 +68,6 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
                     product.badgeColor === "teal" ? "white" :
                     product.badgeColor === "rose" ? "white" :
                     "var(--dark)",
-                  animation:
-                    product.badgeColor === "rose" ? "pulse-badge 2s infinite" :
-                    product.badgeColor === "teal" ? "none" :
-                    "pulse-badge-yellow 2s infinite",
                 }}
               >
                 {product.badge}
