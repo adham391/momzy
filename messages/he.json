@@ -96,6 +96,8 @@
       "namePlaceholder": "השם המלא שלך",
       "emailLabel": "אימייל *",
       "phoneLabel": "מספר וואטסאפ *",
+      "babyNameLabel": "שם מלא של התינוק *",
+      "babyNamePlaceholder": "שם פרטי ושם משפחה",
       "babyBirthDateLabel": "תאריך הלידה של תינוקך *",
       "babyAgeOk": "גיל תינוקך ביום הסדנה: {age} ✓",
       "babyAgeHint": "הסדנה הזו מיועדת ל{range} — ואם את בהיריון הזיני את התאריך המשוער.",

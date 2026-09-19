@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getService } from "@/lib/services/getService";
 import { checkBabyAge, hasAgeGate } from "@/lib/utils/age";
 import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingTopic";
+import { isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
+import { israelTodayISO } from "@/lib/sessions/time";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import { ilsToUsd, type Currency } from "@/lib/currency";
 import { getUsdRate } from "./settings";
@@ -62,6 +64,8 @@ export interface BookingRow {
   topic: string | null;
   /** تاريخ ميلاد الطفل — للورشات ذات الفئة العمرية فقط */
   baby_birth_date: string | null;
+  /** اسم الطفل الكامل — مع تاريخ ميلاده؛ فارغ لطفل لم يُولد بعد أو لحجز سابق لهجرة 0020 */
+  baby_name?: string | null;
   /** لغة العميلة — null للحجوزات السابقة لهجرة 0017 (تُعامَل بالعربية) */
   locale: string | null;
   created_at: string;
@@ -205,6 +209,8 @@ export interface CreateBookingInput {
   topic?: string | null;
   /** تاريخ ميلاد الطفل (أو الموعد المتوقّع) — إلزامي للورشات ذات فئة عمرية */
   babyBirthDate?: string | null;
+  /** اسم الطفل الكامل — إلزامي مع تاريخ ميلاد (مولود)، ويُتجاهل خارج الورشات ذات الفئة العمرية */
+  babyName?: string | null;
   /** لغة الصفحة وقت التسجيل — تحدّد لغة إيميل التأكيد */
   locale?: string;
   /** هل الزائرة داخل البلاد؟ يُحسب في الـ route من ترويسات Vercel — اللقاء الحضوري يُحجز من داخلها فقط؛ غيابه = داخل البلاد */
@@ -244,6 +250,8 @@ export async function createBooking(
 
   /** يُحفظ فقط للخدمات التي تسأل عنه — فلا تلمس حجوزاتُ غيرها عمودَ topic */
   let topic: string | null = null;
+  /** اسم الطفل — للخدمات ذات الفئة العمرية فقط، وكالموضوع لا يُكتب حين يغيب */
+  let babyName: string | null = null;
   if (service && hasAgeGate(service)) {
     if (!input.babyBirthDate) {
       return { error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة", status: 400 };
@@ -251,6 +259,13 @@ export async function createBooking(
     const check = checkBabyAge(input.babyBirthDate, slot.date, service);
     if (!check.ok) {
       return { error: check.message ?? "عمر الطفل خارج الفئة العمرية للورشة", status: 400 };
+    }
+    // الاسم للمولود فقط وإلزامي له — الموعد المتوقّع (حامل) بلا اسم
+    if (isBabyBorn(input.babyBirthDate, israelTodayISO())) {
+      babyName = normalizeBabyName(input.babyName);
+      if (!isBabyNameValid(babyName)) {
+        return { error: "اكتبي اسم الطفل الكامل", status: 400 };
+      }
     }
   }
   if (service?.askTopic) {
@@ -288,6 +303,7 @@ export async function createBooking(
       notes: input.notes ?? null,
       ...(topic ? { topic } : {}),
       baby_birth_date: input.babyBirthDate || null,
+      ...(babyName ? { baby_name: babyName } : {}),
       locale: input.locale === "ar" || input.locale === "he" || input.locale === "en" ? input.locale : null,
     })
     .select("id, booking_number")

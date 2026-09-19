@@ -7,6 +7,8 @@ import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
 import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
 import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
+import { BABY_NAME_MAX_LENGTH, isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
+import { israelTodayISO } from "@/lib/sessions/time";
 import { useGeo } from "@/lib/geo/useGeo";
 import { displayPrice } from "@/lib/currency";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
@@ -56,11 +58,13 @@ interface BookingFormData {
   message: string;
   /** تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */
   babyBirthDate: string;
+  /** اسم الطفل الكامل — مع تاريخ ميلاده */
+  babyName: string;
   /** موضوع اللقاء — للخدمات التي تسأل عنه فقط */
   topic: string;
 }
 
-const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", message: "", babyBirthDate: "", topic: "" };
+const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", message: "", babyBirthDate: "", babyName: "", topic: "" };
 
 /**
  * الخطوات: تحميل المواعيد ← اختيار موعد ← بيانات ← (انتقال لصفحة التأكيد/الدفع)
@@ -218,6 +222,9 @@ export default function BookingModal({
       ? checkBabyAge(form.babyBirthDate, selected.date, ageGate)
       : null;
 
+  /** اسم الطفل إلزامي للمولود فقط — التاريخ في المستقبل موعد متوقّع لحامل */
+  const needsBabyName = needsBabyAge && isBabyBorn(form.babyBirthDate, israelTodayISO());
+
   const contactValid =
     form.name.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) &&
@@ -233,6 +240,7 @@ export default function BookingModal({
   const isValid =
     contactValid &&
     (!needsBabyAge || ageCheck?.ok === true) &&
+    (!needsBabyName || isBabyNameValid(normalizeBabyName(form.babyName))) &&
     (!needsTopic || isBookingTopicValid(form.topic.trim()));
 
   const borderFor = (field: string) => (focused === field ? "var(--teal)" : "var(--bord)");
@@ -253,6 +261,7 @@ export default function BookingModal({
           notes: form.message,
           topic: form.topic,
           babyBirthDate: form.babyBirthDate || null,
+          babyName: needsBabyName ? normalizeBabyName(form.babyName) : null,
           // لغة الموقع — تحدّد لغة صفحة دفع HYP للورشة
           locale,
         }),
@@ -542,6 +551,25 @@ export default function BookingModal({
                             ? t("modal.babyAgeOk", { age: monthsLabel(ageCheck.months) })
                             : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                       </p>
+                    </div>
+                  )}
+
+                  {/* اسم الطفل الكامل — بعد تاريخ الميلاد، يظهر للمولود فقط (وإلزامي حين يظهر);
+                      الموعد المتوقّع (حامل) لا يحتاج اسمًا */}
+                  {needsBabyName && (
+                    <div>
+                      <label style={labelStyle}>{t("modal.babyNameLabel")}</label>
+                      <input
+                        type="text"
+                        value={form.babyName}
+                        onChange={(e) => setForm({ ...form, babyName: e.target.value })}
+                        placeholder={t("modal.babyNamePlaceholder")}
+                        maxLength={BABY_NAME_MAX_LENGTH}
+                        autoComplete="off"
+                        style={{ ...inputBase, border: `1.5px solid ${borderFor("babyName")}` }}
+                        onFocus={() => setFocused("babyName")}
+                        onBlur={() => setFocused(null)}
+                      />
                     </div>
                   )}
 

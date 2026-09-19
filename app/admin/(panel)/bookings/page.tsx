@@ -88,7 +88,7 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
           {/* عمر الطفل يوم الورشة — للورشات ذات الفئة العمرية */}
           {b.baby_birth_date && (
             <div className="text-micro text-light mt-0.5">
-              👶 {babyAgeAtSession(b)} · مواليد{" "}
+              👶 {b.baby_name ? `${b.baby_name} · ` : ""}{babyAgeAtSession(b)} · مواليد{" "}
               <span style={{ direction: "ltr", display: "inline-block" }}>
                 {formatSlotDate(b.baby_birth_date)}
               </span>

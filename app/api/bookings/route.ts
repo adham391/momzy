@@ -32,6 +32,8 @@ export async function POST(request: Request) {
     /** موضوع اللقاء — إلزامي للخدمات التي تسأل عنه (يُتحقَّق منه في createBooking) */
     topic?: string;
     babyBirthDate?: string;
+    /** اسم الطفل الكامل — إلزامي للمولود في الخدمات ذات الفئة العمرية (يُتحقَّق منه في createBooking) */
+    babyName?: string;
     /** لغة الموقع (ar | he | en) — تحدّد لغة صفحة دفع HYP */
     locale?: string;
   };
@@ -53,6 +55,7 @@ export async function POST(request: Request) {
     notes: typeof b.notes === "string" ? b.notes : "",
     topic: typeof b.topic === "string" ? b.topic : null,
     babyBirthDate: typeof b.babyBirthDate === "string" ? b.babyBirthDate : null,
+    babyName: typeof b.babyName === "string" ? b.babyName : null,
     // لغة الصفحة — تُحفظ لتحديد لغة إيميل التأكيد
     locale: typeof b.locale === "string" ? b.locale : undefined,
     domestic,

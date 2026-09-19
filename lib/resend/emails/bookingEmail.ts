@@ -90,12 +90,15 @@ export function bookingCustomerEmailHtml(b: BookingRow): string {
 
 /* ── إشعار هبة ── */
 
-/** سطر عمر الطفل يوم الورشة — لهبة فقط (الورشات ذات الفئة العمرية) */
+/** سطر الطفل: اسمه وعمره يوم الورشة — لهبة فقط (الورشات ذات الفئة العمرية) */
 function babyAgeLine(b: BookingRow): string {
   if (!b.baby_birth_date) return "";
   const months = ageInMonthsAt(b.baby_birth_date, b.date);
   const age = months === null ? "—" : monthsLabel(months);
-  return `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 عمر الطفل يوم الورشة: <strong style="color:#252220;">${age}</strong> <span style="color:#9A9490;">(مواليد <span style="direction:ltr;">${fmtDate(b.baby_birth_date)}</span>)</span></div>`;
+  const name = b.baby_name
+    ? `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 اسم الطفل: <strong style="color:#252220;">${esc(b.baby_name)}</strong></div>`
+    : "";
+  return `${name}<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 عمر الطفل يوم الورشة: <strong style="color:#252220;">${age}</strong> <span style="color:#9A9490;">(مواليد <span style="direction:ltr;">${fmtDate(b.baby_birth_date)}</span>)</span></div>`;
 }
 
 /** نصّ حرّ كتبته العميلة (موضوع اللقاء، ملاحظات) — مُهرَّب، وأسطره تبقى — لهبة فقط */
