@@ -14,6 +14,7 @@ import EmbeddedPayment from "@/components/checkout/EmbeddedPayment";
 import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
 import type { ShippingConfig } from "@/lib/shipping";
+import type { UsdPrices } from "@/lib/geo/cartPricing";
 
 type Step = "delivery" | "payment";
 
@@ -22,7 +23,14 @@ type Step = "delivery" | "payment";
  *   ① التوصيل (النموذج) ← ② الدفع (iframe مدمج) — بلا انتقال صفحات.
  * الطلب يُنشأ عند الانتقال للدفع (قياسي)، والرابط يُزامَن بـ ?order= ليصمد التحديث.
  */
-export default function CheckoutClient({ shipping }: { shipping: ShippingConfig }) {
+export default function CheckoutClient({
+  shipping,
+  usdPrices,
+}: {
+  shipping: ShippingConfig;
+  /** سعر كل منتج بالدولار (slug ← سعر) — للزائرة من خارج البلاد */
+  usdPrices: UsdPrices;
+}) {
   const t    = useTranslations("checkout");
   const tNav = useTranslations("nav");
   const [hydrated, setHydrated] = useState(false);
@@ -82,14 +90,14 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
       {isPayment && orderId ? (
         <EmbeddedPayment id={orderId} onEdit={backToDelivery} />
       ) : (
-        <CheckoutForm shipping={shipping} onProceedToPayment={goToPayment} />
+        <CheckoutForm shipping={shipping} usdPrices={usdPrices} onProceedToPayment={goToPayment} />
       )}
     </div>
   );
 
   const summaryAside = (
     <>
-      <OrderSummary shipping={shipping} readOnly={isPayment} />
+      <OrderSummary shipping={shipping} usdPrices={usdPrices} readOnly={isPayment} />
       <div className="mt-5">
         <TrustBadges />
       </div>

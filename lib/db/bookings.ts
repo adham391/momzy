@@ -5,8 +5,7 @@ import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingT
 import { isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
-import { ilsToUsd, type Currency } from "@/lib/currency";
-import { getUsdRate } from "./settings";
+import { ilsToUsd, orderUsdRate, type Currency } from "@/lib/currency";
 import { isOnlineSession } from "@/lib/services/session";
 import { toLatinDigits } from "@/lib/utils/format";
 import type { PaymentStatus } from "./types";
@@ -275,9 +274,11 @@ export async function createBooking(
     }
   }
 
-  // عملة الخصم: الدولار من خارج البلاد بسعر الصرف المضبوط في الإعدادات — يُحفظ ليثبت المبلغ
+  // عملة الخصم: الدولار من خارج البلاد بسعر الخدمة الثابت بالدولار — يُحفظ ليثبت المبلغ
   const currency: Currency = input.currency ?? "ILS";
-  const exchangeRate = currency === "USD" ? await getUsdRate() : null;
+  // سعر الدولار الثابت للخدمة (Studio) — كل جلساتها بالسعر نفسه من خارج البلاد
+  const exchangeRate =
+    currency === "USD" ? orderUsdRate([{ ils: slot.price, usd: service?.priceUsd, quantity: 1 }]) : null;
   const chargedAmount = exchangeRate ? ilsToUsd(slot.price, exchangeRate) : slot.price;
 
   // حجز ذرّي — يعيد false لو امتلأت أو محجوبة

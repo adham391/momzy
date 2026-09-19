@@ -1,9 +1,11 @@
 /**
  * عملة الخصم — الشيكل داخل البلاد، والدولار الأمريكي من خارجها.
  *
- * الأسعار في الموقع بالشيكل دائمًا؛ التحويل يحدث مرة واحدة عند إنشاء الطلب أو الحجز
- * بسعر الصرف المضبوط في /admin/settings ويُحفظ معه (currency · charged_amount · exchange_rate)،
- * فلا يتغيّر المبلغ لو تغيّر السعر بعد ذلك. الشيكل يبقى أساس الإحصاءات ولوحة الأدمن.
+ * لكل منتج وخدمة تُباع خارج البلاد **سعر دولار ثابت** تضعه هبة في Studio (`priceUsd`) —
+ * لا سعر صرف عام. منه يُشتقّ «سعر صرف الطلب» (قائمة الشيكل ÷ قائمة الدولار)، وبه يتحوّل
+ * كل مبلغ في الطلب: فالمنتج وحده يُعرض ويُخصم بسعره الثابت تمامًا، والخصم (كوبون أو باقة)
+ * ينطبق على الدولار بالنسبة نفسها. يُحسب مرة عند إنشاء الطلب أو الحجز ويُحفظ معه
+ * (currency · charged_amount · exchange_rate). الشيكل يبقى أساس الإحصاءات ولوحة الأدمن.
  */
 
 export type Currency = "ILS" | "USD";
@@ -11,13 +13,10 @@ export type Currency = "ILS" | "USD";
 /** رمز العملة في HYP (البارامتر Coin) */
 export const HYP_COIN: Record<Currency, string> = { ILS: "1", USD: "2" };
 
-/** مفتاح سعر الصرف في جدول settings — ₪ لكل $1 */
-export const USD_RATE_SETTING = "usd_rate";
+/** احتياطي لمنتج أو خدمة بلا سعر دولار في Studio — ₪ لكل $1 (كي لا تتعطّل البيعة) */
+export const FALLBACK_USD_RATE = 3.6;
 
-/** الاحتياطي حين لا يُضبط السعر في /admin/settings */
-export const DEFAULT_USD_RATE = 3.6;
-
-/** ما يلزم لعرض الأسعار للزائرة: عملتها وسعر الصرف */
+/** ما يلزم لعرض أسعار طلب للزائرة: عملتها وسعر صرف الطلب */
 export interface PriceContext {
   currency: Currency;
   usdRate: number;
@@ -29,6 +28,28 @@ export const currencyFor = (domestic: boolean): Currency => (domestic ? "ILS" : 
 /** ₪ → $ بسنتين — تقريب واحد للواجهة والسيرفر كي يتطابق ما تراه العميلة مع ما يُخصم */
 export function ilsToUsd(ils: number, rate: number): number {
   return Math.round((ils / rate) * 100) / 100;
+}
+
+/** سعر عنصر بالدولار: الثابت من Studio، وإلا تحويل احتياطي */
+export function usdPriceOf(ils: number, priceUsd?: number | null): number {
+  return typeof priceUsd === "number" && priceUsd > 0 ? priceUsd : ilsToUsd(ils, FALLBACK_USD_RATE);
+}
+
+/** سطر في قائمة الطلب: سعره بالشيكل، وسعره الثابت بالدولار إن وُجد */
+export interface PricedLine {
+  ils: number;
+  usd?: number | null;
+  quantity: number;
+}
+
+/**
+ * سعر صرف الطلب (₪ لكل $1) من أسعار الدولار الثابتة: قائمة الشيكل ÷ قائمة الدولار.
+ * الواجهة والسيرفر يحسبانه بالدالة نفسها، فيطابق ما تراه العميلة ما يُخصم.
+ */
+export function orderUsdRate(lines: PricedLine[]): number {
+  const ils = lines.reduce((sum, l) => sum + l.ils * l.quantity, 0);
+  const usd = lines.reduce((sum, l) => sum + usdPriceOf(l.ils, l.usd) * l.quantity, 0);
+  return ils > 0 && usd > 0 ? ils / usd : FALLBACK_USD_RATE;
 }
 
 /** المبلغ الذي يُخصم فعلًا بعملة الزائرة */

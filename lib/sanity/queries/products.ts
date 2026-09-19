@@ -15,6 +15,7 @@ const PRODUCT_FIELDS = `{
   ${tf("description")},
   price,
   compareAtPrice,
+  priceUsd,
   category,
   ${tf("label")},
   ${tf("badge")},

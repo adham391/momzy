@@ -1,6 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_SHIPPING, type ShippingConfig } from "@/lib/shipping";
-import { DEFAULT_USD_RATE, USD_RATE_SETTING } from "@/lib/currency";
 import { getFreeShippingSlugs } from "@/lib/products/getProducts";
 
 /** تحويل نص إعداد لرقم بأمان مع احتياطي */
@@ -71,13 +70,6 @@ export async function updateSettings(updates: Record<string, string>): Promise<v
   const supabase = createAdminClient();
   const { error } = await supabase.from("settings").upsert(rows, { onConflict: "key" });
   if (error) throw new Error(error.message);
-}
-
-/** سعر صرف الدولار (₪ لكل $1) — للدفع من خارج البلاد؛ الفارغ أو غير الموجب يعود إلى الاحتياطي */
-export async function getUsdRate(): Promise<number> {
-  const m = await getSettingsMap([USD_RATE_SETTING]);
-  const rate = num(m[USD_RATE_SETTING], DEFAULT_USD_RATE);
-  return rate > 0 ? rate : DEFAULT_USD_RATE;
 }
 
 /** ما يُعبَّأ تلقائيًا في الجلسة الجديدة: رابط زوم الثابت للأونلاين، وعنوان اللقاءات الحضورية */

@@ -10,7 +10,7 @@ import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/booki
 import { BABY_NAME_MAX_LENGTH, isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { useGeo } from "@/lib/geo/useGeo";
-import { displayPrice } from "@/lib/currency";
+import { formatMoney } from "@/lib/currency";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import type { PublicSlot } from "@/lib/services/session";
 import AbroadNotice from "@/components/ui/AbroadNotice";
@@ -134,6 +134,9 @@ export default function BookingModal({
   const [noSessionsAtAll, setNoSessionsAtAll] = useState(false);
   /** موقع الزائرة وعملتها — اللقاء الحضوري من داخل البلاد فقط، والدفع بالدولار من خارجها */
   const geo = useGeo();
+  /** عملة الزائرة — من خارج البلاد بسعر الخدمة الثابت بالدولار */
+  const currency = geo?.currency ?? "ILS";
+  const slotPrice = (s: Slot) => (currency === "USD" ? s.price_usd : s.price);
   /** السيرفر رفض الحجز لأنه من خارج البلاد — أوثق من تخمين الواجهة */
   const [rejectedAbroad, setRejectedAbroad] = useState(false);
 
@@ -415,8 +418,8 @@ export default function BookingModal({
             </p>
             <SessionCalendar
               compact
-              formatPrice={(ils) => displayPrice(ils, geo)}
-              sessions={slots.map(toCalendarSession)}
+              formatPrice={(amount) => formatMoney(amount, currency)}
+              sessions={slots.map((s) => ({ ...toCalendarSession(s), price: slotPrice(s) }))}
               onPick={(id) => {
                 const slot = slots.find((s) => s.id === id);
                 if (slot) {
@@ -616,7 +619,7 @@ export default function BookingModal({
                     ? t("modal.submitting")
                     : step === "form"
                       ? selected && selected.price > 0
-                        ? t("modal.proceedToPayment", { price: displayPrice(selected.price, geo) })
+                        ? t("modal.proceedToPayment", { price: formatMoney(slotPrice(selected), currency) })
                         : t("modal.confirmRegistration")
                       : step === "waitlist"
                         ? t("modal.joinWaitlist")

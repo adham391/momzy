@@ -1,14 +1,14 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProducts } from "@/lib/products/getProducts";
 import { restoreStock } from "@/lib/products/stock";
-import { getShippingConfig, getUsdRate } from "./settings";
+import { getShippingConfig } from "./settings";
 import { validateCoupon, incrementCouponUsage } from "./coupons";
 import { computeShipping } from "@/lib/shipping";
 import { effectivePrice } from "@/lib/bundles";
 import { isDigitalProduct } from "@/lib/products/helpers";
 import { createDownloadTokens, type DigitalDownloadInput } from "./downloads";
 import { toLatinDigits } from "@/lib/utils/format";
-import { ilsToUsd, type Currency } from "@/lib/currency";
+import { ilsToUsd, orderUsdRate, type Currency } from "@/lib/currency";
 import { SETTLED_ORDER_FILTER } from "@/lib/stats/settlement";
 import type { GiftOptions } from "@/lib/store/cart";
 import type {
@@ -143,9 +143,17 @@ export async function createOrder(
   }
   const total = subtotal + shippingCost - discount;
 
-  // عملة الخصم: الدولار من خارج البلاد بسعر الصرف المضبوط في الإعدادات — يُحفظ ليثبت المبلغ
+  // عملة الخصم: الدولار من خارج البلاد بأسعار الدولار الثابتة للمنتجات (Studio) — يُحفظ ليثبت المبلغ
   const currency: Currency = input.currency ?? "ILS";
-  const exchangeRate = currency === "USD" ? await getUsdRate() : null;
+  const exchangeRate =
+    currency === "USD"
+      ? orderUsdRate(
+          lineItems.map((li) => {
+            const product = bySlug.get(li.product_slug);
+            return { ils: product?.price ?? li.unit_price, usd: product?.priceUsd, quantity: li.quantity };
+          })
+        )
+      : null;
   const chargedAmount = exchangeRate ? ilsToUsd(total, exchangeRate) : total;
 
   // بيانات الطلب (رقم الطلب عشوائي — يُولَّد مع retry أدناه)

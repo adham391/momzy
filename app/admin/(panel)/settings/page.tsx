@@ -2,7 +2,6 @@ import { getSettingsMap, boolSetting } from "@/lib/db/settings";
 import { getSiteSettings, getTopBarTexts, type LocalizedText } from "@/lib/sanity/queries/siteSettings";
 import type { AppLocale } from "@/lib/sanity/i18n";
 import { updateOperationalSettingsAction, updateSiteContentAction, updateNotifyEmailsAction, updateSessionDefaultsAction } from "./actions";
-import { DEFAULT_USD_RATE } from "@/lib/currency";
 import { NOTIFY_EMAIL_SETTING_KEYS } from "@/lib/notifications/recipients";
 
 export const dynamic = "force-dynamic";
@@ -44,13 +43,6 @@ export default async function AdminSettingsPage() {
                 defaultValue={settings["free_shipping_min"] ?? "0"}
               />
             </div>
-            <TextField
-              name="usd_rate"
-              label="سعر صرف الدولار — ₪ لكل $1 (الدفع من خارج البلاد)"
-              type="number"
-              step="0.01"
-              defaultValue={settings["usd_rate"] ?? String(DEFAULT_USD_RATE)}
-            />
             <TextField
               name="whatsapp_number"
               label="رقم واتساب هبة للإشعارات"

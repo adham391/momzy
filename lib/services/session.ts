@@ -1,5 +1,6 @@
 import type { SlotRow } from "@/lib/db/bookings";
 import type { ServiceType } from "./types";
+import { usdPriceOf } from "@/lib/currency";
 
 /** ما يلزم من فتحة الإتاحة لمعرفة طريقة الحضور */
 export interface SessionAttendance {
@@ -35,10 +36,18 @@ export interface PublicSlot {
   booked_count: number;
   /** أونلاين أم حضوري — الحضوري يُحجز من داخل البلاد فقط */
   online: boolean;
+  /** السعر من خارج البلاد — سعر الخدمة الثابت بالدولار (Studio) */
+  price_usd: number;
+}
+
+/** ما يلزم من الخدمة لعرض فتحتها للعموم */
+interface PublicSlotService {
+  type?: ServiceType | null;
+  priceUsd?: number | null;
 }
 
 /** يسقط من الفتحة ما لا يخصّ العميلة قبل الدفع، ويضيف حكم الحضور */
-export function toPublicSlot(slot: SlotRow, serviceType: ServiceType | null | undefined): PublicSlot {
+export function toPublicSlot(slot: SlotRow, service: PublicSlotService | null | undefined): PublicSlot {
   return {
     id: slot.id,
     date: slot.date,
@@ -47,6 +56,7 @@ export function toPublicSlot(slot: SlotRow, serviceType: ServiceType | null | un
     price: slot.price,
     capacity: slot.capacity,
     booked_count: slot.booked_count,
-    online: isOnlineSession(slot, serviceType),
+    online: isOnlineSession(slot, service?.type),
+    price_usd: usdPriceOf(slot.price, service?.priceUsd),
   };
 }

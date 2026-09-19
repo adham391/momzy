@@ -263,7 +263,7 @@
     "preparingPayment": "Preparing secure checkout…",
     "proceedToPayment": "Continue to secure checkout — {total} →",
     "noChargeYet": "🔒 No amount will be charged before you enter your payment details in the next step",
-    "usdRateNote": "Charged in US dollars · ⁦$1 = ₪{rate}⁩",
+    "usdNote": "Charged in US dollars",
     "errorNameRequired": "Please enter your full name",
     "errorNameDigits": "Name cannot contain numbers",
     "errorEmailInvalid": "Please enter a valid email (example: name@gmail.com)",
@@ -483,7 +483,7 @@
         "title": "Purchase and payment",
         "items": {
           "0": "Purchasing is available without registering an account — anonymously",
-          "1": "Prices are in Israeli shekels ₪ and include VAT; from outside Israel the amount is charged in US dollars at the site's exchange rate",
+          "1": "Prices are in Israeli shekels ₪ and include VAT; from outside Israel payment is in US dollars at the price shown at checkout",
           "2": "Payment is processed through the secure HYP payment gateway",
           "3": "An order is considered confirmed once payment confirmation is received from HYP",
           "4": "We reserve the right to refuse any order in cases of suspected fraud"

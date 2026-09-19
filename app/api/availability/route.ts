@@ -17,5 +17,5 @@ export async function GET(request: Request) {
   if (!slug) return NextResponse.json({ slots: [] });
 
   const [slots, service] = await Promise.all([getUpcomingSlotsForService(slug), getService(slug)]);
-  return NextResponse.json({ slots: slots.map((slot) => toPublicSlot(slot, service?.type)) });
+  return NextResponse.json({ slots: slots.map((slot) => toPublicSlot(slot, service)) });
 }

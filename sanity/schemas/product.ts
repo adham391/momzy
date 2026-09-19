@@ -132,6 +132,15 @@ export const product = defineType({
     }),
 
     defineField({
+      name: "priceUsd",
+      title: "السعر من خارج البلاد ($)",
+      type: "number",
+      description:
+        "ما تدفعه الزائرة من خارج البلاد بالدولار (للكتيبات — الصندوق لا يُباع خارج البلاد). إن تُرك فارغًا يُحوَّل سعر الشيكل بسعر 3.6.",
+      validation: (r) => r.min(0),
+    }),
+
+    defineField({
       name: "inStock",
       title: "متوفر في المخزون؟",
       type: "boolean",

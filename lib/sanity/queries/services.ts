@@ -26,6 +26,7 @@ const SERVICE_FIELDS = `{
   faqs[hidden != true]{ ${tf("question")}, ${tf("answer")} },
   color,
   price,
+  priceUsd,
   whatsappOnly,
   order,
   "coverImage":       coverImage.asset->url,

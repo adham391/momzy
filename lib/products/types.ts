@@ -91,6 +91,8 @@ export interface Product {
   /* ── حقول اختيارية أساسية ── */
   /** السعر قبل الخصم — يُعرض مشطوبًا */
   compareAtPrice?: number;
+  /** السعر من خارج البلاد بالدولار — ثابت من Studio (الفارغ يُحوَّل احتياطيًا) */
+  priceUsd?: number | null;
   /** الكمية المتوفرة — undefined = غير محدد */
   stockQuantity?: number;
   /** الوزن بالكيلوغرام — لاحقًا للشحن */

@@ -9,13 +9,23 @@ import QuantityInput from "@/components/shop/QuantityInput";
 import { computeShipping, type ShippingConfig } from "@/lib/shipping";
 import { couponDiscount } from "@/lib/coupons";
 import { useGeo } from "@/lib/geo/useGeo";
+import { cartPriceContext, type UsdPrices } from "@/lib/geo/cartPricing";
 import { displayPrice } from "@/lib/currency";
 
 /** حالة الكوبون */
 type CouponStatus = "idle" | "checking" | "valid" | "invalid";
 
 /** ملخص الطلب مع تحكم بالكمية وحقل كوبون. readOnly = عرض فقط (مرحلة الدفع) */
-export default function OrderSummary({ shipping, readOnly = false }: { shipping: ShippingConfig; readOnly?: boolean }) {
+export default function OrderSummary({
+  shipping,
+  usdPrices,
+  readOnly = false,
+}: {
+  shipping: ShippingConfig;
+  /** سعر كل منتج بالدولار — للزائرة من خارج البلاد */
+  usdPrices: UsdPrices;
+  readOnly?: boolean;
+}) {
   const t              = useTranslations("checkout");
   const items          = useCart((s) => s.items);
   const getTotal       = useCart((s) => s.getTotal);
@@ -26,8 +36,8 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
 
   const appliedCoupon = useCart((s) => s.appliedCoupon);
   const setCoupon     = useCart((s) => s.setCoupon);
-  /** عملة الزائرة — الدولار من خارج البلاد؛ كل المبالغ هنا تُعرض بها */
-  const geo = useGeo();
+  /** عملة الزائرة وسعر صرف الطلب من أسعار الدولار الثابتة — كل المبالغ هنا تُعرض بها */
+  const geo = cartPriceContext(useGeo(), items, usdPrices);
 
   const [couponOpen,   setCouponOpen]   = useState(false);
   const [couponCode,   setCouponCode]   = useState("");
@@ -322,7 +332,7 @@ export default function OrderSummary({ shipping, readOnly = false }: { shipping:
         </div>
         {geo?.currency === "USD" && (
           <div className="font-label text-[11.5px] text-light text-end mt-1">
-            {t("usdRateNote", { rate: geo.usdRate })}
+            {t("usdNote")}
           </div>
         )}
       </div>

@@ -9,6 +9,7 @@ import { computeShipping, type ShippingConfig } from "@/lib/shipping";
 import { couponDiscount } from "@/lib/coupons";
 import { getStoredUTM } from "@/lib/analytics/track";
 import { useGeo } from "@/lib/geo/useGeo";
+import { cartPriceContext, type UsdPrices } from "@/lib/geo/cartPricing";
 import { displayPrice } from "@/lib/currency";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import AbroadNotice from "@/components/ui/AbroadNotice";
@@ -102,9 +103,12 @@ const validators: Record<RequiredField, (v: string) => string | null> = {
 /** نموذج بيانات العميل + قبول الشروط */
 export default function CheckoutForm({
   shipping,
+  usdPrices,
   onProceedToPayment,
 }: {
   shipping: ShippingConfig;
+  /** سعر كل منتج بالدولار — للزائرة من خارج البلاد */
+  usdPrices: UsdPrices;
   /** يُستدعى بعد إنشاء الطلب حين يكون الدفع الإلكتروني مفعّلًا — للانتقال لمرحلة الدفع في نفس الصفحة */
   onProceedToPayment?: (orderId: string) => void;
 }) {
@@ -496,7 +500,7 @@ export default function CheckoutForm({
           >
             {status === "submitting"
               ? t("preparingPayment")
-              : t("proceedToPayment", { total: displayPrice(grandTotal, geo) })}
+              : t("proceedToPayment", { total: displayPrice(grandTotal, cartPriceContext(geo, cartItems, usdPrices)) })}
           </button>
 
           <p className="text-center text-[12px] text-light mt-3">
