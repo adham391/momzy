@@ -63,7 +63,7 @@ const DEFAULTS: Record<AppLocale, HomePageContent> = {
     whyValues: [
       { icon: "/icons/services-icon.png", title: "معرفة مهنية حقيقية", desc: "خبرة هبة المعتمدة بين يديكِ، لا نصائح عامة." },
       { icon: "/icons/products-icon.png", title: "منتجات مختارة بحب", desc: "كل منتج جرّبته هبة على أساس علمي موثوق." },
-      { icon: "/icons/blog-icon.png",     title: "مجتمع يفهمكِ",     desc: "مساحة آمنة تجمع أمهات يمررن برحلتك." },
+      { icon: "/icons/blog-icon.png",     title: "مجتمع يفهمكِ",     desc: "مساحة تمنحكِ شعورًا بأنكِ لستِ وحدكِ في هذه الرحلة." },
       { icon: "/icons/heart-icon.png",    title: "طفلك في القلب",    desc: "دعمك كأم ينعكس على بداية حياة طفلك." },
     ],
     whyQuote:
@@ -107,7 +107,7 @@ const DEFAULTS: Record<AppLocale, HomePageContent> = {
     whyValues: [
       { icon: "/icons/services-icon.png", title: "ידע מקצועי אמיתי", desc: "הניסיון המוסמך של היבה בהישג ידך, לא עצות כלליות." },
       { icon: "/icons/products-icon.png", title: "מוצרים שנבחרו באהבה", desc: "כל מוצר נבחן על ידי היבה על בסיס מדעי אמין." },
-      { icon: "/icons/blog-icon.png",     title: "קהילה שמבינה אותך", desc: "מרחב בטוח שמאגד אמהות שעוברות את אותו מסע כמוך." },
+      { icon: "/icons/blog-icon.png",     title: "קהילה שמבינה אותך", desc: "מרחב שנותן לך את התחושה שאת לא לבד במסע הזה." },
       { icon: "/icons/heart-icon.png",    title: "התינוק שלך בלב",    desc: "התמיכה בך כאמא משתקפת בתחילת חייו של תינוקך." },
     ],
     whyQuote:
@@ -151,7 +151,7 @@ const DEFAULTS: Record<AppLocale, HomePageContent> = {
     whyValues: [
       { icon: "/icons/services-icon.png", title: "Real professional knowledge", desc: "Heba's certified expertise in your hands, not generic advice." },
       { icon: "/icons/products-icon.png", title: "Products chosen with love", desc: "Every product tested by Heba on a trusted scientific basis." },
-      { icon: "/icons/blog-icon.png",     title: "A community that gets you", desc: "A safe space bringing together moms going through your journey." },
+      { icon: "/icons/blog-icon.png",     title: "A community that gets you", desc: "A space that reminds you you're not alone on this journey." },
       { icon: "/icons/heart-icon.png",    title: "Your baby at heart",       desc: "Supporting you as a mom shapes the start of your baby's life." },
     ],
     whyQuote:
