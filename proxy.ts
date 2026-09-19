@@ -146,6 +146,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // طبّق على كل الصفحات ما عدا: assets + api + .well-known (ملفات توثيق كـ Apple Pay تُخدَم كما هي من public — لا توجيه لغة)
-  // + خريطة الموقع وrobots.txt (تُولَّد في جذر app — لا بادئة لغة)
-  matcher: ["/((?!_next/static|_next/image|api|icons|images|favicon|\\.well-known|sitemap\\.xml|robots\\.txt).*)"],
+  // + خريطة الموقع وrobots.txt ومفتاح IndexNow (تُولَّد في جذر app — لا بادئة لغة)
+  matcher: ["/((?!_next/static|_next/image|api|icons|images|favicon|\\.well-known|sitemap\\.xml|robots\\.txt|indexnow-key\\.txt).*)"],
 };

@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
-import { type NextRequest, NextResponse } from "next/server";
+import { after, type NextRequest, NextResponse } from "next/server";
+import { pathsForDocument, submitToIndexNow, urlsForPaths } from "@/lib/seo/indexnow";
 
 /**
  * POST /api/revalidate
@@ -48,6 +49,10 @@ export async function POST(req: NextRequest) {
       // إعدادات الموقع تؤثر على كل الصفحات (TopBar + Footer)
       revalidatePath("/", "layout");
     }
+
+    // IndexNow — نبلّغ Bing بالصفحة وقسمها لحظة النشر (بعد الرد، فلا ينتظر Sanity)
+    const changedUrls = urlsForPaths(pathsForDocument(type, body?.slug?.current));
+    if (changedUrls.length > 0) after(() => submitToIndexNow(changedUrls));
 
     return NextResponse.json({ revalidated: true, type });
   } catch {
