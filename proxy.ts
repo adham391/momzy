@@ -145,6 +145,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // طبّق على كل الصفحات ما عدا: assets + api
-  matcher: ["/((?!_next/static|_next/image|api|icons|images|favicon).*)"],
+  // طبّق على كل الصفحات ما عدا: assets + api + .well-known (ملفات توثيق كـ Apple Pay تُخدَم كما هي من public — لا توجيه لغة)
+  matcher: ["/((?!_next/static|_next/image|api|icons|images|favicon|\\.well-known).*)"],
 };
