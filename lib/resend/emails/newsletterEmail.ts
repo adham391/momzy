@@ -45,8 +45,8 @@ export interface NewsletterIssue {
 
 /** بادئة إلزامية لعنوان الرسائل الدعائية في إسرائيل */
 const AD_SUBJECT_PREFIX = "פרסומת";
-/** صفحة إلغاء الاشتراك في الموقع */
-const UNSUBSCRIBE_PATH = "/newsletter/unsubscribe";
+/** صفحة إلغاء الاشتراك في الموقع — ورسالة الترحيب تربط إليها أيضًا */
+export const UNSUBSCRIBE_PATH = "/newsletter/unsubscribe";
 /** عرض الصورة المعروض (600 − هوامش البطاقة) — والملف بضعفه لشاشات الجوال الحادّة */
 const CARD_IMAGE_WIDTH = 536;
 

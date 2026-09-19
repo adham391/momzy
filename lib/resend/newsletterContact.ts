@@ -61,6 +61,12 @@ export async function upsertNewsletterContact(
   return error;
 }
 
+/** رمز إلغاء الاشتراك المحفوظ على جهة اتصال البريد — null إن لم تكن جهة اتصال أو لا رمز لها */
+export async function newsletterUnsubscribeToken(resend: Resend, email: string): Promise<string | null> {
+  const { data } = await resend.contacts.get({ email });
+  return data ? storedToken(data.properties) : null;
+}
+
 /** حال رابط إلغاء الاشتراك: غير صالح · صالح لمشتركة · صالح واشتراكها ملغى أصلًا */
 export type UnsubscribeLinkState = "invalid" | "subscribed" | "unsubscribed";
 

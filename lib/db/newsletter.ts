@@ -3,13 +3,20 @@ import { createAdminClient } from "@/lib/supabase/admin";
 /**
  * يشترك إيميلًا في النشرة (upsert — إعادة الاشتراك تُعيد التفعيل).
  * يُبقي البريد فريدًا، ويعيده منظَّفًا كي تُزامَن القائمة في Resend بالعنوان نفسه.
+ * `isNew`: لم تكن مشتركة نشطة قبلها — فرسالة الترحيب لا تتكرّر بإعادة إرسال النموذج.
  */
 export async function subscribeNewsletter(
   email: string,
   source = "footer"
-): Promise<{ ok: true; email: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; email: string; isNew: boolean } | { ok: false; error: string }> {
   const supabase = createAdminClient();
   const clean = email.trim().toLowerCase();
+
+  const { data: before } = await supabase
+    .from("newsletter_subscribers")
+    .select("is_active")
+    .eq("email", clean)
+    .maybeSingle();
 
   const { error } = await supabase.from("newsletter_subscribers").upsert(
     { email: clean, source, is_active: true, unsubscribed_at: null },
@@ -17,7 +24,7 @@ export async function subscribeNewsletter(
   );
 
   if (error) return { ok: false, error: error.message };
-  return { ok: true, email: clean };
+  return { ok: true, email: clean, isNew: !before?.is_active };
 }
 
 /** يُعلّم المشتركة ملغاة الاشتراك (من صفحة إلغاء الاشتراك) — الصفّ يبقى سجلًّا */

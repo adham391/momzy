@@ -91,12 +91,10 @@ export default function ServiceCard({ service, whatsappNumber, seatsLeft }: Serv
           <MetaChip chip={p.chip} accent={p.accent}><ClockIcon /> {service.duration}</MetaChip>
           <MetaChip chip={p.chip} accent={p.accent}><PinIcon /> {service.location}</MetaChip>
           {service.ageRange && <MetaChip chip={p.chip} accent={p.accent}><BabyIcon /> {service.ageRange}</MetaChip>}
-          {typeof seatsLeft === "number" && (
-            <MetaChip
-              chip={seatsLeft === 0 ? "rgba(217,105,122,0.12)" : "rgba(130,201,196,0.18)"}
-              accent={seatsLeft === 0 ? "#D9697A" : "#3E8F8B"}
-            >
-              <SeatIcon /> {t("seatsLeft", { count: seatsLeft })}
+          {/* عدد المقاعد المتبقية لا يُعرض للزبونة — الشارة تظهر فقط حين يكتمل العدد */}
+          {seatsLeft === 0 && (
+            <MetaChip chip="rgba(217,105,122,0.12)" accent="#D9697A">
+              <SeatIcon /> {t("fullyBooked")}
             </MetaChip>
           )}
         </div>

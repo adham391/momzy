@@ -49,7 +49,7 @@ function Li({ warn, children }: { warn?: boolean; children: React.ReactNode }) {
           display: "inline-block",
         }}
       />
-      <span>{children}</span>
+      <div>{children}</div>
     </div>
   );
 }
@@ -129,8 +129,15 @@ export default function TermsPage() {
               <Li>{t("sections.2.items.0")}</Li>
               <Li>{t("sections.2.items.1")}</Li>
               <Li>{t("sections.2.items.2")}</Li>
-              <Li>{t("sections.2.items.3")}</Li>
-              <Li>{t("sections.2.items.4")}</Li>
+              {/* إخلاء المسؤولية عن التأخير — الحالات مرقّمة تحته */}
+              <Li>
+                {t("sections.2.delayIntro")}
+                <ol className="list-decimal ps-5 mt-1 flex flex-col gap-0.5">
+                  <li>{t("sections.2.delayCases.0")}</li>
+                  <li>{t("sections.2.delayCases.1")}</li>
+                  <li>{t("sections.2.delayCases.2")}</li>
+                </ol>
+              </Li>
             </div>
           </Section>
 

@@ -46,12 +46,11 @@ export default function Footer({ settings }: FooterProps) {
   ];
 
   /**
-   * رابط واتساب — null إن لم يكن الرقم صالحًا.
-   * الافتراضي «#» صادقٌ في شرط `if` لكنّه بلا أرقام، فكان ينتج
-   * `wa.me/` فارغًا: أيقونة على كل صفحة تقود إلى لا شيء.
-   * ويسقط إلى رقم التواصل، فهما الرقم نفسه عمليًا.
+   * رابط واتساب — من أول رقم صالح: رابط السوشيال ثم رقم التواصل (هما الرقم نفسه عمليًا).
+   * الفحص على الأرقام لكل مصدر على حدة: placeholder مثل «#» ليس فارغًا فكان
+   * `??` يقف عنده ولا يصل إلى رقم التواصل — فاختفى واتساب من الفوتر.
    */
-  const whatsappSocial = whatsappLink(socialLinks.whatsapp ?? contact.whatsappNumber);
+  const whatsappSocial = [socialLinks.whatsapp, contact.whatsappNumber].map((n) => whatsappLink(n)).find(Boolean) ?? null;
 
   /** روابط السوشيال مع الأيقونات */
   const socialItems = [
@@ -97,10 +96,18 @@ export default function Footer({ settings }: FooterProps) {
           svg: <ChannelIcon size={20} />,
         }]
       : []),
+    // الإيميل أيقونة بين أيقونات التواصل — بلا عنوان مكتوب
+    {
+      key: "email",
+      href: `mailto:${publicContactEmail(contact.email)}`,
+      label: t("menu.emailAria"),
+      svg: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
+        </svg>
+      ),
+    },
   ];
-
-  const whatsappDisplay = contact.whatsappNumber ?? "";
-  const emailDisplay    = publicContactEmail(contact.email);
 
   return (
     <>
@@ -131,45 +138,15 @@ export default function Footer({ settings }: FooterProps) {
                 {footer.description}
               </p>
 
-              {/* تواصل سريع — رقم وإيميل ظاهرين */}
-              <div className="flex flex-col gap-2 mb-5">
-                {/* صفّ الواتساب يظهر فقط برقم صالح — لا نعرض رقمًا وهميًا
-                    ولا نرسل العميلة إليه؛ الإيميل تحته يبقى في الحالتين */}
-                {whatsappSocial && (
-                <a
-                  href={whatsappSocial}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[13px] hover:text-rose transition-colors"
-                  style={{ color: "rgba(255,255,255,0.85)" }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884" />
-                  </svg>
-                  <span dir="ltr">{whatsappDisplay}</span>
-                </a>
-                )}
-                <a
-                  href={`mailto:${emailDisplay}`}
-                  className="flex items-center gap-2 text-[13px] hover:text-rose transition-colors"
-                  style={{ color: "rgba(255,255,255,0.85)" }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#F2A7B5">
-                    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
-                  </svg>
-                  <span dir="ltr">{emailDisplay}</span>
-                </a>
-              </div>
-
-              {/* أيقونات السوشال */}
-              <div className="flex gap-2.5">
+              {/* أيقونات التواصل — واتساب والإيميل أيقونات بلا رقم أو عنوان مكتوب */}
+              <div className="flex flex-wrap gap-2.5">
                 {socialItems.map((item) => (
                   <a
                     key={item.key}
                     href={item.href}
                     aria-label={item.label}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    // الإيميل (mailto) يفتح تطبيق البريد — لا تبويب جديد
+                    {...(item.href.startsWith("http") && { target: "_blank", rel: "noopener noreferrer" })}
                     className="w-11 h-11 rounded-[10px] flex items-center justify-center transition-opacity hover:opacity-70"
                     style={{ border: "1px solid rgba(255,255,255,0.20)", color: "rgba(255,255,255,0.75)" }}
                   >

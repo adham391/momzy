@@ -43,7 +43,6 @@ function toCalendarSession(s: Slot): CalendarSession {
     price: s.price,
     seatsLeft: Math.max(0, s.capacity - s.booked_count),
     isOnline: s.online,
-    location: s.location,
   };
 }
 

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 /** نموذج الاشتراك بالنشرة البريدية — يظهر في الفوتر */
 export default function NewsletterForm() {
   const t = useTranslations("newsletter");
+  // لغة الصفحة — رسالة الترحيب تصل بها
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -19,7 +21,7 @@ export default function NewsletterForm() {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "footer" }),
+        body: JSON.stringify({ email, source: "footer", locale }),
       });
       const data = (await res.json()) as { success: boolean };
       if (data.success) {

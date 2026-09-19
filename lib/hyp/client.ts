@@ -16,6 +16,14 @@ import { logPaymentAttempt } from "@/lib/db/paymentLogs";
 
 const HYP_BASE = "https://pay.hyp.co.il/p/";
 
+/**
+ * أقصى عدد تقسيطات تختاره العميلة في صفحة الدفع (Tash) — من 1 حتى 3.
+ * بدونه تعرض الصفحة حدّ الترمينال الافتراضي (36).
+ */
+const MAX_INSTALLMENTS = 3;
+/** نوع التقسيط (tashType): 1 = تقسيط عادي بلا فوائد */
+const REGULAR_INSTALLMENTS = "1";
+
 /** هل ضُبطت مفاتيح HYP؟ */
 export function isHypConfigured(): boolean {
   return Boolean(process.env.HYP_MASOF && process.env.HYP_KEY && process.env.HYP_PASSP);
@@ -91,6 +99,11 @@ export async function createHypPaymentUrl(input: HypPaymentInput): Promise<strin
     cell: toLocalPhone(input.phone),
     Fild1: input.orderId, // يُعاد كما هو للتوجيه بعد الدفع
     PageLang: pageLangFor(input.locale),
+    // التقسيط: حتى 3 دفعات بلا فوائد — والعميلة تختار العدد (FixTash يبقى False)
+    Tash: String(MAX_INSTALLMENTS),
+    tashType: REGULAR_INSTALLMENTS,
+    // الصفحة الإنجليزية تُخفي قائمة التقسيطات افتراضيًا
+    ShowEngTashText: "True",
     UTF8: "True",
     UTF8out: "True",
     sendemail: "True",

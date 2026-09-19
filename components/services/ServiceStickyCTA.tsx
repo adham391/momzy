@@ -73,7 +73,8 @@ export default function ServiceStickyCTA({
             <div className="font-label font-bold text-dark text-[13px] truncate">{serviceTitle}</div>
             <div className="font-label text-[11.5px] text-light">
               {price > 0 ? `₪${price}` : t(whatsappOnly ? "arrangeNote" : "onRequest")}
-              {typeof seatsLeft === "number" && ` · ${t("seatsLeft", { count: seatsLeft })}`}
+              {/* بلا عدد المقاعد المتبقية — «اكتمل العدد» فقط حين تمتلئ */}
+              {seatsLeft === 0 && ` · ${t("fullyBooked")}`}
             </div>
           </div>
 

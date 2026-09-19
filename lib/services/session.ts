@@ -21,7 +21,10 @@ export function isOnlineSession(
   return serviceType === "online";
 }
 
-/** الفتحة كما تراها العميلة قبل الدفع — بلا رابط اللقاء (يصل في تذكير اليوم السابق) */
+/**
+ * الفتحة كما تراها العميلة قبل الدفع — بلا رابط اللقاء ولا مكانه: كلاهما يصل في تذكير
+ * اليوم السابق فقط. `online` يكفي الرزنامة لتعرض «أونلاين» أو «حضوري».
+ */
 export interface PublicSlot {
   id: string;
   date: string;
@@ -32,8 +35,6 @@ export interface PublicSlot {
   booked_count: number;
   /** أونلاين أم حضوري — الحضوري يُحجز من داخل البلاد فقط */
   online: boolean;
-  /** مكان اللقاء الحضوري — يُعرض في الرزنامة */
-  location: string | null;
 }
 
 /** يسقط من الفتحة ما لا يخصّ العميلة قبل الدفع، ويضيف حكم الحضور */
@@ -47,6 +48,5 @@ export function toPublicSlot(slot: SlotRow, serviceType: ServiceType | null | un
     capacity: slot.capacity,
     booked_count: slot.booked_count,
     online: isOnlineSession(slot, serviceType),
-    location: slot.location,
   };
 }

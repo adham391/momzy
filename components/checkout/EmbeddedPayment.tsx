@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
+import Script from "next/script";
 import { formatMoney, type Currency } from "@/lib/currency";
+
+/**
+ * سكربت HYP الرسمي لـ Apple Pay داخل iframe — يلزم كل صفحة تضمّ إطار الدفع.
+ * Safari لا يفتح نافذة Apple Pay من إطار بنطاق آخر، فيطلبها الإطار من صفحتنا
+ * (postMessage) وهذا السكربت يفتحها. لا يعمل شيئًا قبل تفعيل Apple Pay في حساب HYP
+ * وتسجيل النطاق هناك. المرجع: developers.hyp.co.il — Digital wallets › Apple Pay › Iframe
+ */
+const HYP_APPLE_PAY_SCRIPT = "https://pps.creditguard.co.il/plugins/applePayOnIframe.js";
 
 interface EmbeddedPaymentProps {
   /** نوع الدفع — طلب متجر أو تسجيل ورشة/خدمة */
@@ -43,6 +52,9 @@ export default function EmbeddedPayment({
 
   return (
     <div className="max-w-[680px] mx-auto">
+      {/* Apple Pay داخل إطار الدفع — يُحمَّل مرة واحدة للصفحة */}
+      <Script src={HYP_APPLE_PAY_SCRIPT} strategy="afterInteractive" />
+
       {/* ── ترويسة ── */}
       <div className="text-center mb-5">
         <Image

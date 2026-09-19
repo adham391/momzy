@@ -44,7 +44,7 @@ export interface SiteSettings {
 export const SOCIAL_LINKS: SiteSettingsSocialLinks = {
   instagram: "https://www.instagram.com/hebahasan._",
   tiktok:    "https://www.tiktok.com/@heba.the.nurse",
-  whatsapp:  "#",
+  // لا رقم افتراضي لواتساب — الفوتر يأخذ رقم التواصل من الإعدادات
   whatsappChannel: "https://whatsapp.com/channel/0029Vb7W941KWEKrvB5s7B3Q",
 };
 

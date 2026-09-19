@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { seatsLabel } from "@/lib/utils/seats";
 
 /** جلسة معروضة في الرزنامة */
 export interface CalendarSession {
@@ -14,7 +13,6 @@ export interface CalendarSession {
   price: number;
   seatsLeft: number;
   isOnline: boolean;
-  location: string | null;
 }
 
 interface SessionCalendarProps {
@@ -235,11 +233,14 @@ export default function SessionCalendar({
                       {hhmm(s.startTime)}{s.endTime ? `–${hhmm(s.endTime)}` : ""}
                     </div>
                     <div className="font-label text-light" style={{ fontSize: 11 }}>
-                      {full ? t("calendar.full") : seatsLabel(s.seatsLeft)}
-                      {s.price > 0 ? ` · ${formatPrice(s.price)}` : ""}
+                      {/* بلا عدد المقاعد المتبقية — «اكتمل العدد» فقط حين تمتلئ */}
+                      {[full ? t("calendar.full") : null, s.price > 0 ? formatPrice(s.price) : null]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </div>
                     <div className="font-label text-light" style={{ fontSize: 10.5 }}>
-                      {s.isOnline ? t("calendar.online") : s.location ? `📍 ${s.location}` : ""}
+                      {/* نوع الحضور فقط — الرابط والمكان يصلان في تذكير اليوم السابق */}
+                      {t(s.isOnline ? "calendar.online" : "calendar.onsite")}
                     </div>
                   </button>
                 );

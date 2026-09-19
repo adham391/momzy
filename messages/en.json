@@ -73,7 +73,8 @@
       "pickDayHint": "Pick a highlighted day on the calendar to see available times.",
       "sessionsOn": "Sessions on",
       "full": "Full",
-      "online": "💻 Online"
+      "online": "💻 Online",
+      "onsite": "📍 In person"
     },
     "modal": {
       "bookingFailed": "Booking failed",
@@ -469,12 +470,12 @@
     "metaDescription": "Momzy's terms and conditions — the rights and obligations of the user and the website",
     "label": "Legal",
     "title": "Terms & Conditions",
-    "lastUpdated": "Last updated: April 2026",
+    "lastUpdated": "Last updated: September 2026",
     "intro": "By using the <b>Momzy</b> website or making a purchase, you agree to the terms and conditions set out on this page. Please read them carefully before continuing.",
     "sections": {
       "0": {
         "title": "About the site",
-        "body": "Momzy is a motherhood care platform founded by <b>Heba Hasan</b> — a certified nurse, lactation consultant and birth doula. The site offers physical and digital products and recorded workshops for moms in Israel."
+        "body": "Momzy is a motherhood care platform founded by <b>Heba Hasan</b> — a certified nurse, lactation consultant and birth doula. The site offers physical and digital products and recorded workshops for moms."
       },
       "1": {
         "title": "Purchase and payment",
@@ -489,11 +490,15 @@
       "2": {
         "title": "Shipping and delivery",
         "items": {
-          "0": "Shipping is available within Israel only, and physical products can be ordered and in-person sessions booked from within Israel only",
+          "0": "Shipping is available within Israel and the West Bank, and physical products can be ordered and in-person sessions booked from within these areas only",
           "1": "Estimated delivery time: up to 7 business days from order confirmation",
-          "2": "Shipping fee: ₪40 for physical products — free for digital products",
-          "3": "A tracking number is sent after your order ships",
-          "4": "The site is not responsible for any delays on the part of the shipping company"
+          "2": "Shipping fee: ₪40 for physical products — free for digital products"
+        },
+        "delayIntro": "The store will not be responsible for delays in delivering the product in the following cases:",
+        "delayCases": {
+          "0": "Force majeure — war, riots, a state of emergency, natural disasters",
+          "1": "A strike at delivery or shipping companies",
+          "2": "Any cause beyond the store's control"
         }
       },
       "3": {
@@ -844,7 +849,7 @@
       "online": "Online",
       "home": "Home visit"
     },
-    "seatsLeft": "{count, plural, =0 {Fully booked} one {1 seat left} other {# seats left}}",
+    "fullyBooked": "Fully booked",
     "details": "Details →",
     "inquiry": "Ask",
     "fullJoinWaitlist": "Fully booked — join the waitlist",
@@ -1050,6 +1055,17 @@
       "validitySetup": "The link is valid for 7 days and can be used once.",
       "validityReset": "The link is valid for two hours and can be used once.",
       "afterwards": "After that you'll always sign in with your email and password."
+    },
+    "newsletterWelcome": {
+      "subject": "Welcome to the Momzy newsletter 🌸",
+      "title": "Welcome to the Momzy newsletter 🌸",
+      "intro": "Thank you for subscribing! From now on, Heba's tips and the latest articles will come straight to your inbox.",
+      "body": "Reliable information on pregnancy, breastfeeding, baby care and development — explained simply and warmly.",
+      "cta": "Read Momzy articles",
+      "signOff": "With love,<br/>Heba Hasan",
+      "why": "You received this email because you subscribed to the Momzy newsletter on our website.",
+      "unsubscribe": "Unsubscribe from the newsletter",
+      "unsubscribeByEmail": "To unsubscribe, email us at {email}"
     }
   }
 }
