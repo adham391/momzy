@@ -10,9 +10,12 @@ import { orderPendingEmailHtml, orderPendingSubject } from "@/lib/resend/emails/
  * «لم تدفعي بعد» ثم «تأكيد الطلب» — ضجيج في المسار الغالب. فنؤجّله، ولا
  * يُرسَل إلا لمن بقي طلبها معلّقًا بعد المهلة.
  *
- * التشغيل: **مسح عابر** يُستدعى بعد إنشاء أي طلب (خطة Vercel الحالية تحدّ
- * المهام المجدولة بمرّة يوميًا، وهي أبطأ من أن تنفع هنا). عيبه أنّه يتوقّف
- * إن توقّفت الطلبات تمامًا — وحينها لا مبيعات تُفقد أصلًا.
+ * التشغيل: **مسح عابر** — خطة Vercel الحالية تحدّ المهام المجدولة بمرّة يوميًا،
+ * وهي أبطأ من أن تنفع هنا. يُستدعى من ثلاثة مواضع:
+ *   - بعد إنشاء أي طلب (`/api/orders`)؛
+ *   - مع تصفّح الموقع (`/api/track` عند كل زيارة صفحة) — مقيَّدًا بمرّة كل بضع دقائق؛
+ *   - يوميًا مع مهمة التذكيرات (`/api/cron/reminders`) احتياطًا ليوم بلا زوّار.
+ * كان يُستدعى بعد الطلبات وحدها، ففي يوم هادئ لم يصل تذكير لمن رُفضت بطاقتها.
  */
 
 /** المهلة قبل اعتبار الطلب متروكًا */
@@ -23,6 +26,12 @@ const RECOVERY_MAX_AGE_HOURS = 48;
 
 /** سقف الرسائل في المسحة الواحدة — يمنع دفقة مفاجئة */
 const MAX_PER_SWEEP = 20;
+
+/** أقلّ فاصل بين مسحتين تطلقهما زيارات الموقع — لكل نسخة خادم */
+const TRAFFIC_SWEEP_INTERVAL_MS = 5 * 60_000;
+
+/** آخر مسحة أطلقتها الزيارات في هذه النسخة من الخادم */
+let lastTrafficSweepAt = 0;
 
 /**
  * يمسح الطلبات المعلّقة الناضجة ويرسل تذكيرًا واحدًا لكل منها.
@@ -79,4 +88,19 @@ export async function sweepAbandonedOrders(siteUrl: string): Promise<number> {
   }
 
   return sent;
+}
+
+/**
+ * مسح من حركة الموقع — تستدعيه كل زيارة صفحة، ويمرّ مرة كل 5 دقائق على الأكثر في كل
+ * نسخة خادم (الاستعلام خفيف، والختم الذرّي أعلاه يمنع رسالتين وإن تزامنت نسختان).
+ */
+export async function sweepAbandonedOrdersFromTraffic(siteUrl: string): Promise<void> {
+  const now = Date.now();
+  if (now - lastTrafficSweepAt < TRAFFIC_SWEEP_INTERVAL_MS) return;
+  lastTrafficSweepAt = now;
+  try {
+    await sweepAbandonedOrders(siteUrl);
+  } catch (e) {
+    console.error("[recovery] تعذّر المسح من حركة الموقع:", e);
+  }
 }

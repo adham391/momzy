@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { sendDueReminders } from "@/lib/notifications/reminders";
+import { sweepAbandonedOrders } from "@/lib/notifications/recovery";
 
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/cron/reminders — تذكير اليوم السابق (يحمل رابط اللقاء/المكان).
+ * GET /api/cron/reminders — تذكير اليوم السابق (يحمل رابط اللقاء/المكان)،
+ * ومعه تذكير الطلبات غير المدفوعة احتياطًا ليوم بلا زوّار (lib/notifications/recovery.ts).
  * يستدعيه Vercel Cron يوميًا (vercel.json) بترويسة `Authorization: Bearer $CRON_SECRET`؛
  * بلا المفتاح أو بمفتاح مختلف يُرفض — فلا يستطيع أحد تشغيل التذكيرات من الخارج.
  */
@@ -14,5 +16,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const result = await sendDueReminders();
-  return NextResponse.json(result);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+  const unpaidOrderReminders = await sweepAbandonedOrders(siteUrl);
+  return NextResponse.json({ ...result, unpaidOrderReminders });
 }
