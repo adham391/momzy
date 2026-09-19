@@ -975,7 +975,11 @@
       "subject": "Your order {number} is confirmed — Momzy",
       "badge": "Order confirmed",
       "title": "We've got your order! ✓",
+      "titleDigital": "Your order is confirmed! ✓",
       "intro": "Thank you for ordering from Momzy. We've received your order and are getting it ready. Here are the details:",
+      "introDigital": "Thank you for ordering from Momzy! Your order is confirmed — here are the details:",
+      "digitalNote": "📖 Your booklet's reading link is on its way in a separate email, together with your permanent Momzy library — where all your booklets are waiting for you anytime.",
+      "digitalGiftNote": "🎁 The booklet you gave as a gift is being sent to the recipient's email in a separate message, together with her Momzy library.",
       "shipTo": "Delivering to",
       "closing": "We'll be in touch as soon as your order ships."
     },

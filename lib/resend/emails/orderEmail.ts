@@ -14,6 +14,19 @@ const charged = (o: OrderWithItems) =>
 /** لغة الطلب — العربية للطلبات السابقة لهجرة 0017 */
 const localeOf = (order: OrderWithItems): EmailLocale => emailLocale(order.locale);
 
+/** ما في الطلب — يحدّد نصّ التأكيد: ما يُجهَّز ويُشحن، وما يصل رابطه في رسالة منفصلة */
+function orderContents(order: OrderWithItems) {
+  const digital = order.items.filter((it) => it.product_type === "digital");
+  return {
+    /** فيه ما يُشحن (الصندوق) — «سنبدأ بتجهيزه» والعنوان والشحن */
+    hasPhysical: order.items.some((it) => it.product_type === "physical"),
+    /** كتيب للمشترية نفسها — رابطه ومكتبتها في رسالة منفصلة إليها */
+    hasOwnDigital: digital.some((it) => !it.gift),
+    /** كتيب هدية — رابطه يذهب إلى بريد المستلِمة لا المشترية */
+    hasGiftDigital: digital.some((it) => Boolean(it.gift)),
+  };
+}
+
 /** صفوف العناصر */
 function itemRows(order: OrderWithItems, dir: "rtl" | "ltr"): string {
   const end = dir === "rtl" ? "left" : "right";
@@ -32,7 +45,7 @@ function itemRows(order: OrderWithItems, dir: "rtl" | "ltr"): string {
 }
 
 /** كتلة الإجماليات */
-function totalsBlock(order: OrderWithItems, t: EmailT, dir: "rtl" | "ltr"): string {
+function totalsBlock(order: OrderWithItems, t: EmailT, dir: "rtl" | "ltr", showShipping: boolean): string {
   const end = dir === "rtl" ? "left" : "right";
   const row = (label: string, val: string, bold = false) => `
     <tr>
@@ -43,7 +56,7 @@ function totalsBlock(order: OrderWithItems, t: EmailT, dir: "rtl" | "ltr"): stri
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
       ${row(t("totals.subtotal"), ils(order.subtotal))}
       ${order.discount_amount > 0 ? row(t("totals.discount"), `− ${ils(order.discount_amount)}`) : ""}
-      ${row(t("totals.shipping"), order.shipping_cost === 0 ? t("common.free") : ils(order.shipping_cost))}
+      ${showShipping ? row(t("totals.shipping"), order.shipping_cost === 0 ? t("common.free") : ils(order.shipping_cost)) : ""}
       ${row(t("totals.total"), charged(order), true)}
     </table>`;
 }
@@ -90,24 +103,38 @@ const supportLine = (t: EmailT, prefix = "") =>
 export const orderCustomerSubject = (order: OrderWithItems) =>
   emailTranslator(localeOf(order))("order.subject", { number: order.order_number });
 
+/** تنبيه الرسالة المنفصلة: رابط الكتيب ومكتبتها (لها) أو إلى المستلِمة (هدية) */
+function digitalNotes(t: EmailT, own: boolean, gift: boolean): string {
+  const lines = [own ? t("order.digitalNote") : "", gift ? t("order.digitalGiftNote") : ""].filter(Boolean);
+  if (lines.length === 0) return "";
+  return `<div style="margin-top:24px;padding:16px 20px;background:#EFF8F8;border-radius:10px;border:1.5px solid #A8D8D5;font-size:14px;color:#252220;line-height:1.8;">${lines.join("<br/>")}</div>`;
+}
+
 export function orderCustomerEmailHtml(order: OrderWithItems): string {
   const locale = localeOf(order);
   const t = emailTranslator(locale);
   const dir = isRtl(locale) ? "rtl" : "ltr";
+  const { hasPhysical, hasOwnDigital, hasGiftDigital } = orderContents(order);
+
+  // الكتيب وحده لا يُجهَّز ولا يُشحن: لا «سنبدأ بتجهيزه» ولا عنوان توصيل ولا سطر شحن
+  const shipTo = hasPhysical
+    ? `<div style="margin-top:24px;padding:16px 20px;background:#FDFAF5;border-radius:10px;border:1.5px solid #EDE9E4;">
+      <div style="font-size:11px;font-weight:700;color:#9A9490;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">${t("order.shipTo")}</div>
+      <div style="font-size:14px;color:#252220;line-height:1.7;">${order.customer_name} · <span style="direction:ltr;">${order.customer_phone}</span><br/>${order.customer_address}${order.customer_building ? ` · ${order.customer_building}` : ""} · ${order.customer_city}</div>
+    </div>`
+    : "";
 
   const body = `
     <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 8px;">${t("common.greeting", { name: order.customer_name })}</p>
-    <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 24px;">${t("order.intro")}</p>
+    <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 24px;">${t(hasPhysical ? "order.intro" : "order.introDigital")}</p>
     ${orderNumberBox(order, t)}
     <table width="100%" cellpadding="0" cellspacing="0">${itemRows(order, dir)}</table>
-    ${totalsBlock(order, t, dir)}
-    <div style="margin-top:24px;padding:16px 20px;background:#FDFAF5;border-radius:10px;border:1.5px solid #EDE9E4;">
-      <div style="font-size:11px;font-weight:700;color:#9A9490;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">${t("order.shipTo")}</div>
-      <div style="font-size:14px;color:#252220;line-height:1.7;">${order.customer_name} · <span style="direction:ltr;">${order.customer_phone}</span><br/>${order.customer_address}${order.customer_building ? ` · ${order.customer_building}` : ""} · ${order.customer_city}</div>
-    </div>
-    ${supportLine(t, `${t("order.closing")} `)}`;
+    ${totalsBlock(order, t, dir, hasPhysical)}
+    ${digitalNotes(t, hasOwnDigital, hasGiftDigital)}
+    ${shipTo}
+    ${supportLine(t, hasPhysical ? `${t("order.closing")} ` : "")}`;
 
-  return shell(locale, t("order.badge"), t("order.title"), body);
+  return shell(locale, t("order.badge"), t(hasPhysical ? "order.title" : "order.titleDigital"), body);
 }
 
 /* ── تذكير استرداد — يُرسل بعد مهلة، لمن بقي طلبها غير مدفوع ── */
@@ -130,7 +157,7 @@ export function orderPendingEmailHtml(order: OrderWithItems, payUrl: string): st
     <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 24px;">${t("recovery.intro")}</p>
     ${orderNumberBox(order, t)}
     <table width="100%" cellpadding="0" cellspacing="0">${itemRows(order, dir)}</table>
-    ${totalsBlock(order, t, dir)}
+    ${totalsBlock(order, t, dir, orderContents(order).hasPhysical)}
     <div style="text-align:center;margin:28px 0 0;">
       <a href="${payUrl}" style="display:inline-block;background:#F2A7B5;color:#252220;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 34px;border-radius:50px;">${t("recovery.cta", { amount: charged(order) })}</a>
     </div>
@@ -146,16 +173,21 @@ export const orderAdminSubject = (order: OrderWithItems) => `🛍️ طلب جد
 
 export function orderAdminEmailHtml(order: OrderWithItems): string {
   const t = emailTranslator("ar");
+  const { hasPhysical } = orderContents(order);
+  // طلب كتيبات فقط: لا شيء يُجهَّز ولا عنوان — الرابط يصل العميلة تلقائيًا
+  const intro = hasPhysical ? "وصل طلب جديد — جهّزيه للشحن." : "وصل طلب جديد — كتيب رقمي، ورابطه يصل العميلة تلقائيًا. لا شيء للتجهيز أو الشحن.";
+  const address = hasPhysical
+    ? `<br/>${order.customer_address}${order.customer_building ? ` · ${order.customer_building}` : ""}${order.customer_postal_code ? ` · ${order.customer_postal_code}` : ""} · ${order.customer_city}`
+    : "";
   const body = `
-    <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 20px;">وصل طلب جديد — جهّزيه للشحن.</p>
+    <p style="font-size:15px;color:#55504C;line-height:1.9;margin:0 0 20px;">${intro}</p>
     ${orderNumberBox(order, t)}
     <table width="100%" cellpadding="0" cellspacing="0">${itemRows(order, "rtl")}</table>
-    ${totalsBlock(order, t, "rtl")}
+    ${totalsBlock(order, t, "rtl", hasPhysical)}
     <div style="margin-top:24px;padding:16px 20px;background:#EFF8F8;border-radius:10px;border:1.5px solid #D4EDEB;">
-      <div style="font-size:11px;font-weight:700;color:#82C9C4;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">العميل والتوصيل</div>
+      <div style="font-size:11px;font-weight:700;color:#82C9C4;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">${hasPhysical ? "العميل والتوصيل" : "العميل"}</div>
       <div style="font-size:14px;color:#252220;line-height:1.8;">
-        ${order.customer_name} · <a href="tel:${order.customer_phone}" style="color:#82C9C4;direction:ltr;">${order.customer_phone}</a> · <a href="mailto:${order.customer_email}" style="color:#82C9C4;">${order.customer_email}</a><br/>
-        ${order.customer_address}${order.customer_building ? ` · ${order.customer_building}` : ""}${order.customer_postal_code ? ` · ${order.customer_postal_code}` : ""} · ${order.customer_city}
+        ${order.customer_name} · <a href="tel:${order.customer_phone}" style="color:#82C9C4;direction:ltr;">${order.customer_phone}</a> · <a href="mailto:${order.customer_email}" style="color:#82C9C4;">${order.customer_email}</a>${address}
         ${order.notes ? `<br/><span style="color:#9A9490;">ملاحظات: ${order.notes}</span>` : ""}
       </div>
     </div>`;
