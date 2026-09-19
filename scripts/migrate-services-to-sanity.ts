@@ -3,7 +3,7 @@
  * ──────────────────────────────
  * يقرأ SEED_SERVICES ويرفعها إلى Sanity كـ service documents.
  *
- * - الصور لن تُرفع تلقائياً — هبة ترفعها يدوياً من Studio
+ * - الصور لن تُرفع تلقائيًا — هبة ترفعها يدويًا من Studio
  * - idempotent: يستخدم _id ثابت = "service-{slug}"
  *
  * ⚠️ Sanity هو مصدر الحقيقة بعد أول تشغيل — فالخدمة الموجودة **لا تُلمس**
@@ -67,7 +67,7 @@ function toSanityDocument(service: Service) {
     price:            service.price,
     order:            service.order,
 
-    // الصور لن تُرفع تلقائياً — ترفعها هبة من Studio
+    // الصور لن تُرفع تلقائيًا — ترفعها هبة من Studio
     // coverImage: undefined,
     // icon: undefined,
   };
@@ -129,7 +129,7 @@ async function migrate() {
   if (results.skipped)  console.log(`⏭️  تُركت:    ${results.skipped} خدمة (موجودة — استخدمي --force للاستبدال)`);
   if (results.failed)   console.log(`❌ فشل:      ${results.failed} خدمة`);
   console.log("─────────────────────────────────────────");
-  console.log("\n📌 تذكير: الصور لم تُرفع تلقائياً.");
+  console.log("\n📌 تذكير: الصور لم تُرفع تلقائيًا.");
   console.log("   افتحي Studio وارفعي صور الغلاف لكل خدمة.\n");
 }
 

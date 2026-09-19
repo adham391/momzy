@@ -3,7 +3,7 @@
  * ──────────────
  * ينشئ 3 حسابات أدمن في Supabase Auth + صفوفها في جدول public.admins.
  *
- * ⚠️ طبّق ملفات supabase/migrations/ أولاً (خاصة 0002_admin.sql) قبل التشغيل.
+ * ⚠️ طبّق ملفات supabase/migrations/ أولًا (خاصة 0002_admin.sql) قبل التشغيل.
  *
  * idempotent: يتخطّى الحساب الموجود ويحدّث صفّ admins (upsert).
  *
@@ -24,7 +24,7 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
 import { createClient } from "@supabase/supabase-js";
 
-// ─── الأدمن الثلاثة (تُغيَّر الإيميلات لاحقاً للحقيقية) ─────────────────────────
+// ─── الأدمن الثلاثة (تُغيَّر الإيميلات لاحقًا للحقيقية) ─────────────────────────
 const ADMINS = [
   { name: "ادهم",    email: "adham@momzyworld.com", role: "super_admin" as const },
   { name: "هبة حسن", email: "heba@momzyworld.com",  role: "admin" as const },
@@ -46,7 +46,7 @@ async function main() {
 
   console.log("🚀 إنشاء حسابات الأدمن...\n");
 
-  // اجلب المستخدمين الحاليين مرة واحدة (لاكتشاف الموجود مسبقاً)
+  // اجلب المستخدمين الحاليين مرة واحدة (لاكتشاف الموجود مسبقًا)
   const { data: existing, error: listErr } = await supabase.auth.admin.listUsers();
   if (listErr) {
     console.error("❌ فشل جلب المستخدمين الحاليين:", listErr.message);
@@ -71,13 +71,13 @@ async function main() {
       let userId = byEmail.get(admin.email);
 
       if (userId) {
-        console.log(`⏭️  موجود مسبقاً: ${admin.email}`);
+        console.log(`⏭️  موجود مسبقًا: ${admin.email}`);
         results.existed++;
       } else {
         const { data, error } = await supabase.auth.admin.createUser({
           email: admin.email,
           password: tempPassword,
-          email_confirm: true, // مؤكَّد — يستطيع الدخول فوراً بلا إيميل تحقّق
+          email_confirm: true, // مؤكَّد — يستطيع الدخول فورًا بلا إيميل تحقّق
           user_metadata: { name: admin.name },
         });
         if (error || !data.user) {

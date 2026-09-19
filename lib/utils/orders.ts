@@ -1,6 +1,6 @@
 /**
  * منطق الطلبات — تخزين مؤقت في localStorage
- * مصمم بحيث يمكن استبدال saveOrder/getOrder لاحقاً بـ Supabase calls
+ * مصمم بحيث يمكن استبدال saveOrder/getOrder لاحقًا بـ Supabase calls
  * بدون لمس المكونات.
  */
 
@@ -47,9 +47,9 @@ const ORDER_NUMBER_PREFIX  = "MZ-";
 /* ── دوال مساعدة ─────────────────────────────────────── */
 
 /**
- * يُولّد رقم طلب فريد عالمياً بصيغة MZ-XXXXXXXX
+ * يُولّد رقم طلب فريد عالميًا بصيغة MZ-XXXXXXXX
  * يستخدم crypto.randomUUID() — معيار W3C مدعوم في كل المتصفحات الحديثة
- * احتمال التكرار: 1 من 5.3 × 10^36 (مستحيل عملياً)
+ * احتمال التكرار: 1 من 5.3 × 10^36 (مستحيل عمليًا)
  */
 export function generateOrderNumber(): string {
   const uuid  = crypto.randomUUID();          // xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx

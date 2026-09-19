@@ -114,7 +114,7 @@ export function contactEmailHtml(data: ContactEmailData): string {
           <tr>
             <td style="background:#F8F4EE;border-radius:0 0 16px 16px;padding:20px 40px;text-align:center;border:1.5px solid #EDE9E4;border-top:none;">
               <p style="margin:0;font-size:12px;color:#9A9490;">
-                هذا الإيميل أُرسل تلقائياً من نموذج التواصل في
+                هذا الإيميل أُرسل تلقائيًا من نموذج التواصل في
                 <a href="https://momzyworld.com" style="color:#82C9C4;text-decoration:none;">momzyworld.com</a>
               </p>
               <p style="margin:6px 0 0;font-size:11px;color:#C4BDB8;">© 2026 Momzy — جميع الحقوق محفوظة</p>

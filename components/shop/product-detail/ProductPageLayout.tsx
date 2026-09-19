@@ -47,7 +47,7 @@ const WAVES = {
  */
 export default async function ProductPageLayout({ product }: ProductPageLayoutProps) {
   const t = await getTranslations("product");
-  // جلب المنتجات المرتبطة مسبقاً لإخفاء القسم كاملاً عند غيابها
+  // جلب المنتجات المرتبطة مسبقًا لإخفاء القسم كاملًا عند غيابها
   const allProducts = await getProducts({ inStockOnly: true });
   const relatedProducts = allProducts.filter((p) => p.slug !== product.slug).slice(0, 3);
 

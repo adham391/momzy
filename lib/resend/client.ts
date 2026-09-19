@@ -16,7 +16,7 @@ export function isEmailConfigured(): boolean {
 }
 
 /**
- * يرسل إيميلاً ويسجّل أخطاء Resend (best-effort — لا يرمي).
+ * يرسل إيميلًا ويسجّل أخطاء Resend (best-effort — لا يرمي).
  *
  * الردّ يذهب إلى SUPPORT_EMAIL ما لم يُمرَّر replyTo: المرسِل noreply@ بلا صندوق،
  * فالعميلة التي تضغط «ردّ» كانت تتلقّى «العنوان غير موجود».

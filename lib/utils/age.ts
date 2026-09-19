@@ -3,13 +3,13 @@
  *
  * قاعدة أساسية: العمر يُحسب **يوم الجلسة** لا يوم التسجيل —
  * فالطفل الذي عمره شهران اليوم يصبح ثلاثة أشهر في ورشة بعد شهر،
- * والأم الحامل قد تسجّل مسبقاً لورشة يكون طفلها قد وُلد قبلها.
+ * والأم الحامل قد تسجّل مسبقًا لورشة يكون طفلها قد وُلد قبلها.
  */
 
 /**
  * الفئة العمرية للورشة — بأسماء حقول Sanity نفسها،
  * فيُمرَّر كائن `Service` مباشرةً بلا تحويل.
- * الحقول الرقمية فارغة ⇒ لا تحقّق (ورشات الحوامل مثلاً).
+ * الحقول الرقمية فارغة ⇒ لا تحقّق (ورشات الحوامل مثلًا).
  */
 export interface AgeGate {
   ageMinMonths?: number | null;
@@ -45,7 +45,7 @@ export function ageRangeLabel(gate: AgeGate): string {
   return "";
 }
 
-/** نص الفئة المعروض — كلمات هبة أولاً، وإلا صياغة تلقائية من الأشهر */
+/** نص الفئة المعروض — كلمات هبة أولًا، وإلا صياغة تلقائية من الأشهر */
 export function ageRangeText(gate: AgeGate): string {
   return gate.ageRange?.trim() || ageRangeLabel(gate);
 }
@@ -59,7 +59,7 @@ function parseISO(iso: string): Date | null {
 
 /**
  * عدد الأشهر الكاملة بين تاريخ الميلاد ويوم الجلسة.
- * يعيد سالباً إذا لم يكن الطفل قد وُلد بعد يومها، و`null` لتاريخ غير صالح.
+ * يعيد سالبًا إذا لم يكن الطفل قد وُلد بعد يومها، و`null` لتاريخ غير صالح.
  */
 export function ageInMonthsAt(birthISO: string, sessionISO: string): number | null {
   const birth = parseISO(birthISO);
@@ -83,7 +83,7 @@ export interface AgeCheckResult {
 
 /**
  * التحقق من ملاءمة عمر الطفل لورشة في تاريخ معيّن.
- * الورشة بلا فئة عمرية تمرّ دائماً (لا تُسأل الأم أصلاً).
+ * الورشة بلا فئة عمرية تمرّ دائمًا (لا تُسأل الأم أصلًا).
  */
 export function checkBabyAge(
   birthISO: string,

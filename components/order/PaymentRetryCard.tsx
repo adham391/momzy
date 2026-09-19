@@ -11,7 +11,7 @@ interface PaymentRetryCardProps {
 }
 
 /**
- * بطاقة "بانتظار الدفع" — تظهر في صفحة التأكيد حين يكون HYP مفعّلاً
+ * بطاقة "بانتظار الدفع" — تظهر في صفحة التأكيد حين يكون HYP مفعّلًا
  * والطلب لم يُدفع بعد. تعرض زر إعادة توليد رابط دفع HYP.
  */
 export default function PaymentRetryCard({ orderId, amount, failed }: PaymentRetryCardProps) {

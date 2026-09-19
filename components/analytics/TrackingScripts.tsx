@@ -4,7 +4,7 @@ import Script from "next/script";
 
 /**
  * سكربتات التتبّع الخارجية — مشروطة بوجود المتغيّرات (env).
- * بلا IDs → لا تُحمّل شيئاً. تُضبط في .env.local عند الإطلاق.
+ * بلا IDs → لا تُحمّل شيئًا. تُضبط في .env.local عند الإطلاق.
  */
 export default function TrackingScripts() {
   const pixel = process.env.NEXT_PUBLIC_META_PIXEL_ID;

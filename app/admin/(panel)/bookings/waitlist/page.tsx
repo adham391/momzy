@@ -22,7 +22,7 @@ export default async function WaitlistPage() {
 
       <h1 className="font-heading text-h2 font-bold text-dark mb-1">قائمة الانتظار</h1>
       <p className="text-mid text-body-sm mb-6">
-        الأمهات اللواتي سجّلن عند اكتمال المقاعد — بترتيب الأسبقية (الأقدم أولاً).
+        الأمهات اللواتي سجّلن عند اكتمال المقاعد — بترتيب الأسبقية (الأقدم أولًا).
         {waitingCount > 0 && <> بانتظار الإشعار: <strong className="text-dark">{waitingCount}</strong></>}
       </p>
 
@@ -35,7 +35,7 @@ export default async function WaitlistPage() {
           {entries.map((e, i) => {
             const waDigits = e.customer_phone.replace(/\D/g, "");
             const waText = encodeURIComponent(
-              `مرحباً ${e.customer_name} 🌸\nتوفّر مقعد في «${e.service_name ?? "الورشة"}» — هل ما زلتِ مهتمة بالتسجيل؟`
+              `مرحبًا ${e.customer_name} 🌸\nتوفّر مقعد في «${e.service_name ?? "الورشة"}» — هل ما زلتِ مهتمة بالتسجيل؟`
             );
 
             return (

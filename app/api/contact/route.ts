@@ -8,7 +8,7 @@ function validate(body: Record<string, unknown>): string | null {
   if (!body.name    || typeof body.name    !== "string" || body.name.trim().length    < 2) return "الاسم غير صحيح";
   if (!body.email   || typeof body.email   !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) return "الإيميل غير صحيح";
   if (!body.subject || typeof body.subject !== "string" || body.subject.trim().length < 2) return "الموضوع غير صحيح";
-  if (!body.message || typeof body.message !== "string" || body.message.trim().length < 10) return "الرسالة قصيرة جداً";
+  if (!body.message || typeof body.message !== "string" || body.message.trim().length < 10) return "الرسالة قصيرة جدًا";
   return null;
 }
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "فشل إرسال الإيميل" }, { status: 500 });
     }
 
-    /* TODO: حفظ في Supabase جدول contact_messages لاحقاً */
+    /* TODO: حفظ في Supabase جدول contact_messages لاحقًا */
 
     return NextResponse.json({ success: true });
 

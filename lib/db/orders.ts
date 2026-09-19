@@ -83,7 +83,7 @@ function normalizeGift(g: GiftOptions | null | undefined): GiftOptions | null {
 /* ── إنشاء طلب ─────────────────────────────────────────── */
 
 /**
- * ينشئ طلباً في Supabase. الأسعار تُحسب على السيرفر من مصدر المنتجات (Sanity)
+ * ينشئ طلبًا في Supabase. الأسعار تُحسب على السيرفر من مصدر المنتجات (Sanity)
  * لمنع التلاعب، والشحن من جدول settings. رقم الطلب يُولَّد بواسطة DB (sequence).
  */
 export async function createOrder(
@@ -102,7 +102,7 @@ export async function createOrder(
   const lineItems = [];
   for (const item of input.items) {
     const product = bySlug.get(item.slug);
-    if (!product) continue; // تجاهل منتجاً غير موجود
+    if (!product) continue; // تجاهل منتجًا غير موجود
     const quantity = Math.max(1, Math.floor(item.quantity));
     // السعر الموثوق من Sanity، مع تطبيق سعر الباقة إن انطبقت شروطها
     const unitPrice = effectivePrice(item.slug, product.price, orderSlugs);
@@ -517,7 +517,7 @@ export interface StatusHistoryRow {
   created_at: string;
 }
 
-/** سجلّ تغيّر حالة الطلب (الأحدث أولاً) */
+/** سجلّ تغيّر حالة الطلب (الأحدث أولًا) */
 export async function getOrderStatusHistory(orderId: string): Promise<StatusHistoryRow[]> {
   const supabase = createAdminClient();
   const { data } = await supabase

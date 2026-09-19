@@ -9,7 +9,7 @@ import { LIBRARY_SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "@/lib/library/c
 /** موجّه اللغات — يعيد كتابة / → /ar داخليًا ويخدم /he و /en */
 const intlMiddleware = createIntlMiddleware(routing);
 
-/** الدول المحظورة كلياً — ISO 3166-1 alpha-2 */
+/** الدول المحظورة كليًا — ISO 3166-1 alpha-2 */
 const BLOCKED_COUNTRIES = new Set([
   "IR", // إيران
   "SY", // سوريا
@@ -44,10 +44,10 @@ const ADMIN_PUBLIC_PATHS = new Set(["/admin/login", "/admin/forgot", "/admin/res
 
 /** هل الطلب قادم من منطقة محظورة؟ */
 function isBlocked(country: string, region: string): boolean {
-  // دولة محظورة كلياً
+  // دولة محظورة كليًا
   if (BLOCKED_COUNTRIES.has(country)) return true;
 
-  // منطقة محظورة داخل دولة مسموح بها جزئياً
+  // منطقة محظورة داخل دولة مسموح بها جزئيًا
   if (BLOCKED_REGIONS[country]?.has(region)) return true;
 
   return false;
@@ -91,7 +91,7 @@ function isLibraryPath(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  /* ── 1. الحجب الجغرافي (أولاً) — تُستثنى صفحة الحجب نفسها لمنع حلقة redirect ── */
+  /* ── 1. الحجب الجغرافي (أولًا) — تُستثنى صفحة الحجب نفسها لمنع حلقة redirect ── */
   if (!isNotAvailablePath(pathname)) {
     const { country, region } = getGeo(request);
     if (country && isBlocked(country, region)) {

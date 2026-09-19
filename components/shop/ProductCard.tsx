@@ -11,9 +11,9 @@ import type { Product } from "@/lib/products/types";
 
 interface ProductCardProps {
   product: Product;
-  /** إظهار شارات الـ tags — يُعطّل في الشبكات المدمجة (مثل الأكثر مبيعاً) لتوحيد الطول */
+  /** إظهار شارات الـ tags — يُعطّل في الشبكات المدمجة (مثل الأكثر مبيعًا) لتوحيد الطول */
   showTags?: boolean;
-  /** ترتيبه في «الأكثر مبيعاً» — شارة ذهبية في زاوية الصورة */
+  /** ترتيبه في «الأكثر مبيعًا» — شارة ذهبية في زاوية الصورة */
   rank?: number;
 }
 
@@ -49,7 +49,7 @@ export default function ProductCard({ product, showTags = true, rank }: ProductC
           objectFit={digital ? "contain" : "cover"}
         />
 
-        {/* شارة الترتيب (الأكثر مبيعاً) — داخل البطاقة، في الزاوية المقابلة للشارات */}
+        {/* شارة الترتيب (الأكثر مبيعًا) — داخل البطاقة، في الزاوية المقابلة للشارات */}
         {rank !== undefined && (
           <span
             className="absolute top-2.5 end-2.5 z-20 flex items-center gap-0.5 font-label font-extrabold rounded-full"

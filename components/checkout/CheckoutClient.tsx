@@ -31,7 +31,7 @@ export default function CheckoutClient({ shipping }: { shipping: ShippingConfig 
 
   const items  = useCart((s) => s.items);
 
-  /** الطلب الرقمي البحت لا يُشحن — عناوين المراحل ونصوصها تتبدّل تبعاً لذلك */
+  /** الطلب الرقمي البحت لا يُشحن — عناوين المراحل ونصوصها تتبدّل تبعًا لذلك */
   const needsShipping = items.some((i) => !i.isDigital);
   const router = useRouter();
 

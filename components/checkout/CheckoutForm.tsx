@@ -105,7 +105,7 @@ export default function CheckoutForm({
   onProceedToPayment,
 }: {
   shipping: ShippingConfig;
-  /** يُستدعى بعد إنشاء الطلب حين يكون الدفع الإلكتروني مفعّلاً — للانتقال لمرحلة الدفع في نفس الصفحة */
+  /** يُستدعى بعد إنشاء الطلب حين يكون الدفع الإلكتروني مفعّلًا — للانتقال لمرحلة الدفع في نفس الصفحة */
   onProceedToPayment?: (orderId: string) => void;
 }) {
   const t         = useTranslations("checkout");
@@ -184,7 +184,7 @@ export default function CheckoutForm({
     cartItems.filter((i) => !i.isDigital).forEach((i) => removeItem(i.id));
   }
 
-  /** إرسال الطلب — ينشئه في Supabase عبر /api/orders (الدفع الفعلي بـ HYP لاحقاً) */
+  /** إرسال الطلب — ينشئه في Supabase عبر /api/orders (الدفع الفعلي بـ HYP لاحقًا) */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValid) return;

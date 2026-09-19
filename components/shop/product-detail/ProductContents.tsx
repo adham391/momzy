@@ -76,7 +76,7 @@ function ContentCard({ item, idx }: { item: ProductContent; idx: number }) {
   const [overflows, setOverflows] = useState(false);
   const pRef = useRef<HTMLParagraphElement>(null);
 
-  /** يُظهر زر «المزيد» فقط إذا كان الوصف يتجاوز أسطر الطيّ فعلاً */
+  /** يُظهر زر «المزيد» فقط إذا كان الوصف يتجاوز أسطر الطيّ فعلًا */
   useEffect(() => {
     const el = pRef.current;
     if (el) setOverflows(el.scrollHeight > el.clientHeight + 2);

@@ -131,7 +131,7 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
     featuredBorderColor: "border-[rgba(130,201,196,0.2)]",
     featured: {
       emoji: "📗",
-      badge: "الأكثر مبيعاً",
+      badge: "الأكثر مبيعًا",
       badgeBg: "bg-teal",
       title: "كتيب الرضاعة الطبيعية",
       price: "₪ 49",
@@ -153,7 +153,7 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
     featuredBorderColor: "border-[rgba(245,217,142,0.3)]",
     featured: {
       emoji: "🎥",
-      badge: "الأكثر طلباً",
+      badge: "الأكثر طلبًا",
       badgeBg: "bg-gradient-to-br from-[#C09420] to-[#D4B840]",
       title: "ورشة الحسية",
       price: "₪ 120",
@@ -266,7 +266,7 @@ export const REVIEWS: Review[] = [
   },
   {
     quote:
-      "رافقتني هبة أثناء الولادة — وجودها كان مطمئناً جداً لا يوصف.",
+      "رافقتني هبة أثناء الولادة — وجودها كان مطمئنًا جدًا لا يوصف.",
     name: "منى ص.",
     info: "أم لطفل بكر",
     initial: "م",
@@ -274,7 +274,7 @@ export const REVIEWS: Review[] = [
   },
   {
     quote:
-      "ورشة الحسية ممتعة وعلمية في نفس الوقت. أصبحت أفهم طفلتي بشكل مختلف تماماً.",
+      "ورشة الحسية ممتعة وعلمية في نفس الوقت. أصبحت أفهم طفلتي بشكل مختلف تمامًا.",
     name: "لينا ع.",
     info: "أم لتوأم",
     initial: "ل",

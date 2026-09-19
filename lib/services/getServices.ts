@@ -5,7 +5,7 @@ import { SEED_SERVICES } from "./seed";
 /**
  * إحضار قائمة الخدمات مع فلترة اختيارية.
  *
- * المصدر: Sanity CMS (أولاً)
+ * المصدر: Sanity CMS (أولًا)
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  */
 export async function getServices(filters?: ServiceFilters, locale?: string): Promise<Service[]> {

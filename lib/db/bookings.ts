@@ -138,7 +138,7 @@ export async function createSlot(input: CreateSlotInput): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-/** الفتحات القادمة (للأدمن) — من اليوم فصاعداً */
+/** الفتحات القادمة (للأدمن) — من اليوم فصاعدًا */
 export async function listUpcomingSlots(): Promise<SlotRow[]> {
   const supabase = createAdminClient();
   const { data } = await supabase
@@ -217,7 +217,7 @@ export interface CreateBookingInput {
 type BookingError = { error: string; status?: number; code?: string };
 
 /**
- * ينشئ حجزاً — يتحقق من أن اللقاء الحضوري من داخل البلاد، ومن الفئة العمرية وموضوع اللقاء، ثم يحجز الفتحة ذرّياً
+ * ينشئ حجزًا — يتحقق من أن اللقاء الحضوري من داخل البلاد، ومن الفئة العمرية وموضوع اللقاء، ثم يحجز الفتحة ذرّيًا
  * (يمنع تجاوز السعة) ثم يُدرج الحجز.
  * التحقق هنا لا في الواجهة فقط — الواجهة قابلة للتجاوز.
  */
@@ -267,7 +267,7 @@ export async function createBooking(
 
   // حجز ذرّي — يعيد false لو امتلأت أو محجوبة
   const { data: booked } = await supabase.rpc("book_slot", { slot_id: input.slotId });
-  if (!booked) return { error: "عذراً، هذا الموعد لم يعد متاحاً", status: 409 };
+  if (!booked) return { error: "عذرًا، هذا الموعد لم يعد متاحًا", status: 409 };
 
   const { data: booking, error } = await supabase
     .from("bookings")

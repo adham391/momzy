@@ -27,7 +27,7 @@ export default function ArticleCover({
   /** الاحتياطي الثابت (بطاقات constants) — يتقدّم على تصنيف غير موجود */
   emoji?: string;
   bg?: string;
-  /** العرض ÷ الارتفاع — مثلاً 3 / 2 */
+  /** العرض ÷ الارتفاع — مثلًا 3 / 2 */
   ratio: number;
   emojiSize?: number;
   className?: string;

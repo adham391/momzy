@@ -12,7 +12,7 @@ function isValidEmail(email: string): boolean {
 /**
  * POST /api/bookings — تسجيل في ورشة/خدمة.
  * body: { slotId, customer: { name, email, phone }, notes?, topic? }
- * يعيد 409 لو امتلأ الموعد (السعة تُحجز ذرّياً).
+ * يعيد 409 لو امتلأ الموعد (السعة تُحجز ذرّيًا).
  *
  * الورشة المدفوعة: يُنشأ الحجز ويُحجز المقعد، ويُعاد `paymentUrl` لإتمام الدفع.
  * التأكيد (إيميل/واتساب) يُرسل **بعد نجاح الدفع** فقط — أما المجانية فتُؤكَّد فورًا.
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   };
   const c = b.customer;
 
-  if (!b.slotId) return NextResponse.json({ error: "اختاري موعداً" }, { status: 400 });
+  if (!b.slotId) return NextResponse.json({ error: "اختاري موعدًا" }, { status: 400 });
   if (!c || typeof c.name !== "string" || c.name.trim().length < 2)
     return NextResponse.json({ error: "الاسم مطلوب" }, { status: 400 });
   if (typeof c.email !== "string" || !isValidEmail(c.email.trim()))

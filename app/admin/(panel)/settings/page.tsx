@@ -14,7 +14,7 @@ export default async function AdminSettingsPage() {
   return (
     <div className="max-w-3xl">
       <h1 className="font-heading text-h2 font-bold text-dark mb-1">الإعدادات</h1>
-      <p className="text-mid text-body-sm mb-6">إعدادات المتجر والتواصل — تُطبَّق على الموقع فوراً.</p>
+      <p className="text-mid text-body-sm mb-6">إعدادات المتجر والتواصل — تُطبَّق على الموقع فورًا.</p>
 
       <div className="grid grid-cols-1 gap-5">
         {/* ── إعدادات المتجر (Supabase) ── */}

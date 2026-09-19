@@ -92,7 +92,7 @@ export const review = defineType({
       name: "order",
       title: "ترتيب العرض",
       type: "number",
-      description: "الأرقام الأصغر تظهر أولاً",
+      description: "الأرقام الأصغر تظهر أولًا",
       initialValue: 0,
     }),
   ],

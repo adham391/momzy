@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * يشترك إيميلاً في النشرة (upsert — إعادة الاشتراك تُعيد التفعيل).
+ * يشترك إيميلًا في النشرة (upsert — إعادة الاشتراك تُعيد التفعيل).
  * يُبقي البريد فريدًا، ويعيده منظَّفًا كي تُزامَن القائمة في Resend بالعنوان نفسه.
  */
 export async function subscribeNewsletter(

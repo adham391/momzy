@@ -5,7 +5,7 @@ import { pathsForDocument, submitToIndexNow, urlsForPaths } from "@/lib/seo/inde
 /**
  * POST /api/revalidate
  * Sanity webhook يستدعيه عند نشر أي تغيير في Studio
- * يعيد بناء الصفحات المتأثرة فوراً بدون انتظار الـ ISR
+ * يعيد بناء الصفحات المتأثرة فورًا بدون انتظار الـ ISR
  */
 export async function POST(req: NextRequest) {
   // التحقق من الـ secret لحماية الـ endpoint

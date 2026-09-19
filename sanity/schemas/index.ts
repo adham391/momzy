@@ -22,7 +22,7 @@ import { article }       from "./article";
 
 /**
  * تجميع كل Sanity schemas
- * الـ objects تأتي أولاً — الـ documents تأتي بعدها
+ * الـ objects تأتي أولًا — الـ documents تأتي بعدها
  */
 export const schemaTypes: SchemaTypeDefinition[] = [
   // Objects (nested)

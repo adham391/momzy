@@ -5,7 +5,7 @@
  *
  * ملاحظات:
  * - الصور في seed هي placeholder paths — لن تُرفع (لا توجد ملفات فعلية)
- *   → كل منتج سيُنشأ في Sanity بدون صور، ترفعها هبة يدوياً من Studio
+ *   → كل منتج سيُنشأ في Sanity بدون صور، ترفعها هبة يدويًا من Studio
  * - المنتج الحقيقي الوحيد: صندوق مشوار أم
  * - idempotent: يستخدم _id ثابت = "product-{slug}" فلن يُكرَّر عند إعادة التشغيل
  *
@@ -66,8 +66,8 @@ function toSanityDocument(product: Product) {
     weight:         product.weight,
     longDescription: product.longDescription,
 
-    // ملاحظة: الصور لن تُرفع تلقائياً (placeholder paths فقط)
-    // هبة ترفعها يدوياً من Studio
+    // ملاحظة: الصور لن تُرفع تلقائيًا (placeholder paths فقط)
+    // هبة ترفعها يدويًا من Studio
     // mainImage: null,
     // gallery: [],
 
@@ -95,7 +95,7 @@ function toSanityDocument(product: Product) {
       _key:        `content-${i}`,
       name:        item.name,
       description: item.description,
-      // icon/image: لن تُرفع تلقائياً
+      // icon/image: لن تُرفع تلقائيًا
     })),
 
     // فئات الهدية
@@ -114,7 +114,7 @@ function toSanityDocument(product: Product) {
       location: t.location,
       text:     t.text,
       rating:   t.rating,
-      // image: لن تُرفع تلقائياً
+      // image: لن تُرفع تلقائيًا
     })),
 
     // الأسئلة الشائعة
@@ -131,7 +131,7 @@ function toSanityDocument(product: Product) {
           _type:      "productStory",
           title:      product.story.title,
           paragraphs: product.story.paragraphs,
-          // image: لن تُرفع تلقائياً
+          // image: لن تُرفع تلقائيًا
         }
       : undefined,
   };
@@ -176,8 +176,8 @@ async function migrate() {
   if (results.skipped > 0) console.log(`⏭️  تخطّى: ${results.skipped} منتج`);
   if (results.failed > 0)  console.log(`❌ فشل:   ${results.failed} منتج`);
   console.log("─────────────────────────────────────────");
-  console.log("\n📌 تذكير: الصور لم تُرفع تلقائياً.");
-  console.log("   افتحي Studio وارفعي الصور يدوياً لكل منتج.\n");
+  console.log("\n📌 تذكير: الصور لم تُرفع تلقائيًا.");
+  console.log("   افتحي Studio وارفعي الصور يدويًا لكل منتج.\n");
 }
 
 migrate().catch((err) => {

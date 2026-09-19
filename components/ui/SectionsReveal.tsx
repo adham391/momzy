@@ -27,7 +27,7 @@ function setDotsPlayState(section: Element, state: "running" | "paused") {
  * 1. fadeInUp — كل .reveal-section يظهر بأنيميشن عند الدخول للـ viewport
  * 2. dots optimization — النقاط تعمل فقط عند ظهور قسمها، وتتوقف عند الخروج
  *
- * النتيجة: بدلاً من 108 أنيميشن متزامن → عادةً 18 فقط (قسم واحد في الـ viewport)
+ * النتيجة: بدلًا من 108 أنيميشن متزامن → عادةً 18 فقط (قسم واحد في الـ viewport)
  */
 export default function SectionsReveal() {
   useEffect(() => {

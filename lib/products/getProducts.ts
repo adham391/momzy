@@ -6,7 +6,7 @@ import { isDigitalProduct } from "./helpers";
 /**
  * إحضار قائمة المنتجات مع فلترة اختيارية.
  *
- * المصدر: Sanity CMS (أولاً)
+ * المصدر: Sanity CMS (أولًا)
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  *
  * التوقيع لا يتغير — كل المكونات تعمل بدون تعديل
@@ -40,7 +40,7 @@ export async function getFreeShippingSlugs(): Promise<string[]> {
 
 /**
  * إحضار قائمة الـ categories الفريدة.
- * يستخدم في FilterBar لبناء أزرار الفلترة ديناميكياً.
+ * يستخدم في FilterBar لبناء أزرار الفلترة ديناميكيًا.
  */
 export async function getProductCategories(): Promise<string[]> {
   // إذا لم يُضبط projectId، ارجع للـ seed
@@ -82,7 +82,7 @@ function applyFiltersToSeed(filters?: ProductFilters): Product[] {
 /**
  * هل يحتاج الطلب عنوان توصيل؟
  *
- * نعم إن كان فيه منتج فيزيائي واحد على الأقل. الطلب الرقمي البحت (كتيّب مثلاً)
+ * نعم إن كان فيه منتج فيزيائي واحد على الأقل. الطلب الرقمي البحت (كتيّب مثلًا)
  * يصل على البريد الإلكتروني فلا معنى لطلب البلدة والعنوان من العميلة.
  *
  * يُحسب من المصدر الموثوق (Sanity) لا من بيانات العميل — فلا يستطيع أحد
@@ -93,7 +93,7 @@ export async function orderNeedsShipping(slugs: string[]): Promise<boolean> {
   const bySlug = new Map(products.map((p) => [p.slug, p]));
   return slugs.some((slug) => {
     const product = bySlug.get(slug);
-    // slug غير معروف — يتجاهله createOrder لاحقاً، فلا يفرض عنواناً هنا
+    // slug غير معروف — يتجاهله createOrder لاحقًا، فلا يفرض عنوانًا هنا
     return product ? !isDigitalProduct(product) : false;
   });
 }

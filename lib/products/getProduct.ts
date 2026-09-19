@@ -5,7 +5,7 @@ import { SEED_PRODUCTS }    from "./seed";
 /**
  * إحضار منتج واحد بالـ slug.
  *
- * المصدر: Sanity CMS (أولاً)
+ * المصدر: Sanity CMS (أولًا)
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  *
  * التوقيع لا يتغير — كل المكونات تعمل بدون تعديل

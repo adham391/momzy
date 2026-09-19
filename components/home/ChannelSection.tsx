@@ -9,7 +9,7 @@ import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 /** أخضر واتساب الرسمي — للزر والتمييزات فقط، لا للخلفيات الكبيرة */
 const WA_GREEN = "#25D366";
 
-/** ألوان محادثة واتساب الداكنة — تجعل النموذج يُقرأ فوراً كواتساب */
+/** ألوان محادثة واتساب الداكنة — تجعل النموذج يُقرأ فورًا كواتساب */
 const WA_CHAT   = "#0B141A";
 const WA_BAR    = "#1F2C34";
 const WA_BUBBLE = "#1F2C34";

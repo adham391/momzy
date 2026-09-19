@@ -12,13 +12,13 @@
 - **اللغة:** العربية RTL فقط
 - **العملة:** شيكل إسرائيلي ₪ ILS
 - **الجمهور:** أمهات في إسرائيل
-- **الشراء:** مجهول كلياً — لا تسجيل دخول، لا حسابات للعملاء
+- **الشراء:** مجهول كليًا — لا تسجيل دخول، لا حسابات للعملاء
 
 ---
 
 ## 🎨 المرجع البصري
 
-> **إلزامي:** قبل بناء أي component أو صفحة، اقرأ الملفين التاليين أولاً:
+> **إلزامي:** قبل بناء أي component أو صفحة، اقرأ الملفين التاليين أولًا:
 
 - `reference/momzy-prototype.html` — الـ prototype الكامل للموقع
 - `reference/assets/` — جميع الأصول (اللوقو والأيقونات)
@@ -160,7 +160,7 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 ## 📦 نظام الشحن
 
 - **النطاق:** إسرائيل كاملة
-- **الشركة:** محلية — رقم التتبع يُدخل يدوياً من الأدمن
+- **الشركة:** محلية — رقم التتبع يُدخل يدويًا من الأدمن
 - **الحالات:** pending → confirmed → shipped → delivered
 - **لا حساب مطلوب** — شراء مجهول مباشر
 - **إجباري:** قبول سياسة الخصوصية قبل الشراء
@@ -170,8 +170,8 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 ## 📱 نظام الحجوزات
 
 - العميل يختار الخدمة → يرى المواعيد → يحجز → يدفع
-- هبة تحدد إتاحتها شهرياً من الأدمن
-- النظام يبلوك التعارضات تلقائياً
+- هبة تحدد إتاحتها شهريًا من الأدمن
+- النظام يبلوك التعارضات تلقائيًا
 - واتساب فوري لهبة + إيميل للعميل عند كل حجز
 - تذكير للعميل قبل 24 ساعة و2 ساعة
 
@@ -212,7 +212,7 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 
 ## 🗄️ قاعدة البيانات — 45 جدول
 
-> لا يوجد جدول customers — الشراء مجهول كلياً.
+> لا يوجد جدول customers — الشراء مجهول كليًا.
 > بيانات العميل تُحفظ مباشرة في orders و bookings.
 
 ### المتجر (15 جدول)
@@ -491,7 +491,7 @@ momzy/
 │   │   ├── FloatingCartButton.tsx      ✅ زر السلة العائم
 │   │   ├── Toast.tsx                   ✅ إشعار إضافة للسلة
 │   │   └── product-detail/
-│   │       ├── ProductPageLayout.tsx       ✅ المنسّق — يرتب 11 قسماً، أقسام شرطية حسب البيانات
+│   │       ├── ProductPageLayout.tsx       ✅ المنسّق — يرتب 11 قسمًا، أقسام شرطية حسب البيانات
 │   │       ├── ProductHero.tsx             ✅ Hero — صورة + tagline + سعر gold + CTAs forest/gold + 3 trust signals ديناميكية
 │   │       ├── ProductGallery.tsx          ✅ Grid 2/3 cols + lightbox + دعم فيديو (videoUrl أول عنصر)
 │   │       ├── ProductShortDescription.tsx ✅ نص شاعري وسط ivory
@@ -550,8 +550,8 @@ momzy/
 │   ├── products/
 │   │   ├── types.ts                ✅ Product + ProductContent + ProductStory + ProductGiftTarget + ProductTestimonial + ProductFAQ + ProductShippingInfo + ProductSpecification + ProductFilters + ProductSort
 │   │   ├── seed.ts                 ✅ SEED_PRODUCTS — صندوق مشوار أم فقط (fallback في dev حين لا يُرجع Sanity شيئًا)
-│   │   ├── getProduct.ts           ✅ async getProduct(slug) — Sanity أولاً، seed fallback في dev حين لا يُرجع Sanity شيئًا
-│   │   └── getProducts.ts          ✅ async getProducts(filters?) + getProductCategories() — Sanity أولاً، seed fallback في dev حين لا يُرجع Sanity شيئًا
+│   │   ├── getProduct.ts           ✅ async getProduct(slug) — Sanity أولًا، seed fallback في dev حين لا يُرجع Sanity شيئًا
+│   │   └── getProducts.ts          ✅ async getProducts(filters?) + getProductCategories() — Sanity أولًا، seed fallback في dev حين لا يُرجع Sanity شيئًا
 │   ├── sanity/
 │   │   ├── client.ts               ✅ sanityClient + sanityWriteClient + sanityFetch (ISR revalidate + try-catch)
 │   │   ├── image.ts                ✅
@@ -735,7 +735,7 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 
 | الشرط | الإضافة المطلوبة | الموقع |
 |-------|------------------|--------|
-| تسجيل **עוסק מורשה** (حالياً פטור) | إضافة رقم ח.פ. + اسم النشاط القانوني — إلزامي قانونياً | الشريط السفلي في `Footer.tsx` |
+| تسجيل **עוסק מורשה** (حاليًا פטור) | إضافة رقم ח.פ. + اسم النشاط القانوني — إلزامي قانونيًا | الشريط السفلي في `Footer.tsx` |
 | ربط **HYP API** للدفع | أيقونات Visa / Mastercard / HYP — يبني الثقة عند الدفع | بجانب Newsletter في `Footer.tsx` |
 | توفر **مكتب أو عيادة** فيزيائية | عنوان النشاط الكامل + رابط Google Maps | عمود التواصل في `Footer.tsx` |
 
@@ -767,13 +767,13 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
   ✅ Sanity Studio على /studio — واجهة هبة لإدارة المحتوى
   ✅ Schemas: product (document) + siteSettings (singleton) + 7 objects
   ✅ Query layer: lib/sanity/queries/products.ts + siteSettings.ts
-  ✅ getProduct/getProducts تقرآن من Sanity أولاً، seed fallback في dev حين لا يُرجع Sanity شيئًا (بلا مفاتيح Sanity لا يعمل الموقع أصلًا — انظر متغيرات البيئة)
+  ✅ getProduct/getProducts تقرآن من Sanity أولًا، seed fallback في dev حين لا يُرجع Sanity شيئًا (بلا مفاتيح Sanity لا يعمل الموقع أصلًا — انظر متغيرات البيئة)
   ✅ TopBar + Footer ديناميكيان من Sanity siteSettings
   ✅ Migration script جاهز (npx tsx scripts/migrate-seed-to-sanity.ts)
   ✅ ISR revalidate 60s — تحديثات Studio تظهر خلال دقيقة
   □ رفع صور المنتجات الحقيقية من Studio ← هبة
   □ إعداد siteSettings من Studio ← هبة
-  □ ربط ReviewModal بـ Sanity testimonials ← لاحقاً
+  □ ربط ReviewModal بـ Sanity testimonials ← لاحقًا
   □ دمج HYP  ← الخطوة التالية للمطور
   □ ربط Supabase للطلبات الفعلية (استبدال localStorage)
 
@@ -863,13 +863,13 @@ button:hover, a:hover { animation: wobble 0.6s ease; }
 
 - **المرجع البصري إلزامي** — اقرأ `reference/momzy-prototype.html` قبل أي component
 - **الأصول** من `reference/assets/` — انسخها إلى `public/`
-- **RTL دائماً** — `dir="rtl"` على كل المكونات
-- **العربية أولاً** — كل النصوص بالعربية
-- **Server Components** افتراضياً
+- **RTL دائمًا** — `dir="rtl"` على كل المكونات
+- **العربية أولًا** — كل النصوص بالعربية
+- **Server Components** افتراضيًا
 - **لا `any`** في TypeScript
 - **Tailwind v4** — `@theme inline {}` في globals.css، لا CSS مخصص إلا للـ keyframes
 - **Mobile First**
-- **لا تسجيل دخول للعملاء** — الشراء والحجز مجهول كلياً
+- **لا تسجيل دخول للعملاء** — الشراء والحجز مجهول كليًا
 - **Modals بـ Portal** — استخدم `createPortal(el, document.body)` لتجنب z-index conflicts
 - **Clean Code** — كل function هدف واحد، لا تتجاوز 150 سطر
 - **تعليقات عربية** — كل section وfunction موثقة

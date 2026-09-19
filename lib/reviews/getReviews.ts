@@ -5,11 +5,11 @@ import { SEED_REVIEWS } from "./seed";
 /**
  * إحضار قائمة التقييمات.
  *
- * المصدر: Sanity CMS (أولاً)
+ * المصدر: Sanity CMS (أولًا)
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  *
- * @param limit — حد أقصى لعدد التقييمات (مثلاً 4 للصفحة الرئيسية)
- * @param locale — اللغة الفعّالة (اختياري؛ السيرفر يقرأها تلقائياً عبر activeLocale)
+ * @param limit — حد أقصى لعدد التقييمات (مثلًا 4 للصفحة الرئيسية)
+ * @param locale — اللغة الفعّالة (اختياري؛ السيرفر يقرأها تلقائيًا عبر activeLocale)
  */
 export async function getReviews(limit?: number, locale?: string): Promise<Review[]> {
   let reviews: Review[] = [];

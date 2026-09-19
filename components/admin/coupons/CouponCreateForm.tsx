@@ -6,7 +6,7 @@ import { createCouponAction, type CouponFormState } from "@/app/admin/(panel)/co
 
 const INITIAL: CouponFormState = { error: null, success: false };
 
-/** نموذج إنشاء كوبون — يُفرَّغ تلقائياً بعد النجاح */
+/** نموذج إنشاء كوبون — يُفرَّغ تلقائيًا بعد النجاح */
 export default function CouponCreateForm() {
   const [state, formAction, pending] = useActionState(createCouponAction, INITIAL);
   const formRef = useRef<HTMLFormElement>(null);

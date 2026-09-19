@@ -73,14 +73,14 @@ const DEFAULTS: Record<AppLocale, HomePageContent> = {
     hebaHeadingLine1: "القلب النابض",
     hebaHeadingLine2: "وراء Momzy",
     hebaBio: [
-      "ممرضة شغوفة بالأمومة، رحلتها مع +1000 أم منحتها فهماً عميقاً لما تحتاجه كل أم. هبة لا تقدم معلومات فقط — تقدم حضوراً إنسانياً حقيقياً.",
+      "ممرضة شغوفة بالأمومة، رحلتها مع +1000 أم منحتها فهمًا عميقًا لما تحتاجه كل أم. هبة لا تقدم معلومات فقط — تقدم حضورًا إنسانيًا حقيقيًا.",
       "من أول نبضة قلب حتى الخطوة الأولى لطفلك — هبة بجانبك بعلم وحب وشغف حقيقي.",
     ],
     hebaSignature: "هبة حسن",
     hebaStat: { number: "+1000", label: "أمّ رافقتهنّ" },
 
     bestSellersLabel: "الأكثر طلبًا",
-    bestSellersTitle: "الأكثر مبيعاً",
+    bestSellersTitle: "الأكثر مبيعًا",
     articlesLabel: "أحدث المقالات",
     articlesTitle: "اقرئي وتعلّمي مع Momzy",
     reviewsLabel: "تجارب حقيقية",

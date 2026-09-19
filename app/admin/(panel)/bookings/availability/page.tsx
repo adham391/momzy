@@ -95,7 +95,7 @@ export default async function AvailabilityPage({
 
       {options.length === 0 && (
         <p className="text-mid text-body-sm bg-white rounded-[var(--rl)] border border-bord p-5 mb-6">
-          أضيفي خدمة في Studio أولاً كي تتمكّني من فتح مواعيد لها.
+          أضيفي خدمة في Studio أولًا كي تتمكّني من فتح مواعيد لها.
         </p>
       )}
 

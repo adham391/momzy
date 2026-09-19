@@ -127,7 +127,7 @@ export const service = defineType({
       title: "أصغر عمر بالأشهر (اختياري)",
       type: "number",
       description:
-        "لمنع تسجيل طفل خارج الفئة تلقائياً. اتركيه فارغاً إن لم تكن الورشة محدودة العمر (مثل ورشات الحوامل).",
+        "لمنع تسجيل طفل خارج الفئة تلقائيًا. اتركيه فارغًا إن لم تكن الورشة محدودة العمر (مثل ورشات الحوامل).",
       validation: (r) => r.min(0).integer(),
     }),
 
@@ -161,7 +161,7 @@ export const service = defineType({
       name: "price",
       title: "السعر بالشيكل (اختياري)",
       type: "number",
-      description: "اتركيه فارغاً إذا كان السعر حسب الطلب",
+      description: "اتركيه فارغًا إذا كان السعر حسب الطلب",
       validation: (r) => r.min(0),
     }),
 
@@ -246,7 +246,7 @@ export const service = defineType({
       name: "order",
       title: "ترتيب العرض",
       type: "number",
-      description: "الأرقام الأصغر تظهر أولاً",
+      description: "الأرقام الأصغر تظهر أولًا",
       initialValue: 0,
     }),
   ],

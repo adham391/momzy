@@ -17,7 +17,7 @@ const HEBA_TAGS = [
 export default function HebaSection({ content }: { content: HomePageContent }) {
   const t = useTranslations("home");
   return (
-    /** ─ الـ section شفاف — الـ wave يغطي نهاية قسم الأكثر مبيعاً ─ */
+    /** ─ الـ section شفاف — الـ wave يغطي نهاية قسم الأكثر مبيعًا ─ */
     <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 4 }}>
 
       {/* ── موجة أعلى القسم ── */}

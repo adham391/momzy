@@ -1,10 +1,10 @@
-/** منطق الكوبون — آمن للعميل والسيرفر (لا يستورد شيئاً خادمياً) */
+/** منطق الكوبون — آمن للعميل والسيرفر (لا يستورد شيئًا خادميًا) */
 
 export type CouponType = "percentage" | "fixed";
 
 /**
  * كوبون مطبّق على السلة — يُحفظ في الـ store.
- * نحفظ القاعدة (النوع/القيمة/الحد الأدنى) لإعادة حساب الخصم حيّاً مع تغيّر السلة،
+ * نحفظ القاعدة (النوع/القيمة/الحد الأدنى) لإعادة حساب الخصم حيًّا مع تغيّر السلة،
  * فلا يبقى خصم قديم إذا تغيّرت الكمية.
  */
 export interface AppliedCoupon {
@@ -15,7 +15,7 @@ export interface AppliedCoupon {
   label: string;
 }
 
-/** يحسب خصم الكوبون على مجموع حالي (0 إذا لم يعد صالحاً) */
+/** يحسب خصم الكوبون على مجموع حالي (0 إذا لم يعد صالحًا) */
 export function couponDiscount(coupon: AppliedCoupon | null, subtotal: number): number {
   if (!coupon) return 0;
   if (subtotal < coupon.minOrderAmount) return 0;

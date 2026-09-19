@@ -57,7 +57,7 @@ interface CartStore {
   lastAdded: LastAdded | null;
   appliedCoupon: AppliedCoupon | null;
 
-  /** إضافة منتج — يدمج بالـ slug إذا بدون هدية، يضيف عنصراً جديداً إذا هدية */
+  /** إضافة منتج — يدمج بالـ slug إذا بدون هدية، يضيف عنصرًا جديدًا إذا هدية */
   addItem: (product: Product, gift?: GiftOptions) => void;
   /** إضافة بصمت — بدون تشغيل modal (لـ اشتري الآن) */
   addItemSilent: (product: Product, gift?: GiftOptions) => void;
@@ -142,7 +142,7 @@ export const useCart = create<CartStore>()(
           timestamp: Date.now(),
         };
 
-        // عناصر الهدية → دائماً جديدة (لا تُدمج)
+        // عناصر الهدية → دائمًا جديدة (لا تُدمج)
         if (isGift) {
           set({ items: [...items, buildCartItem(product, gift)], lastAdded });
           return;

@@ -60,7 +60,7 @@ export default function MomzyStoryModal({ open, onClose }: Props) {
 
   useEffect(() => {
     if (open) {
-      // mount أولاً ثم frame واحد لتشغيل الـ enter transition
+      // mount أولًا ثم frame واحد لتشغيل الـ enter transition
       setMounted(true);
       const id = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(id);

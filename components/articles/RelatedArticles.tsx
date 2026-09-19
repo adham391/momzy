@@ -6,7 +6,7 @@ import { getArticleLabeller } from "@/lib/articles/labels";
 import type { ArticleCategory } from "@/lib/articles/categories";
 
 /**
- * «اقرئي أيضًا» — من التصنيف نفسه أولاً ثم الأحدث.
+ * «اقرئي أيضًا» — من التصنيف نفسه أولًا ثم الأحدث.
  * يختفي القسم كليًا حين لا يوجد مقال آخر — أفضل من شبكة فارغة.
  */
 export default async function RelatedArticles({

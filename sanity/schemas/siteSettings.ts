@@ -56,8 +56,8 @@ export const siteSettings = defineType({
       title: "روابط التواصل الاجتماعي",
       type: "object",
       description:
-        "ما تتركينه فارغاً هنا لا يظهر في الموقع إطلاقاً — لا يُستبدل بقيمة جاهزة. " +
-        "الروابط الحالية معبّأة مسبقاً عند إنشاء الإعدادات لأول مرة.",
+        "ما تتركينه فارغًا هنا لا يظهر في الموقع إطلاقًا — لا يُستبدل بقيمة جاهزة. " +
+        "الروابط الحالية معبّأة مسبقًا عند إنشاء الإعدادات لأول مرة.",
       fields: [
         defineField({
           name: "instagram",
@@ -87,7 +87,7 @@ export const siteSettings = defineType({
           title: "قناة WhatsApp",
           type: "url",
           placeholder: "https://whatsapp.com/channel/xxxxxxxx",
-          description: "رابط القناة — يظهر في الفوتر وفي قسم القناة بالصفحة الرئيسية. اتركيه فارغاً لإخفائهما",
+          description: "رابط القناة — يظهر في الفوتر وفي قسم القناة بالصفحة الرئيسية. اتركيه فارغًا لإخفائهما",
           initialValue: "https://whatsapp.com/channel/0029Vb7W941KWEKrvB5s7B3Q",
         }),
       ],

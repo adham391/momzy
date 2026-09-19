@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { track } from "@/lib/analytics/track";
 
 /**
- * يسجّل حدثاً مرّة واحدة عند التركيب — للاستخدام داخل server components
+ * يسجّل حدثًا مرّة واحدة عند التركيب — للاستخدام داخل server components
  * (view_product، begin_checkout، purchase...).
  */
 export default function TrackEvent({

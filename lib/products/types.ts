@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────
-   أنواع المنتجات — تطابق Schema المخطط لـ Supabase لاحقاً
+   أنواع المنتجات — تطابق Schema المخطط لـ Supabase لاحقًا
    كل interface مصمم ليُخزَّن كـ row أو JSONB في Postgres
    ───────────────────────────────────────────────────────── */
 
@@ -89,11 +89,11 @@ export interface Product {
   category: string;
 
   /* ── حقول اختيارية أساسية ── */
-  /** السعر قبل الخصم — يُعرض مشطوباً */
+  /** السعر قبل الخصم — يُعرض مشطوبًا */
   compareAtPrice?: number;
   /** الكمية المتوفرة — undefined = غير محدد */
   stockQuantity?: number;
-  /** الوزن بالكيلوغرام — لاحقاً للشحن */
+  /** الوزن بالكيلوغرام — لاحقًا للشحن */
   weight?: number;
   /** مواصفات تقنية (مادة، أبعاد، عمر...) */
   specifications?: ProductSpecification[];
@@ -107,7 +107,7 @@ export interface Product {
   badge?: string;
   /** لون الـ badge: yellow | rose | teal */
   badgeColor?: "yellow" | "rose" | "teal";
-  /** ترتيبه في «الأكثر مبيعاً» بالرئيسية — الأصغر أولًا؛ بلا رقم ⇒ بعد المرتّبة */
+  /** ترتيبه في «الأكثر مبيعًا» بالرئيسية — الأصغر أولًا؛ بلا رقم ⇒ بعد المرتّبة */
   bestSellerRank?: number;
   /** tags ملوّنة فوق ProductCard */
   tags?: ProductTag[];

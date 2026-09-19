@@ -78,7 +78,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
   const ytThumb = product.videoUrl ? toYtThumbnail(product.videoUrl) : null;
   const videoThumb = ytThumb ?? product.mainImage ?? "";
 
-  /** بناء قائمة الميديا — فيديو أولاً (إذا موجود) ثم الصور */
+  /** بناء قائمة الميديا — فيديو أولًا (إذا موجود) ثم الصور */
   const media: MediaItem[] = [];
   if (embedUrl) media.push({ type: "video", src: embedUrl, thumb: videoThumb });
   if (product.mainImage) media.push({ type: "image", src: product.mainImage });
@@ -487,7 +487,7 @@ export default function ProductHero({ product }: ProductHeroProps) {
               {t("orAddToCart")}
             </button>
 
-            {/* إشارات الثقة — موبايل: stacked عمودياً / ديسكتوب: صف أفقي */}
+            {/* إشارات الثقة — موبايل: stacked عموديًا / ديسكتوب: صف أفقي */}
             <div
               className="rounded-[16px] overflow-hidden flex flex-col md:flex-row md:items-center md:justify-around md:py-4 md:px-3 md:gap-2"
               style={{

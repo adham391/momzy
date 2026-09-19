@@ -73,14 +73,14 @@ export const product = defineType({
       name: "label",
       title: "الـ Label (اختياري)",
       type: "internationalizedArrayString",
-      description: "نص صغير يظهر فوق العنوان في الكارد الكبير بالصفحة الرئيسية — مثال: Limited Edition، أو اتركيه فارغاً لإخفائه",
+      description: "نص صغير يظهر فوق العنوان في الكارد الكبير بالصفحة الرئيسية — مثال: Limited Edition، أو اتركيه فارغًا لإخفائه",
     }),
 
     defineField({
       name: "badge",
       title: "الـ Badge (اختياري)",
       type: "internationalizedArrayString",
-      description: "نص يظهر فوق الكارد الكبير في الصفحة الرئيسية — اكتبي ما تريدين، مثال: جديد الآن، عرض محدود، مخزون محدود. اتركيه فارغاً لإخفائه.",
+      description: "نص يظهر فوق الكارد الكبير في الصفحة الرئيسية — اكتبي ما تريدين، مثال: جديد الآن، عرض محدود، مخزون محدود. اتركيه فارغًا لإخفائه.",
     }),
 
     defineField({
@@ -101,9 +101,9 @@ export const product = defineType({
 
     defineField({
       name: "bestSellerRank",
-      title: "الترتيب في «الأكثر مبيعاً»",
+      title: "الترتيب في «الأكثر مبيعًا»",
       type: "number",
-      description: "ترتيب المنتج في قسم «الأكثر مبيعاً» بالصفحة الرئيسية: 1 أولًا، ثم 2… المنتجات بلا رقم تأتي بعد المرتّبة (الأحدث أولًا).",
+      description: "ترتيب المنتج في قسم «الأكثر مبيعًا» بالصفحة الرئيسية: 1 أولًا، ثم 2… المنتجات بلا رقم تأتي بعد المرتّبة (الأحدث أولًا).",
       validation: (rule) => rule.integer().min(1),
     }),
 
@@ -127,7 +127,7 @@ export const product = defineType({
       name: "compareAtPrice",
       title: "السعر الأصلي قبل الخصم (₪) — اختياري",
       type: "number",
-      description: "يُعرض مشطوباً بجانب السعر الحالي",
+      description: "يُعرض مشطوبًا بجانب السعر الحالي",
       validation: (r) => r.min(0),
     }),
 
@@ -143,7 +143,7 @@ export const product = defineType({
       title: "الكمية المتوفرة (اختياري)",
       type: "number",
       description:
-        "ملاحظة: سيتم ربط المخزون مع Supabase لاحقاً للتحديث التلقائي مع كل طلب",
+        "ملاحظة: سيتم ربط المخزون مع Supabase لاحقًا للتحديث التلقائي مع كل طلب",
       validation: (r) => r.min(0).integer(),
     }),
 
@@ -151,7 +151,7 @@ export const product = defineType({
       name: "weight",
       title: "الوزن بالكيلوغرام (اختياري)",
       type: "number",
-      description: "يُستخدم لحسابات الشحن لاحقاً",
+      description: "يُستخدم لحسابات الشحن لاحقًا",
       validation: (r) => r.min(0),
     }),
 
@@ -209,7 +209,7 @@ export const product = defineType({
       name: "story",
       title: "قصة المنتج — 'من قلب هبة' (اختياري)",
       type: "productStory",
-      description: "إذا تركتِه فارغاً، قسم القصة لن يظهر في الصفحة",
+      description: "إذا تركتِه فارغًا، قسم القصة لن يظهر في الصفحة",
     }),
 
     defineField({

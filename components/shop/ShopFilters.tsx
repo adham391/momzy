@@ -46,7 +46,7 @@ export default function ShopFilters({ products }: ShopFiltersProps) {
     if (sort === "price-asc") result.sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") result.sort((a, b) => b.price - a.price);
     else {
-      // الأحدث = حسب createdAt تنازلياً
+      // الأحدث = حسب createdAt تنازليًا
       result.sort((a, b) => {
         const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;

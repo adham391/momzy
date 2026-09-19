@@ -57,7 +57,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
   );
 }
 
-/** عمر الطفل يوم الجلسة — يُحسب لا يُخزَّن، كي يبقى صحيحاً لو تغيّر موعد الورشة */
+/** عمر الطفل يوم الجلسة — يُحسب لا يُخزَّن، كي يبقى صحيحًا لو تغيّر موعد الورشة */
 function babyAgeAtSession(b: BookingRow): string {
   const months = b.baby_birth_date ? ageInMonthsAt(b.baby_birth_date, b.date) : null;
   return months === null ? "—" : monthsLabel(months);
@@ -66,7 +66,7 @@ function babyAgeAtSession(b: BookingRow): string {
 function BookingCard({ booking: b }: { booking: BookingRow }) {
   const phone = b.customer_phone.replace(/\D/g, "");
   const waMessage = encodeURIComponent(
-    `مرحباً ${b.customer_name} 🌸، تذكير بموعدك «${b.service_name ?? ""}» يوم ${formatSlotDate(b.date)} الساعة ${formatTimeShort(b.start_time)} مع Momzy. بانتظارك!`
+    `مرحبًا ${b.customer_name} 🌸، تذكير بموعدك «${b.service_name ?? ""}» يوم ${formatSlotDate(b.date)} الساعة ${formatTimeShort(b.start_time)} مع Momzy. بانتظارك!`
   );
   const waLink = `https://wa.me/${phone}?text=${waMessage}`;
   const closed = b.status === "cancelled" || b.status === "completed";

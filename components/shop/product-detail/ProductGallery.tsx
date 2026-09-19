@@ -98,7 +98,7 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
 
-            {/* الفيديو — أول عنصر دائماً */}
+            {/* الفيديو — أول عنصر دائمًا */}
             {videoUrl && embedUrl && (
               <button
                 onClick={openVideo}

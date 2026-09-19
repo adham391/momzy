@@ -169,7 +169,7 @@ const FALLBACK: ArticleCard[] = ARTICLE_PREVIEWS.map((a) => ({
   imageBg: a.imageBg,
 }));
 
-/** أحدث 3 مقالات للصفحة الرئيسية — Sanity أولاً، fallback ثابت */
+/** أحدث 3 مقالات للصفحة الرئيسية — Sanity أولًا، fallback ثابت */
 export async function getHomeArticles(locale?: string): Promise<ArticleCard[]> {
   const loc = await activeLocale(locale);
   const query = `*[_type == "article" && isPublished == true] | order(publishedAt desc)[0...3]{${CARD_FIELDS}}`;
@@ -204,7 +204,7 @@ export async function getArticleBySlug(slug: string, locale?: string): Promise<A
 }
 
 /**
- * مقالات مقترحة — من التصنيف نفسه أولاً، ثم الأحدث لتكملة العدد.
+ * مقالات مقترحة — من التصنيف نفسه أولًا، ثم الأحدث لتكملة العدد.
  * تستثني المقال الحالي دائمًا.
  */
 export async function getRelatedArticles(

@@ -12,7 +12,7 @@ import type { Product } from "@/lib/products/types";
 /** ترتيب القسم: المرتّبة في Studio أولًا (1، 2…)، ثم الباقي بترتيبه الأصلي (الترتيب ثابت) */
 const rankOf = (p: Product) => p.bestSellerRank ?? Number.MAX_SAFE_INTEGER;
 
-/** قسم "الأكثر مبيعاً" — شبكة منتجات بشارة ترتيب (مثل متاجر الأمومة العصرية) */
+/** قسم "الأكثر مبيعًا" — شبكة منتجات بشارة ترتيب (مثل متاجر الأمومة العصرية) */
 export default async function BestSellersSection({ content }: { content: HomePageContent }) {
   const tMega = await getTranslations("megaMenu");
   const products = (await getProducts({ inStockOnly: true }))

@@ -19,7 +19,7 @@ export function adminResetEmailHtml(opts: { name: string; resetUrl: string }): s
       </div>
       <div style="padding:28px 24px;text-align:center;color:#252220;">
         <p style="font-size:18px;font-weight:bold;margin:0 0 14px;">إعادة ضبط كلمة المرور</p>
-        <p style="font-size:15px;line-height:1.9;color:#55504C;margin:0 0 22px;">مرحباً ${opts.name}، وصلنا طلب لإعادة ضبط كلمة مرور حسابك في لوحة تحكم Momzy.</p>
+        <p style="font-size:15px;line-height:1.9;color:#55504C;margin:0 0 22px;">مرحبًا ${opts.name}، وصلنا طلب لإعادة ضبط كلمة مرور حسابك في لوحة تحكم Momzy.</p>
         <a href="${opts.resetUrl}" style="display:inline-block;background:#252220;color:#ffffff;text-decoration:none;font-weight:bold;font-size:16px;padding:14px 34px;border-radius:50px;">🔑 اختاري كلمة مرور جديدة</a>
         <p style="font-size:12px;color:#9A9490;margin:22px 0 0;line-height:1.8;">
           الرابط يُستعمل مرة واحدة ولمدة قصيرة.<br/>

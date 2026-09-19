@@ -5,7 +5,7 @@ import { SEED_SERVICES } from "./seed";
 /**
  * إحضار خدمة واحدة بالـ slug.
  *
- * المصدر: Sanity CMS (أولاً)
+ * المصدر: Sanity CMS (أولًا)
  * Fallback: seed.ts في بيئة التطوير فقط إذا Sanity فارغ أو غير مضبوط
  */
 export async function getService(slug: string, locale?: string): Promise<Service | null> {

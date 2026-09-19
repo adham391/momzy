@@ -153,7 +153,7 @@ const STRINGS: Record<Locale, Strings> = {
 function logoDataUri(): string {
   const p = path.resolve(process.cwd(), "reference/assets/momzy-logo-small.png");
   if (!fs.existsSync(p)) {
-    throw new Error(`الشعار المصغّر غير موجود: ${p} — شغّل التصغير أولاً`);
+    throw new Error(`الشعار المصغّر غير موجود: ${p} — شغّل التصغير أولًا`);
   }
   return `data:image/png;base64,${fs.readFileSync(p).toString("base64")}`;
 }

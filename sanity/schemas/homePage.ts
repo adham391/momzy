@@ -78,8 +78,8 @@ export const homePage = defineType({
     }),
 
     // ═══════════ عناوين الأقسام ═══════════
-    defineField({ name: "bestSellersLabel", title: "الأكثر مبيعاً — عنوان صغير", type: "internationalizedArrayString", group: "headings", description: "مثال: الأكثر طلبًا" }),
-    defineField({ name: "bestSellersTitle", title: "الأكثر مبيعاً — العنوان", type: "internationalizedArrayString", group: "headings", description: "مثال: الأكثر مبيعاً" }),
+    defineField({ name: "bestSellersLabel", title: "الأكثر مبيعًا — عنوان صغير", type: "internationalizedArrayString", group: "headings", description: "مثال: الأكثر طلبًا" }),
+    defineField({ name: "bestSellersTitle", title: "الأكثر مبيعًا — العنوان", type: "internationalizedArrayString", group: "headings", description: "مثال: الأكثر مبيعًا" }),
     defineField({ name: "articlesLabel", title: "المقالات — عنوان صغير", type: "internationalizedArrayString", group: "headings", description: "مثال: أحدث المقالات" }),
     defineField({ name: "articlesTitle", title: "المقالات — العنوان", type: "internationalizedArrayString", group: "headings" }),
     defineField({ name: "reviewsLabel", title: "التقييمات — عنوان صغير", type: "internationalizedArrayString", group: "headings" }),

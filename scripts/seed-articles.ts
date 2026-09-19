@@ -2,7 +2,7 @@
  * يرفع كل المقالات إلى Sanity — idempotent (إعادة التشغيل تحديث لا تكرار).
  *
  * التشغيل:  npx tsx scripts/seed-articles.ts
- * أو مقالاً بعينه:  npx tsx scripts/seed-articles.ts teething
+ * أو مقالًا بعينه:  npx tsx scripts/seed-articles.ts teething
  *
  * لإضافة مقال جديد: أنشئ ملفًا في scripts/articles/ يصدّر ArticleSeed،
  * وسجّله في القائمة أدناه. لا شيء آخر.

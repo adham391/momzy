@@ -98,7 +98,7 @@ export async function incrementCouponUsage(code: string): Promise<void> {
 
 /* ── إدارة الأدمن ── */
 
-/** قائمة الكوبونات (الأحدث أولاً) */
+/** قائمة الكوبونات (الأحدث أولًا) */
 export async function listCoupons(): Promise<CouponRow[]> {
   const supabase = createAdminClient();
   const { data } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
@@ -115,7 +115,7 @@ export interface CreateCouponInput {
   createdBy?: string | null;
 }
 
-/** ينشئ كوبوناً جديداً — يعيد خطأ ودّياً لو الكود مكرّر */
+/** ينشئ كوبونًا جديدًا — يعيد خطأ ودّيًا لو الكود مكرّر */
 export async function createCoupon(input: CreateCouponInput): Promise<{ ok: boolean; error?: string }> {
   const supabase = createAdminClient();
   const { error } = await supabase.from("coupons").insert({
@@ -128,7 +128,7 @@ export async function createCoupon(input: CreateCouponInput): Promise<{ ok: bool
     created_by: input.createdBy ?? null,
   });
   if (error) {
-    if (error.code === "23505") return { ok: false, error: "هذا الكود موجود مسبقاً" };
+    if (error.code === "23505") return { ok: false, error: "هذا الكود موجود مسبقًا" };
     return { ok: false, error: error.message };
   }
   return { ok: true };

@@ -4,7 +4,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * عميل Supabase بصلاحية service-role — يتجاوز RLS بالكامل.
  *
  * ⚠️ للسيرفر فقط: API routes، server actions، أو server components
- *    خلف حماية الأدمن. لا يُستورَد إطلاقاً في كود يصل للمتصفح
+ *    خلف حماية الأدمن. لا يُستورَد إطلاقًا في كود يصل للمتصفح
  *    (المفتاح سرّي — يكشف كامل قاعدة البيانات لو تسرّب).
  *
  * الاستخدام:

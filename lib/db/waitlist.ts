@@ -75,7 +75,7 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
   return { ok: false, error: error.message };
 }
 
-/** قائمة الانتظار للأدمن — الأقدم أولاً (أسبقية عادلة) */
+/** قائمة الانتظار للأدمن — الأقدم أولًا (أسبقية عادلة) */
 export async function listWaitlist(serviceSlug?: string): Promise<WaitlistRow[]> {
   const supabase = createAdminClient();
   let query = supabase.from("waitlist").select("*").order("created_at", { ascending: true });

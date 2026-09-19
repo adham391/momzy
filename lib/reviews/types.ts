@@ -21,6 +21,6 @@ export interface Review {
   color: ReviewColor;
   /** عدد النجوم 1-5 */
   rating: number;
-  /** ترتيب العرض — الأصغر يظهر أولاً */
+  /** ترتيب العرض — الأصغر يظهر أولًا */
   order?: number;
 }

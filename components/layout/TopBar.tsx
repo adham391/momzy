@@ -25,7 +25,7 @@ export default function TopBar({ settings }: TopBarProps) {
       }}
     >
       {/*
-        position: absolute + left: 0  — يمنع محاذاة RTL تلقائياً
+        position: absolute + left: 0  — يمنع محاذاة RTL تلقائيًا
         paddingLeft: 100vw             — يبدأ المحتوى عند الحافة اليمنى للشاشة
         translateX(-100%)              — يحرّك العنصر كامل عرضه لليسار
         سرعة أعلى على الموبايل (10s) لأن الشاشة أضيق

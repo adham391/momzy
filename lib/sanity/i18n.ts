@@ -29,7 +29,7 @@ export async function activeLocale(explicit?: string): Promise<AppLocale> {
 }
 
 /**
- * GROQ: يحلّ حقلاً نصّياً مُدوّلاً إلى نص اللغة الفعّالة ($loc).
+ * GROQ: يحلّ حقلًا نصّيًا مُدوّلًا إلى نص اللغة الفعّالة ($loc).
  * plugin v5 يخزّن اللغة في حقل `language` (لا `_key`).
  * سلسلة السقوط: لغة الطلب ← العربية ← القيمة الخام (حماية انتقالية قبل الترحيل).
  * الاستعمال داخل projection: بدّل `title,` بـ `${tf("title")}`.

@@ -41,7 +41,7 @@ export function captureUTM(): void {
   const params = new URLSearchParams(window.location.search);
   const source = params.get("utm_source");
   if (!source) return; // لا UTM في الرابط
-  if (readCookie(UTM_COOKIE)) return; // محفوظ مسبقاً (first-touch)
+  if (readCookie(UTM_COOKIE)) return; // محفوظ مسبقًا (first-touch)
   const utm: UTM = {
     source,
     medium: params.get("utm_medium") ?? undefined,

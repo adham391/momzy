@@ -31,7 +31,7 @@ function InfoRow({ label, value, ltr }: { label: string; value: string; ltr?: bo
 /** كاردا بيانات العميل وعنوان التوصيل */
 export default function OrderInfoCard({ customer, notes, building, postalCode }: OrderInfoCardProps) {
   const t = useTranslations("order");
-  /** الطلب الرقمي البحت يُنشأ بلا عنوان — فلا نعرض كارد توصيل فارغاً */
+  /** الطلب الرقمي البحت يُنشأ بلا عنوان — فلا نعرض كارد توصيل فارغًا */
   const hasDelivery = customer.city.trim().length > 0 || customer.address.trim().length > 0;
   const cardStyle = {
     background: "white",

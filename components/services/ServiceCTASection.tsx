@@ -214,7 +214,7 @@ export default function ServiceCTASection({
                 <span style={{ fontSize: "1.2em" }}>{isRtl ? "←" : "→"}</span>
               </CTAAction>
 
-              {/* WhatsApp — أبرز قليلاً (زائد حين يكون الزرّ نفسه واتساب) */}
+              {/* WhatsApp — أبرز قليلًا (زائد حين يكون الزرّ نفسه واتساب) */}
               {waLink && !contact && (
                 <div className="mb-5">
                   <a
@@ -238,7 +238,7 @@ export default function ServiceCTASection({
                 </div>
               )}
 
-              {/* رابط صفحة التواصل — مخفّف جداً */}
+              {/* رابط صفحة التواصل — مخفّف جدًا */}
               <div className="mb-2">
                 <Link
                   href="/contact"

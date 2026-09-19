@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * يعيد { supabase, response }:
  * - supabase: للتحقق من الجلسة عبر `auth.getUser()`
  * - response:  يحمل كوكيز الجلسة المُجدَّدة — **يجب** أن يُعاد من middleware
- *   (أو تُنسَخ كوكيزه إلى أي redirect) وإلا انتهت جلسة الأدمن مبكراً.
+ *   (أو تُنسَخ كوكيزه إلى أي redirect) وإلا انتهت جلسة الأدمن مبكرًا.
  *
  * ملاحظة: لا نستخدم `lib/supabase/server.ts` هنا لأنه يعتمد `cookies()`
  * من `next/headers` — لا يعمل داخل middleware. هذا النمط (getAll/setAll

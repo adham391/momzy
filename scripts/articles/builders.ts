@@ -91,7 +91,7 @@ const VALUE_TYPE = {
   articleBody: "internationalizedArrayArticleBodyValue",
 } as const;
 
-/** يبني حقلاً مُدوّلاً بلغاته الثلاث */
+/** يبني حقلًا مُدوّلًا بلغاته الثلاث */
 function intl(
   type: keyof typeof VALUE_TYPE,
   content: Record<Lang, Content>,
@@ -116,8 +116,8 @@ async function uploadCover(cover: CoverSeed): Promise<SanityImage> {
 }
 
 /**
- * يرفع مقالاً — idempotent.
- * `createOrReplace` يمسح ما لا نمرّره، فنقرأ أولاً ما لا يأتي من ملف المقال:
+ * يرفع مقالًا — idempotent.
+ * `createOrReplace` يمسح ما لا نمرّره، فنقرأ أولًا ما لا يأتي من ملف المقال:
  * تاريخ النشر (كي لا يقفز المقال إلى رأس القائمة في كل تشغيل) والغلاف
  * (تغيّره هبة من Studio — وكان كل تشغيل يمحوه). ملف الغلاف يُرفع فقط لمقال بلا غلاف.
  */
