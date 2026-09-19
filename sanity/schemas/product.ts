@@ -100,6 +100,14 @@ export const product = defineType({
     }),
 
     defineField({
+      name: "bestSellerRank",
+      title: "الترتيب في «الأكثر مبيعاً»",
+      type: "number",
+      description: "ترتيب المنتج في قسم «الأكثر مبيعاً» بالصفحة الرئيسية: 1 أولًا، ثم 2… المنتجات بلا رقم تأتي بعد المرتّبة (الأحدث أولًا).",
+      validation: (rule) => rule.integer().min(1),
+    }),
+
+    defineField({
       name: "tags",
       title: "الـ Tags (اختياري)",
       type: "array",

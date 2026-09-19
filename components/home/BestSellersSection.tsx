@@ -7,11 +7,17 @@ import ProductCard from "@/components/shop/ProductCard";
 import { getProducts } from "@/lib/products/getProducts";
 import { getTranslations } from "next-intl/server";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
+import type { Product } from "@/lib/products/types";
+
+/** ترتيب القسم: المرتّبة في Studio أولًا (1، 2…)، ثم الباقي بترتيبه الأصلي (الترتيب ثابت) */
+const rankOf = (p: Product) => p.bestSellerRank ?? Number.MAX_SAFE_INTEGER;
 
 /** قسم "الأكثر مبيعاً" — شبكة منتجات بشارة ترتيب (مثل متاجر الأمومة العصرية) */
 export default async function BestSellersSection({ content }: { content: HomePageContent }) {
   const tMega = await getTranslations("megaMenu");
-  const products = (await getProducts({ inStockOnly: true })).slice(0, 4);
+  const products = (await getProducts({ inStockOnly: true }))
+    .sort((a, b) => rankOf(a) - rankOf(b))
+    .slice(0, 4);
 
   // لا تعرض القسم إذا لا توجد منتجات
   if (products.length === 0) return null;
@@ -72,22 +78,9 @@ export default async function BestSellersSection({ content }: { content: HomePag
             }
           >
             {products.map((product, idx) => (
-              <div key={product.slug} className="relative h-full">
-                {/* شارة الترتيب — الأكثر مبيعاً */}
-                <span
-                  className="absolute top-2.5 end-2.5 z-20 flex items-center gap-0.5 font-label font-extrabold rounded-full"
-                  style={{
-                    background: "linear-gradient(135deg, #C09420, #E6C254)",
-                    color: "white",
-                    fontSize: 10,
-                    padding: "3px 8px",
-                    boxShadow: "0 4px 12px rgba(192,148,32,0.4)",
-                  }}
-                >
-                  ★ #{idx + 1}
-                </span>
-
-                <ProductCard product={product} showTags={false} />
+              <div key={product.slug} className="h-full">
+                {/* شارة الترتيب داخل البطاقة نفسها — بطاقة الكتيب أضيق من خانتها */}
+                <ProductCard product={product} showTags={false} rank={idx + 1} />
               </div>
             ))}
           </div>

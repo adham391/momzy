@@ -107,6 +107,8 @@ export interface Product {
   badge?: string;
   /** لون الـ badge: yellow | rose | teal */
   badgeColor?: "yellow" | "rose" | "teal";
+  /** ترتيبه في «الأكثر مبيعاً» بالرئيسية — الأصغر أولًا؛ بلا رقم ⇒ بعد المرتّبة */
+  bestSellerRank?: number;
   /** tags ملوّنة فوق ProductCard */
   tags?: ProductTag[];
   /** معلومات الشحن — تستخدم في trust signals */

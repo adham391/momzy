@@ -13,10 +13,12 @@ interface ProductCardProps {
   product: Product;
   /** إظهار شارات الـ tags — يُعطّل في الشبكات المدمجة (مثل الأكثر مبيعاً) لتوحيد الطول */
   showTags?: boolean;
+  /** ترتيبه في «الأكثر مبيعاً» — شارة ذهبية في زاوية الصورة */
+  rank?: number;
 }
 
 /** كارد منتج واحد في شبكة المتجر — schema الجديد */
-export default function ProductCard({ product, showTags = true }: ProductCardProps) {
+export default function ProductCard({ product, showTags = true, rank }: ProductCardProps) {
   const locale = useLocale();
   /** أول 1-2 tags كـ badges فوق الصورة — فلترة القيم القديمة (strings) */
   const visibleTags = (product.tags ?? [])
@@ -46,6 +48,22 @@ export default function ProductCard({ product, showTags = true }: ProductCardPro
           size="card"
           objectFit={digital ? "contain" : "cover"}
         />
+
+        {/* شارة الترتيب (الأكثر مبيعاً) — داخل البطاقة، في الزاوية المقابلة للشارات */}
+        {rank !== undefined && (
+          <span
+            className="absolute top-2.5 end-2.5 z-20 flex items-center gap-0.5 font-label font-extrabold rounded-full"
+            style={{
+              background: "linear-gradient(135deg, #C09420, #E6C254)",
+              color: "white",
+              fontSize: 10,
+              padding: "3px 8px",
+              boxShadow: "0 4px 12px rgba(192,148,32,0.4)",
+            }}
+          >
+            ★ #{rank}
+          </span>
+        )}
 
         {/* الشارات العلوية — شارة المنتج من Sanity، و«شحن مجاني» بجانبها (تنزل تحتها في البطاقة الضيقة) */}
         {(product.badge || freeShipping) && (

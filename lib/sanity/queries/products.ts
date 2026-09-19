@@ -19,6 +19,7 @@ const PRODUCT_FIELDS = `{
   ${tf("label")},
   ${tf("badge")},
   badgeColor,
+  bestSellerRank,
   tags[] { ${tf("label")}, color },
   inStock,
   stockQuantity,
