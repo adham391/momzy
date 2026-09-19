@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageSeo } from "@/lib/seo/site";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
@@ -8,7 +9,7 @@ import PageHeaderWave from "@/components/ui/PageHeaderWave";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "terms" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageSeo({ path: "/terms", locale, title: t("metaTitle"), description: t("metaDescription") });
 }
 
 /** قسم فرعي */

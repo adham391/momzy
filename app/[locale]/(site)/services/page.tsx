@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageSeo } from "@/lib/seo/site";
 import { getTranslations } from "next-intl/server";
 import { getServices } from "@/lib/services/getServices";
 import { getAvailableSeatsBySlug } from "@/lib/db/bookings";
@@ -13,7 +14,7 @@ import SectionsReveal from "@/components/ui/SectionsReveal";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "services" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageSeo({ path: "/services", locale, title: t("metaTitle"), description: t("metaDescription") });
 }
 
 /** المقاعد تتغيّر مع كل تسجيل — تحديث كل دقيقة */

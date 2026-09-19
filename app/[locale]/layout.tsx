@@ -14,6 +14,11 @@ import "../globals.css";
 import { routing, LOCALE_DIR, type Locale } from "@/lib/i18n/routing";
 import PageTracker from "@/components/analytics/PageTracker";
 import TrackingScripts from "@/components/analytics/TrackingScripts";
+import { preconnect } from "react-dom";
+import JsonLd from "@/components/seo/JsonLd";
+import { siteJsonLd } from "@/lib/seo/jsonld";
+import { DEFAULT_OG_IMAGE, HOME_META, SITE_NAME } from "@/lib/seo/site";
+import { siteOrigin } from "@/lib/resend/emails/brand";
 
 /* ── الخطوط ──────────────────────────────────────────────
    العربية:    Amiri (عناوين) + Tajawal (نصوص) + Nunito (أرقام)
@@ -62,25 +67,6 @@ const lora = Lora({
   display: "swap",
 });
 
-/* ── البيانات الوصفية لكل لغة ────────────────────────── */
-const METADATA: Record<Locale, Metadata> = {
-  ar: {
-    title: "Momzy — منصة الأمومة",
-    description:
-      "مؤسسة متخصصة ترافق الأمهات منذ الحمل وحتى السنوات الأولى — خدمات، منتجات، ومحتوى لكل أم",
-  },
-  he: {
-    title: "Momzy — פלטפורמת האימהוּת",
-    description:
-      "מיזם המלווה אימהות מההיריון ועד השנים הראשונות — שירותים, מוצרים ותוכן לכל אמא",
-  },
-  en: {
-    title: "Momzy — The Motherhood Platform",
-    description:
-      "Supporting mothers from pregnancy through the first years — services, products, and content for every mom",
-  },
-};
-
 interface LocaleLayoutProps {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
@@ -97,7 +83,22 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return METADATA[(hasLocale(routing.locales, locale) ? locale : "ar") as Locale];
+  const home = HOME_META[(hasLocale(routing.locales, locale) ? locale : "ar") as Locale];
+  // الافتراضي لكل صفحة: أساس الروابط وصورة المعاينة — وكل صفحة عامة تضع رابطها الأساسي ولغاتها عبر pageSeo
+  return {
+    metadataBase: new URL(siteOrigin()),
+    applicationName: SITE_NAME,
+    title: home.title,
+    description: home.description,
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      title: home.title,
+      description: home.description,
+      images: [DEFAULT_OG_IMAGE],
+    },
+    twitter: { card: "summary_large_image", images: [DEFAULT_OG_IMAGE.url] },
+  };
 }
 
 /* ── التخطيط الجذري متعدد اللغات ─────────────────────── */
@@ -105,6 +106,8 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  // صور المنتجات والمقالات من Sanity CDN — الاتصال يُفتح مبكرًا فتظهر أسرع
+  preconnect("https://cdn.sanity.io");
 
   // رسائل الترجمة — تُمرَّر للمكونات العميلة عبر الـ Provider
   const messages = await getMessages();
@@ -120,6 +123,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
         <PageTracker />
         <TrackingScripts />
+        <JsonLd data={siteJsonLd(locale)} />
       </body>
     </html>
   );

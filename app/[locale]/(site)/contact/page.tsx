@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageSeo } from "@/lib/seo/site";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import { getTranslations } from "next-intl/server";
 import { whatsappLink } from "@/lib/utils/whatsapp";
@@ -13,7 +14,7 @@ import ContactForm from "@/components/contact/ContactForm";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "contact" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageSeo({ path: "/contact", locale, title: t("metaTitle"), description: t("metaDescription") });
 }
 
 /** بطاقة معلومات تواصل */

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageSeo } from "@/lib/seo/site";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Container from "@/components/ui/Container";
@@ -15,7 +16,7 @@ import MomzyText from "@/components/ui/MomzyText";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "about" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageSeo({ path: "/about", locale, title: t("metaTitle"), description: t("metaDescription") });
 }
 
 /** ألوان نقاط الشهادات (بالترتيب) */

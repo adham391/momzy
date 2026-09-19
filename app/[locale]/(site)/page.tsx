@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { HOME_META, asLocale, pageSeo } from "@/lib/seo/site";
 import HeroSection        from "@/components/home/HeroSection";
 import WhyMomzySection    from "@/components/home/WhyMomzySection";
 import BestSellersSection from "@/components/home/BestSellersSection";
@@ -7,6 +9,13 @@ import ChannelSection     from "@/components/home/ChannelSection";
 import ReviewsSection     from "@/components/home/ReviewsSection";
 import SectionsReveal     from "@/components/ui/SectionsReveal";
 import { getHomePage }    from "@/lib/sanity/queries/homePage";
+
+/** عنوان الرئيسية ووصفها — فيهما الاسم كما يكتبه الناس (Momzy / مومزي / מומזי) */
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const meta = HOME_META[asLocale(locale)];
+  return pageSeo({ path: "", locale, title: meta.title, description: meta.description });
+}
 
 /** الصفحة الرئيسية — المحتوى قابل للتعديل من Sanity (مع fallback) */
 export default async function HomePage({

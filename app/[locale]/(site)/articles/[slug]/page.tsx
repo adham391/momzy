@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import JsonLd from "@/components/seo/JsonLd";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { asLocale, pageSeo } from "@/lib/seo/site";
 import { notFound } from "next/navigation";
 import Container from "@/components/ui/Container";
 import ArticleHero, { ArticleHeroCover } from "@/components/articles/ArticleHero";
@@ -17,17 +21,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const article = await getArticleBySlug(slug, locale);
   if (!article) return { title: "Momzy" };
 
-  return {
+  return pageSeo({
+    path: `/articles/${slug}`,
+    locale,
     title: `${article.title} | Momzy`,
     description: article.excerpt,
-    openGraph: {
-      title: article.title,
-      description: article.excerpt,
-      type: "article",
-      publishedTime: article.publishedIso,
-      images: article.coverImage ? [{ url: article.coverImage }] : undefined,
-    },
-  };
+    image: article.coverImageLarge ?? article.coverImage,
+    article: { publishedTime: article.publishedIso },
+  });
 }
 
 /** المسارات تُبنى مسبقًا لكل المقالات المنشورة */
@@ -45,9 +46,19 @@ export default async function ArticlePage({ params }: PageProps) {
   if (!article) notFound();
 
   const { t, categoryLabel, readTime } = await getArticleLabeller(locale);
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const seoLocale = asLocale(locale);
 
   return (
     <>
+      <JsonLd data={articleJsonLd(article, seoLocale)} />
+      <JsonLd
+        data={breadcrumbJsonLd(seoLocale, [
+          { name: tNav("home"), path: "" },
+          { name: tNav("articles"), path: "/articles" },
+          { name: article.title, path: `/articles/${article.slug}` },
+        ])}
+      />
       <ArticleHero
         article={article}
         categoryLabel={categoryLabel(article)}

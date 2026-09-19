@@ -41,7 +41,7 @@ export interface SiteSettings {
  * روابط السوشيال ومعلومات التواصل — موحّدة عبر كل اللغات (روابط/إيميلات لا نصوص قابلة للترجمة).
  * تُشارَك بين ar/he/en فلا تُكرَّر ولا تتباين.
  */
-const SOCIAL_LINKS: SiteSettingsSocialLinks = {
+export const SOCIAL_LINKS: SiteSettingsSocialLinks = {
   instagram: "https://www.instagram.com/hebahasan._",
   tiktok:    "https://www.tiktok.com/@heba.the.nurse",
   whatsapp:  "#",

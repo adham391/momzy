@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageSeo } from "@/lib/seo/site";
 import { getTranslations } from "next-intl/server";
 import Container from "@/components/ui/Container";
 import ArticlesHeader from "@/components/articles/ArticlesHeader";
@@ -13,7 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "articles" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageSeo({ path: "/articles", locale, title: t("metaTitle"), description: t("metaDescription") });
 }
 
 /** ISR — يُعاد بناء الصفحة كل دقيقة، فيظهر مقال هبة الجديد سريعًا */

@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import JsonLd from "@/components/seo/JsonLd";
+import { breadcrumbJsonLd, serviceJsonLd } from "@/lib/seo/jsonld";
+import { asLocale, pageSeo } from "@/lib/seo/site";
 import { getTranslations } from "next-intl/server";
 import Container from "@/components/ui/Container";
 import { getService } from "@/lib/services/getService";
@@ -40,21 +43,21 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
   const t = await getTranslations({ locale, namespace: "services" });
   const service = await getService(slug);
   if (!service) return { title: t("metaTitleNotFound") };
-  return {
+  return pageSeo({
+    path: `/services/${slug}`,
+    locale,
     title: t("metaTitleWithName", { title: service.title }),
     description: service.shortDescription,
-    openGraph: {
-      title: service.title,
-      description: service.shortDescription,
-      images: service.coverImage ? [service.coverImage] : undefined,
-    },
-  };
+    image: service.coverImage,
+  });
 }
 
 /** صفحة تفاصيل الخدمة */
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const t = await getTranslations("services");
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const seoLocale = asLocale(locale);
   const service = await getService(slug);
 
   if (!service) notFound();
@@ -86,6 +89,14 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
 
   return (
     <div style={{ background: "var(--offwh)" }}>
+      <JsonLd data={serviceJsonLd(service, seoLocale)} />
+      <JsonLd
+        data={breadcrumbJsonLd(seoLocale, [
+          { name: tNav("home"), path: "" },
+          { name: tNav("services"), path: "/services" },
+          { name: service.title, path: `/services/${service.slug}` },
+        ])}
+      />
 
       {/* 1. Hero — صورة + meta + CTAs */}
       <ServiceDetailHero service={service} whatsappNumber={whatsapp} />
