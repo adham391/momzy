@@ -51,7 +51,7 @@ const DEFAULTS: Record<AppLocale, HomePageContent> = {
     heroIntro:
       "تأسست Momzy على يد هبة حسن — ممرضة معتمدة ومرافقة ولادة، رافقت +1000 أم برحلتهنّ.",
     heroPoints: [
-      "استشارات ومرافقة ولادة من هبة",
+      "استشارات ومرافقة للأم والطفل من الحمل حتى السنوات الأولى",
       "منتجات ومحتوى تعليمي موثوق",
       "مجتمع داعم يرافقك بكل خطوة",
     ],
@@ -95,7 +95,7 @@ const DEFAULTS: Record<AppLocale, HomePageContent> = {
     heroIntro:
       "Momzy נוסדה על ידי היבה חסן — אחות מוסמכת ודולה מלווה לידה, שליוותה יותר מ־1000 אמהות במסע שלהן.",
     heroPoints: [
-      "ייעוץ וליווי לידה מהיבה",
+      "ייעוץ וליווי לאם ולילד מההריון ועד השנים הראשונות",
       "מוצרים ותוכן חינוכי אמין",
       "קהילה תומכת שמלווה אותך בכל צעד",
     ],
@@ -139,7 +139,7 @@ const DEFAULTS: Record<AppLocale, HomePageContent> = {
     heroIntro:
       "Momzy was founded by Heba Hasan — a certified nurse and birth doula who has supported over 1,000 moms on their journey.",
     heroPoints: [
-      "Consultations and birth support from Heba",
+      "Consultations and support for mother and child, from pregnancy through the early years",
       "Trusted products and educational content",
       "A supportive community with you every step",
     ],
