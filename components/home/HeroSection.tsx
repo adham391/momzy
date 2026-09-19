@@ -3,6 +3,7 @@ import Image from "next/image";
 import PolkaDots from "@/components/ui/PolkaDots";
 import Container from "@/components/ui/Container";
 import MomzyText from "@/components/ui/MomzyText";
+import CheckGlyph from "@/components/ui/CheckGlyph";
 import { useTranslations, useLocale } from "next-intl";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
 
@@ -65,8 +66,9 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
         aria-hidden="true"
       />
 
-      {/* ── بطاقة تعريف هبة على الصورة (ديسكتوب فقط) ── */}
+      {/* ── بطاقة تعريف هبة على الصورة (ديسكتوب فقط) — خارج مقتطف البحث ── */}
       <div
+        data-nosnippet
         className="hero-rise absolute hidden md:flex items-center gap-3 z-[3]"
         style={{
           bottom: 84,
@@ -86,7 +88,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
           className="flex items-center justify-center shrink-0 rounded-full"
           style={{ width: 34, height: 34, background: "var(--teal)", color: "white", fontSize: 16 }}
         >
-          ✓
+          <CheckGlyph size={16} />
         </span>
         <div className="leading-tight">
           <div className="font-heading font-bold" style={{ color: "var(--dark)", fontSize: 16 }}>{t("hero.hebaName")}</div>
@@ -136,7 +138,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.22)",
                 }}
               >
-                ✓
+                <CheckGlyph size={16} />
               </span>
             </div>
 
@@ -185,8 +187,9 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
               <MomzyText text={content.heroIntro} highlightClassName="text-yellow italic font-semibold" />
             </p>
 
-            {/* ── نقاط القيمة ── */}
+            {/* ── نقاط القيمة — خارج مقتطف البحث: Google كان يعرضها وصفًا («✓استشارات ✓منتجات…») ── */}
             <ul
+              data-nosnippet
               className="hero-rise inline-flex flex-col gap-2.5 mb-7"
               style={{ animationDelay: "0.4s" }}
             >
@@ -207,7 +210,7 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
                       boxShadow: "0 2px 6px rgba(130,201,196,0.5)",
                     }}
                   >
-                    ✓
+                    <CheckGlyph size={11} />
                   </span>
                   {text}
                 </li>

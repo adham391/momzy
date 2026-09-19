@@ -5,6 +5,7 @@ import SectionWave from "@/components/ui/SectionWave";
 import MomzyText from "@/components/ui/MomzyText";
 import { useTranslations } from "next-intl";
 import type { HomePageContent } from "@/lib/sanity/queries/homePage";
+import CheckGlyph from "@/components/ui/CheckGlyph";
 
 /** شهادات هبة المهنية مع ألوان النقطة — النص من مفاتيح home.heba.tags */
 const HEBA_TAGS = [
@@ -141,7 +142,7 @@ export default function HebaSection({ content }: { content: HomePageContent }) {
                     className="absolute flex items-center justify-center rounded-full border-[3px] border-white shadow-[0_6px_16px_rgba(0,0,0,0.18)]"
                     style={{ background: "var(--teal)", color: "white", width: 44, height: 44, fontSize: 19, top: 16, insetInlineEnd: 16 }}
                   >
-                    ✓
+                    <CheckGlyph size={19} />
                   </span>
                 </div>
 
