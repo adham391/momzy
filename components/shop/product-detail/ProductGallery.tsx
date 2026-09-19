@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Container from "@/components/ui/Container";
 import ProductImagePlaceholder from "@/components/shop/ProductImagePlaceholder";
+import { sanityImageAt } from "@/lib/sanity/imageUrl";
 import SectionLabel from "@/components/ui/SectionLabel";
 
 interface ProductGalleryProps {
@@ -108,8 +109,10 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
                 {/* Thumbnail */}
                 {thumbnailUrl ? (
                   <img
-                    src={thumbnailUrl}
+                    src={sanityImageAt(thumbnailUrl, 640)}
                     alt={title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                     style={{ pointerEvents: "none" }}
                   />
@@ -191,7 +194,7 @@ export default function ProductGallery({ images, mainImage, title, videoUrl }: P
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={lightbox.src}
+                src={sanityImageAt(lightbox.src, 1280)}
                 alt={title}
                 style={{
                   width: "100%",

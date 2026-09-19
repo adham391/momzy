@@ -1,4 +1,5 @@
 import { Link } from "@/lib/i18n/navigation";
+import Image from "next/image";
 import PolkaDots from "@/components/ui/PolkaDots";
 import Container from "@/components/ui/Container";
 import MomzyText from "@/components/ui/MomzyText";
@@ -38,16 +39,23 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
         style={{
           insetInlineEnd: 0,
           width: "68%",
-          backgroundImage: `url('${content.heroImage}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 8%",
-          backgroundRepeat: "no-repeat",
           // القناع يتلاشى نحو النص (البداية): يمينًا في RTL ويسارًا في LTR
           WebkitMaskImage: `linear-gradient(to ${isRtl ? "right" : "left"}, #000 55%, transparent 100%)`,
           maskImage: `linear-gradient(to ${isRtl ? "right" : "left"}, #000 55%, transparent 100%)`,
         }}
         aria-hidden="true"
-      />
+      >
+        <Image
+          src={content.heroImage}
+          alt=""
+          fill
+          // مخفية على الجوال — «1px» يجعل المتصفح لا يطلب منها إلا أصغر نسخة
+          sizes="(min-width: 768px) 68vw, 1px"
+          loading="eager"
+          fetchPriority="high"
+          style={{ objectFit: "cover", objectPosition: "center 8%" }}
+        />
+      </div>
       {/* ── تدرّج خفيف على جهة النص (البداية) للتباين ── */}
       <div
         className="absolute inset-0 hidden md:block"
@@ -98,16 +106,21 @@ export default function HeroSection({ content }: { content: HomePageContent }) {
             {/* ── صورة هبة المؤطّرة — موبايل فقط (إطار أبيض + توثيق) ── */}
             <div className="md:hidden mx-auto mb-5 relative" style={{ width: 168, maxWidth: "54%" }}>
               <div
-                className="rounded-[26px] overflow-hidden border-[5px] border-white"
-                style={{
-                  aspectRatio: "4 / 5",
-                  backgroundImage: `url('${content.heroImage}')`,
-                  // تقريب أكبر من cover — يعرض الرأس حتى الخصر كنسخة الديسكتوب
-                  backgroundSize: "160%",
-                  backgroundPosition: "center 10%",
-                  boxShadow: "0 18px 44px rgba(0,0,0,0.24)",
-                }}
-              />
+                className="relative rounded-[26px] overflow-hidden border-[5px] border-white"
+                style={{ aspectRatio: "4 / 5", boxShadow: "0 18px 44px rgba(0,0,0,0.24)" }}
+              >
+                {/* أول ما تراه الزائرة على الجوال (LCP) — تُحمَّل مسبقًا وبأولوية */}
+                <Image
+                  src={content.heroImage}
+                  alt=""
+                  fill
+                  sizes="(min-width: 768px) 1px, 270px"
+                  preload
+                  fetchPriority="high"
+                  // تقريب أكبر من cover (كـ background-size: 160%) — يعرض الرأس حتى الخصر كنسخة الديسكتوب
+                  style={{ objectFit: "cover", objectPosition: "center 10%", transform: "scale(1.6)", transformOrigin: "50% 10%" }}
+                />
+              </div>
               {/* علامة توثيق teal */}
               <span
                 className="absolute flex items-center justify-center rounded-full border-[3px] border-white"
