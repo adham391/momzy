@@ -39,8 +39,11 @@ export default function ProductCard({ product, showTags = true, rank }: ProductC
       // بطاقة الكتيب أضيق — تحتضن الغلاف الطولي وتتوسّط خليتها (ككتاب بجانب صندوق)
       style={digital ? { maxWidth: 270, width: "100%", marginInline: "auto" } : undefined}
     >
-      {/* ── منطقة الصورة ── */}
-      <div className="relative shrink-0" style={{ height: 300 }}>
+      {/* ── منطقة الصورة ──
+          على الجوال بنسبة صور المنتجات (9:10 — صورة الصندوق 950×1056) لا بارتفاع ثابت:
+          البطاقة هناك نحو 165px عرضًا، و300px ارتفاعًا كانت تقصّ نحو 40% من عرض الصورة.
+          البطاقتان في الصف بالعرض نفسه فتبقيان متساويتين؛ ومن sm فأعلى الارتفاع الثابت كما كان. */}
+      <div className="relative shrink-0 aspect-[9/10] sm:aspect-auto sm:h-[300px]">
         {/* الكتيبات طولية — contain على أبيض نظيف يعرض الغلاف كبيرًا كاملًا بلا قص */}
         <ProductImagePlaceholder
           src={product.mainImage}
