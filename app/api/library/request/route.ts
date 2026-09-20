@@ -9,6 +9,7 @@ import {
 } from "@/lib/db/library";
 import { isEmailConfigured, sendEmail } from "@/lib/resend/client";
 import { libraryEmailHtml, libraryEmailSubject } from "@/lib/resend/emails/libraryEmail";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 /**
  * POST /api/library/request — «نسيت كلمة المرور» + الدعوة الذاتية معًا.
@@ -20,6 +21,8 @@ import { libraryEmailHtml, libraryEmailSubject } from "@/lib/resend/emails/libra
  *  - بريد لا نعرفه → لا يُرسَل شيء
  */
 export async function POST(req: NextRequest) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(req, "library"))) return tooManyRequests();
   try {
     const body = (await req.json()) as { email?: unknown; locale?: unknown };
     const email = typeof body.email === "string" ? body.email.trim() : "";

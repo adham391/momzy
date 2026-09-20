@@ -1,7 +1,7 @@
 import { after } from "next/server";
 import { verifyHypPayment } from "@/lib/hyp/client";
 import { breakoutResponse } from "@/lib/hyp/breakout";
-import { markOrderPaid, getOrderIdByNumber } from "@/lib/db/orders";
+import { markOrderPaid, getOrderIdByNumber, deductOrderStock } from "@/lib/db/orders";
 import { markBookingPaid, getBookingIdByNumber } from "@/lib/db/bookings";
 import { sendBookingNotifications } from "@/lib/notifications/booking";
 import { sendDigitalDelivery } from "@/lib/notifications/digital";
@@ -34,10 +34,11 @@ export async function GET(request: Request) {
 
   if (isBooking) {
     if (result.valid) {
-      entityId = await markBookingPaid(result.orderNumber, result.transactionId);
-      // التأكيد (إيميل + واتساب) يُرسل الآن — بعد نجاح الدفع لا قبله
-      if (entityId) {
-        const bookingId = entityId;
+      const paid = await markBookingPaid(result.orderNumber, result.transactionId);
+      entityId = paid?.id ?? null;
+      // التأكيد (إيميل + واتساب) بعد نجاح الدفع لا قبله — ومرة واحدة: إعادة فتح العنوان لا تكرّره
+      if (paid?.firstPayment) {
+        const bookingId = paid.id;
         after(() => sendBookingNotifications(bookingId));
       }
       dest = entityId ? `/booking/${entityId}` : "/services";
@@ -47,12 +48,14 @@ export async function GET(request: Request) {
     }
   } else {
     if (result.valid) {
-      entityId = await markOrderPaid(result.orderNumber, result.transactionId);
-      // التأكيد وإشعار هبة والتسليم الرقمي والنشرة (لمن وافقت) — كلها بعد نجاح الدفع لا قبله
-      if (entityId) {
-        const orderId = entityId;
+      const paid = await markOrderPaid(result.orderNumber, result.transactionId);
+      entityId = paid?.id ?? null;
+      // خصم المخزون والتأكيد وإشعار هبة والتسليم الرقمي والنشرة — بعد نجاح الدفع، ومرة واحدة
+      if (paid?.firstPayment) {
+        const orderId = paid.id;
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
         after(async () => {
+          await deductOrderStock(orderId);
           await sendOrderConfirmation(orderId);
           await sendDigitalDelivery(orderId, siteUrl);
           await subscribeConsentingBuyer(orderId);

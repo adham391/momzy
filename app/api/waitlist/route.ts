@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { joinWaitlist } from "@/lib/db/waitlist";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -11,6 +12,8 @@ function isValidEmail(email: string): boolean {
  * التسجيل مرتين لا يُنشئ صفًّا مكررًا (upsert).
  */
 export async function POST(request: Request) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(request, "waitlist"))) return tooManyRequests();
   let body: unknown;
   try {
     body = await request.json();

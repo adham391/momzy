@@ -121,6 +121,7 @@ export function bookingAdminEmailHtml(b: BookingRow): string {
       ${babyAgeLine(b)}
       ${customerTextLine("📝 موضوع اللقاء", b.topic)}
       ${customerTextLine("ملاحظات", b.notes)}
+      ${customerTextLine("⚠️ ملاحظة", b.admin_notes)}
     </div>`;
   return bookingEmailShell("ar", "حجز جديد", "📅 حجز جديد", body);
 }

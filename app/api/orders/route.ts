@@ -1,6 +1,5 @@
 import { NextResponse, after } from "next/server";
-import { createOrder } from "@/lib/db/orders";
-import { decrementStock } from "@/lib/products/stock";
+import { createOrder, deductOrderStock } from "@/lib/db/orders";
 import { orderNeedsShipping } from "@/lib/products/getProducts";
 import { isWhatsAppConfigured } from "@/lib/whatsapp/client";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
@@ -13,6 +12,7 @@ import { sendDigitalDelivery } from "@/lib/notifications/digital";
 import { subscribeConsentingBuyer } from "@/lib/newsletter/checkoutConsent";
 import type { CreateOrderInput } from "@/lib/db/types";
 import type { GiftOptions } from "@/lib/store/cart";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 /** تحقق بسيط من صيغة الإيميل */
 function isValidEmail(email: string): boolean {
@@ -25,6 +25,8 @@ function isValidEmail(email: string): boolean {
  * الأسعار تُحسب على السيرفر؛ العميل يرسل slug + الكمية فقط.
  */
 export async function POST(request: Request) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(request, "order"))) return tooManyRequests();
   let body: unknown;
   try {
     body = await request.json();
@@ -94,13 +96,6 @@ export async function POST(request: Request) {
       currency: currencyFor(domestic),
     });
 
-    // إنقاص المخزون تلقائيًا في Sanity — بعد الرد (best-effort، لا يعطّل الـ checkout)
-    const orderedItems = b.items.map((i) => ({
-      slug: String(i.slug),
-      quantity: Number(i.quantity) || 1,
-    }));
-    after(() => decrementStock(orderedItems));
-
     // عليه مبلغ و HYP مضبوط → رابط الدفع لتحويل العميلة إليه.
     // مجاني، أو HYP غير مضبوط (تدفّق يدوي) → لا دفع إلكتروني، ويتأكّد الطلب الآن.
     const needsOnlinePayment = result.total > 0 && isHypConfigured();
@@ -126,6 +121,9 @@ export async function POST(request: Request) {
     // كان يُعامَل كغياب HYP فيصل التأكيد ورابط الكتيب بلا دفع. يبقى الطلب pending، وتعيد
     // العميلة المحاولة من صفحة الطلب، ويصلها تذكير الاسترداد كأي طلب متروك.
     const confirmNow = !needsOnlinePayment;
+
+    // المخزون يُخصم عند التأكيد لا عند الإنشاء: الآن للطلب بلا دفع إلكتروني، وبعد نجاح الدفع من /api/hyp/callback
+    if (confirmNow) after(() => deductOrderStock(result.id));
 
     // إشعارات ما بعد الرد — best-effort، لا تعطّل الـ checkout.
     // مع الدفع الإلكتروني لا يُرسَل شيء هنا: التأكيد وإشعار هبة والتسليم من

@@ -3,12 +3,15 @@ import { cookies } from "next/headers";
 import { getCurrentAccount, LIBRARY_SESSION_COOKIE } from "@/lib/library/auth";
 import { setAccountPassword } from "@/lib/db/library";
 import { hashPassword, verifyPassword, sha256, PASSWORD_MIN_LENGTH } from "@/lib/library/password";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 /**
  * POST /api/library/change — تغيير كلمة المرور من داخل المكتبة.
  * يتطلب جلسة صالحة + الكلمة الحالية. الجلسات الأخرى تُبطل، وتبقى الحالية.
  */
 export async function POST(req: NextRequest) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(req, "library"))) return tooManyRequests();
   try {
     const account = await getCurrentAccount();
     if (!account || !account.password_hash) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { consumeLibraryToken, setAccountPassword, createSession } from "@/lib/db/library";
 import { hashPassword, PASSWORD_MIN_LENGTH } from "@/lib/library/password";
 import { LIBRARY_SESSION_COOKIE, sessionCookieOptions } from "@/lib/library/auth";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 /**
  * POST /api/library/password — تثبيت كلمة المرور من رابط الإنشاء/الاستعادة.
@@ -9,6 +10,8 @@ import { LIBRARY_SESSION_COOKIE, sessionCookieOptions } from "@/lib/library/auth
  * وتُفتح جلسة جديدة فورًا فلا تُطالَب العميلة بالدخول مرة ثانية.
  */
 export async function POST(req: NextRequest) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(req, "library"))) return tooManyRequests();
   try {
     const body = (await req.json()) as { token?: unknown; password?: unknown };
     const token = typeof body.token === "string" ? body.token : "";

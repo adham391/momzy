@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginWithPassword, LIBRARY_SESSION_COOKIE, sessionCookieOptions } from "@/lib/library/auth";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 /**
  * POST /api/library/login — دخول المكتبة بالبريد وكلمة المرور.
@@ -7,6 +8,8 @@ import { loginWithPassword, LIBRARY_SESSION_COOKIE, sessionCookieOptions } from 
  * عن «كلمة خاطئة»، فلا يتحوّل الرد إلى أداة لكشف من اشترى من الموقع.
  */
 export async function POST(req: NextRequest) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(req, "library"))) return tooManyRequests();
   try {
     const body = (await req.json()) as { email?: unknown; password?: unknown };
     const email = typeof body.email === "string" ? body.email.trim() : "";

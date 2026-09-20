@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOrderById } from "@/lib/db/orders";
-import { getBookingById } from "@/lib/db/bookings";
+import { getBookingById, updateBookingStatus } from "@/lib/db/bookings";
+import { ensureSeatForPayment } from "@/lib/bookings/seatHold";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
 import { breakoutResponse } from "@/lib/hyp/breakout";
 
@@ -68,6 +69,12 @@ async function payBooking(id: string, origin: string, locale?: string) {
   // مدفوع، أو مجاني، أو HYP غير مضبوط → صفحة تأكيد التسجيل
   if (booking.payment_status === "paid" || booking.amount <= 0 || !isHypConfigured()) {
     return leaveFrame(`/booking/${id}`, origin);
+  }
+
+  // المقعد: يُمدَّد حجزه المؤقت، أو يُؤخذ من جديد إن تحرّر — ولا دفع لجلسة اكتملت في الأثناء
+  if ((await ensureSeatForPayment(booking.id)) === "taken") {
+    await updateBookingStatus(booking.id, "cancelled", "انتهى حجز المقعد المؤقت واكتمل العدد قبل الدفع", null);
+    return leaveFrame(`/booking/${id}?seat=taken`, origin);
   }
 
   const paymentUrl = await createHypPaymentUrl({

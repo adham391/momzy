@@ -4,6 +4,7 @@ import { sendBookingNotifications } from "@/lib/notifications/booking";
 import { isHypConfigured, createHypPaymentUrl } from "@/lib/hyp/client";
 import { isDomesticRequest } from "@/lib/geo/country";
 import { currencyFor } from "@/lib/currency";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -18,6 +19,8 @@ function isValidEmail(email: string): boolean {
  * التأكيد (إيميل/واتساب) يُرسل **بعد نجاح الدفع** فقط — أما المجانية فتُؤكَّد فورًا.
  */
 export async function POST(request: Request) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(request, "booking"))) return tooManyRequests();
   let body: unknown;
   try {
     body = await request.json();

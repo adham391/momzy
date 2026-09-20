@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: BookingPageProps): Promise<Me
 
 interface BookingPageProps {
   params: Promise<{ locale: string; id: string }>;
-  searchParams: Promise<{ payment?: string }>;
+  searchParams: Promise<{ payment?: string; seat?: string }>;
 }
 
 /**
@@ -49,7 +49,7 @@ interface BookingPageProps {
  */
 export default async function BookingPage({ params, searchParams }: BookingPageProps) {
   const { id } = await params;
-  const { payment } = await searchParams;
+  const { payment, seat } = await searchParams;
   const t = await getTranslations("booking");
   const tNav = await getTranslations("nav");
   const tMenu = await getTranslations("menu");
@@ -62,6 +62,8 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
   // بانتظار الدفع: ورشة مدفوعة + غير مدفوعة + HYP مفعّل + غير ملغاة
   const awaitingPayment = !isPaid && booking.amount > 0 && isHypConfigured() && !isCancelled;
   const paymentFailed = payment === "failed";
+  /** انتهى الحجز المؤقت واكتمل العدد قبل الدفع — التسجيل أُلغي بلا خصم */
+  const seatTaken = seat === "taken";
   const state = isCancelled ? "cancelled" : awaitingPayment ? "awaiting" : "confirmed";
   // رابط اللقاء/المكان لا يُكشفان فور الدفع بل في تذكير اليوم السابق — ويظهران هنا حين تصبح الجلسة خلال يوم
   const revealSession = state === "confirmed" && startsWithinHours(booking.date, booking.start_time, REVEAL_HOURS_BEFORE);
@@ -112,6 +114,16 @@ export default async function BookingPage({ params, searchParams }: BookingPageP
       )}
 
       <Container>
+        {seatTaken && isCancelled && (
+          <div
+            className="rounded-[16px] text-center mt-8 max-w-[680px] mx-auto"
+            style={{ background: "#FEF5F7", border: "1.5px solid var(--roselt)", padding: "14px 20px" }}
+          >
+            <span className="font-label text-[13.5px]" style={{ color: "var(--rose)" }}>
+              {t("page.seatTaken")}
+            </span>
+          </div>
+        )}
         {isAwaiting ? (
           /* ── مرحلة الدفع — تخطيط /checkout نفسه: الدفع + ملخّص جانبي ملتصق ── */
           <div className="mt-8 grid gap-8 grid-cols-1 md:[grid-template-columns:1fr_380px]">

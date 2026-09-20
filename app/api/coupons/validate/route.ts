@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateCoupon } from "@/lib/db/coupons";
+import { withinRateLimit } from "@/lib/security/rateLimit";
 
 /**
  * POST /api/coupons/validate — يتحقق من كود خصم لمجموع معيّن.
@@ -7,6 +8,8 @@ import { validateCoupon } from "@/lib/db/coupons";
  * يعيد: { valid, discount, code?, label?, error? }
  */
 export async function POST(request: Request) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(request, "coupon"))) return NextResponse.json({ valid: false, discount: 0, error: "محاولات كثيرة — انتظري قليلًا" }, { status: 429 });
   let body: unknown;
   try {
     body = await request.json();

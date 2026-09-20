@@ -8,6 +8,8 @@ import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import { ilsToUsd, orderUsdRate, type Currency } from "@/lib/currency";
 import { isOnlineSession } from "@/lib/services/session";
 import { toLatinDigits } from "@/lib/utils/format";
+import { isHypConfigured } from "@/lib/hyp/client";
+import { forceSeat, reacquireSeat, releaseExpiredSeatHolds, releaseSeat, seatHoldExpiry } from "@/lib/bookings/seatHold";
 import type { PaymentStatus } from "./types";
 import type { StatusHistoryRow } from "./orders";
 
@@ -281,7 +283,11 @@ export async function createBooking(
     currency === "USD" ? orderUsdRate([{ ils: slot.price, usd: service?.priceUsd, quantity: 1 }]) : null;
   const chargedAmount = exchangeRate ? ilsToUsd(slot.price, exchangeRate) : slot.price;
 
-  // حجز ذرّي — يعيد false لو امتلأت أو محجوبة
+  // مقاعد من تركت الدفع وانتهى حجزها المؤقت تعود أولًا — كي لا تُرفض أم على مقعد متاح فعلًا
+  await releaseExpiredSeatHolds();
+
+  // حجز ذرّي — يعيد false لو امتلأت أو محجوبة. الجلسة المدفوعة: حجز مؤقت ينتهي إن لم يتم الدفع
+  const holdUntil = slot.price > 0 && isHypConfigured() ? seatHoldExpiry() : null;
   const { data: booked } = await supabase.rpc("book_slot", { slot_id: input.slotId });
   if (!booked) return { error: "عذرًا، هذا الموعد لم يعد متاحًا", status: 409 };
 
@@ -305,6 +311,8 @@ export async function createBooking(
       ...(topic ? { topic } : {}),
       baby_birth_date: input.babyBirthDate || null,
       ...(babyName ? { baby_name: babyName } : {}),
+      seat_held: true,
+      hold_expires_at: holdUntil,
       locale: input.locale === "ar" || input.locale === "he" || input.locale === "en" ? input.locale : null,
     })
     .select("id, booking_number")
@@ -334,8 +342,9 @@ export async function createBooking(
 export async function markBookingPaid(
   bookingNumber: string,
   paymentRef: string
-): Promise<string | null> {
+): Promise<{ id: string; firstPayment: boolean } | null> {
   const supabase = createAdminClient();
+  // الانتقال الأول إلى «مدفوع» فقط — إعادة فتح عنوان العودة لا تكرّر الإشعارات؛ والمقعد يصير ثابتًا
   const { data } = await supabase
     .from("bookings")
     .update({
@@ -343,12 +352,32 @@ export async function markBookingPaid(
       status: "confirmed",
       payment_method: "HYP",
       payment_ref: paymentRef,
+      hold_expires_at: null,
     })
     .eq("booking_number", bookingNumber)
-    .select("id")
-    .single();
-  return (data?.id as string | undefined) ?? null;
+    .neq("payment_status", "paid")
+    .select("id, seat_held, availability_id")
+    .maybeSingle();
+
+  if (!data) {
+    const id = await getBookingIdByNumber(bookingNumber);
+    return id ? { id, firstPayment: false } : null;
+  }
+
+  // دفعت بعد انتهاء حجزها المؤقت: تأخذ مقعدًا ثابتًا — وإن اكتمل العدد في الأثناء فلها مقعدها وتُنبَّه هبة
+  if (!data.seat_held && data.availability_id) {
+    const id = String(data.id), slotId = String(data.availability_id);
+    if (!(await reacquireSeat(id, slotId, null))) {
+      await forceSeat(id, slotId);
+      await supabase.from("bookings").update({ admin_notes: OVERBOOKED_NOTE }).eq("id", id);
+    }
+  }
+  return { id: String(data.id), firstPayment: true };
 }
+
+/** ملاحظة لهبة: دفعت بعد انتهاء الحجز المؤقت والجلسة ممتلئة */
+const OVERBOOKED_NOTE =
+  "دفعت بعد انتهاء حجز المقعد المؤقت، وكانت الجلسة قد اكتملت في الأثناء — المقاعد الآن أكثر من السعة بواحد.";
 
 /** يعيد UUID الحجز برقمه (BK-…) — لتوجيه callback عند فشل الدفع */
 export async function getBookingIdByNumber(bookingNumber: string): Promise<string | null> {
@@ -420,9 +449,9 @@ export async function updateBookingStatus(
   const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", id);
   if (error) throw new Error(error.message);
 
-  // إلغاء → حرّر الفتحة
-  if (newStatus === "cancelled" && oldStatus !== "cancelled" && current?.availability_id) {
-    await supabase.rpc("unbook_slot", { slot_id: current.availability_id });
+  // إلغاء → حرّر مقعدها إن كانت تحجز مقعدًا (الحجز المؤقت المنتهي تحرّر مقعده من قبل)
+  if (newStatus === "cancelled" && oldStatus !== "cancelled") {
+    await releaseSeat(id);
   }
 
   await supabase.from("booking_status_history").insert({

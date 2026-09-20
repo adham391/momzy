@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resend, FROM_EMAIL } from "@/lib/resend/client";
 import { getNotifyEmail } from "@/lib/notifications/recipients";
 import { contactEmailHtml, contactEmailSubject } from "@/lib/resend/emails/contactEmail";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 /** التحقق من صحة الحقول المطلوبة */
 function validate(body: Record<string, unknown>): string | null {
@@ -14,6 +15,8 @@ function validate(body: Record<string, unknown>): string | null {
 
 /** POST /api/contact — استقبال رسالة التواصل وإرسالها لهبة عبر Resend */
 export async function POST(req: NextRequest) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(req, "contact"))) return tooManyRequests();
   try {
     const body = await req.json() as Record<string, unknown>;
 

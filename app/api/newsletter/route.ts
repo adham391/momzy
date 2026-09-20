@@ -1,6 +1,7 @@
 import { NextResponse, after } from "next/server";
 import { subscribeNewsletter } from "@/lib/db/newsletter";
 import { sendNewsletterWelcome, syncNewsletterSubscriber } from "@/lib/resend/newsletter";
+import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 /**
  * POST /api/newsletter — اشتراك في النشرة البريدية.
@@ -8,6 +9,8 @@ import { sendNewsletterWelcome, syncNewsletterSubscriber } from "@/lib/resend/ne
  * وتصل المشتركة الجديدة رسالة ترحيب بلغة الصفحة — فلا يتأخّر الرد ولا يفشل الاشتراك إن تعثّر Resend.
  */
 export async function POST(request: Request) {
+  // حدّ المحاولات لكل IP — يمنع إغراق النموذج
+  if (!(await withinRateLimit(request, "newsletter"))) return tooManyRequests();
   let body: unknown;
   try {
     body = await request.json();

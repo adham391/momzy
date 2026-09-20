@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUpcomingSlotsForService } from "@/lib/db/bookings";
 import { getService } from "@/lib/services/getService";
 import { toPublicSlot } from "@/lib/services/session";
+import { releaseExpiredSeatHolds } from "@/lib/bookings/seatHold";
 
 /**
  * GET /api/availability?service=slug — كل الجلسات القادمة لخدمة، **بما فيها المكتملة**:
@@ -16,6 +17,8 @@ export async function GET(request: Request) {
   const slug = searchParams.get("service");
   if (!slug) return NextResponse.json({ slots: [] });
 
+  // مقاعد الحجوزات المؤقتة المنتهية بلا دفع تعود قبل العرض — فلا تظهر جلسة مكتملة وهي ليست كذلك
+  await releaseExpiredSeatHolds();
   const [slots, service] = await Promise.all([getUpcomingSlotsForService(slug), getService(slug)]);
   return NextResponse.json({ slots: slots.map((slot) => toPublicSlot(slot, service)) });
 }

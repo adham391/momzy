@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProducts } from "@/lib/products/getProducts";
-import { restoreStock } from "@/lib/products/stock";
+import { decrementStock, restoreStock } from "@/lib/products/stock";
+import { canFulfill } from "@/lib/orders/fulfillment";
 import { getShippingConfig } from "./settings";
 import { validateCoupon, incrementCouponUsage } from "./coupons";
 import { computeShipping } from "@/lib/shipping";
@@ -243,8 +244,12 @@ export async function createOrder(
 }
 
 /** يُعلّم الطلب مدفوعًا (من HYP callback) — يعيد id الطلب أو null */
-export async function markOrderPaid(orderNumber: string, paymentRef: string): Promise<string | null> {
+export async function markOrderPaid(
+  orderNumber: string,
+  paymentRef: string
+): Promise<{ id: string; firstPayment: boolean } | null> {
   const supabase = createAdminClient();
+  // الانتقال الأول إلى «مدفوع» فقط — إعادة فتح عنوان العودة لا تكرّر الإشعارات ولا خصم المخزون
   const { data } = await supabase
     .from("orders")
     .update({
@@ -254,9 +259,24 @@ export async function markOrderPaid(orderNumber: string, paymentRef: string): Pr
       payment_ref: paymentRef,
     })
     .eq("order_number", orderNumber)
+    .neq("payment_status", "paid")
     .select("id")
-    .single();
-  return (data?.id as string | undefined) ?? null;
+    .maybeSingle();
+  if (data?.id) return { id: String(data.id), firstPayment: true };
+  const id = await getOrderIdByNumber(orderNumber);
+  return id ? { id, firstPayment: false } : null;
+}
+
+/**
+ * يخصم مخزون ما في الطلب — عند تأكيده (نجاح الدفع، أو طلب بلا دفع إلكتروني) لا عند إنشائه:
+ * الطلب المتروك قبل الدفع لا يُنقص المخزون. المنتجات بلا كمية (الكتيبات) تُتخطّى.
+ */
+export async function deductOrderStock(orderId: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { data: items } = await supabase.from("order_items").select("product_slug, quantity").eq("order_id", orderId);
+  if (items?.length) {
+    await decrementStock(items.map((it) => ({ slug: String(it.product_slug), quantity: Number(it.quantity) || 0 })));
+  }
 }
 
 /**
@@ -465,10 +485,12 @@ export async function updateOrderStatus(
 
   const { data: current } = await supabase
     .from("orders")
-    .select("order_status")
+    .select("order_status, payment_status, total_amount")
     .eq("id", id)
     .single();
   const oldStatus = (current?.order_status as string | undefined) ?? null;
+  /** خُصم مخزونه؟ — المخزون يُخصم عند التأكيد، فالطلب غير المدفوع لا يُرجِع شيئًا */
+  const stockWasDeducted = canFulfill(String(current?.payment_status ?? ""), Number(current?.total_amount ?? 0), false);
 
   const { error } = await supabase.from("orders").update({ order_status: newStatus }).eq("id", id);
   if (error) throw new Error(error.message);
@@ -482,7 +504,7 @@ export async function updateOrderStatus(
   });
 
   // إرجاع المخزون تلقائيًا عند الإلغاء (فقط عند الانتقال من حالة غير ملغاة → ملغاة، لتجنّب الإرجاع المزدوج)
-  if (newStatus === "cancelled" && oldStatus !== "cancelled") {
+  if (newStatus === "cancelled" && oldStatus !== "cancelled" && stockWasDeducted) {
     const { data: items } = await supabase
       .from("order_items")
       .select("product_slug, quantity")

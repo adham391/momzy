@@ -122,7 +122,7 @@
     "header": {
       "confirmedTitle": "You're registered 🌸",
       "confirmedSubtitle": "Your seat is reserved — see you there!",
-      "awaitingTitle": "We saved your seat — awaiting payment",
+      "awaitingTitle": "Awaiting payment",
       "awaitingSubtitle": "Complete the payment below to secure your seat",
       "cancelledTitle": "Registration cancelled",
       "cancelledSubtitle": "Contact us if you'd like to register again",
@@ -159,7 +159,7 @@
       "workshopFallback": "Workshop",
       "seatFor": "One seat for {name}",
       "total": "Total",
-      "seatHeld": "🎟️ Your seat is held in your name while you complete payment"
+      "seatHeld": "🎟️ Your seat is held for a few minutes while you pay — complete payment to secure it"
     },
     "page": {
       "awaitingTitle": "Secure checkout",
@@ -170,7 +170,8 @@
       "cancelledSubtitle": "Contact us if you'd like to register again",
       "metaDescription": "Your workshop registration details",
       "servicesCrumb": "Services",
-      "paymentFailed": "The payment didn't go through — your seat is still held, and you can try again below.",
+      "paymentFailed": "The payment didn't go through — you can try again below.",
+      "seatTaken": "Your seat hold ended before payment was completed, and this session filled up in the meantime — you weren't charged. Choose another date or join the waitlist on the workshop page.",
       "otherServices": "Other services",
       "notFoundTitle": "Registration not found",
       "notFoundBody": "We couldn't find this registration — the link may be incorrect.",

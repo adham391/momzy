@@ -5,6 +5,7 @@ import { listUpcomingSlots } from "@/lib/db/bookings";
 import { getActiveBookingsForSlots, type SessionBooking } from "@/lib/db/sessions";
 import { getSessionDefaults } from "@/lib/db/settings";
 import { israelTodayISO } from "@/lib/sessions/time";
+import { releaseExpiredSeatHolds } from "@/lib/bookings/seatHold";
 import SessionsManager from "@/components/admin/sessions/SessionsManager";
 import type { PageNotice, ServiceOption } from "@/components/admin/sessions/types";
 import type { Service } from "@/lib/services/types";
@@ -42,6 +43,8 @@ export default async function AvailabilityPage({
   const notice: PageNotice | null = sp.notice ? { text: sp.notice, tone: sp.tone === "error" ? "error" : "ok" } : null;
   const initialDay = sp.day && DATE_RE.test(sp.day) ? sp.day : null;
 
+  // الأعداد بلا الحجوزات المؤقتة المنتهية — كما تراها الأمهات في الرزنامة
+  await releaseExpiredSeatHolds();
   const [services, defaults, slots] = await Promise.all([getServices(), getSessionDefaults(), listUpcomingSlots()]);
   const bookingsMap = await getActiveBookingsForSlots(slots.map((s) => s.id));
   // كائن عادي لا Map — يعبر إلى المكوّن العميل

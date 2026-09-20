@@ -97,6 +97,7 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
           {/* ما كتبته الأم عند التسجيل — موضوع اللقاء (للّقاءات الفردية) وملاحظاتها */}
           {b.topic && <CustomerText label="موضوع اللقاء" text={b.topic} strong />}
           {b.notes && <CustomerText label="ملاحظات" text={b.notes} />}
+          {b.admin_notes && <CustomerText label="⚠️ ملاحظة" text={b.admin_notes} strong />}
         </div>
 
         {/* إجراءات */}
