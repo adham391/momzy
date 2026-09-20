@@ -188,11 +188,8 @@ WHATSAPP_ACCESS_TOKEN=التوكن_الدائم
 ## 🟢 8. التتبّع والتحليلات
 
 - [x] **8.1أ — Meta Pixel:** `NEXT_PUBLIC_META_PIXEL_ID` مضبوط في Vercel (Production) — 20 سبتمبر 2026. الأحداث المرسَلة: PageView مع كل تنقّل · ViewContent · AddToCart · InitiateCheckout · Purchase · Lead (`lib/analytics/pixel.ts`).
-- [ ] **8.1ب — Google Analytics وGoogle Tag Manager:** أضيفي المعرّفين في Vercel (Production):
-```env
-NEXT_PUBLIC_GA_MEASUREMENT_ID=
-NEXT_PUBLIC_GTM_ID=
-```
+- [x] **8.1ب — Google Analytics:** `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TC3TWX7J5Z` مضبوط في Vercel (Production) — 20 سبتمبر 2026، ومُتحقَّق منه في المتصفح على الموقع الحيّ. «מדידה משופרת» مفعّلة، فتُقاس التمرير والنقرات الخارجية تلقائيًا.
+- [ ] **8.1ج — Google Tag Manager (اختياري، غير مطلوب الآن):** البكسل وAnalytics مركّبان في الكود مباشرة. يُضاف `NEXT_PUBLIC_GTM_ID` في Vercel متى أردتِ إدارة أدوات تتبّع أخرى من لوحة بلا مبرمج.
 
 > ⚠️ **متغيّر جديد لا يدخل البناء بـRedeploy وحده:** إعادة نشر نشرٍ قديم تعيد استخدام بيئته، فلا ترى المتغيّر المضاف بعده. الحلّ: رفعة جديدة (أي commit) — أو Redeploy **بلا** «Use existing Build Cache» من نشرٍ أُنشئ بعد إضافة المتغيّر. المتغيّرات التي تبدأ بـ`NEXT_PUBLIC_` تُكتب داخل الصفحات وقت البناء لا وقت التشغيل.
 
