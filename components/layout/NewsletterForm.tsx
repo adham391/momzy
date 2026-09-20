@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { pixelTrack } from "@/lib/analytics/pixel";
 
 /** نموذج الاشتراك بالنشرة البريدية — يظهر في الفوتر */
 export default function NewsletterForm() {
@@ -26,6 +27,7 @@ export default function NewsletterForm() {
       const data = (await res.json()) as { success: boolean };
       if (data.success) {
         setStatus("success");
+        pixelTrack("Lead", { content_name: "newsletter" });
         setEmail("");
         setTimeout(() => setStatus("idle"), 4000);
       } else {

@@ -204,7 +204,7 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 
 ## 📊 أدوات التتبع
 
-- Meta Pixel: ViewContent, AddToCart, InitiateCheckout, Purchase, Lead
+- Meta Pixel (`lib/analytics/pixel.ts`): PageView مع كل تنقّل (السكربت يرسل الأولى وحدها) · ViewContent في صفحة المنتج · AddToCart من السلة · InitiateCheckout في `/checkout` · Purchase في صفحة التأكيد · Lead من نموذجي التواصل والنشرة. بلا `NEXT_PUBLIC_META_PIXEL_ID` لا يُحمَّل شيء ولا يُرسَل شيء.
 - Google Analytics 4
 - Google Tag Manager
 

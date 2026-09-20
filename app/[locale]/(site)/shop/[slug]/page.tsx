@@ -9,6 +9,7 @@ import { getAllProductSlugs } from "@/lib/sanity/queries/products";
 import { SEED_PRODUCTS } from "@/lib/products/seed";
 import ProductPageLayout from "@/components/shop/product-detail/ProductPageLayout";
 import BookletDetail from "@/components/shop/product-detail/BookletDetail";
+import PixelEvent from "@/components/analytics/PixelEvent";
 
 /** ISR — يُعاد بناء الصفحة كل 60 ثانية بعد تحديث Sanity */
 export const revalidate = 60;
@@ -63,6 +64,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           { name: product.title, path: `/shop/${product.slug}` },
         ])}
       />
+      {/* مشاهدة منتج — لإعلانات Meta (تحليلات الموقع تعدّها من page_view) */}
+      <PixelEvent name="ViewContent" params={{ content_ids: [product.slug], content_type: "product", value: product.price, currency: "ILS" }} />
       {isBooklet ? <BookletDetail product={product} /> : <ProductPageLayout product={product} />}
     </>
   );

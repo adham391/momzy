@@ -5,6 +5,7 @@ import type { AppliedCoupon } from "@/lib/coupons";
 import { effectivePrice } from "@/lib/bundles";
 import { isDigitalProduct } from "@/lib/products/helpers";
 import { track } from "@/lib/analytics/track";
+import { pixelTrackValue } from "@/lib/analytics/pixel";
 
 /* ── أنواع السلة ─────────────────────────────────────── */
 
@@ -131,6 +132,7 @@ export const useCart = create<CartStore>()(
 
       addItem: (product, gift) => {
         track("add_to_cart", { product_slug: product.slug, value: product.price });
+        pixelTrackValue("AddToCart", product.price, { content_ids: [product.slug], content_type: "product" });
         const { items } = get();
         const isGift = hasGiftData(gift);
 

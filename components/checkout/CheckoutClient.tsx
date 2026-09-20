@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { useRouter } from "@/lib/i18n/navigation";
@@ -15,6 +15,7 @@ import Container from "@/components/ui/Container";
 import PageHeaderWave from "@/components/ui/PageHeaderWave";
 import type { ShippingConfig } from "@/lib/shipping";
 import type { UsdPrices } from "@/lib/geo/cartPricing";
+import { pixelTrackValue } from "@/lib/analytics/pixel";
 
 type Step = "delivery" | "payment";
 
@@ -38,10 +39,20 @@ export default function CheckoutClient({
   const [orderId, setOrderId]   = useState<string | null>(null);
 
   const items  = useCart((s) => s.items);
+  const getTotal = useCart((s) => s.getTotal);
+  /** بدء الدفع — مرّة واحدة حين تفتح العميلة الصفحة بسلة غير فارغة */
+  const checkoutStarted = useRef(false);
 
   /** الطلب الرقمي البحت لا يُشحن — عناوين المراحل ونصوصها تتبدّل تبعًا لذلك */
   const needsShipping = items.some((i) => !i.isDigital);
   const router = useRouter();
+
+  /* بدء الدفع لإعلانات Meta — بعد الـ hydration كي تكون السلة مقروءة */
+  useEffect(() => {
+    if (!hydrated || checkoutStarted.current || items.length === 0) return;
+    checkoutStarted.current = true;
+    pixelTrackValue("InitiateCheckout", getTotal(), { num_items: items.length });
+  }, [hydrated, items, getTotal]);
 
   /* hydration + استعادة مرحلة الدفع من الرابط عند التحديث (?order=) */
   useEffect(() => {

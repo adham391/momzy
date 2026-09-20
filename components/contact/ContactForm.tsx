@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { pixelTrack } from "@/lib/analytics/pixel";
 
 /** بيانات نموذج التواصل */
 interface FormData {
@@ -119,6 +120,7 @@ export default function ContactForm() {
       const json = await res.json() as { success: boolean };
       if (json.success) {
         setStatus("success");
+        pixelTrack("Lead", { content_name: "contact" });
         setForm({ name: "", email: "", phone: "", subject: "", message: "" });
         setTouched({});
       } else {
