@@ -42,6 +42,20 @@ const BLOCKED_REGIONS: Record<string, Set<string>> = {
  */
 const ADMIN_PUBLIC_PATHS = new Set(["/admin/login", "/admin/forgot", "/admin/reset-password"]);
 
+/**
+ * عنوان Vercel التلقائي للنسخة المنشورة — يفتح الموقع كاملًا فيصير نسخة ثانية منه:
+ * تُفهرَس في محركات البحث، وApple Pay لا يعمل فيها (التسجيل عند HYP وApple للنطاق وحده).
+ * فيُحوَّل إلى النطاق الرسمي. عناوين المعاينة (لكل نشر عنوانه) لا تتأثّر — للتجربة قبل النشر.
+ */
+const VERCEL_PRODUCTION_HOST = "momzyworld.vercel.app";
+
+/** تحويل دائم إلى النطاق الرسمي حين يأتي الطلب من عنوان Vercel التلقائي */
+function redirectToCanonicalHost(request: NextRequest): NextResponse | null {
+  if (request.headers.get("host") !== VERCEL_PRODUCTION_HOST) return null;
+  const target = new URL(request.nextUrl.pathname + request.nextUrl.search, "https://momzyworld.com");
+  return NextResponse.redirect(target, 308);
+}
+
 /** هل الطلب قادم من منطقة محظورة؟ */
 function isBlocked(country: string, region: string): boolean {
   // دولة محظورة كليًا
@@ -90,6 +104,10 @@ function isLibraryPath(pathname: string): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  /* ── 0. النطاق الرسمي وحده يخدم الزوّار ── */
+  const canonicalRedirect = redirectToCanonicalHost(request);
+  if (canonicalRedirect) return canonicalRedirect;
 
   /* ── 1. الحجب الجغرافي (أولًا) — تُستثنى صفحة الحجب نفسها لمنع حلقة redirect ── */
   if (!isNotAvailablePath(pathname)) {
