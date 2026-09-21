@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
 import Script from "next/script";
@@ -28,6 +28,17 @@ const HYP_ORIGIN = "https://pay.hyp.co.il";
  * التمرير واحدًا: تمرير الصفحة.
  */
 const HYP_PAGE_HEIGHT = 1480;
+
+/**
+ * أضيق عرض تُعرَض فيه صفحة HYP بلا قصّ.
+ *
+ * تخطيطها لا ينكمش تحت حدّ معيّن: أعرض عنصر فيها (نموذج البطاقة) يبقى **367px**
+ * مهما ضاقت الشاشة، وجسمها يقصّ الفائض بلا تمرير أفقي. فعلى هاتف بعرض 320
+ * أو 360 (وكثير من هواتف أندرويد كذلك) تُقصّ حوافّ الحقول وعناوينها.
+ * لذلك تُعرَض دائمًا بهذا العرض ثم تُصغَّر بصريًّا (`transform: scale`) لتملأ
+ * الحاوية الأضيق — كل شيء ظاهر ومتناسق بدل نصف حقل مقطوع.
+ */
+const HYP_MIN_WIDTH = 380;
 
 /**
  * الخاصية القديمة `allowpaymentrequest` — توصي بها HYP إلى جانب `allow`
@@ -80,10 +91,27 @@ export default function EmbeddedPayment({
     () => false,
   );
   const [linkCopied, setLinkCopied] = useState(false);
+  /** عرض حاوية الإطار — منه نعرف هل نحتاج تصغير صفحة HYP لتدخل بلا قصّ */
+  const [boxWidth, setBoxWidth] = useState<number | null>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
   const isBooking = kind === "booking";
   const hasSummary = reference && total != null;
   // اللغة تُمرَّر صراحةً: مسارات ‏/api خارج شجرة اللغات فلا تُستنتج منها
   const src = `/api/hyp/retry?${isBooking ? "booking" : "order"}=${id}&locale=${locale}`;
+
+  /* قياس الحاوية — يتغيّر بتدوير الهاتف وبتبدّل المراحل، فنتابعه لا نقرأه مرة */
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box) return;
+    const observer = new ResizeObserver(([entry]) => setBoxWidth(entry.contentRect.width));
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, []);
+
+  /* عرض الإطار: عرض الحاوية إن اتّسعت، وإلا الحدّ الأدنى مع تصغير بصري */
+  const frameWidth = boxWidth === null ? null : Math.max(boxWidth, HYP_MIN_WIDTH);
+  const scale = boxWidth !== null && frameWidth ? boxWidth / frameWidth : 1;
+  const boxHeight = Math.round(HYP_PAGE_HEIGHT * scale);
 
   /** فتح الصفحة نفسها في متصفّح حقيقي — Chrome على أندرويد، وإلا نسخ الرابط */
   function openOutsideApp(): void {
@@ -147,12 +175,14 @@ export default function EmbeddedPayment({
 
       {/* ── حاوية الـ iframe ── */}
       <div
-        className="rounded-[22px] overflow-hidden relative"
+        ref={boxRef}
+        /* على الهاتف يقترب الإطار من حافّتي الشاشة: كل بكسل عرض يقلّل التصغير */
+        className="rounded-[22px] overflow-hidden relative -mx-3 sm:mx-0"
         style={{
           background: "white",
           border: "1.5px solid var(--bord)",
           boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-          minHeight: HYP_PAGE_HEIGHT,
+          height: boxHeight,
         }}
       >
         {/* غطاء تحميل — يُخفى عند اكتمال تحميل صفحة HYP */}
@@ -178,8 +208,19 @@ export default function EmbeddedPayment({
            */
           allow={`payment 'src' ${HYP_ORIGIN}`}
           {...LEGACY_PAYMENT_REQUEST}
-          className="w-full block"
-          style={{ height: HYP_PAGE_HEIGHT, border: "none" }}
+          className="block"
+          style={{
+            // العرض والتصغير معًا: الصفحة تُرسَم بعرض كافٍ ثم تُصغَّر لتملأ الحاوية.
+            // الموضع مطلق ومن اليسار كي لا يقلب اتجاه الصفحة (RTL) نقطةَ التصغير.
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: frameWidth ?? "100%",
+            height: HYP_PAGE_HEIGHT,
+            transform: scale < 1 ? `scale(${scale})` : undefined,
+            transformOrigin: "top left",
+            border: "none",
+          }}
         />
       </div>
 
