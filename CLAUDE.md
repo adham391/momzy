@@ -507,7 +507,7 @@ momzy/
 │   │   ├── CheckoutClient.tsx      ✅ تدفّق مرحلي سلس (صفحة واحدة): التوصيل ↔ الدفع بلا انتقال + مزامنة ?order=
 │   │   ├── CheckoutSteps.tsx       ✅ شريط تقدّم: التوصيل ← الدفع ← التأكيد (يُستخدم في /checkout و /order)
 │   │   ├── CheckoutForm.tsx        ✅ نموذج التوصيل — onProceedToPayment (سلس) أو redirect /order/[id] (يدوي)
-│   │   ├── EmbeddedPayment.tsx     ✅ iframe صفحة دفع HYP داخل الموقع + حالة تحميل + رجوع لتعديل التوصيل
+│   │   ├── EmbeddedPayment.tsx     ✅ iframe صفحة دفع HYP داخل الموقع + حالة تحميل + رجوع لتعديل التوصيل — ارتفاع الإطار بطول صفحة HYP كاملة (`HYP_PAGE_HEIGHT` — قِيست 1387px عند كل عرض) فلا تمرير داخل تمرير، و`allow="payment 'src' https://pay.hyp.co.il"` + `allowpaymentrequest` شرطُ ظهور Google Pay داخل الإطار (نطاق HYP يُسمّى صراحةً لأن الإطار يُحوَّل إليه من `/api/hyp/retry`)، وتنبيه «افتحي في المتصفّح» لمن دخلت من متصفّح تطبيق (`lib/utils/inAppBrowser.ts`)
 │   │   ├── TrustBadges.tsx         ✅ شارات الثقة — Visa/Mastercard/HYP + تشفير SSL
 │   │   ├── CheckoutUpsell.tsx     ✅ منتجات مقترحة أسفل صفحة الدفع
 │   │   └── OrderSummary.tsx        ✅ ملخص الطلب — عناصر + شحن + إجمالي (readOnly في مرحلة الدفع)
