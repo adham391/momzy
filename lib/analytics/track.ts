@@ -6,6 +6,24 @@
 const UTM_COOKIE = "momzy_utm";
 const SESSION_KEY = "momzy_sid";
 
+/**
+ * هل تُحتسب زيارات هذا المضيف في إحصاءات هبة؟
+ *
+ * لا تُحتسب: الجهاز المحلي أثناء التطوير، ولا نسخ المعاينة على Vercel —
+ * فحصٌ واحد من المطوّر كان يظهر لهبة زائرةً جديدة ومشاهدةَ منتج.
+ * الأرقام يجب أن تعني أمّهات حقيقيات على momzyworld.com وحده.
+ */
+export function isTrackedHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  if (host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]") return false;
+  if (host.endsWith(".local") || host.endsWith(".localhost")) return false;
+  // عناوين الشبكة المحلية — تجربة الموقع من الهاتف على نفس الواي فاي
+  if (/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host)) return false;
+  // نسخ المعاينة (ونطاق Vercel نفسه — الإنتاج يحوّل منه إلى الدومين)
+  if (host.endsWith(".vercel.app")) return false;
+  return true;
+}
+
 export interface UTM {
   source?: string;
   medium?: string;
@@ -64,6 +82,7 @@ export function getStoredUTM(): UTM {
 /** يرسل حدث تتبّع — best-effort (لا يرمي، لا يعطّل الصفحة) */
 export function track(eventType: string, data: Record<string, unknown> = {}): void {
   if (typeof window === "undefined") return;
+  if (!isTrackedHost(window.location.hostname)) return;
   const utm = getStoredUTM();
   const payload = {
     event_type: eventType,

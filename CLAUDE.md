@@ -207,6 +207,7 @@ siteSettings: topBarMessage, socialLinks, contactInfo
 - Meta Pixel (`lib/analytics/pixel.ts`): PageView مع كل تنقّل (السكربت يرسل الأولى وحدها) · ViewContent في صفحة المنتج · AddToCart من السلة · InitiateCheckout في `/checkout` · Purchase في صفحة التأكيد · Lead من نموذجي التواصل والنشرة. بلا `NEXT_PUBLIC_META_PIXEL_ID` لا يُحمَّل شيء ولا يُرسَل شيء.
 - Google Analytics 4
 - Google Tag Manager
+- **لا تُحتسب زيارات المطوّر:** `isTrackedHost` في `lib/analytics/track.ts` يمنع التتبّع الداخلي (`/api/track`) وتحميل سكربتات Meta/GA/GTM على `localhost` والشبكة المحلية و`*.vercel.app` — مفاتيح الإنتاج في `.env.local`، فكان كل فحص محلي يظهر لهبة زائرةً ومشاهدةَ منتج.
 
 ---
 

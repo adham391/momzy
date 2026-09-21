@@ -1,15 +1,32 @@
 "use client";
 
 import Script from "next/script";
+import { useSyncExternalStore } from "react";
+import { isTrackedHost } from "@/lib/analytics/track";
+
+/** المضيف لا يتغيّر أثناء الجلسة — لا اشتراك يُلغى */
+const NO_SUBSCRIBE = () => () => {};
 
 /**
  * سكربتات التتبّع الخارجية — مشروطة بوجود المتغيّرات (env).
  * بلا IDs → لا تُحمّل شيئًا. تُضبط في .env.local عند الإطلاق.
+ *
+ * ولا تُحمَّل أصلًا على جهاز التطوير ولا على نسخ المعاينة: مفاتيح Meta وGA
+ * نفسها موجودة في `.env.local`، فكان كل فحص محلي يرسل زيارة ومشاهدة منتج
+ * إلى حسابَي هبة الحقيقيين.
  */
 export default function TrackingScripts() {
   const pixel = process.env.NEXT_PUBLIC_META_PIXEL_ID;
   const ga = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const gtm = process.env.NEXT_PUBLIC_GTM_ID;
+
+  // على الخادم لا يُعرف المضيف؛ والسكربتات تُحقن بعد الترطيب على كل حال
+  const tracked = useSyncExternalStore(
+    NO_SUBSCRIBE,
+    () => isTrackedHost(window.location.hostname),
+    () => true,
+  );
+  if (!tracked) return null;
 
   return (
     <>
