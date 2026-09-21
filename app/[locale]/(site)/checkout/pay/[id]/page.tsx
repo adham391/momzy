@@ -66,7 +66,13 @@ export default async function PayPage({ params }: PayPageProps) {
       {/* ── الدفع المدمج ── */}
       <Container>
         <div className="mt-8">
-          <EmbeddedPayment id={order.id} reference={order.order_number} total={order.total_amount} />
+          {/* المبلغ كما سيُخصم فعلًا — بالدولار للطلب من خارج البلاد */}
+          <EmbeddedPayment
+            id={order.id}
+            reference={order.order_number}
+            total={order.charged_amount ?? order.total_amount}
+            currency={order.currency}
+          />
         </div>
       </Container>
     </div>

@@ -71,6 +71,18 @@ export default function CheckoutClient({
     }
   }, [hydrated, step, items.length, router]);
 
+  /*
+   * رابط الدفع فُتح في متصفّح آخر (من تنبيه متصفّح التطبيق مثلًا): الطلب في
+   * الخادم لكن السلة في المتصفّح الأول، فكان الملخّص الجانبي يقرأ سلة فارغة
+   * ويعرض ₪0 بجانب مبلغ حقيقي في إطار الدفع. صفحة الدفع المستقلة تقرأ الطلب
+   * من الخادم وتعرض رقمه ومبلغه، فنحوّل إليها.
+   */
+  useEffect(() => {
+    if (hydrated && step === "payment" && orderId && items.length === 0) {
+      router.replace(`/checkout/pay/${orderId}`);
+    }
+  }, [hydrated, step, orderId, items.length, router]);
+
   /** الانتقال لمرحلة الدفع بعد إنشاء الطلب — يُزامن الرابط بلا إعادة تحميل */
   function goToPayment(id: string) {
     setOrderId(id);
@@ -85,7 +97,8 @@ export default function CheckoutClient({
     window.history.replaceState(null, "", "/checkout");
   }
 
-  if (!hydrated || (step === "delivery" && items.length === 0)) {
+  // سلة فارغة = تحويل جارٍ (للمتجر من التوصيل، ولصفحة الدفع المستقلة من الدفع)
+  if (!hydrated || items.length === 0) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-light text-[15px]">{t("loading")}</div>
