@@ -52,6 +52,8 @@ export async function sweepAbandonedOrders(siteUrl: string): Promise<number> {
     .from("orders")
     .select("id")
     .eq("payment_status", "pending")
+    // الملغى لا يُطارَد: هبة ألغته عن قصد (طلب مكرّر أو تجربة)
+    .neq("order_status", "cancelled")
     .is("recovery_email_sent_at", null)
     .lt("created_at", ripenedBefore)
     .gt("created_at", notOlderThan)
@@ -75,6 +77,8 @@ export async function sweepAbandonedOrders(siteUrl: string): Promise<number> {
       const order = await getOrderById(row.id);
       // قد تكون دُفعت بين الاستعلام والحجز — لا تذكير عندها
       if (!order || order.payment_status !== "pending") continue;
+      // أو أعادت المحاولة بطلب جديد ودفعته — الطلب المتروك توأمٌ ميت لا يُطارَد
+      if (await hasPaidOrder(order.customer_email, notOlderThan)) continue;
 
       await sendEmail({
         to: order.customer_email,
@@ -88,6 +92,25 @@ export async function sweepAbandonedOrders(siteUrl: string): Promise<number> {
   }
 
   return sent;
+}
+
+/**
+ * هل لهذا البريد طلبٌ مدفوع داخل نافذة الاسترداد؟
+ *
+ * من تعثّر دفعها فبدأت من جديد يبقى طلبها الأول معلّقًا إلى جانب الطلب المدفوع.
+ * إرسال «أتمّي الدفع» لها بعدها يقول لها إنها لم تدفع وقد دفعت — فنصمت.
+ * البريد يُقارَن بلا حساسية لحالة الأحرف (يُحفظ كما كتبته العميلة).
+ */
+async function hasPaidOrder(email: string, since: string): Promise<boolean> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("orders")
+    .select("id")
+    .ilike("customer_email", email)
+    .eq("payment_status", "paid")
+    .gt("created_at", since)
+    .limit(1);
+  return Boolean(data?.length);
 }
 
 /**
