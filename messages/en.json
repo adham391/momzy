@@ -101,6 +101,8 @@
       "babyBirthDateLabel": "Your baby's birth date *",
       "babyAgeOk": "Your baby's age on the workshop day: {age} ✓",
       "babyAgeHint": "This workshop is for {range} — and if you're pregnant, enter your due date.",
+      "babyAgeNow": "Your baby's age today: {age} ✓",
+      "waitlistAgeOutOfRange": "This workshop is for {range} — your baby's age is outside that range, so a seat would not suit them when one opens.",
       "topicLabel": "Meeting topic *",
       "topicPlaceholder": "Briefly, what would you like to talk about with Heba — breastfeeding, baby sleep, postpartum recovery...",
       "notesLabel": "Additional notes (optional)",

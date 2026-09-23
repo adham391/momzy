@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { joinWaitlist } from "@/lib/db/waitlist";
+import { getService } from "@/lib/services/getService";
+import { ageRangeText, checkBabyAge, hasAgeGate, monthsLabel } from "@/lib/utils/age";
+import { israelTodayISO } from "@/lib/sessions/time";
 import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
 function isValidEmail(email: string): boolean {
@@ -28,6 +31,7 @@ export async function POST(request: Request) {
     serviceSlug?: string;
     serviceName?: string;
     notes?: string;
+    babyBirthDate?: string;
   };
 
   if (typeof b.name !== "string" || b.name.trim().length < 2)
@@ -39,6 +43,34 @@ export async function POST(request: Request) {
   if (typeof b.serviceSlug !== "string" || !b.serviceSlug.trim())
     return NextResponse.json({ success: false, error: "الورشة غير محددة" }, { status: 400 });
 
+  /*
+   * الفئة العمرية — كالتسجيل تمامًا، والحكم على السيرفر لا في الواجهة.
+   * لا موعد جلسة بعد، فيُقاس العمر **اليوم**: من طفلها خارج الفئة الآن
+   * لن يصلح له المقعد حين يُفتح، فانتظاره انتظارٌ بلا جدوى.
+   */
+  const service = await getService(b.serviceSlug);
+  let babyBirthDate: string | null = null;
+  if (service && hasAgeGate(service)) {
+    if (typeof b.babyBirthDate !== "string" || !b.babyBirthDate) {
+      return NextResponse.json({ success: false, error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة" }, { status: 400 });
+    }
+    const check = checkBabyAge(b.babyBirthDate, israelTodayISO(), service);
+    if (!check.ok) {
+      // رسالة الانتظار تقيس العمر اليوم — رسالة `checkBabyAge` تتحدّث عن «يوم الورشة» ولا ورشة بعد
+      const age = check.months === null ? null : monthsLabel(check.months);
+      return NextResponse.json(
+        {
+          success: false,
+          error: age
+            ? `عمر طفلكِ اليوم ${age}، وهذه الورشة مخصّصة لـ${ageRangeText(service)}.`
+            : "تاريخ الميلاد غير صحيح",
+        },
+        { status: 400 },
+      );
+    }
+    babyBirthDate = b.babyBirthDate;
+  }
+
   const result = await joinWaitlist({
     name: b.name,
     email: b.email,
@@ -46,6 +78,7 @@ export async function POST(request: Request) {
     serviceSlug: b.serviceSlug,
     serviceName: b.serviceName ?? null,
     notes: b.notes,
+    babyBirthDate,
   });
 
   if (!result.ok) {

@@ -10,6 +10,8 @@ export interface WaitlistRow {
   service_slug: string;
   service_name: string | null;
   availability_id: string | null;
+  /** تاريخ ميلاد الطفل (أو الموعد المتوقّع) — للخدمات ذات الفئة العمرية فقط */
+  baby_birth_date: string | null;
   is_notified: boolean;
   notified_at: string | null;
   notes: string | null;
@@ -34,6 +36,8 @@ export interface JoinWaitlistInput {
   serviceSlug: string;
   serviceName?: string | null;
   notes?: string;
+  /** تاريخ ميلاد الطفل — يصل للخدمات ذات الفئة العمرية (يتحقّق منه الـ route) */
+  babyBirthDate?: string | null;
 }
 
 /**
@@ -50,12 +54,15 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
   const phone = toLatinDigits(input.phone.trim());
   const notes = input.notes?.trim() || null;
 
+  const babyBirthDate = input.babyBirthDate || null;
+
   const { error } = await supabase.from("waitlist").insert({
     customer_name: name,
     customer_email: email,
     customer_phone: phone,
     service_slug: input.serviceSlug,
     service_name: input.serviceName ?? null,
+    baby_birth_date: babyBirthDate,
     notes,
     is_notified: false,
   });
@@ -66,7 +73,7 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
   if (error.code === "23505") {
     const { error: updateError } = await supabase
       .from("waitlist")
-      .update({ customer_name: name, customer_phone: phone, notes })
+      .update({ customer_name: name, customer_phone: phone, baby_birth_date: babyBirthDate, notes })
       .eq("service_slug", input.serviceSlug)
       .eq("customer_email", email);
     return updateError ? { ok: false, error: updateError.message } : { ok: true };

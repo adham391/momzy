@@ -217,16 +217,20 @@ export default function BookingModal({
 
   if (!mounted) return null;
 
-  /** الفئة العمرية — تُسأل في خطوة الحجز الفعلي فقط (لا في التواصل/الانتظار) */
-  const needsBabyAge = step === "form" && hasAgeGate(ageGate);
-  /** تحقّق العمر **يوم الجلسة** — null قبل إدخال التاريخ */
+  /** الفئة العمرية — في الحجز وفي قائمة الانتظار (لا في التواصل) */
+  const needsBabyAge = (step === "form" || step === "waitlist") && hasAgeGate(ageGate);
+  /**
+   * تاريخ قياس العمر: يوم الجلسة عند الحجز، واليوم عند الانتظار — لا موعد بعد،
+   * ومن طفلها خارج الفئة اليوم لن يصلح له المقعد حين يُفتح.
+   */
+  const ageReferenceDate = step === "waitlist" ? israelTodayISO() : (selected?.date ?? null);
   const ageCheck =
-    needsBabyAge && ageGate && selected && form.babyBirthDate
-      ? checkBabyAge(form.babyBirthDate, selected.date, ageGate)
+    needsBabyAge && ageGate && ageReferenceDate && form.babyBirthDate
+      ? checkBabyAge(form.babyBirthDate, ageReferenceDate, ageGate)
       : null;
 
-  /** اسم الطفل إلزامي للمولود فقط — التاريخ في المستقبل موعد متوقّع لحامل */
-  const needsBabyName = needsBabyAge && isBabyBorn(form.babyBirthDate, israelTodayISO());
+  /** اسم الطفل إلزامي للمولود فقط، وعند الحجز وحده — الانتظار يكفيه العمر */
+  const needsBabyName = step === "form" && needsBabyAge && isBabyBorn(form.babyBirthDate, israelTodayISO());
 
   const contactValid =
     form.name.trim().length >= 2 &&
@@ -337,6 +341,7 @@ export default function BookingModal({
           serviceSlug,
           serviceName: serviceTitle,
           notes: form.message,
+          babyBirthDate: form.babyBirthDate || null,
         }),
       });
       const json = (await res.json()) as { success: boolean; error?: string };
@@ -549,9 +554,13 @@ export default function BookingModal({
                         }}
                       >
                         {ageCheck && !ageCheck.ok
-                          ? ageCheck.message
+                          ? step === "waitlist"
+                            ? t("modal.waitlistAgeOutOfRange", { range: ageGate ? ageRangeText(ageGate) : "" })
+                            : ageCheck.message
                           : ageCheck?.ok && ageCheck.months !== null
-                            ? t("modal.babyAgeOk", { age: monthsLabel(ageCheck.months) })
+                            ? t(step === "waitlist" ? "modal.babyAgeNow" : "modal.babyAgeOk", {
+                                age: monthsLabel(ageCheck.months),
+                              })
                             : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                       </p>
                     </div>
