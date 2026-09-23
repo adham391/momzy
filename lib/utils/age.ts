@@ -134,12 +134,21 @@ export function checkBabyAge(
 
   const label = ageRangeText(gate);
 
+  /*
+   * لم يُولد بعد يوم الجلسة (موعد متوقّع — أم حامل).
+   * يمنعه **الحدّ الأدنى** وحده: ورشة تبدأ من شهر مولودٍ تحتاج مولودًا.
+   * أمّا حدٌّ أقصى بلا أدنى فلا يمنعه — الجنين أصغر من أي سقف، وورشة
+   * التحضير لما بعد الولادة موجَّهة للحوامل أصلًا.
+   */
   if (months < 0) {
-    return {
-      ok: false,
-      months,
-      message: `تاريخ الميلاد بعد موعد الورشة — هذه الورشة مخصّصة لـ${label}.`,
-    };
+    if (typeof gate.ageMinMonths === "number") {
+      return {
+        ok: false,
+        months,
+        message: `تاريخ الميلاد بعد موعد الورشة — هذه الورشة مخصّصة لـ${label}.`,
+      };
+    }
+    return { ok: true, months };
   }
 
   const tooYoung = typeof gate.ageMinMonths === "number" && months < gate.ageMinMonths;

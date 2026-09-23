@@ -592,9 +592,11 @@ export default function BookingModal({
                             ? t("modal.waitlistAgeOutOfRange", { range: ageGate ? ageRangeText(ageGate) : "" })
                             : ageCheck.message
                           : ageCheck?.ok && ageCheck.months !== null
-                            ? t(step === "waitlist" ? "modal.babyAgeNow" : "modal.babyAgeOk", {
-                                age: monthsLabel(ageCheck.months),
-                              })
+                            ? ageCheck.months < 0
+                              ? t("modal.babyDueOk") // موعد متوقّع — حامل مقبولة في ورشة بلا حدّ أدنى
+                              : t(step === "waitlist" ? "modal.babyAgeNow" : "modal.babyAgeOk", {
+                                  age: monthsLabel(ageCheck.months),
+                                })
                             : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                       </p>
 
