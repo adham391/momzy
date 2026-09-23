@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { CalendarDays, MessageCircle } from "lucide-react";
+import { CalendarDays, Hourglass, MessageCircle } from "lucide-react";
 import { listBookings } from "@/lib/db/bookings";
+import { listWaitlist } from "@/lib/db/waitlist";
 import type { BookingRow, BookingStatus } from "@/lib/db/bookings";
 import BookingsFilterBar from "@/components/admin/bookings/BookingsFilterBar";
 import { BookingStatusBadge } from "@/components/admin/StatusBadge";
@@ -21,21 +22,42 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
   const status = sp.status ?? "all";
   const date = sp.date ?? "";
 
-  const bookings = await listBookings({
-    status: status as BookingStatus | "all",
-    date: date || undefined,
-  });
+  // قائمة الانتظار تُجلب معًا: عددها يظهر في الترويسة فلا تبقى صفحةً منسيّة
+  const [bookings, waitlist] = await Promise.all([
+    listBookings({
+      status: status as BookingStatus | "all",
+      date: date || undefined,
+    }),
+    listWaitlist(),
+  ]);
+  const waitingCount = waitlist.filter((w) => !w.is_notified).length;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between gap-3 mb-1">
         <h1 className="font-heading text-h2 font-bold text-dark">الحجوزات</h1>
-        <Link
-          href="/admin/bookings/availability"
-          className="inline-flex items-center gap-1.5 text-body-sm text-teal font-bold hover:underline"
-        >
-          <CalendarDays size={15} /> إتاحة المواعيد
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/bookings/waitlist"
+            className="inline-flex items-center gap-1.5 text-body-sm text-teal font-bold hover:underline"
+          >
+            <Hourglass size={15} /> قائمة الانتظار
+            {waitingCount > 0 && (
+              <span
+                className="font-label text-micro font-bold rounded-full px-2 py-0.5"
+                style={{ background: "var(--rose)", color: "#fff" }}
+              >
+                {waitingCount}
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/admin/bookings/availability"
+            className="inline-flex items-center gap-1.5 text-body-sm text-teal font-bold hover:underline"
+          >
+            <CalendarDays size={15} /> إتاحة المواعيد
+          </Link>
+        </div>
       </div>
       <p className="text-mid text-body-sm mb-6">{bookings.length} حجز</p>
 
