@@ -1,11 +1,25 @@
 import Link from "next/link";
 import { ArrowRight, Check, Trash2, MessageCircle } from "lucide-react";
-import { listWaitlist } from "@/lib/db/waitlist";
+import { listWaitlist, type WaitlistRow } from "@/lib/db/waitlist";
+import { siteOrigin } from "@/lib/resend/emails/brand";
 import { notifyWaitlistAction, removeWaitlistAction } from "../actions";
 import { formatDate } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "قائمة الانتظار — لوحة Momzy" };
+
+/**
+ * رسالة الواتساب الجاهزة للمنتظِرة — **إعلان لا سؤال**.
+ *
+ * كانت تسأل «هل ما زلتِ مهتمة؟» فتفتح حديثًا يحتاج ردًّا ومتابعة من هبة.
+ * صارت تخبرها أن التسجيل فُتح وتدلّها على صفحة الورشة، فتسجّل بنفسها
+ * كأي أم أخرى — بلا محادثة ولا حجز يدوي.
+ */
+function waitlistMessage(entry: WaitlistRow): string {
+  const service = entry.service_name ?? "الورشة";
+  const link = `${siteOrigin()}/services/${entry.service_slug}`;
+  return `مرحبًا ${entry.customer_name} 🌸\nالتسجيل لـ«${service}» مفتوح الآن — تجدين المواعيد المتاحة والتسجيل على الموقع:\n${link}`;
+}
 
 export default async function WaitlistPage() {
   const entries = await listWaitlist();
@@ -34,9 +48,7 @@ export default async function WaitlistPage() {
         <div className="flex flex-col gap-2">
           {entries.map((e, i) => {
             const waDigits = e.customer_phone.replace(/\D/g, "");
-            const waText = encodeURIComponent(
-              `مرحبًا ${e.customer_name} 🌸\nتوفّر مقعد في «${e.service_name ?? "الورشة"}» — هل ما زلتِ مهتمة بالتسجيل؟`
-            );
+            const waText = encodeURIComponent(waitlistMessage(e));
 
             return (
               <div
