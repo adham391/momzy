@@ -37,6 +37,41 @@ export async function unsubscribeNewsletter(email: string): Promise<{ ok: boolea
   return { ok: !error };
 }
 
+/** مشتركة كما تُعرض في لوحة الأدمن */
+export interface SubscriberRow {
+  email: string;
+  /** من أين اشتركت: نموذج الفوتر أو خانة الموافقة في الدفع */
+  source: string | null;
+  isActive: boolean;
+  subscribedAt: string;
+  unsubscribedAt: string | null;
+}
+
+/**
+ * كل المشتركات للوحة الأدمن — **بمن ألغت اشتراكها** (الصفّ يبقى سجلًّا).
+ * الأحدث أولًا، والبحث على البريد. تختلف عن `listSubscribers` التي تخدم
+ * الإرسال فلا تعيد إلا النشطات.
+ */
+export async function getSubscribers(search?: string): Promise<SubscriberRow[]> {
+  const supabase = createAdminClient();
+  let query = supabase
+    .from("newsletter_subscribers")
+    .select("email, source, is_active, subscribed_at, unsubscribed_at")
+    .order("subscribed_at", { ascending: false });
+
+  const term = search?.trim();
+  if (term) query = query.ilike("email", `%${term}%`);
+
+  const { data } = await query;
+  return (data ?? []).map((r) => ({
+    email: String(r.email),
+    source: (r.source as string | null) ?? null,
+    isActive: Boolean(r.is_active),
+    subscribedAt: String(r.subscribed_at),
+    unsubscribedAt: (r.unsubscribed_at as string | null) ?? null,
+  }));
+}
+
 /** قائمة المشتركين النشطين (للأدمن/التصدير لاحقًا) */
 export async function listSubscribers(): Promise<{ email: string; source: string | null; subscribed_at: string }[]> {
   const supabase = createAdminClient();

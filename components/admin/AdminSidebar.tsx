@@ -11,6 +11,7 @@ import {
   Ticket,
   BarChart3,
   Users,
+  Mail,
   Settings,
   UserCog,
   LogOut,
@@ -36,6 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/coupons",   label: "الكوبونات", icon: Ticket },
   { href: "/admin/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/admin/customers", label: "العملاء",   icon: Users },
+  { href: "/admin/newsletter", label: "النشرة",   icon: Mail },
   { href: "/admin/settings",  label: "الإعدادات", icon: Settings },
 ];
 

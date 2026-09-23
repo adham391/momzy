@@ -1,7 +1,7 @@
 import { getOrderById } from "@/lib/db/orders";
 import { canFulfill } from "@/lib/orders/fulfillment";
 import { subscribeNewsletter } from "@/lib/db/newsletter";
-import { syncNewsletterSubscriber } from "@/lib/resend/newsletter";
+import { sendNewsletterWelcome, syncNewsletterSubscriber } from "@/lib/resend/newsletter";
 
 /** مصدر الاشتراك في جدول newsletter_subscribers لمن وافقت عند الدفع */
 const CHECKOUT_SOURCE = "checkout";
@@ -25,7 +25,10 @@ export async function subscribeConsentingBuyer(orderId: string): Promise<void> {
       console.error("[newsletter] تعذّر إضافة مشترية للنشرة:", order.order_number, result.error);
       return;
     }
+    // المزامنة أولًا: تمنحها رمز إلغاء الاشتراك الذي يحمله رابط رسالة الترحيب
     await syncNewsletterSubscriber(result.email);
+    // ثم الترحيب — بلغة الطلب، ومرة واحدة فقط (من كانت مشتركة لا تتلقّاه ثانيةً)
+    if (result.isNew) await sendNewsletterWelcome(result.email, order.locale ?? "ar");
   } catch (e) {
     console.error("[newsletter] استثناء في إضافة مشترية للنشرة:", e);
   }
