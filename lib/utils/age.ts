@@ -184,7 +184,7 @@ export function checkBabyAge(
     return {
       ok: false,
       months,
-      message: `عمر طفلكِ يوم الورشة سيكون ${monthsLabel(months)}، وهذه الورشة مخصّصة لـ${label}.`,
+      message: `عمر طفلكِ يوم الورشة سيكون ${babyAgeDetailedLabel(birthISO, sessionISO)}، وهذه الورشة مخصّصة لـ${label}.`,
     };
   }
 
@@ -211,7 +211,7 @@ export function checkWaitlistAge(birthISO: string, todayISO: string, gate: AgeGa
     return {
       ok: false,
       months,
-      message: `عمر طفلكِ اليوم ${monthsLabel(months)}، وهذه الورشة مخصّصة لـ${label}.`,
+      message: `عمر طفلكِ اليوم ${babyAgeDetailedLabel(birthISO, todayISO)}، وهذه الورشة مخصّصة لـ${label}.`,
     };
   }
 
@@ -228,4 +228,38 @@ export function checkWaitlistAge(birthISO: string, todayISO: string, gate: AgeGa
   }
 
   return { ok: true, months };
+}
+
+/** عمر بالأشهر والأيام — الأيام هي ما بعد آخر «شهرية» ميلاد */
+export interface AgeParts {
+  months: number;
+  days: number;
+}
+
+/** يفصل العمر إلى أشهر كاملة + أيام بعدها — null لتاريخ غير صالح أو طفل لم يُولد */
+export function ageMonthsAndDays(birthISO: string, atISO: string): AgeParts | null {
+  const months = ageInMonthsAt(birthISO, atISO);
+  const birth = parseISO(birthISO);
+  if (months === null || months < 0 || !birth) return null;
+
+  const anniversary = new Date(birth);
+  anniversary.setMonth(anniversary.getMonth() + months);
+  const days = daysBetween(toISODate(anniversary), atISO);
+  return days === null ? null : { months, days: Math.max(0, days) };
+}
+
+/**
+ * عمر الطفل بالتفصيل: «3 أشهر و15 يومًا» · «شهر واحد» · «12 يومًا».
+ *
+ * الأشهر وحدها تخفي فرقًا تراه الأم والمرشدة: طفل أتمّ 3 أشهر أمس وآخر
+ * يكاد يبلغ الرابع ليسا سواءً في ورشة تبدأ من 4 أشهر.
+ */
+export function babyAgeDetailedLabel(birthISO: string, atISO: string): string {
+  const parts = ageMonthsAndDays(birthISO, atISO);
+  // غير صالح أو لم يُولد بعد — الصياغة الموجزة تتكفّل بالحالتين
+  if (!parts) return babyAgeAtLabel(birthISO, atISO);
+
+  if (parts.months === 0) return daysLabel(parts.days);
+  if (parts.days === 0) return monthsLabel(parts.months);
+  return `${monthsLabel(parts.months)} و${daysLabel(parts.days)}`;
 }

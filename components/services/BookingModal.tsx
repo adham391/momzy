@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
-import { checkBabyAge, checkWaitlistAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
+import { babyAgeDetailedLabel, checkBabyAge, checkWaitlistAge, hasAgeGate, ageRangeText, type AgeGate } from "@/lib/utils/age";
 import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
 import { BABY_NAME_MAX_LENGTH, isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
 import { israelTodayISO } from "@/lib/sessions/time";
@@ -246,6 +246,10 @@ export default function BookingModal({
   const needsBabyName = step === "form" && needsBabyAge && isBabyBorn(form.babyBirthDate, israelTodayISO());
 
   /** عمر مرفوض (وُلد فعلًا) — عنده نقترح ما يناسبه بدل أن نغلق الباب */
+  /** عمر الطفل بالتفصيل (أشهر وأيام) عند تاريخ القياس — للعرض في التلميحات */
+  const detailedAge =
+    form.babyBirthDate && ageReferenceDate ? babyAgeDetailedLabel(form.babyBirthDate, ageReferenceDate) : "";
+
   const rejectedMonths =
     ageCheck && !ageCheck.ok && ageCheck.months !== null && ageCheck.months >= 0 ? ageCheck.months : null;
   const alternatives = ageAlternatives?.months === rejectedMonths ? ageAlternatives.services : null;
@@ -598,7 +602,7 @@ export default function BookingModal({
                             ? ageCheck.months < 0
                               ? t("modal.babyDueOk") // موعد متوقّع — حامل مقبولة في ورشة بلا حدّ أدنى
                               : t(step === "waitlist" ? "modal.babyAgeNow" : "modal.babyAgeOk", {
-                                  age: monthsLabel(ageCheck.months),
+                                  age: detailedAge,
                                 })
                             : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                       </p>
@@ -616,7 +620,7 @@ export default function BookingModal({
                           ) : (
                             <>
                               <p className="text-[12.5px] font-bold mb-2" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
-                                {t("modal.fitTitle", { age: monthsLabel(rejectedMonths) })}
+                                {t("modal.fitTitle", { age: detailedAge })}
                               </p>
                               <ul className="flex flex-col gap-1.5">
                                 {alternatives.map((s) => (

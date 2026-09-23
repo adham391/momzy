@@ -4,7 +4,7 @@ import { listWaitlist, type WaitlistRow } from "@/lib/db/waitlist";
 import { siteOrigin } from "@/lib/resend/emails/brand";
 import { notifyWaitlistAction, removeWaitlistAction } from "../actions";
 import { formatDate } from "@/lib/utils/format";
-import { babyAgeAtLabel } from "@/lib/utils/age";
+import { babyAgeDetailedLabel } from "@/lib/utils/age";
 import { israelTodayISO } from "@/lib/sessions/time";
 import WaitlistEntries, { type WaitlistEntryView } from "@/components/admin/bookings/WaitlistEntries";
 
@@ -34,7 +34,7 @@ function toView(entry: WaitlistRow): WaitlistEntryView {
     email: entry.customer_email,
     joined: formatDate(entry.created_at),
     // عمر الطفل اليوم — لا يوم انضمامها: الشهر يمرّ فيتغيّر
-    babyAge: entry.baby_birth_date ? babyAgeAtLabel(entry.baby_birth_date, israelTodayISO()) : null,
+    babyAge: entry.baby_birth_date ? babyAgeDetailedLabel(entry.baby_birth_date, israelTodayISO()) : null,
     notes: entry.notes,
     isNotified: entry.is_notified,
     waHref: `https://wa.me/${entry.customer_phone.replace(/\D/g, "")}?text=${encodeURIComponent(waitlistMessage(entry))}`,

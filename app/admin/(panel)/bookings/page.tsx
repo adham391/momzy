@@ -8,7 +8,7 @@ import { BookingStatusBadge } from "@/components/admin/StatusBadge";
 import { changeBookingStatusAction } from "./actions";
 import { formatSlotDate, formatTimeShort } from "@/lib/utils/format";
 import { formatCharged } from "@/lib/currency";
-import { babyAgeAtLabel } from "@/lib/utils/age";
+import { babyAgeDetailedLabel } from "@/lib/utils/age";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "الحجوزات — لوحة Momzy" };
@@ -82,7 +82,7 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
 /** عمر الطفل يوم الجلسة — يُحسب لا يُخزَّن، كي يبقى صحيحًا لو تغيّر موعد الورشة */
 function babyAgeAtSession(b: BookingRow): string {
   // بالأيام قبل الشهر الأول، وبالأشهر بعده
-  return b.baby_birth_date ? babyAgeAtLabel(b.baby_birth_date, b.date) : "—";
+  return b.baby_birth_date ? babyAgeDetailedLabel(b.baby_birth_date, b.date) : "—";
 }
 
 function BookingCard({ booking: b }: { booking: BookingRow }) {
