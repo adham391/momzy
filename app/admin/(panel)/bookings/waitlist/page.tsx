@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, Check, Trash2, MessageCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { listWaitlist, type WaitlistRow } from "@/lib/db/waitlist";
 import { siteOrigin } from "@/lib/resend/emails/brand";
 import { notifyWaitlistAction, removeWaitlistAction } from "../actions";
 import { formatDate } from "@/lib/utils/format";
+import WaitlistEntries, { type WaitlistEntryView } from "@/components/admin/bookings/WaitlistEntries";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "قائمة الانتظار — لوحة Momzy" };
@@ -19,6 +20,21 @@ function waitlistMessage(entry: WaitlistRow): string {
   const service = entry.service_name ?? "الورشة";
   const link = `${siteOrigin()}/services/${entry.service_slug}`;
   return `مرحبًا ${entry.customer_name} 🌸\nالتسجيل لـ«${service}» مفتوح الآن — تجدين المواعيد المتاحة والتسجيل على الموقع:\n${link}`;
+}
+
+/** صفّ القاعدة ← ما تعرضه الواجهة (روابط ونصوص جاهزة — مكوّن العميل لا يحسب شيئًا) */
+function toView(entry: WaitlistRow): WaitlistEntryView {
+  return {
+    id: entry.id,
+    name: entry.customer_name,
+    service: entry.service_name ?? entry.service_slug,
+    phone: entry.customer_phone,
+    email: entry.customer_email,
+    joined: formatDate(entry.created_at),
+    notes: entry.notes,
+    isNotified: entry.is_notified,
+    waHref: `https://wa.me/${entry.customer_phone.replace(/\D/g, "")}?text=${encodeURIComponent(waitlistMessage(entry))}`,
+  };
 }
 
 export default async function WaitlistPage() {
@@ -45,75 +61,11 @@ export default async function WaitlistPage() {
           لا أحد في قائمة الانتظار حاليًا.
         </p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {entries.map((e, i) => {
-            const waDigits = e.customer_phone.replace(/\D/g, "");
-            const waText = encodeURIComponent(waitlistMessage(e));
-
-            return (
-              <div
-                key={e.id}
-                className="bg-white rounded-[var(--r)] border border-bord p-4 flex flex-wrap items-center gap-4"
-                style={{ opacity: e.is_notified ? 0.6 : 1 }}
-              >
-                {/* الترتيب */}
-                <div className="w-7 h-7 rounded-full bg-offwh border border-bord flex items-center justify-center text-micro font-bold text-mid shrink-0">
-                  {i + 1}
-                </div>
-
-                {/* البيانات */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-dark text-body-sm truncate">
-                    {e.customer_name}
-                    {e.is_notified && <span className="text-micro text-teal font-normal"> · أُشعِرت</span>}
-                  </div>
-                  <div className="text-micro text-light truncate">
-                    {e.service_name ?? e.service_slug} · انضمّت {formatDate(e.created_at)}
-                  </div>
-                  <div className="text-micro text-light truncate" dir="ltr">
-                    {e.customer_phone} · {e.customer_email}
-                  </div>
-                </div>
-
-                {/* إجراءات */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <a
-                    href={`https://wa.me/${waDigits}?text=${waText}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-body-sm font-bold text-teal border border-bord hover:bg-tealpale transition"
-                  >
-                    <MessageCircle size={15} /> راسليها
-                  </a>
-
-                  {!e.is_notified && (
-                    <form action={notifyWaitlistAction}>
-                      <input type="hidden" name="id" value={e.id} />
-                      <button
-                        type="submit"
-                        title="تعليمها كمُشعَرة"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-body-sm font-bold text-dark border border-bord hover:bg-offwh transition"
-                      >
-                        <Check size={15} /> أُشعِرت
-                      </button>
-                    </form>
-                  )}
-
-                  <form action={removeWaitlistAction}>
-                    <input type="hidden" name="id" value={e.id} />
-                    <button
-                      type="submit"
-                      title="حذف من القائمة"
-                      className="px-2.5 py-1.5 rounded-lg text-rose border border-bord hover:bg-rosepale transition"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </form>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <WaitlistEntries
+          entries={entries.map(toView)}
+          notifyAction={notifyWaitlistAction}
+          removeAction={removeWaitlistAction}
+        />
       )}
     </div>
   );
