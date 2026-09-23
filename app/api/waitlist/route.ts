@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { joinWaitlist } from "@/lib/db/waitlist";
 import { getService } from "@/lib/services/getService";
-import { ageRangeText, checkBabyAge, hasAgeGate, monthsLabel } from "@/lib/utils/age";
+import { ageRangeText, checkWaitlistAge, hasAgeGate, monthsLabel } from "@/lib/utils/age";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     if (typeof b.babyBirthDate !== "string" || !b.babyBirthDate) {
       return NextResponse.json({ success: false, error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة" }, { status: 400 });
     }
-    const check = checkBabyAge(b.babyBirthDate, israelTodayISO(), service);
+    const check = checkWaitlistAge(b.babyBirthDate, israelTodayISO(), service);
     if (!check.ok) {
       // رسالة الانتظار تقيس العمر اليوم — رسالة `checkBabyAge` تتحدّث عن «يوم الورشة» ولا ورشة بعد
       const age = check.months === null ? null : monthsLabel(check.months);

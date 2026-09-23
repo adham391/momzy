@@ -108,6 +108,32 @@ export function babyAgeAtLabel(birthISO: string, sessionISO: string): string {
   return days === null ? "—" : daysLabel(days);
 }
 
+/**
+ * مهلة قائمة الانتظار — نصف شهر تحت الحدّ الأدنى.
+ *
+ * المنتظِرة لا تحجز اليوم بل تنتظر موعدًا يُفتح لاحقًا، فطفلها الذي يقصّر عن
+ * السنّ بأسبوعين سيبلغها قبل الجلسة. الحدّ الأقصى يبقى صارمًا: الطفل يكبر ولا يصغر.
+ */
+export const WAITLIST_GRACE_DAYS = 15;
+
+/** تاريخ (YYYY-MM-DD) من كائن Date بالتقويم المحلي */
+function toISODate(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/**
+ * كم يومًا يفصل الطفل عن بلوغه عمرًا معيّنًا بالأشهر — سالب إن بلغه.
+ * يُقاس بالتاريخ لا بالأشهر الكاملة، فنصف الشهر يُحسب بدقّة.
+ */
+export function daysUntilAgeMonths(birthISO: string, months: number, fromISO: string): number | null {
+  const birth = parseISO(birthISO);
+  if (!birth) return null;
+  const target = new Date(birth);
+  target.setMonth(target.getMonth() + months);
+  return daysBetween(fromISO, toISODate(target));
+}
+
 export interface AgeCheckResult {
   ok: boolean;
   /** عمر الطفل بالأشهر يوم الجلسة (null لتاريخ غير صالح) */
@@ -160,6 +186,45 @@ export function checkBabyAge(
       months,
       message: `عمر طفلكِ يوم الورشة سيكون ${monthsLabel(months)}، وهذه الورشة مخصّصة لـ${label}.`,
     };
+  }
+
+  return { ok: true, months };
+}
+
+/**
+ * تحقّق العمر لقائمة الانتظار — كالتسجيل، بفارقٍ واحد:
+ * من يقصّر طفلها عن الحدّ الأدنى بأقلّ من `WAITLIST_GRACE_DAYS` تُقبل، لأن
+ * الجلسة تُفتح بعد أسابيع وطفلها يكون قد بلغ السنّ. والأكبر يُرفض كما هو:
+ * انتظارُه انتظارٌ بلا جدوى.
+ *
+ * يُقاس بعمر الطفل **اليوم** — لا جلسة بعد.
+ */
+export function checkWaitlistAge(birthISO: string, todayISO: string, gate: AgeGate): AgeCheckResult {
+  if (!hasAgeGate(gate)) return { ok: true, months: null };
+
+  const months = ageInMonthsAt(birthISO, todayISO);
+  if (months === null) return { ok: false, months: null, message: "تاريخ الميلاد غير صحيح" };
+
+  const label = ageRangeText(gate);
+
+  if (typeof gate.ageMaxMonths === "number" && months > gate.ageMaxMonths) {
+    return {
+      ok: false,
+      months,
+      message: `عمر طفلكِ اليوم ${monthsLabel(months)}، وهذه الورشة مخصّصة لـ${label}.`,
+    };
+  }
+
+  if (typeof gate.ageMinMonths === "number") {
+    const daysToMin = daysUntilAgeMonths(birthISO, gate.ageMinMonths, todayISO);
+    if (daysToMin === null) return { ok: false, months: null, message: "تاريخ الميلاد غير صحيح" };
+    if (daysToMin > WAITLIST_GRACE_DAYS) {
+      return {
+        ok: false,
+        months,
+        message: `طفلكِ يبلغ سنّ الورشة بعد ${daysLabel(daysToMin)} — هذه الورشة مخصّصة لـ${label}.`,
+      };
+    }
   }
 
   return { ok: true, months };

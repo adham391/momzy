@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/lib/i18n/navigation";
 import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
-import { checkBabyAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
+import { checkBabyAge, checkWaitlistAge, hasAgeGate, ageRangeText, monthsLabel, type AgeGate } from "@/lib/utils/age";
 import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
 import { BABY_NAME_MAX_LENGTH, isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
 import { israelTodayISO } from "@/lib/sessions/time";
@@ -234,9 +234,12 @@ export default function BookingModal({
    * ومن طفلها خارج الفئة اليوم لن يصلح له المقعد حين يُفتح.
    */
   const ageReferenceDate = step === "waitlist" ? israelTodayISO() : (selected?.date ?? null);
+  /* الانتظار يتساهل نصف شهر تحت الحدّ الأدنى — الطفل يبلغ السنّ قبل أن يُفتح الموعد */
   const ageCheck =
     needsBabyAge && ageGate && ageReferenceDate && form.babyBirthDate
-      ? checkBabyAge(form.babyBirthDate, ageReferenceDate, ageGate)
+      ? step === "waitlist"
+        ? checkWaitlistAge(form.babyBirthDate, ageReferenceDate, ageGate)
+        : checkBabyAge(form.babyBirthDate, ageReferenceDate, ageGate)
       : null;
 
   /** اسم الطفل إلزامي للمولود فقط، وعند الحجز وحده — الانتظار يكفيه العمر */
