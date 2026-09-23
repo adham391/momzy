@@ -103,6 +103,8 @@
       "babyAgeHint": "This workshop is for {range} — and if you're pregnant, enter your due date.",
       "babyAgeNow": "Your baby's age today: {age} ✓",
       "waitlistAgeOutOfRange": "This workshop is for {range} — your baby's age is outside that range, so a seat would not suit them when one opens.",
+      "fitTitle": "Your baby is {age} — these suit that age:",
+      "fitNone": "Nothing fits this age right now — get in touch and we'll guide you.",
       "topicLabel": "Meeting topic *",
       "topicPlaceholder": "Briefly, what would you like to talk about with Heba — breastfeeding, baby sleep, postpartum recovery...",
       "notesLabel": "Additional notes (optional)",

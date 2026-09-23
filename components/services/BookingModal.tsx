@@ -51,6 +51,14 @@ function toCalendarSession(s: Slot): CalendarSession {
 /** مكتملة — تُعرض في الرزنامة رمادية ولا تُحجز */
 const isFull = (s: Slot) => s.booked_count >= s.capacity;
 
+/** خدمة تناسب عمر الطفل — تُقترح حين يُرفض العمر هنا */
+interface ServiceForAge {
+  slug: string;
+  title: string;
+  ageRange: string | null;
+  price: number | null;
+}
+
 interface BookingFormData {
   name: string;
   email: string;
@@ -139,6 +147,8 @@ export default function BookingModal({
   const slotPrice = (s: Slot) => (currency === "USD" ? s.price_usd : s.price);
   /** السيرفر رفض الحجز لأنه من خارج البلاد — أوثق من تخمين الواجهة */
   const [rejectedAbroad, setRejectedAbroad] = useState(false);
+  /** بدائل تناسب عمر الطفل — تُجلب حين يُرفض العمر، ومفتاحها العمر بالأشهر */
+  const [ageAlternatives, setAgeAlternatives] = useState<{ months: number; services: ServiceForAge[] } | null>(null);
 
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -215,7 +225,7 @@ export default function BookingModal({
     };
   }, [open, onClose]);
 
-  if (!mounted) return null;
+  /* ═══ الفئة العمرية — تُحسب قبل أي return كي تبقى الـ hooks بترتيب ثابت ═══ */
 
   /** الفئة العمرية — في الحجز وفي قائمة الانتظار (لا في التواصل) */
   const needsBabyAge = (step === "form" || step === "waitlist") && hasAgeGate(ageGate);
@@ -231,6 +241,30 @@ export default function BookingModal({
 
   /** اسم الطفل إلزامي للمولود فقط، وعند الحجز وحده — الانتظار يكفيه العمر */
   const needsBabyName = step === "form" && needsBabyAge && isBabyBorn(form.babyBirthDate, israelTodayISO());
+
+  /** عمر مرفوض (وُلد فعلًا) — عنده نقترح ما يناسبه بدل أن نغلق الباب */
+  const rejectedMonths =
+    ageCheck && !ageCheck.ok && ageCheck.months !== null && ageCheck.months >= 0 ? ageCheck.months : null;
+  const alternatives = ageAlternatives?.months === rejectedMonths ? ageAlternatives.services : null;
+
+  /* البدائل المناسبة للعمر المرفوض — تُجلب مرة لكل عمر، والفشل يمرّ بصمت */
+  useEffect(() => {
+    if (rejectedMonths === null) return;
+    let cancelled = false;
+    const params = new URLSearchParams({ months: String(rejectedMonths), locale });
+    if (serviceSlug) params.set("exclude", serviceSlug);
+    fetch(`/api/services/for-age?${params}`)
+      .then((res) => res.json())
+      .then((json: { services?: ServiceForAge[] }) => {
+        if (!cancelled) setAgeAlternatives({ months: rejectedMonths, services: json.services ?? [] });
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [rejectedMonths, serviceSlug, locale]);
+
+  if (!mounted) return null;
 
   const contactValid =
     form.name.trim().length >= 2 &&
@@ -563,6 +597,50 @@ export default function BookingModal({
                               })
                             : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                       </p>
+
+                      {/* بدائل تناسب عمر طفلها — لا نغلق الباب بلا أن ندلّها على غيره */}
+                      {rejectedMonths !== null && alternatives !== null && (
+                        <div
+                          className="rounded-xl px-4 py-3.5 mt-3"
+                          style={{ background: "var(--tealpale)", border: "1.5px solid var(--mint)" }}
+                        >
+                          {alternatives.length === 0 ? (
+                            <p className="text-[12.5px] leading-[1.75]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+                              {t("modal.fitNone")}
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-[12.5px] font-bold mb-2" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
+                                {t("modal.fitTitle", { age: monthsLabel(rejectedMonths) })}
+                              </p>
+                              <ul className="flex flex-col gap-1.5">
+                                {alternatives.map((s) => (
+                                  <li key={s.slug}>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        onClose();
+                                        router.push(`/services/${s.slug}`);
+                                      }}
+                                      className="text-start w-full"
+                                      style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                                    >
+                                      <span className="text-[13px] font-bold" style={{ color: "var(--teal)", fontFamily: "'Tajawal', sans-serif" }}>
+                                        {s.title}
+                                      </span>
+                                      {s.ageRange && (
+                                        <span className="text-[11.5px]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
+                                          {" "}· {s.ageRange}
+                                        </span>
+                                      )}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 
