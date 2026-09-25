@@ -118,6 +118,7 @@ export function bookingAdminEmailHtml(b: BookingRow): string {
     <div style="margin-top:16px;padding:16px 20px;background:#FEF5F7;border-radius:10px;border:1.5px solid #F7C4CE;">
       <div style="font-size:11px;font-weight:700;color:#F2A7B5;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">العميلة</div>
       <div style="font-size:14px;color:#252220;line-height:1.8;">${esc(b.customer_name)} · <a href="tel:${esc(b.customer_phone)}" style="color:#82C9C4;direction:ltr;">${esc(b.customer_phone)}</a> · <a href="mailto:${esc(b.customer_email)}" style="color:#82C9C4;">${esc(b.customer_email)}</a></div>
+      ${b.city ? `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">📍 من: <strong style="color:#252220;">${esc(b.city)}</strong></div>` : ""}
       ${babyAgeLine(b)}
       ${customerTextLine("📝 موضوع اللقاء", b.topic)}
       ${customerTextLine("ملاحظات", b.notes)}

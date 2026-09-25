@@ -8,6 +8,7 @@ import SessionCalendar, { type CalendarSession } from "./SessionCalendar";
 import { babyAgeDetailedLabel, checkBabyAge, checkWaitlistAge, hasAgeGate, ageRangeText, type AgeGate } from "@/lib/utils/age";
 import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
 import { BABY_NAME_MAX_LENGTH, isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
+import { BOOKING_CITY_MAX_LENGTH, isBookingCityValid, normalizeBookingCity } from "@/lib/utils/bookingCity";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { useGeo } from "@/lib/geo/useGeo";
 import { formatMoney } from "@/lib/currency";
@@ -63,6 +64,8 @@ interface BookingFormData {
   name: string;
   email: string;
   phone: string;
+  /** بلدة الأم — تُسأل في التسجيل الفعلي */
+  city: string;
   message: string;
   /** تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */
   babyBirthDate: string;
@@ -72,7 +75,7 @@ interface BookingFormData {
   topic: string;
 }
 
-const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", message: "", babyBirthDate: "", babyName: "", topic: "" };
+const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", city: "", message: "", babyBirthDate: "", babyName: "", topic: "" };
 
 /**
  * الخطوات: تحميل المواعيد ← اختيار موعد ← بيانات ← (انتقال لصفحة التأكيد/الدفع)
@@ -281,6 +284,9 @@ export default function BookingModal({
   /** موضوع اللقاء — يُسأل في خطوة الحجز الفعلي فقط، كالفئة العمرية */
   const needsTopic = step === "form" && Boolean(askTopic);
 
+  /** البلدة — في التسجيل الفعلي وحده؛ نموذجا التواصل والانتظار لا يحفظانها */
+  const needsCity = step === "form";
+
   /** لقاء حضوري وزائرة من خارج البلاد — التسجيل من داخل البلاد فقط (السيرفر يرفض أيضًا) */
   const blockedAbroad =
     step === "form" && selected !== null && !selected.online && ((geo !== null && !geo.domestic) || rejectedAbroad);
@@ -289,7 +295,8 @@ export default function BookingModal({
     contactValid &&
     (!needsBabyAge || ageCheck?.ok === true) &&
     (!needsBabyName || isBabyNameValid(normalizeBabyName(form.babyName))) &&
-    (!needsTopic || isBookingTopicValid(form.topic.trim()));
+    (!needsTopic || isBookingTopicValid(form.topic.trim())) &&
+    (!needsCity || isBookingCityValid(normalizeBookingCity(form.city)));
 
   const borderFor = (field: string) => (focused === field ? "var(--teal)" : "var(--bord)");
 
@@ -306,6 +313,7 @@ export default function BookingModal({
         body: JSON.stringify({
           slotId: selected.id,
           customer: { name: form.name, email: form.email, phone: form.phone },
+          city: normalizeBookingCity(form.city),
           notes: form.message,
           topic: form.topic,
           babyBirthDate: form.babyBirthDate || null,
@@ -563,6 +571,23 @@ export default function BookingModal({
                         style={{ ...inputBase, border: `1.5px solid ${borderFor("phone")}`, textAlign: "right" }} onFocus={() => setFocused("phone")} onBlur={() => setFocused(null)} />
                     </div>
                   </div>
+                  {/* البلدة — في التسجيل الفعلي وحده؛ هبة تحتاج أن تعرف من أين تأتي المسجِّلات */}
+                  {needsCity && (
+                    <div>
+                      <label style={labelStyle}>{t("modal.cityLabel")}</label>
+                      <input
+                        type="text"
+                        value={form.city}
+                        onChange={(e) => setForm({ ...form, city: e.target.value })}
+                        placeholder={t("modal.cityPlaceholder")}
+                        maxLength={BOOKING_CITY_MAX_LENGTH}
+                        autoComplete="address-level2"
+                        style={{ ...inputBase, border: `1.5px solid ${borderFor("city")}` }}
+                        onFocus={() => setFocused("city")}
+                        onBlur={() => setFocused(null)}
+                      />
+                    </div>
+                  )}
                   {/* تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */}
                   {needsBabyAge && (
                     <div>

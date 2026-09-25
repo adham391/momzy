@@ -96,6 +96,8 @@
       "namePlaceholder": "Your full name",
       "emailLabel": "Email *",
       "phoneLabel": "WhatsApp number *",
+      "cityLabel": "City or town *",
+      "cityPlaceholder": "e.g. Nazareth",
       "babyNameLabel": "Baby's full name *",
       "babyNamePlaceholder": "First and last name",
       "babyBirthDateLabel": "Your baby's birth date *",

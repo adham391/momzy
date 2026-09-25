@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getService } from "@/lib/services/getService";
 import { checkBabyAge, hasAgeGate } from "@/lib/utils/age";
 import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingTopic";
+import { isBookingCityValid, normalizeBookingCity } from "@/lib/utils/bookingCity";
 import { isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
@@ -44,6 +45,8 @@ export interface BookingRow {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  /** بلدة الأم — null للحجوزات السابقة لهجرة 0025 */
+  city: string | null;
   service_slug: string | null;
   service_name: string | null;
   availability_id: string | null;
@@ -93,6 +96,7 @@ function toBooking(r: Record<string, unknown>): BookingRow {
     ...row,
     customer_name: toLatinDigits(row.customer_name),
     customer_phone: toLatinDigits(row.customer_phone),
+    city: row.city ? toLatinDigits(row.city) : null,
     service_name: row.service_name ? toLatinDigits(row.service_name) : null,
     notes: row.notes ? toLatinDigits(row.notes) : null,
     admin_notes: row.admin_notes ? toLatinDigits(row.admin_notes) : null,
@@ -205,6 +209,8 @@ export async function getAvailableSeatsBySlug(): Promise<Record<string, number>>
 export interface CreateBookingInput {
   slotId: string;
   customer: { name: string; email: string; phone: string };
+  /** بلدة الأم — إلزامية لكل تسجيل */
+  city?: string | null;
   notes?: string;
   /** موضوع اللقاء — إلزامي للخدمات التي تسأل عنه (askTopic)، ويُتجاهل في غيرها */
   topic?: string | null;
@@ -247,6 +253,12 @@ export async function createBooking(
   // اللقاء الحضوري (الناصرة أو بيت الأم) من داخل البلاد فقط
   if (!isOnlineSession(slot, service?.type) && input.domestic === false) {
     return { error: "اللقاء الحضوري يُحجز من داخل البلاد فقط", status: 403, code: DOMESTIC_ONLY_CODE };
+  }
+
+  // البلدة تُسأل في كل تسجيل — هبة تحتاج أن تعرف من أين تأتي المسجِّلات
+  const city = normalizeBookingCity(input.city);
+  if (!isBookingCityValid(city)) {
+    return { error: "اكتبي اسم بلدتك", status: 400 };
   }
 
   /** يُحفظ فقط للخدمات التي تسأل عنه — فلا تلمس حجوزاتُ غيرها عمودَ topic */
@@ -297,6 +309,7 @@ export async function createBooking(
       customer_name: input.customer.name,
       customer_email: input.customer.email,
       customer_phone: input.customer.phone,
+      city,
       service_slug: slot.service_slug,
       service_name: slot.service_name,
       availability_id: slot.id,

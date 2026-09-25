@@ -1,58 +1,34 @@
 import { sendWhatsAppTemplate, isWhatsAppConfigured } from "./client";
-import { formatCharged } from "@/lib/currency";
 import { getHebaWhatsAppNumber } from "@/lib/db/settings";
-import type { OrderWithItems } from "@/lib/db/types";
-import type { BookingRow } from "@/lib/db/bookings";
 
 /**
- * إشعارات هبة التلقائية عبر واتساب (Meta Cloud API).
+ * إشعار هبة على واتساب — **جدول اليوم صباحًا وحده**.
  *
- * تستخدم قالبًا واحدًا بأربعة بارامترات (جسم القالب):
- *   {{1}} النوع (طلب جديد / حجز جديد)
- *   {{2}} الرقم (MZ-… / BK-…)
- *   {{3}} العميلة (الاسم · الهاتف)
- *   {{4}} التفاصيل (المبلغ+الكمية / الخدمة+الموعد)
+ * الطلب الجديد والحجز الجديد يصلان هبة بالإيميل بكل تفاصيلهما، فرسالة واتساب
+ * معهما تكرارٌ يُعوّدها تجاهُلَ الإشعارات. الباقي: جدولٌ واحد كل صباح.
  *
- * كلها best-effort ومشروطة بإعداد Meta + وجود رقم هبة — وإلا no-op صامت.
+ * القالب المعتمد من Meta: `momzy_daily_schedule` بثلاثة بارامترات (DailyScheduleParams).
+ * best-effort ومشروط بإعداد Meta + وجود رقم هبة — وإلا no-op صامت.
  */
 
-/** تاريخ+وقت الحجز بصيغة بسيطة بلا محارف اتجاه (بارامترات القالب لا تقبل أسطرًا/رموز تحكّم) */
-function plainSlot(dateStr: string, startTime: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${startTime.slice(0, 5)}`;
+/**
+ * بارامترات القالب — كلٌّ سطر واحد:
+ *   {{1}} اليوم والتاريخ · {{2}} الخلاصة (عدد الجلسات والمسجّلات) · {{3}} الجلسات بالتفصيل
+ */
+export interface DailyScheduleParams {
+  dateLabel: string;
+  summary: string;
+  sessions: string;
 }
 
-/** يشعر هبة بطلب جديد */
-export async function notifyHebaNewOrder(order: OrderWithItems): Promise<void> {
-  if (!isWhatsAppConfigured()) return;
+/** يرسل لهبة جدول يومها — تُبنى نصوصه في lib/notifications/dailySchedule.ts */
+export async function notifyHebaDailySchedule(params: DailyScheduleParams): Promise<boolean> {
+  if (!isWhatsAppConfigured()) return false;
   const to = await getHebaWhatsAppNumber();
-  if (!to) return;
+  if (!to) return false;
 
-  const itemCount = order.items.reduce((n, it) => n + it.quantity, 0);
-  await sendWhatsAppTemplate({
+  return sendWhatsAppTemplate({
     to,
-    bodyParams: [
-      "طلب جديد",
-      order.order_number,
-      `${order.customer_name} · ${order.customer_phone}`,
-      `${formatCharged(order.total_amount, order.currency, order.charged_amount)} · ${itemCount} منتج`,
-    ],
-  });
-}
-
-/** يشعر هبة بحجز جديد */
-export async function notifyHebaNewBooking(b: BookingRow): Promise<void> {
-  if (!isWhatsAppConfigured()) return;
-  const to = await getHebaWhatsAppNumber();
-  if (!to) return;
-
-  await sendWhatsAppTemplate({
-    to,
-    bodyParams: [
-      "حجز جديد",
-      b.booking_number,
-      `${b.customer_name} · ${b.customer_phone}`,
-      `${b.service_name ?? "خدمة"} · ${plainSlot(b.date, b.start_time)}`,
-    ],
+    bodyParams: [params.dateLabel, params.summary, params.sessions],
   });
 }

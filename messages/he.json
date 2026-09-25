@@ -96,6 +96,8 @@
       "namePlaceholder": "השם המלא שלך",
       "emailLabel": "אימייל *",
       "phoneLabel": "מספר וואטסאפ *",
+      "cityLabel": "יישוב *",
+      "cityPlaceholder": "לדוגמה: נצרת",
       "babyNameLabel": "שם מלא של התינוק *",
       "babyNamePlaceholder": "שם פרטי ושם משפחה",
       "babyBirthDateLabel": "תאריך הלידה של תינוקך *",

@@ -12,7 +12,7 @@ function isValidEmail(email: string): boolean {
 
 /**
  * POST /api/bookings — تسجيل في ورشة/خدمة.
- * body: { slotId, customer: { name, email, phone }, notes?, topic? }
+ * body: { slotId, customer: { name, email, phone }, city, notes?, topic? }
  * يعيد 409 لو امتلأ الموعد (السعة تُحجز ذرّيًا).
  *
  * الورشة المدفوعة: يُنشأ الحجز ويُحجز المقعد، ويُعاد `paymentUrl` لإتمام الدفع.
@@ -31,6 +31,8 @@ export async function POST(request: Request) {
   const b = body as {
     slotId?: string;
     customer?: { name?: string; email?: string; phone?: string };
+    /** بلدة الأم — إلزامية لكل تسجيل (يُتحقَّق منها في createBooking) */
+    city?: string;
     notes?: string;
     /** موضوع اللقاء — إلزامي للخدمات التي تسأل عنه (يُتحقَّق منه في createBooking) */
     topic?: string;
@@ -55,6 +57,7 @@ export async function POST(request: Request) {
   const result = await createBooking({
     slotId: b.slotId,
     customer: { name: c.name.trim(), email: c.email.trim(), phone: c.phone.trim() },
+    city: typeof b.city === "string" ? b.city : null,
     notes: typeof b.notes === "string" ? b.notes : "",
     topic: typeof b.topic === "string" ? b.topic : null,
     babyBirthDate: typeof b.babyBirthDate === "string" ? b.babyBirthDate : null,

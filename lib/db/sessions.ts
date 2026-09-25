@@ -25,10 +25,18 @@ export interface SessionBooking {
   charged_amount: number | null;
   /** لغة الأم — تحدّد لغة إيميل التغيير */
   locale: string | null;
+  /** بلدة الأم — null للحجوزات السابقة لهجرة 0025 */
+  city: string | null;
+  /** تاريخ ميلاد الطفل — للورشات ذات الفئة العمرية فقط */
+  baby_birth_date: string | null;
+  /** اسم الطفل — مع تاريخ الميلاد، وفارغ لمن لم يُولد بعد */
+  baby_name: string | null;
+  /** موضوع اللقاء كما كتبته الأم — للخدمات التي تسأل عنه (askTopic) فقط */
+  topic: string | null;
 }
 
 const BOOKING_FIELDS =
-  "id, booking_number, customer_name, customer_phone, customer_email, status, payment_status, amount, currency, charged_amount, locale, availability_id";
+  "id, booking_number, customer_name, customer_phone, customer_email, status, payment_status, amount, currency, charged_amount, locale, city, baby_birth_date, baby_name, topic, availability_id";
 
 function toSessionBooking(r: Record<string, unknown>): SessionBooking {
   return {
@@ -43,6 +51,10 @@ function toSessionBooking(r: Record<string, unknown>): SessionBooking {
     currency: (r.currency as Currency | undefined) ?? "ILS",
     charged_amount: r.charged_amount == null ? null : Number(r.charged_amount),
     locale: (r.locale as string | null) ?? null,
+    city: (r.city as string | null) ?? null,
+    baby_birth_date: (r.baby_birth_date as string | null) ?? null,
+    baby_name: (r.baby_name as string | null) ?? null,
+    topic: (r.topic as string | null) ?? null,
   };
 }
 

@@ -8,11 +8,10 @@ import {
   bookingAdminEmailHtml,
   bookingAdminSubject,
 } from "@/lib/resend/emails/bookingEmail";
-import { notifyHebaNewBooking } from "@/lib/whatsapp/notify";
 
 /**
- * إشعارات تأكيد الحجز — إيميل لهبة + إيميل للعميلة (يحوي رابط اللقاء/المكان)
- * + إشعار واتساب لهبة.
+ * إشعارات تأكيد الحجز — إيميل لهبة + إيميل للعميلة (يحوي رابط اللقاء/المكان).
+ * (لا واتساب: إيميل هبة يحمل تفاصيل الحجز كلّها — واتساب لجدول الصباح وحده.)
  *
  * تُستدعى في حالتين:
  *  - حجز مجاني: فور إنشائه (`POST /api/bookings`).
@@ -42,6 +41,4 @@ export async function sendBookingNotifications(bookingId: string): Promise<void>
       html: bookingCustomerEmailHtml(full),
     });
   }
-
-  await notifyHebaNewBooking(full);
 }

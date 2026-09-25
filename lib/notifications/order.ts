@@ -8,14 +8,13 @@ import {
   orderAdminEmailHtml,
   orderAdminSubject,
 } from "@/lib/resend/emails/orderEmail";
-import { notifyHebaNewOrder } from "@/lib/whatsapp/notify";
 
 /**
  * إشعارات الطلب — نظير lib/notifications/digital.ts وbooking.ts.
  *
  * القاعدة: **لا تأكيد قبل الدفع.** كان التأكيد يُرسل لحظة إنشاء الطلب،
- * فتصل العميلة رسالة «تأكيد طلبكِ» ثم تُرفض بطاقتها — وتصل هبة رسالة
- * وواتساب عن طلب لن يُدفع أبدًا.
+ * فتصل العميلة رسالة «تأكيد طلبكِ» ثم تُرفض بطاقتها — ويصل هبة إيميل
+ * عن طلب لن يُدفع أبدًا.
  *
  * فصار:
  *  - الدفع الإلكتروني مفعّل → لا شيء عند الإنشاء؛ التأكيد وإشعار هبة بعد
@@ -27,7 +26,8 @@ import { notifyHebaNewOrder } from "@/lib/whatsapp/notify";
  */
 
 /**
- * تأكيد الطلب — للعميلة، ولهبة (إيميل + واتساب).
+ * تأكيد الطلب — للعميلة ولهبة، بالإيميل.
+ * (لا واتساب للطلب: الإيميل يصلها فيه كل التفاصيل — الواتساب للحجوزات وجدول اليوم.)
  * يُستدعى بعد نجاح الدفع، أو عند الإنشاء في التدفّق اليدوي.
  *
  * إشعار هبة يذهب لصندوق يطابق محتوى الطلب: الفيزيائي لصندوق الطلبات
@@ -58,7 +58,5 @@ export async function sendOrderConfirmation(orderId: string): Promise<void> {
       });
     }
   }
-
-  await notifyHebaNewOrder(order);
 }
 

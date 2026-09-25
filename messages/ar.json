@@ -96,6 +96,8 @@
       "namePlaceholder": "اسمك الكامل",
       "emailLabel": "البريد الإلكتروني *",
       "phoneLabel": "رقم الواتساب *",
+      "cityLabel": "البلدة *",
+      "cityPlaceholder": "مثلًا: الناصرة",
       "babyNameLabel": "اسم الطفل الكامل *",
       "babyNamePlaceholder": "الاسم الأول واسم العائلة",
       "babyBirthDateLabel": "تاريخ ميلاد طفلك *",

@@ -7,12 +7,12 @@
  * مُعطّل تلقائيًا حتى تُضبط مفاتيح Meta في .env.local:
  *   WHATSAPP_PHONE_NUMBER_ID   = معرّف رقم واتساب الأعمال
  *   WHATSAPP_ACCESS_TOKEN      = التوكن الدائم
- *   WHATSAPP_TEMPLATE_NAME     = اسم القالب المعتمد (افتراضي: momzy_notification)
+ *   WHATSAPP_TEMPLATE_NAME     = اسم القالب المعتمد (افتراضي: momzy_daily_schedule)
  * وبدونها لا تُرسَل رسائل واتساب (الإيميلات + رابط wa.me اليدوي يبقيان).
  */
 
 const DEFAULT_VERSION = "v21.0";
-const DEFAULT_TEMPLATE = "momzy_notification";
+const DEFAULT_TEMPLATE = "momzy_daily_schedule";
 const DEFAULT_LANG = "ar";
 
 /** هل ضُبطت مفاتيح Meta WhatsApp؟ */

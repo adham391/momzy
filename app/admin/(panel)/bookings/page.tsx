@@ -103,6 +103,8 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
           </div>
           <div className="font-semibold text-dark text-body-sm">{b.customer_name}</div>
           <div className="text-micro text-light" style={{ direction: "ltr", textAlign: "right" }}>{b.customer_phone}</div>
+          {/* بلدة الأم — من أين تأتي المسجِّلات */}
+          {b.city && <div className="text-micro text-light">📍 {b.city}</div>}
           <div className="text-body-sm text-mid mt-1">
             {b.service_name} · {formatSlotDate(b.date)} · {formatTimeShort(b.start_time)}
             {b.amount > 0 ? ` · ${formatCharged(b.amount, b.currency, b.charged_amount)}` : ""}
