@@ -185,6 +185,15 @@ export const service = defineType({
     }),
 
     defineField({
+      name: "whatsappNumber",
+      title: "رقم واتساب خاص بهذه الخدمة",
+      type: "string",
+      description:
+        "اتركيه فارغًا ليستعمل رقم الموقع. املئيه فقط للخدمة التي تُدار على رقم آخر — " +
+        "فيذهب زرّ «تواصلي على واتساب» في هذه الخدمة وحدها إلى هذا الرقم.",
+    }),
+
+    defineField({
       name: "askTopic",
       title: "اسأل عن موضوع اللقاء عند التسجيل",
       type: "boolean",

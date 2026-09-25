@@ -28,6 +28,7 @@ const SERVICE_FIELDS = `{
   price,
   priceUsd,
   whatsappOnly,
+  whatsappNumber,
   order,
   "coverImage":       coverImage.asset->url,
   "coverAspect":      coverImage.asset->metadata.dimensions.aspectRatio,

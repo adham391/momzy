@@ -90,9 +90,10 @@ export default function ServicesSection({
                   animation: `card-in 0.45s cubic-bezier(0.23, 1, 0.32, 1) ${index * 80}ms both`,
                 }}
               >
+                {/* رقم الخدمة إن كان لها رقم خاصّ، وإلا رقم الموقع */}
                 <ServiceCard
                   service={service}
-                  whatsappNumber={whatsappNumber}
+                  whatsappNumber={service.whatsappNumber || whatsappNumber}
                   seatsLeft={seatsBySlug?.[service.slug]}
                 />
               </div>

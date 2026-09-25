@@ -85,7 +85,8 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   // رقم واتساب من إعدادات الموقع — نفس مصدر صفحة القائمة والفوتر، وهو ما
   // يحرّره الأدمن. كان يُقرأ من env فبقي placeholder وأُرسلت العميلات إلى
   // رابط واتساب فارغ.
-  const whatsapp = (await getSiteSettings()).contact.whatsappNumber;
+  // رقم الخدمة إن كان لها رقم خاصّ (الزيارة البيتية مثلًا)، وإلا رقم الموقع
+  const whatsapp = service.whatsappNumber || (await getSiteSettings()).contact.whatsappNumber;
 
   return (
     <div style={{ background: "var(--offwh)" }}>
