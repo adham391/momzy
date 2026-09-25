@@ -17,7 +17,7 @@ const ICON_STYLE = [
 export default function WhyMomzySection({ content }: { content: HomePageContent }) {
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية الهيرو ─ */
-    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 2 }}>
+    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 3 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <SectionWave fill="#FDFAF5" />

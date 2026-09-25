@@ -19,7 +19,7 @@ export default function HebaSection({ content }: { content: HomePageContent }) {
   const t = useTranslations("home");
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية قسم الأكثر مبيعًا ─ */
-    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 4 }}>
+    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 5 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <SectionWave fill="#F8F4EE" />

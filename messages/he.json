@@ -316,6 +316,27 @@
     "sslSecure": "תשלום מאובטח ומוצפן בטכנולוגיית SSL"
   },
   "home": {
+    "launchOffers": {
+      "boxText": "{count} פריטים שהיבה בחרה ללוות אותך בימים הראשונים.",
+      "boxTextFreeShipping": "{count} פריטים שהיבה בחרה ללוות אותך בימים הראשונים — ומשלוח חינם לכל הארץ.",
+      "bundleEyebrow": "חבילת ההשקה",
+      "previous": "המבצע הקודם",
+      "next": "המבצע הבא",
+      "goToSlide": "מבצע",
+      "label": "מבצעי ההשקה",
+      "heading": "ההתחלה שלנו — במתנה",
+      "subheading": "מבצעים לכבוד השקת Momzy — לזמן מוגבל.",
+      "save": "חסכי {amount}",
+      "freeBadge": "חינם",
+      "launchPrice": "מחיר השקה",
+      "boxCta": "להזמנת המארז ←",
+      "bundleTitle": "המארז + החוברת יחד",
+      "bundleText": "הוסיפי את «{item}» למארז שלך ב-{price} במקום {old}.",
+      "bundleCta": "לפרטים ←",
+      "shippingEyebrow": "מבצע השקה",
+      "shippingTitle": "משלוח חינם לכל הארץ",
+      "shippingText": "על {item} — לזמן מוגבל."
+    },
     "hero": {
       "hebaName": "היבה חסן",
       "hebaCredentials": "אחות מוסמכת · דולה מלווה לידה",

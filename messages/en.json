@@ -316,6 +316,27 @@
     "sslSecure": "Secure encrypted payment with SSL technology"
   },
   "home": {
+    "launchOffers": {
+      "boxText": "{count} pieces Heba chose for your first days.",
+      "boxTextFreeShipping": "{count} pieces Heba chose for your first days — with free shipping nationwide.",
+      "bundleEyebrow": "Launch bundle",
+      "previous": "Previous offer",
+      "next": "Next offer",
+      "goToSlide": "Offer",
+      "label": "Launch offers",
+      "heading": "Our beginning — with a gift",
+      "subheading": "Offers to mark Momzy's launch — for a limited time.",
+      "save": "Save {amount}",
+      "freeBadge": "Free",
+      "launchPrice": "Launch price",
+      "boxCta": "Order the box ←",
+      "bundleTitle": "The box and the booklet together",
+      "bundleText": "Add “{item}” to your box for {price} instead of {old}.",
+      "bundleCta": "See the details ←",
+      "shippingEyebrow": "Launch offer",
+      "shippingTitle": "Free shipping nationwide",
+      "shippingText": "On {item} — for a limited time."
+    },
     "hero": {
       "hebaName": "Heba Hasan",
       "hebaCredentials": "Certified nurse · Birth doula",

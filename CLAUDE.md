@@ -469,6 +469,8 @@ momzy/
 │   ├── home/
 │   │   ├── HeroSection.tsx         ✅ gradient وردي + دوائر + أزرار CTA + HeroStoryButton
 │   │   ├── HeroStoryButton.tsx     ✅ زر "قصة Momzy" يفتح MomzyStoryModal
+│   │   ├── LaunchBanner.tsx        ✅ بانر الإعلانات **تحت الهيرو** (قسم كامل في تسلسل الموجات: `zIndex: 2` وموجة `#F8F4EE`، فما بعده أُزيح +1) — يبني الشرائح من البيانات: خصم الصندوق (`compareAtPrice`) · الباقة (`BUNDLE_RULES`) · الشحن المجاني (`shippingInfo.freeShipping`). **ينتهي العرض في مصدره ⇒ تختفي شريحته**، وبلا عرض سارٍ يختفي البانر. **والشحن المجاني عرضُ افتتاح مؤقّت** (يعود بـ₪40 من `/admin/settings`): إزالة علامته في Studio تُسقط شريحته **وذكرَه في نصّ شريحة الصندوق** (`boxTextFreeShipping` ⟵ `boxText`) — يبقى على هبة تعديل «ملاحظات الشحن» في المنتج ونصّ الشريط العلوي، فهما نصّان كتبتهما بنفسها. عدد قطع الصندوق من `contents.length` لا رقمًا مكتوبًا، والمبالغ معزولة ثنائي الاتجاه (U+2066) كي تبقى ₪ قبل الرقم في الجملة العربية
+│   │   ├── LaunchBannerCarousel.tsx ✅ واجهة البانر (client) — تبديل تلقائي كل 6ث + أسهم (تُخفى على الهاتف) + نقاط + سحب بالإصبع، ويتوقّف بمرور الفأرة أو التركيز ومع `prefers-reduced-motion`. **التوقّف بالفأرة فقط** (`pointerType === "mouse"`): اللمس يُطلق دخول المؤشّر بلا خروج، فكانت أول لمسة توقف التبديل للأبد. الشرائح كلّها في خانة الشبكة نفسها (ظهور بالشفافية و`inert` لغير الظاهرة) فارتفاع البانر ارتفاعُ أطولها ولا يقفز بين شريحة بسطرين وأخرى بسطر، وبكل لغة طول آخر. وشريحة الشحن تعرض **أيقونة الشحن في دائرة** لا صورة منتج (`imageKind: "icon"`) — هي لا تتكلّم عن منتج بل عن الشحن. **الصورة كاملة بلا قصّ** (`object-contain` بخلفية شفّافة يظهر منها تدرّج الشريحة) ومطلقة داخل عمودها — الصورة العادية بـ`h-full` تفرد ارتفاعها الأصلي فيطول البانر. النغمات (`TONES`): **زيتي** للصندوق (لون الصندوق نفسه في صورته) · تركوازي للباقة · وردي للشحن المجاني — ولون الإبراز في كل نغمة درجة غامقة لا الفاتحة من الهوية، لأنه يحمل نصًّا صغيرًا وخلفيةَ زرٍّ بنصّ أبيض
 │   │   ├── MomzyStoryModal.tsx     ✅ modal قصة Momzy + القيم الأربع — Portal
 │   │   ├── LatestSection.tsx       ✅ كاردات منتجات + badge نابض أصفر
 │   │   ├── LatestBigCardBody.tsx   ✅ محتوى الكارد الكبير
@@ -831,11 +833,13 @@ NEXT_PUBLIC_SITE_URL=https://momzyworld.com
 | القسم | z-index | marginTop | لون الـ wave |
 |-------|---------|-----------|-------------|
 | HeroSection | 1 | — | لا wave |
-| LatestSection | 2 | -60px | #F5F0EA |
-| OfferSection | 3 | -60px | #FDFAF5 |
-| HebaSection | 4 | — | #F8F4EE |
-| ArticlesSection | 5 | -60px | #FDFAF5 |
-| ReviewsSection | 6 | -60px | #F5D98E |
+| LaunchBanner | 2 | -60px | #F8F4EE |
+| WhyMomzySection | 3 | -60px | #FDFAF5 |
+| BestSellersSection | 4 | -60px | #F5F0EA |
+| HebaSection | 5 | -60px | #F8F4EE |
+| ArticlesSection | 6 | -60px | #FDFAF5 |
+| ChannelSection | 7 | -60px | #EFF8F8 |
+| ReviewsSection | 8 | -60px | #F5D98E |
 
 **قواعد مهمة:**
 - `<section>` نفسه **بدون background-color**

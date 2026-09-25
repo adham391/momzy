@@ -316,6 +316,27 @@
     "sslSecure": "دفع آمن ومشفّر بتقنية SSL"
   },
   "home": {
+    "launchOffers": {
+      "boxText": "{count} قطع اختارتها هبة لترافقكِ في أيامكِ الأولى.",
+      "boxTextFreeShipping": "{count} قطع اختارتها هبة لترافقكِ في أيامكِ الأولى — وشحن مجاني لكل البلاد.",
+      "bundleEyebrow": "باقة الافتتاح",
+      "previous": "الإعلان السابق",
+      "next": "الإعلان التالي",
+      "goToSlide": "إعلان",
+      "label": "عروض الافتتاح",
+      "heading": "بدايتنا… بهديّة منّا",
+      "subheading": "عروض سارية احتفاءً بانطلاقة Momzy — لفترة محدودة.",
+      "save": "وفّري {amount}",
+      "freeBadge": "مجانًا",
+      "launchPrice": "سعر الافتتاح",
+      "boxCta": "اطلبي الصندوق ←",
+      "bundleTitle": "الصندوق + الكتيّب معًا",
+      "bundleText": "أضيفي «{item}» إلى صندوقكِ بـ{price} بدل {old}.",
+      "bundleCta": "اعرفي التفاصيل ←",
+      "shippingEyebrow": "عرض الافتتاح",
+      "shippingTitle": "شحن مجاني لكل البلاد",
+      "shippingText": "على {item} — لفترة محدودة."
+    },
     "hero": {
       "hebaName": "هبة حسن",
       "hebaCredentials": "ممرضة معتمدة · مرافقة ولادة",

@@ -24,7 +24,7 @@ export default async function BestSellersSection({ content }: { content: HomePag
 
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية قسم "ليش Momzy" ─ */
-    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 3 }}>
+    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 4 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <SectionWave fill="#F5F0EA" />

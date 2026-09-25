@@ -48,7 +48,7 @@ export default async function ChannelSection() {
   const messages = [t("channel.msg1"),    t("channel.msg2"),    t("channel.msg3")];
 
   return (
-    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 6 }}>
+    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 7 }}>
       <SectionWave fill="#EFF8F8" />
 
       <div

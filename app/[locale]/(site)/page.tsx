@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { HOME_META, asLocale, pageSeo } from "@/lib/seo/site";
 import HeroSection        from "@/components/home/HeroSection";
+import LaunchBanner       from "@/components/home/LaunchBanner";
 import WhyMomzySection    from "@/components/home/WhyMomzySection";
 import BestSellersSection from "@/components/home/BestSellersSection";
 import HebaSection        from "@/components/home/HebaSection";
@@ -30,6 +31,8 @@ export default async function HomePage({
     <>
       {/* كل قسم يحتوي على wave في أعلاه يتداخل مع القسم السابق */}
       <HeroSection content={home} />
+      {/* بانر الإعلانات تحت الهيرو — يختفي وحده حين تنتهي العروض */}
+      <LaunchBanner />
       <WhyMomzySection content={home} />
       <BestSellersSection content={home} />
       <HebaSection content={home} />

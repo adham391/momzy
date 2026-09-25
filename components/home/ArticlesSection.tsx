@@ -23,7 +23,7 @@ export default async function ArticlesSection({ content }: { content: HomePageCo
 
   return (
     /** ─ الـ section شفاف — الـ wave يغطي نهاية HebaSection ─ */
-    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 5 }}>
+    <section className="relative reveal-section" style={{ marginTop: -60, zIndex: 6 }}>
 
       {/* ── موجة أعلى القسم ── */}
       <SectionWave fill="#FDFAF5" />
