@@ -112,6 +112,8 @@ export interface SessionInput {
   location: string | null;
   notes: string | null;
   createdBy: string | null;
+  /** تُنشأ محجوبة — لا تظهر للزبونة حتى تُفتح يدويًا */
+  blocked?: boolean;
 }
 
 /** ينشئ عدّة جلسات دفعة واحدة (جلسة واحدة، أو متتالية، أو تكرار أسبوعي) */
@@ -135,6 +137,9 @@ export async function createSessions(inputs: SessionInput[]): Promise<number> {
         meeting_link: s.meetingLink,
         location: s.location,
         notes: s.notes,
+        // المحجوبة لا تظهر في الرزنامة ولا تُحجز (book_slot يشترط is_blocked=false)
+        is_blocked: s.blocked ?? false,
+        block_reason: s.blocked ? "لم تُفتح بعد" : null,
         created_by: s.createdBy,
       }))
     )

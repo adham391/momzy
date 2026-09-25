@@ -59,6 +59,8 @@ export default function SessionCreateForm({
   const [meetingLink, setMeetingLink] = useState(service?.meetingLink ?? "");
   const [location, setLocation] = useState(service?.location ?? "");
   const [notes, setNotes] = useState("");
+  /** تُنشأ محجوبة — تجهيز المواعيد قبل فتحها للزبائن */
+  const [blocked, setBlocked] = useState(false);
 
   /** اختيار خدمة أخرى يعيد تعبئة كل ما يخصّها */
   function pickService(slug: string) {
@@ -210,6 +212,23 @@ export default function SessionCreateForm({
         <label className={`${labelCls} lg:col-span-2`}>
           <span className={captionCls}>ملاحظة داخلية (اختياري — لا تظهر للعميلات)</span>
           <input name="notes" type="text" value={notes} onChange={(e) => setNotes(e.target.value)} className={inputCls} />
+        </label>
+
+        {/* تجهيز المواعيد قبل فتحها — المحجوبة لا تظهر في الرزنامة ولا تُحجز */}
+        <label className="lg:col-span-2 flex items-start gap-2.5 bg-offwh border border-bord rounded-xl px-4 py-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={blocked}
+            onChange={(e) => setBlocked(e.target.checked)}
+            className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--rose)] cursor-pointer"
+          />
+          <input type="hidden" name="blocked" value={blocked ? "1" : "0"} />
+          <span>
+            <span className="block text-body-sm font-bold text-dark">أضيفيها محجوبة</span>
+            <span className="block text-micro text-mid mt-0.5">
+              لا تظهر للزبائن ولا تُحجز حتى تفتحيها من زرّ «إظهار» — للتجهيز قبل الإعلان.
+            </span>
+          </span>
         </label>
       </div>
 

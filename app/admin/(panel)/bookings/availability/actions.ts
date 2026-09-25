@@ -89,6 +89,8 @@ export async function createSessionsAction(formData: FormData) {
     const meetingLink = str(formData, "meeting_link") || null;
     const location = str(formData, "location") || null;
     const notes = str(formData, "notes") || null;
+    // تُنشأ محجوبة حين تريد هبة تجهيز المواعيد قبل فتحها للزبائن
+    const blocked = str(formData, "blocked") === "1";
     const createdBy = await currentAdminId();
 
     const inputs: SessionInput[] = times.map((t) => {
@@ -109,11 +111,16 @@ export async function createSessionsAction(formData: FormData) {
         location,
         notes,
         createdBy,
+        blocked,
       };
     });
 
     const n = await createSessions(inputs);
-    return { notice: `أُضيف ${count(n, "موعد واحد", "مواعيد")} ✓`, day: inputs[0].date };
+    const added = count(n, "موعد واحد", "مواعيد");
+    return {
+      notice: blocked ? `أُضيف ${added} محجوبًا — لا يظهر للزبائن حتى تفتحيه ✓` : `أُضيف ${added} ✓`,
+      day: inputs[0].date,
+    };
   });
 }
 
