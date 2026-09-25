@@ -1,7 +1,7 @@
 import { listUpcomingSlots } from "@/lib/db/bookings";
 import { getActiveBookingsForSlots } from "@/lib/db/sessions";
 import { canFulfill } from "@/lib/orders/fulfillment";
-import { babyAgeDetailedLabel } from "@/lib/utils/age";
+import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
 import { israelTodayISO, shortTime, weekdayAr } from "@/lib/sessions/time";
 import { notifyHebaDailySchedule, type DailyScheduleParams } from "@/lib/whatsapp/notify";
 
@@ -23,6 +23,8 @@ export interface ScheduleAttendee {
   city: string | null;
   babyName: string | null;
   babyBirthDate: string | null;
+  /** أسبوع ولادة الخديج — عمره المصحَّح هو ما يعني هبة */
+  gestationalWeeks: number | null;
   /** موضوع اللقاء كما كتبته — للّقاءات الفردية التي تسأل عنه فقط */
   topic: string | null;
 }
@@ -79,8 +81,12 @@ function shortTopic(topic: string | null): string | null {
 
 /** الأم بتفاصيلها: الاسم · البلدة · الهاتف · الطفل وعمره · موضوع لقائها — الموجود منها فقط */
 function attendeeText(attendee: ScheduleAttendee, date: string): string {
+  // الخديج بعمره المصحَّح — هو ما يحدّد ما يقدر عليه في الجلسة
+  const corrected = attendee.babyBirthDate
+    ? correctedAgeLabel(attendee.babyBirthDate, date, attendee.gestationalWeeks)
+    : null;
   const baby = attendee.babyBirthDate
-    ? `${attendee.babyName ?? "الطفل"} ${babyAgeDetailedLabel(attendee.babyBirthDate, date)}`
+    ? `${attendee.babyName ?? "الطفل"} ${corrected ?? babyAgeDetailedLabel(attendee.babyBirthDate, date)}${corrected ? " (مصحَّح)" : ""}`
     : attendee.babyName;
   return [attendee.name, attendee.city, attendee.phone, baby, shortTopic(attendee.topic)]
     .filter(Boolean)
@@ -137,6 +143,7 @@ export async function sendHebaDailySchedule(today = israelTodayISO()): Promise<{
         city: b.city,
         babyName: b.baby_name,
         babyBirthDate: b.baby_birth_date,
+        gestationalWeeks: b.gestational_weeks,
         topic: b.topic,
       })),
   }));

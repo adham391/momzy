@@ -8,7 +8,7 @@ import { BookingStatusBadge } from "@/components/admin/StatusBadge";
 import { changeBookingStatusAction } from "./actions";
 import { formatSlotDate, formatTimeShort } from "@/lib/utils/format";
 import { formatCharged } from "@/lib/currency";
-import { babyAgeDetailedLabel } from "@/lib/utils/age";
+import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "الحجوزات — لوحة Momzy" };
@@ -79,10 +79,16 @@ export default async function AdminBookingsPage({ searchParams }: PageProps) {
   );
 }
 
-/** عمر الطفل يوم الجلسة — يُحسب لا يُخزَّن، كي يبقى صحيحًا لو تغيّر موعد الورشة */
+/**
+ * عمر الطفل يوم الجلسة — يُحسب لا يُخزَّن، كي يبقى صحيحًا لو تغيّر موعد الورشة.
+ * والخديج يُعرض بعمره المصحَّح (وهو ما تُقاس به الفئة العمرية) ومعه عمره الزمني.
+ */
 function babyAgeAtSession(b: BookingRow): string {
+  if (!b.baby_birth_date) return "—";
   // بالأيام قبل الشهر الأول، وبالأشهر بعده
-  return b.baby_birth_date ? babyAgeDetailedLabel(b.baby_birth_date, b.date) : "—";
+  const actual = babyAgeDetailedLabel(b.baby_birth_date, b.date);
+  const corrected = correctedAgeLabel(b.baby_birth_date, b.date, b.gestational_weeks);
+  return corrected ? `${corrected} (مصحَّح · الزمني ${actual})` : actual;
 }
 
 function BookingCard({ booking: b }: { booking: BookingRow }) {

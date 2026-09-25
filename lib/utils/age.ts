@@ -73,6 +73,87 @@ export function ageInMonthsAt(birthISO: string, sessionISO: string): number | nu
   return months;
 }
 
+/* ═══ الخداج والعمر المصحَّح ═══ */
+
+/**
+ * الطفل الخديج يُقاس بعمره **المصحَّح**: عمره من يوم ولادته ناقصًا ما سبق به موعده.
+ * مولود في الأسبوع 32 يسبق موعده بثمانية أسابيع، فابن الستّة أشهر منهم عمره
+ * المصحَّح أربعة — وهو ما يحدّد ما يقدر عليه في الورشة، لا رقم مواليده.
+ *
+ * التطبيق: نؤخّر **تاريخ الميلاد** بمقدار التصحيح ونمرّره لدوال العمر كما هي،
+ * فلا تعرف الدوالّ الأخرى شيئًا عن الخداج.
+ */
+
+/** أسابيع الحمل الكاملة — الولادة في موعدها */
+export const FULL_TERM_WEEKS = 40;
+
+/** أصغر أسبوع ولادة مقبول */
+export const MIN_GESTATIONAL_WEEKS = 22;
+
+/** أكبر أسبوع يُعدّ خداجًا — الطبّ: ما قبل الأسبوع 37 */
+export const MAX_PRETERM_WEEKS = 36;
+
+/** أسبوع ولادة مقبول؟ (عدد صحيح داخل المدى) */
+export function isGestationalWeeksValid(weeks: unknown): weeks is number {
+  return (
+    typeof weeks === "number" &&
+    Number.isInteger(weeks) &&
+    weeks >= MIN_GESTATIONAL_WEEKS &&
+    weeks <= MAX_PRETERM_WEEKS
+  );
+}
+
+/** هل يُصحَّح عمر هذا الطفل؟ — بلا أسبوع ولادة أو بولادة في موعدها: لا */
+export function hasCorrectedAge(gestationalWeeks?: number | null): boolean {
+  return isGestationalWeeksValid(gestationalWeeks);
+}
+
+/** تاريخ الميلاد المصحَّح — يُؤخَّر بمقدار ما سبق الطفلُ موعده، فيُقاس منه عمره */
+export function correctedBirthDate(birthISO: string, gestationalWeeks?: number | null): string {
+  if (!hasCorrectedAge(gestationalWeeks)) return birthISO;
+  const birth = parseISO(birthISO);
+  if (!birth) return birthISO;
+  const corrected = new Date(birth);
+  corrected.setDate(corrected.getDate() + (FULL_TERM_WEEKS - (gestationalWeeks as number)) * 7);
+  return toISODate(corrected);
+}
+
+/** هل وُلد الطفل بحلول هذا التاريخ؟ */
+function bornBy(birthISO: string, atISO: string): boolean {
+  const days = daysBetween(birthISO, atISO);
+  return days !== null && days >= 0;
+}
+
+/**
+ * العمر المقيس: بالأشهر وبنصّ للعرض، مصحَّحًا للخديج.
+ *
+ * **المولود لا يصير غير مولود**: الخديج في أسبوعه الثالث عمره المصحَّح سالب
+ * (لم يبلغ بعد موعد ولادته)، فنثبّته عند الصفر — وإلا رفضته ورشة تبدأ من يوم
+ * الولادة، وهي أحوج ما تكون إليها.
+ */
+function measuredAge(
+  birthISO: string,
+  atISO: string,
+  gestationalWeeks?: number | null
+): { months: number | null; label: string } {
+  const measured = correctedBirthDate(birthISO, gestationalWeeks);
+  const months = ageInMonthsAt(measured, atISO);
+  if (hasCorrectedAge(gestationalWeeks) && bornBy(birthISO, atISO) && months !== null && months < 0) {
+    return { months: 0, label: monthsLabel(0) };
+  }
+  return { months, label: babyAgeDetailedLabel(measured, atISO) };
+}
+
+/** نصّ العمر المصحَّح — `null` لطفل لا يُصحَّح عمره (فلا يُعرض السطر أصلًا) */
+export function correctedAgeLabel(
+  birthISO: string,
+  atISO: string,
+  gestationalWeeks?: number | null
+): string | null {
+  if (!hasCorrectedAge(gestationalWeeks)) return null;
+  return measuredAge(birthISO, atISO, gestationalWeeks).label;
+}
+
 /** صياغة عربية لعدد الأيام */
 export function daysLabel(n: number): string {
   if (n <= 0) return "يومه الأول";
@@ -145,15 +226,21 @@ export interface AgeCheckResult {
 /**
  * التحقق من ملاءمة عمر الطفل لورشة في تاريخ معيّن.
  * الورشة بلا فئة عمرية تمرّ دائمًا (لا تُسأل الأم أصلًا).
+ *
+ * الخديج يُقاس بعمره المصحَّح — فقد يبلغ طفلٌ سنَّ الورشة بتاريخ مواليده
+ * ولا يبلغها بعمره المصحَّح. والرسالة تقول «العمر المصحّح» ولا تذكر الخداج:
+ * الأم تعرف حال طفلها، وليس من شأن رسالةٍ أن تُذكّرها به.
  */
 export function checkBabyAge(
   birthISO: string,
   sessionISO: string,
-  gate: AgeGate
+  gate: AgeGate,
+  gestationalWeeks?: number | null
 ): AgeCheckResult {
   if (!hasAgeGate(gate)) return { ok: true, months: null };
 
-  const months = ageInMonthsAt(birthISO, sessionISO);
+  const corrected = hasCorrectedAge(gestationalWeeks);
+  const { months, label: ageLabel } = measuredAge(birthISO, sessionISO, gestationalWeeks);
   if (months === null) {
     return { ok: false, months: null, message: "تاريخ الميلاد غير صحيح" };
   }
@@ -181,10 +268,11 @@ export function checkBabyAge(
   const tooOld = typeof gate.ageMaxMonths === "number" && months > gate.ageMaxMonths;
 
   if (tooYoung || tooOld) {
+    const who = corrected ? "العمر المصحّح لطفلكِ" : "عمر طفلكِ";
     return {
       ok: false,
       months,
-      message: `عمر طفلكِ يوم الورشة سيكون ${babyAgeDetailedLabel(birthISO, sessionISO)}، وهذه الورشة مخصّصة لـ${label}.`,
+      message: `${who} يوم الورشة سيكون ${ageLabel}، وهذه الورشة مخصّصة لـ${label}.`,
     };
   }
 
@@ -199,10 +287,17 @@ export function checkBabyAge(
  *
  * يُقاس بعمر الطفل **اليوم** — لا جلسة بعد.
  */
-export function checkWaitlistAge(birthISO: string, todayISO: string, gate: AgeGate): AgeCheckResult {
+export function checkWaitlistAge(
+  birthISO: string,
+  todayISO: string,
+  gate: AgeGate,
+  gestationalWeeks?: number | null
+): AgeCheckResult {
   if (!hasAgeGate(gate)) return { ok: true, months: null };
 
-  const months = ageInMonthsAt(birthISO, todayISO);
+  const corrected = hasCorrectedAge(gestationalWeeks);
+  const measured = correctedBirthDate(birthISO, gestationalWeeks);
+  const { months, label: ageLabel } = measuredAge(birthISO, todayISO, gestationalWeeks);
   if (months === null) return { ok: false, months: null, message: "تاريخ الميلاد غير صحيح" };
 
   const label = ageRangeText(gate);
@@ -211,12 +306,13 @@ export function checkWaitlistAge(birthISO: string, todayISO: string, gate: AgeGa
     return {
       ok: false,
       months,
-      message: `عمر طفلكِ اليوم ${babyAgeDetailedLabel(birthISO, todayISO)}، وهذه الورشة مخصّصة لـ${label}.`,
+      message: `${corrected ? "العمر المصحّح لطفلكِ" : "عمر طفلكِ"} اليوم ${ageLabel}، وهذه الورشة مخصّصة لـ${label}.`,
     };
   }
 
   if (typeof gate.ageMinMonths === "number") {
-    const daysToMin = daysUntilAgeMonths(birthISO, gate.ageMinMonths, todayISO);
+    // من التاريخ المقيس — الخديج يبلغ السنّ متأخّرًا بمقدار ما سبق موعده
+    const daysToMin = daysUntilAgeMonths(measured, gate.ageMinMonths, todayISO);
     if (daysToMin === null) return { ok: false, months: null, message: "تاريخ الميلاد غير صحيح" };
     if (daysToMin > WAITLIST_GRACE_DAYS) {
       return {

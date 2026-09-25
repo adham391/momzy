@@ -1,6 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getService } from "@/lib/services/getService";
-import { checkBabyAge, hasAgeGate } from "@/lib/utils/age";
+import {
+  MAX_PRETERM_WEEKS,
+  MIN_GESTATIONAL_WEEKS,
+  checkBabyAge,
+  hasAgeGate,
+  isGestationalWeeksValid,
+} from "@/lib/utils/age";
 import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingTopic";
 import { isBookingCityValid, normalizeBookingCity } from "@/lib/utils/bookingCity";
 import { isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
@@ -68,6 +74,8 @@ export interface BookingRow {
   topic: string | null;
   /** تاريخ ميلاد الطفل — للورشات ذات الفئة العمرية فقط */
   baby_birth_date: string | null;
+  /** أسبوع ولادة الخديج — منه العمر المصحَّح؛ null = وُلد في موعده */
+  gestational_weeks: number | null;
   /** اسم الطفل الكامل — مع تاريخ ميلاده؛ فارغ لطفل لم يُولد بعد أو لحجز سابق لهجرة 0020 */
   baby_name?: string | null;
   /** لغة العميلة — null للحجوزات السابقة لهجرة 0017 (تُعامَل بالعربية) */
@@ -218,6 +226,8 @@ export interface CreateBookingInput {
   babyBirthDate?: string | null;
   /** اسم الطفل الكامل — إلزامي مع تاريخ ميلاد (مولود)، ويُتجاهل خارج الورشات ذات الفئة العمرية */
   babyName?: string | null;
+  /** أسبوع ولادة الخديج — تُسأل عنه الورشات ذات الفئة العمرية، ومنه العمر المصحَّح */
+  gestationalWeeks?: number | null;
   /** لغة الصفحة وقت التسجيل — تحدّد لغة إيميل التأكيد */
   locale?: string;
   /** هل الزائرة داخل البلاد؟ يُحسب في الـ route من ترويسات Vercel — اللقاء الحضوري يُحجز من داخلها فقط؛ غيابه = داخل البلاد */
@@ -265,11 +275,20 @@ export async function createBooking(
   let topic: string | null = null;
   /** اسم الطفل — للخدمات ذات الفئة العمرية فقط، وكالموضوع لا يُكتب حين يغيب */
   let babyName: string | null = null;
+  /** أسبوع ولادة الخديج — يُحفظ ومنه يُقاس العمر المصحَّح */
+  let gestationalWeeks: number | null = null;
   if (service && hasAgeGate(service)) {
     if (!input.babyBirthDate) {
       return { error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة", status: 400 };
     }
-    const check = checkBabyAge(input.babyBirthDate, slot.date, service);
+    // الأسبوع اختياري (الولادة في موعدها)، لكنه إن أتى وجب أن يكون صحيحًا — وإلا سقط التصحيح بصمت
+    if (input.gestationalWeeks != null) {
+      if (!isGestationalWeeksValid(input.gestationalWeeks)) {
+        return { error: `أسبوع الولادة يجب أن يكون بين ${MIN_GESTATIONAL_WEEKS} و${MAX_PRETERM_WEEKS}`, status: 400 };
+      }
+      gestationalWeeks = input.gestationalWeeks;
+    }
+    const check = checkBabyAge(input.babyBirthDate, slot.date, service, gestationalWeeks);
     if (!check.ok) {
       return { error: check.message ?? "عمر الطفل خارج الفئة العمرية للورشة", status: 400 };
     }
@@ -323,6 +342,7 @@ export async function createBooking(
       notes: input.notes ?? null,
       ...(topic ? { topic } : {}),
       baby_birth_date: input.babyBirthDate || null,
+      gestational_weeks: gestationalWeeks,
       ...(babyName ? { baby_name: babyName } : {}),
       seat_held: true,
       hold_expires_at: holdUntil,

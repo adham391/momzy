@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { joinWaitlist } from "@/lib/db/waitlist";
 import { getService } from "@/lib/services/getService";
-import { ageRangeText, babyAgeDetailedLabel, checkWaitlistAge, hasAgeGate } from "@/lib/utils/age";
+import {
+  MAX_PRETERM_WEEKS,
+  MIN_GESTATIONAL_WEEKS,
+  ageRangeText,
+  babyAgeDetailedLabel,
+  checkWaitlistAge,
+  correctedBirthDate,
+  hasAgeGate,
+  hasCorrectedAge,
+  isGestationalWeeksValid,
+} from "@/lib/utils/age";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
@@ -11,7 +21,7 @@ function isValidEmail(email: string): boolean {
 
 /**
  * POST /api/waitlist — الانضمام لقائمة انتظار ورشة (عند اكتمال المقاعد).
- * body: { name, email, phone, serviceSlug, serviceName?, notes? }
+ * body: { name, email, phone, serviceSlug, serviceName?, notes?, babyBirthDate?, gestationalWeeks? }
  * التسجيل مرتين لا يُنشئ صفًّا مكررًا (upsert).
  */
 export async function POST(request: Request) {
@@ -32,6 +42,7 @@ export async function POST(request: Request) {
     serviceName?: string;
     notes?: string;
     babyBirthDate?: string;
+    gestationalWeeks?: number;
   };
 
   if (typeof b.name !== "string" || b.name.trim().length < 2)
@@ -50,19 +61,33 @@ export async function POST(request: Request) {
    */
   const service = await getService(b.serviceSlug);
   let babyBirthDate: string | null = null;
+  let gestationalWeeks: number | null = null;
   if (service && hasAgeGate(service)) {
     if (typeof b.babyBirthDate !== "string" || !b.babyBirthDate) {
       return NextResponse.json({ success: false, error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة" }, { status: 400 });
     }
-    const check = checkWaitlistAge(b.babyBirthDate, israelTodayISO(), service);
+    // أسبوع الولادة اختياري (الولادة في موعدها)، وإن أتى وجب أن يكون صحيحًا
+    if (b.gestationalWeeks != null) {
+      if (!isGestationalWeeksValid(b.gestationalWeeks)) {
+        return NextResponse.json(
+          { success: false, error: `أسبوع الولادة يجب أن يكون بين ${MIN_GESTATIONAL_WEEKS} و${MAX_PRETERM_WEEKS}` },
+          { status: 400 },
+        );
+      }
+      gestationalWeeks = b.gestationalWeeks;
+    }
+    const check = checkWaitlistAge(b.babyBirthDate, israelTodayISO(), service, gestationalWeeks);
     if (!check.ok) {
-      // رسالة الانتظار تقيس العمر اليوم — رسالة `checkBabyAge` تتحدّث عن «يوم الورشة» ولا ورشة بعد
-      const age = check.months === null ? null : babyAgeDetailedLabel(b.babyBirthDate, israelTodayISO());
+      // رسالة الانتظار تقيس العمر اليوم — رسالة `checkBabyAge` تتحدّث عن «يوم الورشة» ولا ورشة بعد.
+      // والخديج يُقاس بعمره المصحَّح، فالرسالة تسمّيه كذلك بلا ذكر الخداج.
+      const measured = correctedBirthDate(b.babyBirthDate, gestationalWeeks);
+      const age = check.months === null ? null : babyAgeDetailedLabel(measured, israelTodayISO());
+      const who = hasCorrectedAge(gestationalWeeks) ? "العمر المصحّح لطفلكِ" : "عمر طفلكِ";
       return NextResponse.json(
         {
           success: false,
           error: age
-            ? `عمر طفلكِ اليوم ${age}، وهذه الورشة مخصّصة لـ${ageRangeText(service)}.`
+            ? `${who} اليوم ${age}، وهذه الورشة مخصّصة لـ${ageRangeText(service)}.`
             : "تاريخ الميلاد غير صحيح",
         },
         { status: 400 },
@@ -79,6 +104,7 @@ export async function POST(request: Request) {
     serviceName: b.serviceName ?? null,
     notes: b.notes,
     babyBirthDate,
+    gestationalWeeks,
   });
 
   if (!result.ok) {

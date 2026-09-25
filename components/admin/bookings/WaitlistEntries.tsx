@@ -15,6 +15,8 @@ export interface WaitlistEntryView {
   joined: string;
   /** عمر الطفل اليوم — للورشات ذات فئة عمرية فقط */
   babyAge: string | null;
+  /** العمر المصحَّح — للخديج وحده */
+  correctedAge: string | null;
   notes: string | null;
   isNotified: boolean;
   /** رابط واتساب بالرسالة الجاهزة */
@@ -174,6 +176,7 @@ function DetailsBox({
             </a>
           </Field>
           {entry.babyAge && <Field label="عمر الطفل اليوم">{entry.babyAge}</Field>}
+          {entry.correctedAge && <Field label="العمر المصحَّح">{entry.correctedAge}</Field>}
           <Field label="انضمّت">{entry.joined}</Field>
           <Field label="الحالة">{entry.isNotified ? "أُشعِرت بتوفّر مقعد" : "بانتظار الإشعار"}</Field>
           {entry.notes && <Field label="ملاحظاتها">{entry.notes}</Field>}

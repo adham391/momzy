@@ -1,6 +1,6 @@
 import type { BookingRow } from "@/lib/db/bookings";
 import { formatMoney } from "@/lib/currency";
-import { babyAgeDetailedLabel } from "@/lib/utils/age";
+import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
 import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { emailHeader, emailFooter } from "./brand";
 import { emailLocale, emailTranslator, isRtl, type EmailLocale, type EmailT } from "../i18n";
@@ -95,10 +95,14 @@ function babyAgeLine(b: BookingRow): string {
   if (!b.baby_birth_date) return "";
   // بالأيام قبل الشهر الأول، وبالأشهر بعده
   const age = babyAgeDetailedLabel(b.baby_birth_date, b.date);
+  const corrected = correctedAgeLabel(b.baby_birth_date, b.date, b.gestational_weeks);
   const name = b.baby_name
     ? `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 اسم الطفل: <strong style="color:#252220;">${esc(b.baby_name)}</strong></div>`
     : "";
-  return `${name}<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 عمر الطفل يوم الورشة: <strong style="color:#252220;">${age}</strong> <span style="color:#9A9490;">(مواليد <span style="direction:ltr;">${fmtDate(b.baby_birth_date)}</span>)</span></div>`;
+  const correctedLine = corrected
+    ? `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 العمر المصحَّح يوم الورشة: <strong style="color:#252220;">${corrected}</strong> <span style="color:#9A9490;">(وُلد في الأسبوع ${b.gestational_weeks})</span></div>`
+    : "";
+  return `${name}<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">👶 عمر الطفل يوم الورشة: <strong style="color:#252220;">${age}</strong> <span style="color:#9A9490;">(مواليد <span style="direction:ltr;">${fmtDate(b.baby_birth_date)}</span>)</span></div>${correctedLine}`;
 }
 
 /** نصّ حرّ كتبته العميلة (موضوع اللقاء، ملاحظات) — مُهرَّب، وأسطره تبقى — لهبة فقط */

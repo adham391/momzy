@@ -33,10 +33,12 @@ export interface SessionBooking {
   baby_name: string | null;
   /** موضوع اللقاء كما كتبته الأم — للخدمات التي تسأل عنه (askTopic) فقط */
   topic: string | null;
+  /** أسبوع ولادة الخديج — منه العمر المصحَّح */
+  gestational_weeks: number | null;
 }
 
 const BOOKING_FIELDS =
-  "id, booking_number, customer_name, customer_phone, customer_email, status, payment_status, amount, currency, charged_amount, locale, city, baby_birth_date, baby_name, topic, availability_id";
+  "id, booking_number, customer_name, customer_phone, customer_email, status, payment_status, amount, currency, charged_amount, locale, city, baby_birth_date, baby_name, topic, gestational_weeks, availability_id";
 
 function toSessionBooking(r: Record<string, unknown>): SessionBooking {
   return {
@@ -55,6 +57,7 @@ function toSessionBooking(r: Record<string, unknown>): SessionBooking {
     baby_birth_date: (r.baby_birth_date as string | null) ?? null,
     baby_name: (r.baby_name as string | null) ?? null,
     topic: (r.topic as string | null) ?? null,
+    gestational_weeks: r.gestational_weeks == null ? null : Number(r.gestational_weeks),
   };
 }
 

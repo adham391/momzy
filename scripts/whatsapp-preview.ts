@@ -61,6 +61,7 @@ async function todaySessions(today: string): Promise<ScheduleSession[]> {
         city: b.city,
         babyName: b.baby_name,
         babyBirthDate: b.baby_birth_date,
+        gestationalWeeks: b.gestational_weeks,
         topic: b.topic,
       })),
   }));
@@ -71,8 +72,8 @@ const EXAMPLE_SESSIONS: ScheduleSession[] = [
     startTime: "10:00:00",
     serviceName: "الورشة الحسية",
     attendees: [
-      { name: "سارة أحمد", phone: "0501234567", city: "الناصرة", babyName: "ليان", babyBirthDate: "2026-04-20", topic: null },
-      { name: "ريم خالد", phone: "0509876543", city: "حيفا", babyName: "آدم", babyBirthDate: "2026-02-11", topic: null },
+      { name: "سارة أحمد", phone: "0501234567", city: "الناصرة", babyName: "ليان", babyBirthDate: "2026-04-20", gestationalWeeks: null, topic: null },
+      { name: "ريم خالد", phone: "0509876543", city: "حيفا", babyName: "آدم", babyBirthDate: "2026-02-11", gestationalWeeks: 32, topic: null },
     ],
   },
   {
@@ -85,6 +86,7 @@ const EXAMPLE_SESSIONS: ScheduleSession[] = [
         city: "أم الفحم",
         babyName: "سما",
         babyBirthDate: "2026-09-08",
+        gestationalWeeks: null,
         topic: "صعوبة في الرضاعة وألم عند الإرضاع، وأريد أن أفهم وضعيات أفضل",
       },
     ],
