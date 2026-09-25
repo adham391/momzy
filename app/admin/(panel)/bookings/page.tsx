@@ -9,6 +9,7 @@ import { changeBookingStatusAction } from "./actions";
 import { formatSlotDate, formatTimeShort } from "@/lib/utils/format";
 import { formatCharged } from "@/lib/currency";
 import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
+import { pregnancyWeekAt } from "@/lib/utils/pregnancy";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "الحجوزات — لوحة Momzy" };
@@ -115,6 +116,13 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
             {b.service_name} · {formatSlotDate(b.date)} · {formatTimeShort(b.start_time)}
             {b.amount > 0 ? ` · ${formatCharged(b.amount, b.currency, b.charged_amount)}` : ""}
           </div>
+          {/* أسبوع الحمل يوم اللقاء — للخدمات التي تسبق الولادة */}
+          {b.pregnancy_week !== null && (
+            <div className="text-micro text-light mt-0.5">
+              🤰 الأسبوع {pregnancyWeekAt(b.pregnancy_week, b.created_at.slice(0, 10), b.date) ?? b.pregnancy_week} يوم
+              اللقاء (كان {b.pregnancy_week} عند التسجيل)
+            </div>
+          )}
           {/* عمر الطفل يوم الورشة — للورشات ذات الفئة العمرية */}
           {b.baby_birth_date && (
             <div className="text-micro text-light mt-0.5">

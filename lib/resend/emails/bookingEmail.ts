@@ -1,6 +1,7 @@
 import type { BookingRow } from "@/lib/db/bookings";
 import { formatMoney } from "@/lib/currency";
 import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
+import { pregnancyWeekAt } from "@/lib/utils/pregnancy";
 import { SUPPORT_EMAIL } from "@/lib/utils/contactEmail";
 import { emailHeader, emailFooter } from "./brand";
 import { emailLocale, emailTranslator, isRtl, type EmailLocale, type EmailT } from "../i18n";
@@ -90,6 +91,12 @@ export function bookingCustomerEmailHtml(b: BookingRow): string {
 
 /* ── إشعار هبة ── */
 
+/** سطر الحمل: أسبوعها يوم اللقاء — للخدمات التي تسبق الولادة */
+function pregnancyLine(b: BookingRow): string {
+  if (b.pregnancy_week === null) return "";
+  const atSession = pregnancyWeekAt(b.pregnancy_week, b.created_at.slice(0, 10), b.date) ?? b.pregnancy_week;
+  return `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">🤰 أسبوع الحمل يوم اللقاء: <strong style="color:#252220;">${atSession}</strong> <span style="color:#9A9490;">(كان ${b.pregnancy_week} عند التسجيل)</span></div>`;
+}
 /** سطر الطفل: اسمه وعمره يوم الورشة — لهبة فقط (الورشات ذات الفئة العمرية) */
 function babyAgeLine(b: BookingRow): string {
   if (!b.baby_birth_date) return "";
@@ -123,6 +130,7 @@ export function bookingAdminEmailHtml(b: BookingRow): string {
       <div style="font-size:11px;font-weight:700;color:#F2A7B5;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">العميلة</div>
       <div style="font-size:14px;color:#252220;line-height:1.8;">${esc(b.customer_name)} · <a href="tel:${esc(b.customer_phone)}" style="color:#82C9C4;direction:ltr;">${esc(b.customer_phone)}</a> · <a href="mailto:${esc(b.customer_email)}" style="color:#82C9C4;">${esc(b.customer_email)}</a></div>
       ${b.city ? `<div style="font-size:13px;color:#55504C;line-height:1.8;margin-top:6px;">📍 من: <strong style="color:#252220;">${esc(b.city)}</strong></div>` : ""}
+      ${pregnancyLine(b)}
       ${babyAgeLine(b)}
       ${customerTextLine("📝 موضوع اللقاء", b.topic)}
       ${customerTextLine("ملاحظات", b.notes)}

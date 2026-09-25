@@ -12,6 +12,7 @@ import {
   hasCorrectedAge,
   isGestationalWeeksValid,
 } from "@/lib/utils/age";
+import { hasPregnancyGate, isPregnancyWeekValid } from "@/lib/utils/pregnancy";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
     notes?: string;
     babyBirthDate?: string;
     gestationalWeeks?: number;
+    pregnancyWeek?: number;
   };
 
   if (typeof b.name !== "string" || b.name.trim().length < 2)
@@ -62,12 +64,28 @@ export async function POST(request: Request) {
   const service = await getService(b.serviceSlug);
   let babyBirthDate: string | null = null;
   let gestationalWeeks: number | null = null;
-  if (service && hasAgeGate(service)) {
+
+  /**
+   * أسبوع الحمل — للخدمات التي تسبق الولادة، **بلا شرط هنا**:
+   * لا موعد بعد، والأسبوع يتقدّم، فكل أسبوع اليوم يصلح لموعدٍ يُفتح لاحقًا.
+   */
+  let pregnancyWeek: number | null = null;
+  /** خدمة ما قبل الولادة — تقبل حاملًا (أسبوع حمل) وأمًّا ولدت (تاريخ ميلاد) */
+  const prenatalService = hasPregnancyGate(service ?? undefined);
+  if (prenatalService && b.pregnancyWeek != null) {
+    if (!isPregnancyWeekValid(b.pregnancyWeek)) {
+      return NextResponse.json({ success: false, error: "اكتبي أسبوع الحمل" }, { status: 400 });
+    }
+    pregnancyWeek = b.pregnancyWeek;
+  }
+
+  // يُسأل عن الطفل حين لا يكون معنا أسبوع حمل — أمٌّ ولدت فعلًا، أو ورشة بفئة عمرية
+  if (service && pregnancyWeek === null && (prenatalService || hasAgeGate(service))) {
     if (typeof b.babyBirthDate !== "string" || !b.babyBirthDate) {
       return NextResponse.json({ success: false, error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة" }, { status: 400 });
     }
-    // أسبوع الولادة اختياري (الولادة في موعدها)، وإن أتى وجب أن يكون صحيحًا
-    if (b.gestationalWeeks != null) {
+    // خدمة ما قبل الولادة لا تسأل عن الخداج؛ وفي غيرها الأسبوع اختياري، وإن أتى وجب أن يكون صحيحًا
+    if (!prenatalService && b.gestationalWeeks != null) {
       if (!isGestationalWeeksValid(b.gestationalWeeks)) {
         return NextResponse.json(
           { success: false, error: `أسبوع الولادة يجب أن يكون بين ${MIN_GESTATIONAL_WEEKS} و${MAX_PRETERM_WEEKS}` },
@@ -105,6 +123,7 @@ export async function POST(request: Request) {
     notes: b.notes,
     babyBirthDate,
     gestationalWeeks,
+    pregnancyWeek,
   });
 
   if (!result.ok) {

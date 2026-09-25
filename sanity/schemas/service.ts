@@ -185,6 +185,17 @@ export const service = defineType({
     }),
 
     defineField({
+      name: "minPregnancyWeek",
+      title: "أقلّ أسبوع حمل يوم اللقاء",
+      type: "number",
+      description:
+        "للخدمات التي تسبق الولادة: يُستبدل سؤال تاريخ ميلاد الطفل بسؤال أسبوع الحمل، " +
+        "ويُمنع التسجيل لمن تكون قبل هذا الأسبوع **يوم اللقاء** (الأسبوع يتقدّم مع الوقت). " +
+        "قائمة الانتظار تسأل عنه ولا تشترطه. اتركيه فارغًا لأي خدمة أخرى.",
+      validation: (r) => r.min(4).max(42),
+    }),
+
+    defineField({
       name: "whatsappNumber",
       title: "رقم واتساب خاص بهذه الخدمة",
       type: "string",

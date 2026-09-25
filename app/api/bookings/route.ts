@@ -41,6 +41,8 @@ export async function POST(request: Request) {
     babyName?: string;
     /** أسبوع ولادة الخديج — منه العمر المصحَّح (يُتحقَّق منه في createBooking) */
     gestationalWeeks?: number;
+    /** أسبوع الحمل — للخدمات التي تسبق الولادة (يُتحقَّق منه في createBooking) */
+    pregnancyWeek?: number;
     /** لغة الموقع (ar | he | en) — تحدّد لغة صفحة دفع HYP */
     locale?: string;
   };
@@ -65,6 +67,7 @@ export async function POST(request: Request) {
     babyBirthDate: typeof b.babyBirthDate === "string" ? b.babyBirthDate : null,
     babyName: typeof b.babyName === "string" ? b.babyName : null,
     gestationalWeeks: typeof b.gestationalWeeks === "number" ? b.gestationalWeeks : null,
+    pregnancyWeek: typeof b.pregnancyWeek === "number" ? b.pregnancyWeek : null,
     // لغة الصفحة — تُحفظ لتحديد لغة إيميل التأكيد
     locale: typeof b.locale === "string" ? b.locale : undefined,
     domestic,

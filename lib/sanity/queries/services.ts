@@ -29,6 +29,7 @@ const SERVICE_FIELDS = `{
   priceUsd,
   whatsappOnly,
   whatsappNumber,
+  minPregnancyWeek,
   order,
   "coverImage":       coverImage.asset->url,
   "coverAspect":      coverImage.asset->metadata.dimensions.aspectRatio,

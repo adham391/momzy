@@ -18,6 +18,13 @@ import {
   isGestationalWeeksValid,
   type AgeGate,
 } from "@/lib/utils/age";
+import {
+  MAX_PREGNANCY_WEEK,
+  MIN_PREGNANCY_WEEK,
+  checkPregnancyWeek,
+  hasPregnancyGate,
+  isPregnancyWeekValid,
+} from "@/lib/utils/pregnancy";
 import { BOOKING_TOPIC_MAX_LENGTH, isBookingTopicValid } from "@/lib/utils/bookingTopic";
 import { BABY_NAME_MAX_LENGTH, isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
 import { BOOKING_CITY_MAX_LENGTH, isBookingCityValid, normalizeBookingCity } from "@/lib/utils/bookingCity";
@@ -87,11 +94,15 @@ interface BookingFormData {
   preterm: "" | "yes" | "no";
   /** أسبوع الولادة — للخديج وحده، ومنه العمر المصحَّح */
   gestationalWeeks: string;
+  /** حامل أم بعد الولادة — في الخدمة التي تقبل الحالتين؛ فارغ = لم تُجب بعد */
+  stage: "" | "pregnant" | "postpartum";
+  /** أسبوع الحمل — للخدمات التي تسبق الولادة */
+  pregnancyWeek: string;
   /** موضوع اللقاء — للخدمات التي تسأل عنه فقط */
   topic: string;
 }
 
-const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", city: "", message: "", babyBirthDate: "", babyName: "", preterm: "", gestationalWeeks: "", topic: "" };
+const EMPTY_FORM: BookingFormData = { name: "", email: "", phone: "", city: "", message: "", babyBirthDate: "", babyName: "", preterm: "", gestationalWeeks: "", stage: "", pregnancyWeek: "", topic: "" };
 
 /**
  * الخطوات: تحميل المواعيد ← اختيار موعد ← بيانات ← (انتقال لصفحة التأكيد/الدفع)
@@ -247,7 +258,14 @@ export default function BookingModal({
   /* ═══ الفئة العمرية — تُحسب قبل أي return كي تبقى الـ hooks بترتيب ثابت ═══ */
 
   /** الفئة العمرية — في الحجز وفي قائمة الانتظار (لا في التواصل) */
-  const needsBabyAge = (step === "form" || step === "waitlist") && hasAgeGate(ageGate);
+  const asksAboutBaby = step === "form" || step === "waitlist";
+  /** خدمة ما قبل الولادة — تُسأل الأم أولًا: حامل أم بعد الولادة؟ */
+  const needsStage = asksAboutBaby && hasPregnancyGate(ageGate);
+  /** أسبوع الحمل — للحامل وحدها */
+  const needsPregnancyWeek = needsStage && form.stage === "pregnant";
+  /** عمر الطفل — للورشات ذات الفئة العمرية، ولمن ولدت في خدمة ما قبل الولادة */
+  const needsBabyAge =
+    asksAboutBaby && (needsStage ? form.stage === "postpartum" : hasAgeGate(ageGate));
   /**
    * تاريخ قياس العمر: يوم الجلسة عند الحجز، واليوم عند الانتظار — لا موعد بعد،
    * ومن طفلها خارج الفئة اليوم لن يصلح له المقعد حين يُفتح.
@@ -270,6 +288,17 @@ export default function BookingModal({
       ? step === "waitlist"
         ? checkWaitlistAge(form.babyBirthDate, ageReferenceDate, ageGate, gestationalWeeks)
         : checkBabyAge(form.babyBirthDate, ageReferenceDate, ageGate, gestationalWeeks)
+      : null;
+
+  /** أسبوع الحمل يوم اللقاء — الشرط في التسجيل وحده؛ الانتظار يقبل كل الأسابيع */
+  const pregnancyCheck =
+    needsPregnancyWeek && step === "form" && selected && form.pregnancyWeek
+      ? checkPregnancyWeek(
+          Number(form.pregnancyWeek),
+          israelTodayISO(),
+          selected.date,
+          ageGate?.minPregnancyWeek as number,
+        )
       : null;
 
   /** اسم الطفل إلزامي للمولود فقط، وعند الحجز وحده — الانتظار يكفيه العمر */
@@ -323,13 +352,21 @@ export default function BookingModal({
   const blockedAbroad =
     step === "form" && selected !== null && !selected.online && ((geo !== null && !geo.domestic) || rejectedAbroad);
 
-  /** سؤال الخداج إلزامي حيث يُسأل تاريخ الميلاد — وإجابة «نعم» تستلزم أسبوع الولادة */
+  /**
+   * سؤال الخداج — حيث يُسأل تاريخ الميلاد، إلا في خدمة ما قبل الولادة:
+   * حدّها الأقصى وحده، والعمر المصحَّح لا ينقص إلا نقصًا، فلا يغيّر حكمًا.
+   */
+  const needsPreterm = needsBabyAge && !needsStage;
+  /** إجابة «نعم» تستلزم أسبوع الولادة */
   const pretermAnswered =
-    form.preterm === "no" || (form.preterm === "yes" && gestationalWeeks !== null);
+    !needsPreterm || form.preterm === "no" || (form.preterm === "yes" && gestationalWeeks !== null);
 
   const isValid =
     contactValid &&
     (!needsBabyAge || (ageCheck?.ok === true && pretermAnswered)) &&
+    (!needsStage || form.stage !== "") &&
+    (!needsPregnancyWeek ||
+      (isPregnancyWeekValid(Number(form.pregnancyWeek)) && (step === "waitlist" || pregnancyCheck?.ok === true))) &&
     (!needsBabyName || isBabyNameValid(normalizeBabyName(form.babyName))) &&
     (!needsTopic || isBookingTopicValid(form.topic.trim())) &&
     (!needsCity || isBookingCityValid(normalizeBookingCity(form.city)));
@@ -352,9 +389,10 @@ export default function BookingModal({
           city: normalizeBookingCity(form.city),
           notes: form.message,
           topic: form.topic,
-          babyBirthDate: form.babyBirthDate || null,
+          babyBirthDate: needsBabyAge ? form.babyBirthDate || null : null,
           babyName: needsBabyName ? normalizeBabyName(form.babyName) : null,
-          gestationalWeeks,
+          gestationalWeeks: needsPreterm ? gestationalWeeks : null,
+          pregnancyWeek: needsPregnancyWeek ? Number(form.pregnancyWeek) : null,
           // لغة الموقع — تحدّد لغة صفحة دفع HYP للورشة
           locale,
         }),
@@ -427,8 +465,9 @@ export default function BookingModal({
           serviceSlug,
           serviceName: serviceTitle,
           notes: form.message,
-          babyBirthDate: form.babyBirthDate || null,
-          gestationalWeeks,
+          babyBirthDate: needsBabyAge ? form.babyBirthDate || null : null,
+          gestationalWeeks: needsPreterm ? gestationalWeeks : null,
+          pregnancyWeek: needsPregnancyWeek ? Number(form.pregnancyWeek) : null,
         }),
       });
       const json = (await res.json()) as { success: boolean; error?: string };
@@ -626,6 +665,94 @@ export default function BookingModal({
                       />
                     </div>
                   )}
+                  {/*
+                    أسبوع الحمل — بديل تاريخ ميلاد الطفل في الخدمات التي تسبق الولادة.
+                    الشرط يُقاس يوم اللقاء لا اليوم: الأسبوع يتقدّم كما يكبر الطفل.
+                    وقائمة الانتظار تسأل ولا تشترط — لا موعد بعد.
+                  */}
+                  {/* حامل أم بعد الولادة — يحدّد أي سؤال يليه */}
+                  {needsStage && (
+                    <div>
+                      <label style={labelStyle}>{t("modal.stageLabel")}</label>
+                      <div className="flex gap-2">
+                        {(["pregnant", "postpartum"] as const).map((stage) => (
+                          <button
+                            key={stage}
+                            type="button"
+                            onClick={() =>
+                              // تبديل الحالة يمسح إجابة الحالة الأخرى، فلا يُرسل الحقلان معًا
+                              setForm({
+                                ...form,
+                                stage,
+                                pregnancyWeek: "",
+                                babyBirthDate: "",
+                                babyName: "",
+                                preterm: "",
+                                gestationalWeeks: "",
+                              })
+                            }
+                            className="flex-1 rounded-xl py-2.5 text-[13px] font-bold [transition:background-color_160ms_ease,border-color_160ms_ease]"
+                            style={{
+                              background: form.stage === stage ? "var(--tealpale)" : "white",
+                              border: `1.5px solid ${form.stage === stage ? "var(--teal)" : "var(--bord)"}`,
+                              color: form.stage === stage ? "var(--dark)" : "var(--mid)",
+                              cursor: "pointer",
+                              fontFamily: "'Tajawal', sans-serif",
+                            }}
+                          >
+                            {t(stage === "pregnant" ? "modal.stagePregnant" : "modal.stagePostpartum")}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {needsPregnancyWeek && (
+                    <div>
+                      <label style={labelStyle}>{t("modal.pregnancyWeekLabel")}</label>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={MIN_PREGNANCY_WEEK}
+                        max={MAX_PREGNANCY_WEEK}
+                        value={form.pregnancyWeek}
+                        onChange={(e) => setForm({ ...form, pregnancyWeek: e.target.value })}
+                        placeholder="20"
+                        dir="ltr"
+                        style={{
+                          ...inputBase,
+                          border: `1.5px solid ${
+                            pregnancyCheck && !pregnancyCheck.ok ? "var(--rose)" : borderFor("pregnancy")
+                          }`,
+                          textAlign: "right",
+                        }}
+                        onFocus={() => setFocused("pregnancy")}
+                        onBlur={() => setFocused(null)}
+                      />
+                      {/* بلا تلميح في الانتظار — لا شرط هناك، فلا شيء تقوله الجملة */}
+                      {step !== "waitlist" && (
+                        <p
+                          className="text-[11.5px] leading-[1.7] mt-1.5"
+                          style={{
+                            color:
+                              pregnancyCheck && !pregnancyCheck.ok
+                                ? "var(--rose)"
+                                : pregnancyCheck?.ok
+                                  ? "var(--teal)"
+                                  : "var(--light)",
+                            fontFamily: "'Tajawal', sans-serif",
+                          }}
+                        >
+                          {pregnancyCheck && !pregnancyCheck.ok
+                            ? pregnancyCheck.message
+                            : pregnancyCheck?.ok
+                              ? t("modal.pregnancyWeekOk", { week: pregnancyCheck.weekAtSession ?? 0 })
+                              : t("modal.pregnancyWeekHint", { min: ageGate?.minPregnancyWeek ?? 0 })}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {/* تاريخ ميلاد الطفل — للورشات ذات فئة عمرية فقط */}
                   {needsBabyAge && (
                     <div>
@@ -667,12 +794,10 @@ export default function BookingModal({
                                 { range: ageGate ? ageRangeText(ageGate) : "" },
                               )
                             : ageCheck.message
-                          : ageCheck?.ok && ageCheck.months !== null
-                            ? ageCheck.months < 0
-                              ? t("modal.babyDueOk") // موعد متوقّع — حامل مقبولة في ورشة بلا حدّ أدنى
-                              : t(step === "waitlist" ? "modal.babyAgeNow" : "modal.babyAgeOk", {
-                                  age: detailedAge,
-                                })
+                          : ageCheck?.ok && ageCheck.months !== null && ageCheck.months >= 0
+                            ? t(step === "waitlist" ? "modal.babyAgeNow" : "modal.babyAgeOk", {
+                                age: detailedAge,
+                              })
                             : t("modal.babyAgeHint", { range: ageGate ? ageRangeText(ageGate) : "" })}
                       </p>
 
@@ -680,6 +805,7 @@ export default function BookingModal({
                         وُلد قبل موعده؟ — الخديج يُقاس بعمره المصحَّح لا بتاريخ مواليده،
                         فقد يبلغ سنّ الورشة على الورق ولا يبلغها في قدرته.
                       */}
+                      {needsPreterm && (<>
                       <div className="mt-3">
                         <label style={labelStyle}>{t("modal.pretermLabel")}</label>
                         <div className="flex gap-2">
@@ -753,6 +879,7 @@ export default function BookingModal({
                           {t("modal.correctedAge", { corrected: detailedAge, actual: chronologicalAge })}
                         </p>
                       )}
+                      </>)}
 
                       {/* بدائل تناسب عمر طفلها — لا نغلق الباب بلا أن ندلّها على غيره */}
                       {rejectedMonths !== null && alternatives !== null && (

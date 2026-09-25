@@ -16,6 +16,11 @@ export interface AgeGate {
   ageMaxMonths?: number | null;
   /** نص الفئة للعرض بكلمات هبة — "4 أشهر - سنة" */
   ageRange?: string;
+  /**
+   * أقلّ أسبوع حمل يوم اللقاء (lib/utils/pregnancy.ts) — يمرّ مع الخدمة نفسها.
+   * وجودُه **يستبدل** سؤال عمر الطفل بسؤال أسبوع الحمل: لا طفل بعد.
+   */
+  minPregnancyWeek?: number | null;
 }
 
 /** هل لهذه الورشة تحقّق عمري مُفعَّل؟ */
@@ -248,20 +253,16 @@ export function checkBabyAge(
   const label = ageRangeText(gate);
 
   /*
-   * لم يُولد بعد يوم الجلسة (موعد متوقّع — أم حامل).
-   * يمنعه **الحدّ الأدنى** وحده: ورشة تبدأ من شهر مولودٍ تحتاج مولودًا.
-   * أمّا حدٌّ أقصى بلا أدنى فلا يمنعه — الجنين أصغر من أي سقف، وورشة
-   * التحضير لما بعد الولادة موجَّهة للحوامل أصلًا.
+   * لم يُولد بعد يوم الجلسة. الورشات كلّها لمن وُلد طفلها — والحامل تسجّل
+   * في خدمة ما قبل الولادة وحدها، وهناك تُسأل عن أسبوع حملها لا عن تاريخ ميلاد
+   * (lib/utils/pregnancy.ts)، فلا يصل هذا التحقّق أصلًا.
    */
   if (months < 0) {
-    if (typeof gate.ageMinMonths === "number") {
-      return {
-        ok: false,
-        months,
-        message: `تاريخ الميلاد بعد موعد الورشة — هذه الورشة مخصّصة لـ${label}.`,
-      };
-    }
-    return { ok: true, months };
+    return {
+      ok: false,
+      months,
+      message: `تاريخ الميلاد بعد موعد الورشة — هذه الورشة مخصّصة لـ${label}.`,
+    };
   }
 
   const tooYoung = typeof gate.ageMinMonths === "number" && months < gate.ageMinMonths;

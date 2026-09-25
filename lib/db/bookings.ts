@@ -7,6 +7,7 @@ import {
   hasAgeGate,
   isGestationalWeeksValid,
 } from "@/lib/utils/age";
+import { checkPregnancyWeek, hasPregnancyGate } from "@/lib/utils/pregnancy";
 import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingTopic";
 import { isBookingCityValid, normalizeBookingCity } from "@/lib/utils/bookingCity";
 import { isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
@@ -76,6 +77,8 @@ export interface BookingRow {
   baby_birth_date: string | null;
   /** أسبوع ولادة الخديج — منه العمر المصحَّح؛ null = وُلد في موعده */
   gestational_weeks: number | null;
+  /** أسبوع الحمل يوم التسجيل — للخدمات التي تسبق الولادة */
+  pregnancy_week: number | null;
   /** اسم الطفل الكامل — مع تاريخ ميلاده؛ فارغ لطفل لم يُولد بعد أو لحجز سابق لهجرة 0020 */
   baby_name?: string | null;
   /** لغة العميلة — null للحجوزات السابقة لهجرة 0017 (تُعامَل بالعربية) */
@@ -228,6 +231,8 @@ export interface CreateBookingInput {
   babyName?: string | null;
   /** أسبوع ولادة الخديج — تُسأل عنه الورشات ذات الفئة العمرية، ومنه العمر المصحَّح */
   gestationalWeeks?: number | null;
+  /** أسبوع الحمل — للخدمات التي تسبق الولادة (بديل تاريخ ميلاد الطفل) */
+  pregnancyWeek?: number | null;
   /** لغة الصفحة وقت التسجيل — تحدّد لغة إيميل التأكيد */
   locale?: string;
   /** هل الزائرة داخل البلاد؟ يُحسب في الـ route من ترويسات Vercel — اللقاء الحضوري يُحجز من داخلها فقط؛ غيابه = داخل البلاد */
@@ -275,14 +280,43 @@ export async function createBooking(
   let topic: string | null = null;
   /** اسم الطفل — للخدمات ذات الفئة العمرية فقط، وكالموضوع لا يُكتب حين يغيب */
   let babyName: string | null = null;
+  /**
+   * أسبوع الحمل — للخدمات التي تسبق الولادة، بديلًا عن عمر الطفل.
+   * يُقاس **يوم اللقاء** لا يوم التسجيل: الأسبوع يتقدّم كما يكبر الطفل.
+   */
+  let pregnancyWeek: number | null = null;
+  /** خدمة ما قبل الولادة — تقبل حاملًا (أسبوع حمل) وأمًّا ولدت (تاريخ ميلاد) */
+  const prenatalService = hasPregnancyGate(service ?? undefined);
+  if (prenatalService && input.pregnancyWeek != null) {
+    const check = checkPregnancyWeek(
+      input.pregnancyWeek,
+      israelTodayISO(),
+      slot.date,
+      service!.minPregnancyWeek as number
+    );
+    if (!check.ok) {
+      return { error: check.message ?? "أسبوع الحمل غير مناسب لهذا الموعد", status: 400 };
+    }
+    pregnancyWeek = input.pregnancyWeek as number;
+  }
+
   /** أسبوع ولادة الخديج — يُحفظ ومنه يُقاس العمر المصحَّح */
   let gestationalWeeks: number | null = null;
-  if (service && hasAgeGate(service)) {
+  /**
+   * يُسأل عن الطفل: في الورشات ذات الفئة العمرية، وفي خدمة ما قبل الولادة
+   * حين تسجّل أمٌّ ولدت فعلًا (فلا أسبوع حمل معها).
+   */
+  const asksBaby = prenatalService ? pregnancyWeek === null : Boolean(service && hasAgeGate(service));
+  if (service && asksBaby) {
     if (!input.babyBirthDate) {
-      return { error: "تاريخ ميلاد الطفل مطلوب لهذه الورشة", status: 400 };
+      return {
+        error: prenatalService ? "اختاري: حامل أم بعد الولادة" : "تاريخ ميلاد الطفل مطلوب لهذه الورشة",
+        status: 400,
+      };
     }
-    // الأسبوع اختياري (الولادة في موعدها)، لكنه إن أتى وجب أن يكون صحيحًا — وإلا سقط التصحيح بصمت
-    if (input.gestationalWeeks != null) {
+    // خدمة ما قبل الولادة لا تسأل عن الخداج (حدّ أقصى وحده، والتصحيح لا ينقص إلا نقصًا)
+    // والأسبوع اختياري عمومًا، لكنه إن أتى وجب أن يكون صحيحًا — وإلا سقط التصحيح بصمت
+    if (!prenatalService && input.gestationalWeeks != null) {
       if (!isGestationalWeeksValid(input.gestationalWeeks)) {
         return { error: `أسبوع الولادة يجب أن يكون بين ${MIN_GESTATIONAL_WEEKS} و${MAX_PRETERM_WEEKS}`, status: 400 };
       }
@@ -343,6 +377,7 @@ export async function createBooking(
       ...(topic ? { topic } : {}),
       baby_birth_date: input.babyBirthDate || null,
       gestational_weeks: gestationalWeeks,
+      pregnancy_week: pregnancyWeek,
       ...(babyName ? { baby_name: babyName } : {}),
       seat_held: true,
       hold_expires_at: holdUntil,

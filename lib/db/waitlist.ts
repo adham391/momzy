@@ -14,6 +14,8 @@ export interface WaitlistRow {
   baby_birth_date: string | null;
   /** أسبوع ولادة الخديج — منه العمر المصحَّح؛ null = وُلد في موعده */
   gestational_weeks: number | null;
+  /** أسبوع الحمل يوم الانضمام — للخدمات التي تسبق الولادة */
+  pregnancy_week: number | null;
   is_notified: boolean;
   notified_at: string | null;
   notes: string | null;
@@ -42,6 +44,8 @@ export interface JoinWaitlistInput {
   babyBirthDate?: string | null;
   /** أسبوع ولادة الخديج — منه العمر المصحَّح (يتحقّق منه الـ route) */
   gestationalWeeks?: number | null;
+  /** أسبوع الحمل — للخدمات التي تسبق الولادة (بلا شرط في الانتظار) */
+  pregnancyWeek?: number | null;
 }
 
 /**
@@ -60,6 +64,7 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
 
   const babyBirthDate = input.babyBirthDate || null;
   const gestationalWeeks = input.gestationalWeeks ?? null;
+  const pregnancyWeek = input.pregnancyWeek ?? null;
 
   const { error } = await supabase.from("waitlist").insert({
     customer_name: name,
@@ -69,6 +74,7 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
     service_name: input.serviceName ?? null,
     baby_birth_date: babyBirthDate,
     gestational_weeks: gestationalWeeks,
+    pregnancy_week: pregnancyWeek,
     notes,
     is_notified: false,
   });
@@ -79,7 +85,7 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
   if (error.code === "23505") {
     const { error: updateError } = await supabase
       .from("waitlist")
-      .update({ customer_name: name, customer_phone: phone, baby_birth_date: babyBirthDate, gestational_weeks: gestationalWeeks, notes })
+      .update({ customer_name: name, customer_phone: phone, baby_birth_date: babyBirthDate, gestational_weeks: gestationalWeeks, pregnancy_week: pregnancyWeek, notes })
       .eq("service_slug", input.serviceSlug)
       .eq("customer_email", email);
     return updateError ? { ok: false, error: updateError.message } : { ok: true };

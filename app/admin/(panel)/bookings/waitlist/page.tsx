@@ -5,6 +5,7 @@ import { siteOrigin } from "@/lib/resend/emails/brand";
 import { notifyWaitlistAction, removeWaitlistAction } from "../actions";
 import { formatDate } from "@/lib/utils/format";
 import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
+import { pregnancyWeekAt } from "@/lib/utils/pregnancy";
 import { israelTodayISO } from "@/lib/sessions/time";
 import WaitlistEntries, { type WaitlistEntryView } from "@/components/admin/bookings/WaitlistEntries";
 
@@ -39,6 +40,12 @@ function toView(entry: WaitlistRow): WaitlistEntryView {
     correctedAge: entry.baby_birth_date
       ? correctedAgeLabel(entry.baby_birth_date, israelTodayISO(), entry.gestational_weeks)
       : null,
+    // أسبوع الحمل يوم الانضمام محفوظ، وأسبوعها اليوم يُحسب منه (يتقدّم مع الوقت)
+    pregnancyWeek:
+      entry.pregnancy_week === null
+        ? null
+        : (pregnancyWeekAt(entry.pregnancy_week, entry.created_at.slice(0, 10), israelTodayISO()) ??
+          entry.pregnancy_week),
     notes: entry.notes,
     isNotified: entry.is_notified,
     waHref: `https://wa.me/${entry.customer_phone.replace(/\D/g, "")}?text=${encodeURIComponent(waitlistMessage(entry))}`,
