@@ -63,14 +63,19 @@ function toCalendarSession(s: Slot): CalendarSession {
     startTime: s.start_time,
     endTime: s.end_time,
     price: s.price,
-    seatsLeft: Math.max(0, s.capacity - s.booked_count),
+    // الوقت المأخوذ بجلسة أخرى لا مقعد فيه — وإن بقيت سعته فارغة
+    seatsLeft: s.taken ? 0 : Math.max(0, s.capacity - s.booked_count),
     capacity: s.capacity,
+    taken: s.taken,
     isOnline: s.online,
   };
 }
 
-/** مكتملة — تُعرض في الرزنامة رمادية ولا تُحجز */
-const isFull = (s: Slot) => s.booked_count >= s.capacity;
+/**
+ * غير متاحة: امتلأت مقاعدها، أو وقت هبة مأخوذ بجلسة أخرى تتقاطع معها
+ * (`taken` من `/api/availability`). تُعرض في الرزنامة بالأحمر ولا تُحجز.
+ */
+const isFull = (s: Slot) => s.booked_count >= s.capacity || s.taken;
 
 /**
  * خدمة بمقعد واحد لكل جلسة = لقاء فردي، فالكلام عنها «محجوز» لا «اكتمل العدد»:

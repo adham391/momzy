@@ -14,6 +14,8 @@ export interface CalendarSession {
   seatsLeft: number;
   /** مقاعد الجلسة — الواحد منها لقاء فردي: «محجوز» لا «اكتمل العدد» */
   capacity: number;
+  /** وقتها مأخوذ بجلسة أخرى محجوزة — «محجوز» مهما كانت سعتها */
+  taken?: boolean;
   isOnline: boolean;
 }
 
@@ -46,10 +48,11 @@ const FULL_TONE = {
 };
 
 /**
- * جلسة بمقعد واحد = لقاء فردي: حين يُحجز يقال «محجوز» لا «اكتمل العدد».
- * «العدد» كلمة ورشةٍ جماعية، ولا عدد في لقاء لا يتّسع إلا لأمّ واحدة.
+ * «محجوز» لا «اكتمل العدد» في حالتين: لقاءٌ بمقعد واحد — «العدد» كلمة ورشةٍ
+ * جماعية ولا عدد في لقاء لا يتّسع إلا لأمّ واحدة — وجلسةٌ أُخذ وقتها بجلسة
+ * أخرى، فمقاعدها ليست هي المشكلة.
  */
-const isSingleSeat = (s: CalendarSession) => s.capacity <= 1;
+const showsTaken = (s: CalendarSession) => s.taken === true || s.capacity <= 1;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 /** مفتاح تاريخ محلي YYYY-MM-DD (بلا انزياح توقيت) */
@@ -259,7 +262,7 @@ export default function SessionCalendar({
                     <div className="font-label font-bold" style={{ fontSize: 11, color: tone.meta }}>
                       {/* بلا عدد المقاعد المتبقية — الحالة فقط حين لا يبقى مكان */}
                       {[
-                        full ? t(isSingleSeat(s) ? "calendar.taken" : "calendar.full") : null,
+                        full ? t(showsTaken(s) ? "calendar.taken" : "calendar.full") : null,
                         s.price > 0 ? formatPrice(s.price) : null,
                       ]
                         .filter(Boolean)

@@ -38,6 +38,11 @@ export interface PublicSlot {
   online: boolean;
   /** السعر من خارج البلاد — سعر الخدمة الثابت بالدولار (Studio) */
   price_usd: number;
+  /**
+   * وقتها مأخوذ بجلسة أخرى محجوزة (`lib/sessions/overlap.ts`) — هبة واحدة.
+   * تُعرض «محجوز» ولا تُحجز، وإن بقيت مقاعدها فارغة.
+   */
+  taken: boolean;
 }
 
 /** ما يلزم من الخدمة لعرض فتحتها للعموم */
@@ -46,8 +51,15 @@ interface PublicSlotService {
   priceUsd?: number | null;
 }
 
-/** يسقط من الفتحة ما لا يخصّ العميلة قبل الدفع، ويضيف حكم الحضور */
-export function toPublicSlot(slot: SlotRow, service: PublicSlotService | null | undefined): PublicSlot {
+/**
+ * يسقط من الفتحة ما لا يخصّ العميلة قبل الدفع، ويضيف حكم الحضور.
+ * `taken` يُحسب خارجَها من جلسات اليوم كلّها — الفتحة وحدها لا تعرف عن أخواتها.
+ */
+export function toPublicSlot(
+  slot: SlotRow,
+  service: PublicSlotService | null | undefined,
+  taken = false
+): PublicSlot {
   return {
     id: slot.id,
     date: slot.date,
@@ -58,5 +70,6 @@ export function toPublicSlot(slot: SlotRow, service: PublicSlotService | null | 
     booked_count: slot.booked_count,
     online: isOnlineSession(slot, service?.type),
     price_usd: usdPriceOf(slot.price, service?.priceUsd),
+    taken,
   };
 }

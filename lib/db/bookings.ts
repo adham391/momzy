@@ -12,6 +12,7 @@ import { isBookingTopicValid, normalizeBookingTopic } from "@/lib/utils/bookingT
 import { isBookingCityValid, normalizeBookingCity } from "@/lib/utils/bookingCity";
 import { isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
 import { israelTodayISO } from "@/lib/sessions/time";
+import { isTimeTaken, type SessionSpan } from "@/lib/sessions/overlap";
 import { DOMESTIC_ONLY_CODE } from "@/lib/geo/country";
 import { ilsToUsd, orderUsdRate, type Currency } from "@/lib/currency";
 import { isOnlineSession } from "@/lib/services/session";
@@ -200,6 +201,23 @@ export async function getUpcomingSlotsForService(serviceSlug: string): Promise<S
 }
 
 /**
+ * الفترات المشغولة — كل جلسة قادمة فيها حجز واحد على الأقل، في أي خدمة.
+ *
+ * منها يُعرف تعارض المواعيد (`lib/sessions/overlap.ts`): هبة واحدة، فالجلسة
+ * المحجوزة تشغل وقتها كلّه وتُسقط كل جلسة تتقاطع معها. والمحجوبة تُحسب أيضًا —
+ * الحجز اليدوي يشغل هبة كغيره وإن لم تكن جلسته ظاهرة للزبائن.
+ */
+export async function getBookedSpans(): Promise<SessionSpan[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("availability")
+    .select("id, date, start_time, end_time")
+    .gt("booked_count", 0)
+    .gte("date", todayISO());
+  return (data ?? []) as unknown as SessionSpan[];
+}
+
+/**
  * المقاعد المتاحة لكل خدمة — مجموع (السعة − المحجوز) لكل الفتحات القادمة.
  * تُستخدم في قائمة الخدمات لعرض «بقي N مقاعد» أو «اكتمل العدد».
  */
@@ -357,7 +375,16 @@ export async function createBooking(
   // مقاعد من تركت الدفع وانتهى حجزها المؤقت تعود أولًا — كي لا تُرفض أم على مقعد متاح فعلًا
   await releaseExpiredSeatHolds();
 
-  // حجز ذرّي — يعيد false لو امتلأت أو محجوبة. الجلسة المدفوعة: حجز مؤقت ينتهي إن لم يتم الدفع
+  /*
+   * وقت هبة مأخوذ بجلسة أخرى تتقاطع مع هذه؟ الجلسات المتوازية بدائل لا مواعيد
+   * مستقلّة. الشرط نفسه مكرَّر داخل `book_slot` (هجرة 0031) لأنه وحده الذرّي؛
+   * وهنا كي تُقال الرسالة بوضوح بدل «امتلأت».
+   */
+  if (isTimeTaken(slot, await getBookedSpans())) {
+    return { error: "عذرًا، هذا الوقت لم يعد متاحًا — اختاري موعدًا آخر", status: 409 };
+  }
+
+  // حجز ذرّي — يعيد false لو امتلأت أو محجوبة أو تقاطع وقتها مع جلسة محجوزة
   const holdUntil = slot.price > 0 && isHypConfigured() ? seatHoldExpiry() : null;
   const { data: booked } = await supabase.rpc("book_slot", { slot_id: input.slotId });
   if (!booked) return { error: "عذرًا، هذا الموعد لم يعد متاحًا", status: 409 };
@@ -457,12 +484,14 @@ export async function createManualBooking(
   const { data: booked } = await supabase.rpc("book_slot", { slot_id: input.slotId });
   if (!booked) {
     /*
-     * الحجب يخفي الجلسة عن الزبائن لا عن هبة — و`book_slot` يشترط ألّا تكون محجوبة.
-     * فنأخذ المقعد هنا بمقارنة-وتحديث: يفشل لو تغيّر العدد بيننا، فلا يتجاوز السعة.
+     * `book_slot` يرفض المحجوبة ويرفض ما تقاطع وقته مع جلسة محجوزة — وكلاهما
+     * قيدٌ على الزبونة لا على هبة: الجلسة المحجوبة جلستها، والتعارض قد تكون
+     * دبّرته بنفسها (أمّ تأتي مع أخرى، أو موعد اتّفقت عليه). فنأخذ المقعد هنا
+     * بمقارنة-وتحديث: يفشل لو تغيّر العدد بيننا، فلا يتجاوز السعة أبدًا.
      * أمّا الامتلاء فيمنع يدويًّا كما يمنع إلكترونيًّا — المقعد غير موجود أصلًا.
      */
     const free = slot.capacity - slot.booked_count;
-    if (!slot.is_blocked || free <= 0) {
+    if (free <= 0) {
       return { error: "لا مقعد متاح — الجلسة مكتملة", status: 409 };
     }
     const { data: forced } = await supabase
