@@ -25,7 +25,6 @@ interface ServicesSectionProps {
   /** رقم واتساب هبة — يُمرَّر لكل كارد للاستفسار */
   whatsappNumber?: string;
   /** المقاعد المتبقية لكل خدمة (slug → عدد) — لعرض «بقي N مقاعد» */
-  seatsBySlug?: Record<string, number>;
 }
 
 /**
@@ -43,7 +42,6 @@ export default function ServicesSection({
   waveColor = "var(--offwh)",
   zIndex = 2,
   whatsappNumber,
-  seatsBySlug,
 }: ServicesSectionProps) {
   if (services.length === 0) return null;
 
@@ -94,7 +92,6 @@ export default function ServicesSection({
                 <ServiceCard
                   service={service}
                   whatsappNumber={service.whatsappNumber || whatsappNumber}
-                  seatsLeft={seatsBySlug?.[service.slug]}
                 />
               </div>
             ))}

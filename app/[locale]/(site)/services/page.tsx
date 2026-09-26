@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { pageSeo } from "@/lib/seo/site";
 import { getTranslations } from "next-intl/server";
 import { getServices } from "@/lib/services/getServices";
-import { getAvailableSeatsBySlug } from "@/lib/db/bookings";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
@@ -23,11 +22,7 @@ export const revalidate = 60;
 /** صفحة الخدمات — رأس مدمج + بطاقات + تسجيل إلكتروني مباشر */
 export default async function ServicesPage() {
   const t = await getTranslations("services");
-  const [allServices, settings, seatsBySlug] = await Promise.all([
-    getServices(),
-    getSiteSettings(),
-    getAvailableSeatsBySlug(),
-  ]);
+  const [allServices, settings] = await Promise.all([getServices(), getSiteSettings()]);
   const whatsappNumber = settings.contact.whatsappNumber;
 
   const groupServices      = allServices.filter((s) => s.category === "group");
@@ -72,7 +67,6 @@ export default async function ServicesPage() {
         waveColor="var(--offwh)"
         zIndex={2}
         whatsappNumber={whatsappNumber}
-        seatsBySlug={seatsBySlug}
       />
 
       {/* قسم الورشات الجماعية — تحته — zIndex 3 */}
@@ -86,7 +80,6 @@ export default async function ServicesPage() {
         waveColor="var(--cream)"
         zIndex={3}
         whatsappNumber={whatsappNumber}
-        seatsBySlug={seatsBySlug}
       />
 
       {/* CTA نهائي — zIndex 4 */}

@@ -895,10 +895,8 @@
       "online": "أونلاين",
       "home": "زيارة بيتية"
     },
-    "fullyBooked": "اكتمل العدد",
     "details": "التفاصيل ←",
     "inquiry": "استفسار",
-    "fullJoinWaitlist": "اكتمل العدد — انضمي للانتظار",
     "registerNow": "سجّلي الآن",
     "registerNowPriced": "سجّلي الآن — <amt>₪{price}</amt>",
     "arrangeWhatsApp": "تواصلي على واتساب",

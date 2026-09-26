@@ -895,10 +895,8 @@
       "online": "Online",
       "home": "Home visit"
     },
-    "fullyBooked": "Fully booked",
     "details": "Details →",
     "inquiry": "Ask",
-    "fullJoinWaitlist": "Fully booked — join the waitlist",
     "registerNow": "Register now",
     "registerNowPriced": "Register now — <amt>₪{price}</amt>",
     "arrangeWhatsApp": "Arrange on WhatsApp",

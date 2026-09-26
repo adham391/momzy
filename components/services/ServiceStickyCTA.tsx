@@ -13,7 +13,6 @@ interface ServiceStickyCTAProps {
   /** أقل سعر بين الجلسات القادمة (0 = بلا سعر) */
   price: number;
   /** مجموع المقاعد المتبقية — undefined = لا جلسات مجدولة */
-  seatsLeft?: number;
   /** الفئة العمرية للورشة — تُمرَّر لنموذج التسجيل */
   ageGate?: AgeGate;
   /** يسأل نموذج التسجيل عن موضوع اللقاء — للّقاءات الفردية */
@@ -32,7 +31,6 @@ export default function ServiceStickyCTA({
   serviceTitle,
   serviceSlug,
   price,
-  seatsLeft,
   ageGate,
   askTopic,
   whatsappOnly,
@@ -53,8 +51,6 @@ export default function ServiceStickyCTA({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isFull = seatsLeft === 0;
-
   return (
     <>
       <div
@@ -73,8 +69,6 @@ export default function ServiceStickyCTA({
             <div className="font-label font-bold text-dark text-[13px] truncate">{serviceTitle}</div>
             <div className="font-label text-[11.5px] text-light">
               {price > 0 ? `₪${price}` : t(whatsappOnly ? "arrangeNote" : "onRequest")}
-              {/* بلا عدد المقاعد المتبقية — «اكتمل العدد» فقط حين تمتلئ */}
-              {seatsLeft === 0 && ` · ${t("fullyBooked")}`}
             </div>
           </div>
 
@@ -84,19 +78,17 @@ export default function ServiceStickyCTA({
             onClick={() => setOpen(true)}
             className="inline-flex items-center font-label font-bold text-[14px] shrink-0 active:scale-[0.97] [transition:transform_160ms_ease-out]"
             style={{
-              background: isFull ? "var(--cream)" : "linear-gradient(135deg,#F2A7B5,#E88FA2)",
-              color: isFull ? "var(--mid)" : "white",
-              border: isFull ? "1.5px solid var(--bord)" : "none",
+              background: "linear-gradient(135deg,#F2A7B5,#E88FA2)",
+              color: "white",
+              border: "none",
               borderRadius: 50,
               padding: "11px 26px",
               cursor: "pointer",
-              boxShadow: isFull ? "none" : "0 6px 18px rgba(242,167,181,0.38)",
+              boxShadow: "0 6px 18px rgba(242,167,181,0.38)",
             }}
           >
             {contact
               ? t("arrangeWhatsApp")
-              : isFull
-              ? t("waitlist")
               : t("registerNow")}
           </CTAAction>
         </div>

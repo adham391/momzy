@@ -70,11 +70,6 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
   // اختيار الموعد نفسه يتم داخل نموذج التسجيل — مدخل تسجيل واحد للموقع كله.
   const slots = await getUpcomingSlotsForService(service.slug);
   const minPrice = slots.length > 0 ? Math.min(...slots.map((s) => s.price)) : service.price ?? 0;
-  const seatsLeft =
-    slots.length > 0
-      ? slots.reduce((n, s) => n + Math.max(0, s.capacity - s.booked_count), 0)
-      : undefined;
-
   /** لون التمييز حسب لون الخدمة */
   const accent =
     service.color === "teal" ? "var(--teal)"
@@ -168,7 +163,6 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         serviceTitle={service.title}
         serviceSlug={service.slug}
         price={minPrice}
-        seatsLeft={seatsLeft}
         ageGate={service}
         askTopic={service.askTopic}
         whatsappOnly={service.whatsappOnly}
