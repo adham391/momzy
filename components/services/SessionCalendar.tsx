@@ -12,6 +12,8 @@ export interface CalendarSession {
   endTime: string | null;
   price: number;
   seatsLeft: number;
+  /** مقاعد الجلسة — الواحد منها لقاء فردي: «محجوز» لا «اكتمل العدد» */
+  capacity: number;
   isOnline: boolean;
 }
 
@@ -24,6 +26,30 @@ interface SessionCalendarProps {
   /** صياغة السعر — بعملة الزائرة في النموذج (الافتراضي بالشيكل) */
   formatPrice?: (ils: number) => string;
 }
+
+/**
+ * لونا الحالة في الرزنامة — أخضر لما فيه مكان، أحمر لما لا مكان فيه.
+ * اللون مع الكلمة لا بدلًا منها: «اكتمل العدد» (أو «محجوز») مكتوبة أيضًا،
+ * فمن لا يميّز الألوان يقرأها.
+ */
+const OPEN_TONE = {
+  border: "var(--teal)",
+  background: "var(--tealpale)",
+  time: "var(--dark)",
+  meta: "#3C948D",
+};
+const FULL_TONE = {
+  border: "#E08A99",
+  background: "#FDF0F3",
+  time: "#B04A5C",
+  meta: "#B04A5C",
+};
+
+/**
+ * جلسة بمقعد واحد = لقاء فردي: حين يُحجز يقال «محجوز» لا «اكتمل العدد».
+ * «العدد» كلمة ورشةٍ جماعية، ولا عدد في لقاء لا يتّسع إلا لأمّ واحدة.
+ */
+const isSingleSeat = (s: CalendarSession) => s.capacity <= 1;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 /** مفتاح تاريخ محلي YYYY-MM-DD (بلا انزياح توقيت) */
@@ -43,25 +69,7 @@ export default function SessionCalendar({
   const t = useTranslations("booking");
 
   /** أيام الأسبوع مختصرة — تبدأ بالأحد (يمينًا في RTL) */
-  /**
- * لونا الحالة في الرزنامة — أخضر لما فيه مكان، أحمر للمكتمل.
- * اللون مع الكلمة لا بدلًا منها: «اكتمل العدد» مكتوبة أيضًا، فمن لا يميّز
- * الألوان يقرأها.
- */
-const OPEN_TONE = {
-  border: "var(--teal)",
-  background: "var(--tealpale)",
-  time: "var(--dark)",
-  meta: "#3C948D",
-};
-const FULL_TONE = {
-  border: "#E08A99",
-  background: "#FDF0F3",
-  time: "#B04A5C",
-  meta: "#B04A5C",
-};
-
-const WEEKDAYS = [
+  const WEEKDAYS = [
     t("calendar.sun"),
     t("calendar.mon"),
     t("calendar.tue"),
@@ -249,8 +257,11 @@ const WEEKDAYS = [
                       {hhmm(s.startTime)}{s.endTime ? `–${hhmm(s.endTime)}` : ""}
                     </div>
                     <div className="font-label font-bold" style={{ fontSize: 11, color: tone.meta }}>
-                      {/* بلا عدد المقاعد المتبقية — «اكتمل العدد» فقط حين تمتلئ */}
-                      {[full ? t("calendar.full") : null, s.price > 0 ? formatPrice(s.price) : null]
+                      {/* بلا عدد المقاعد المتبقية — الحالة فقط حين لا يبقى مكان */}
+                      {[
+                        full ? t(isSingleSeat(s) ? "calendar.taken" : "calendar.full") : null,
+                        s.price > 0 ? formatPrice(s.price) : null,
+                      ]
                         .filter(Boolean)
                         .join(" · ")}
                     </div>

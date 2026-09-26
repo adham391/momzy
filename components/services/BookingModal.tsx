@@ -64,12 +64,20 @@ function toCalendarSession(s: Slot): CalendarSession {
     endTime: s.end_time,
     price: s.price,
     seatsLeft: Math.max(0, s.capacity - s.booked_count),
+    capacity: s.capacity,
     isOnline: s.online,
   };
 }
 
 /** مكتملة — تُعرض في الرزنامة رمادية ولا تُحجز */
 const isFull = (s: Slot) => s.booked_count >= s.capacity;
+
+/**
+ * خدمة بمقعد واحد لكل جلسة = لقاء فردي، فالكلام عنها «محجوز» لا «اكتمل العدد»:
+ * «العدد» كلمة ورشةٍ جماعية. تُقاس من الجلسات نفسها لا من نوع الخدمة، فلو فتحت
+ * هبة لقاءً لأمّين تبعها النصّ.
+ */
+const isSingleSeatService = (slots: Slot[]) => slots.length > 0 && slots.every((s) => s.capacity <= 1);
 
 /** خدمة تناسب عمر الطفل — تُقترح حين يُرفض العمر هنا */
 interface ServiceForAge {
@@ -256,6 +264,9 @@ export default function BookingModal({
   }, [open, onClose]);
 
   /* ═══ الفئة العمرية — تُحسب قبل أي return كي تبقى الـ hooks بترتيب ثابت ═══ */
+
+  /** لقاء فردي (مقعد واحد) — تتبعه صياغة «محجوز» بدل «اكتمل العدد» */
+  const singleSeatService = isSingleSeatService(slots);
 
   /** الفئة العمرية — في الحجز وفي قائمة الانتظار (لا في التواصل) */
   const asksAboutBaby = step === "form" || step === "waitlist";
@@ -569,7 +580,9 @@ export default function BookingModal({
                 style={{ background: "var(--yellowlt)", border: "1.5px solid var(--yellow)" }}
               >
                 <p className="text-[13px] leading-[1.8] mb-3" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-                  {slots.every(isFull) ? t("modal.fullBody") : t("modal.someFullNote")}
+                  {slots.every(isFull)
+                    ? t(singleSeatService ? "modal.takenBody" : "modal.fullBody")
+                    : t(singleSeatService ? "modal.someTakenNote" : "modal.someFullNote")}
                 </p>
                 <button
                   type="button"
@@ -616,10 +629,14 @@ export default function BookingModal({
             ) : step === "waitlist" ? (
               <div className="rounded-xl px-4 py-3.5 mb-5" style={{ background: "var(--yellowlt)", border: "1.5px solid var(--yellow)" }}>
                 <p className="text-[13.5px] font-bold mb-1" style={{ color: "var(--dark)", fontFamily: "'Tajawal', sans-serif" }}>
-                  {noSessionsAtAll ? t("modal.noSessionsTitle") : t("modal.fullTitle")}
+                  {noSessionsAtAll
+                    ? t("modal.noSessionsTitle")
+                    : t(singleSeatService ? "modal.takenTitle" : "modal.fullTitle")}
                 </p>
                 <p className="text-[13px] leading-[1.8]" style={{ color: "var(--mid)", fontFamily: "'Tajawal', sans-serif" }}>
-                  {noSessionsAtAll ? t("modal.noSessionsBody") : t("modal.fullBody")}
+                  {noSessionsAtAll
+                    ? t("modal.noSessionsBody")
+                    : t(singleSeatService ? "modal.takenBody" : "modal.fullBody")}
                 </p>
               </div>
             ) : (
