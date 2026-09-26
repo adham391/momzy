@@ -1086,9 +1086,9 @@
       "date": "Date",
       "time": "Time",
       "amount": "Amount",
-      "onlineLater": "The session is online — the Zoom link will be emailed here the day before.",
-      "onsiteLater": "The session is in person — the exact location will be emailed here the day before.",
-      "detailsLater": "We'll email the attendance details here the day before."
+      "onlineLater": "The session is online — Heba will be in touch the day before to remind you and send the Zoom link.",
+      "onsiteLater": "The session is in person — Heba will be in touch the day before to remind you and send the exact location.",
+      "detailsLater": "Heba will be in touch the day before to remind you and share the attendance details."
     },
     "booklet": {
       "subject": "Your booklet is ready to read: {product}",
