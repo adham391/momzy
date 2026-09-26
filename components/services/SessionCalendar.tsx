@@ -19,8 +19,6 @@ interface SessionCalendarProps {
   sessions: CalendarSession[];
   /** يُستدعى عند اختيار ساعة متاحة */
   onPick: (sessionId: string) => void;
-  /** لون التمييز (لون الخدمة) */
-  accent?: string;
   /** نسخة مضغوطة — داخل النموذج المنبثق */
   compact?: boolean;
   /** صياغة السعر — بعملة الزائرة في النموذج (الافتراضي بالشيكل) */
@@ -39,14 +37,31 @@ const hhmm = (t: string) => t.slice(0, 5);
 export default function SessionCalendar({
   sessions,
   onPick,
-  accent = "var(--rose)",
   compact = false,
   formatPrice = (ils) => `₪${ils}`,
 }: SessionCalendarProps) {
   const t = useTranslations("booking");
 
   /** أيام الأسبوع مختصرة — تبدأ بالأحد (يمينًا في RTL) */
-  const WEEKDAYS = [
+  /**
+ * لونا الحالة في الرزنامة — أخضر لما فيه مكان، أحمر للمكتمل.
+ * اللون مع الكلمة لا بدلًا منها: «اكتمل العدد» مكتوبة أيضًا، فمن لا يميّز
+ * الألوان يقرأها.
+ */
+const OPEN_TONE = {
+  border: "var(--teal)",
+  background: "var(--tealpale)",
+  time: "var(--dark)",
+  meta: "#3C948D",
+};
+const FULL_TONE = {
+  border: "#E08A99",
+  background: "#FDF0F3",
+  time: "#B04A5C",
+  meta: "#B04A5C",
+};
+
+const WEEKDAYS = [
     t("calendar.sun"),
     t("calendar.mon"),
     t("calendar.tue"),
@@ -178,20 +193,21 @@ export default function SessionCalendar({
                 fontSize: compact ? 12.5 : 13.5,
                 fontWeight: clickable ? 700 : 500,
                 cursor: clickable ? "pointer" : "default",
-                border: isSelected ? `1.5px solid ${accent}` : "1.5px solid transparent",
-                background: isSelected
-                  ? accent
-                  : hasOpen && !isPast
-                    ? "rgba(130,201,196,0.16)"
-                    : "transparent",
-                color: isSelected
-                  ? "white"
-                  : isPast || daySessions.length === 0
+                /* الاختيار إطارٌ لا ملء — كي يبقى لون الحالة (أخضر/أحمر) ظاهرًا على اليوم المختار */
+                border: isSelected ? "2px solid var(--dark)" : "1.5px solid transparent",
+                background:
+                  isPast || daySessions.length === 0
+                    ? "transparent"
+                    : hasOpen
+                      ? "rgba(130,201,196,0.20)"
+                      : "rgba(224,138,153,0.18)",
+                color:
+                  isPast || daySessions.length === 0
                     ? "var(--bord)"
                     : isFullDay
-                      ? "var(--light)"
+                      ? FULL_TONE.time
                       : "var(--dark)",
-                textDecoration: isFullDay && !isSelected ? "line-through" : "none",
+                textDecoration: isFullDay ? "line-through" : "none",
               }}
             >
               {day}
@@ -214,6 +230,7 @@ export default function SessionCalendar({
             <div className="flex flex-wrap justify-center gap-2">
               {selectedSessions.map((s) => {
                 const full = s.seatsLeft <= 0;
+                const tone = full ? FULL_TONE : OPEN_TONE;
                 return (
                   <button
                     key={s.id}
@@ -221,18 +238,17 @@ export default function SessionCalendar({
                     disabled={full}
                     className="rounded-xl text-start active:scale-[0.98] [transition:transform_140ms_ease-out,border-color_160ms_ease]"
                     style={{
-                      border: `1.5px solid ${full ? "var(--bord)" : "var(--mint)"}`,
-                      background: full ? "var(--offwh)" : "white",
+                      border: `1.5px solid ${tone.border}`,
+                      background: tone.background,
                       padding: "9px 14px",
                       cursor: full ? "not-allowed" : "pointer",
-                      opacity: full ? 0.65 : 1,
                       minWidth: 132,
                     }}
                   >
-                    <div className="font-label font-extrabold text-dark" style={{ fontSize: 14 }} dir="ltr">
+                    <div className="font-label font-extrabold" style={{ fontSize: 14, color: tone.time }} dir="ltr">
                       {hhmm(s.startTime)}{s.endTime ? `–${hhmm(s.endTime)}` : ""}
                     </div>
-                    <div className="font-label text-light" style={{ fontSize: 11 }}>
+                    <div className="font-label font-bold" style={{ fontSize: 11, color: tone.meta }}>
                       {/* بلا عدد المقاعد المتبقية — «اكتمل العدد» فقط حين تمتلئ */}
                       {[full ? t("calendar.full") : null, s.price > 0 ? formatPrice(s.price) : null]
                         .filter(Boolean)
