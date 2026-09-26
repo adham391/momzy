@@ -19,6 +19,7 @@ import { listUpcomingSlots } from "@/lib/db/bookings";
 import { getActiveBookingsForSlots } from "@/lib/db/sessions";
 import { canFulfill } from "@/lib/orders/fulfillment";
 import { israelTodayISO } from "@/lib/sessions/time";
+import { remainingOf } from "@/lib/bookings/deposit";
 import { pregnancyWeekAt } from "@/lib/utils/pregnancy";
 
 /** اسم القالب ونصّه كما يُسجَّلان في Meta — يُطبَع ليُنسخ كما هو عند إنشائه */
@@ -67,6 +68,7 @@ async function todaySessions(today: string): Promise<ScheduleSession[]> {
           b.pregnancy_week === null
             ? null
             : (pregnancyWeekAt(b.pregnancy_week, b.created_at.slice(0, 10), today) ?? b.pregnancy_week),
+        remaining: remainingOf(b),
         topic: b.topic,
       })),
   }));
@@ -77,8 +79,8 @@ const EXAMPLE_SESSIONS: ScheduleSession[] = [
     startTime: "10:00:00",
     serviceName: "الورشة الحسية",
     attendees: [
-      { name: "سارة أحمد", phone: "0501234567", city: "الناصرة", babyName: "ليان", babyBirthDate: "2026-04-20", gestationalWeeks: null, pregnancyWeek: null, topic: null },
-      { name: "ريم خالد", phone: "0509876543", city: "حيفا", babyName: "آدم", babyBirthDate: "2026-02-11", gestationalWeeks: 32, pregnancyWeek: null, topic: null },
+      { name: "سارة أحمد", phone: "0501234567", city: "الناصرة", babyName: "ليان", babyBirthDate: "2026-04-20", gestationalWeeks: null, pregnancyWeek: null, remaining: 0, topic: null },
+      { name: "ريم خالد", phone: "0509876543", city: "حيفا", babyName: "آدم", babyBirthDate: "2026-02-11", gestationalWeeks: 32, pregnancyWeek: null, remaining: 0, topic: null },
     ],
   },
   {
@@ -93,6 +95,7 @@ const EXAMPLE_SESSIONS: ScheduleSession[] = [
         babyBirthDate: "2026-09-08",
         gestationalWeeks: null,
         pregnancyWeek: null,
+        remaining: 250,
         topic: "صعوبة في الرضاعة وألم عند الإرضاع، وأريد أن أفهم وضعيات أفضل",
       },
     ],

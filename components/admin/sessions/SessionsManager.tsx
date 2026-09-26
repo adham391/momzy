@@ -72,7 +72,13 @@ export default function SessionsManager({
       ) : (
         <div className="flex flex-col gap-2">
           {daySlots.map((slot) => (
-            <SessionCard key={slot.id} slot={slot} bookings={bookingsBySlot[slot.id] ?? []} day={selected} />
+            <SessionCard
+              key={slot.id}
+              slot={slot}
+              bookings={bookingsBySlot[slot.id] ?? []}
+              day={selected}
+              service={services.find((s) => s.slug === slot.service_slug) ?? null}
+            />
           ))}
         </div>
       )}

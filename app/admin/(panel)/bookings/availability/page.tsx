@@ -31,6 +31,10 @@ function toOption(service: Service, defaults: { zoomLink: string; venueAddress: 
     meetingLink: online ? defaults.zoomLink : "",
     // الزيارة البيتية مكانها بيت الأم (نصّ الخدمة)؛ الحضوري في العنوان الثابت وإلا مدينة الخدمة
     location: online ? "" : service.type === "home" ? service.location : defaults.venueAddress || service.location,
+    ageMinMonths: service.ageMinMonths ?? null,
+    ageMaxMonths: service.ageMaxMonths ?? null,
+    minPregnancyWeek: service.minPregnancyWeek ?? null,
+    askTopic: Boolean(service.askTopic),
   };
 }
 

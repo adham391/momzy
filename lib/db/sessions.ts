@@ -23,6 +23,10 @@ export interface SessionBooking {
   amount: number;
   currency: Currency;
   charged_amount: number | null;
+  /** المقبوض حين يقلّ عن amount (عربون) — null = لا عربون */
+  deposit_amount: number | null;
+  /** لحظة تحصيل الباقي — null = لم يُحصَّل */
+  remainder_collected_at: string | null;
   /** لغة الأم — تحدّد لغة إيميل التغيير */
   locale: string | null;
   /** بلدة الأم — null للحجوزات السابقة لهجرة 0025 */
@@ -42,7 +46,7 @@ export interface SessionBooking {
 }
 
 const BOOKING_FIELDS =
-  "id, booking_number, customer_name, customer_phone, customer_email, status, payment_status, amount, currency, charged_amount, locale, city, baby_birth_date, baby_name, topic, gestational_weeks, pregnancy_week, created_at, availability_id";
+  "id, booking_number, customer_name, customer_phone, customer_email, status, payment_status, amount, currency, charged_amount, locale, deposit_amount, remainder_collected_at, city, baby_birth_date, baby_name, topic, gestational_weeks, pregnancy_week, created_at, availability_id";
 
 function toSessionBooking(r: Record<string, unknown>): SessionBooking {
   return {
@@ -56,6 +60,8 @@ function toSessionBooking(r: Record<string, unknown>): SessionBooking {
     amount: Number(r.amount ?? 0),
     currency: (r.currency as Currency | undefined) ?? "ILS",
     charged_amount: r.charged_amount == null ? null : Number(r.charged_amount),
+    deposit_amount: r.deposit_amount == null ? null : Number(r.deposit_amount),
+    remainder_collected_at: (r.remainder_collected_at as string | null) ?? null,
     locale: (r.locale as string | null) ?? null,
     city: (r.city as string | null) ?? null,
     baby_birth_date: (r.baby_birth_date as string | null) ?? null,

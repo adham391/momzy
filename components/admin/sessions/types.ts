@@ -10,6 +10,12 @@ export interface ServiceOption {
   durationMin: number;
   meetingLink: string;
   location: string;
+  /** حقول التسجيل التي تسألها هذه الخدمة — كي يطابق التسجيل اليدوي التسجيلَ العادي */
+  ageMinMonths: number | null;
+  ageMaxMonths: number | null;
+  /** خدمة ما قبل الولادة — تُسأل: حامل أم بعد الولادة */
+  minPregnancyWeek: number | null;
+  askTopic: boolean;
 }
 
 /** رسالة أعلى الصفحة بعد كل فعل */

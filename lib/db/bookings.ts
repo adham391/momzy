@@ -67,6 +67,10 @@ export interface BookingRow {
   currency: Currency;
   /** المبلغ المخصوم بعملة currency — null للحجوزات القديمة (= amount بالشيكل) */
   charged_amount: number | null;
+  /** المقبوض فعلًا حين يقلّ عن amount (عربون) — null = لا عربون */
+  deposit_amount: number | null;
+  /** لحظة تحصيل الباقي — منها يُحتسب في إيراد يومه؛ null = لم يُحصَّل */
+  remainder_collected_at: string | null;
   /** ₪ لكل $1 وقت الحجز — للحجوزات بالدولار */
   exchange_rate: number | null;
   notes: string | null;
@@ -115,6 +119,8 @@ function toBooking(r: Record<string, unknown>): BookingRow {
     amount: Number(r.amount ?? 0),
     currency: (r.currency as Currency | undefined) ?? "ILS",
     charged_amount: r.charged_amount == null ? null : Number(r.charged_amount),
+    deposit_amount: r.deposit_amount == null ? null : Number(r.deposit_amount),
+    remainder_collected_at: (r.remainder_collected_at as string | null) ?? null,
     exchange_rate: r.exchange_rate == null ? null : Number(r.exchange_rate),
   };
 }
@@ -399,6 +405,119 @@ export async function createBooking(
     currency,
     chargedAmount,
   };
+}
+
+/* ── التسجيل اليدوي من اللوحة ── */
+
+export interface ManualBookingInput {
+  slotId: string;
+  name: string;
+  /** قد يكون فارغًا — أمٌّ سجّلت بالهاتف وليس لها بريد */
+  email: string;
+  phone: string;
+  city: string | null;
+  /** ما تكتبه هبة عن الحالة */
+  notes: string | null;
+  /** حقول التسجيل نفسها — تُحفظ كما تكتبها هبة، بلا شروط الفئة العمرية */
+  babyBirthDate: string | null;
+  babyName: string | null;
+  gestationalWeeks: number | null;
+  pregnancyWeek: number | null;
+  topic: string | null;
+  /**
+   * المبلغ المقبوض فعلًا: صفر = لم تدفع بعد · أقلّ من السعر = عربون · السعر فأكثر = كامل.
+   * العربون يؤكّد الحجز كالدفع الكامل — هي قادمة، فيصلها رابط اللقاء وتظهر في جدول اليوم.
+   */
+  received: number;
+  createdBy: string | null;
+}
+
+/**
+ * تسجيل تكتبه هبة بنفسها — لأمٍّ سجّلت على الواتساب أو بالهاتف.
+ *
+ * يحجز المقعد ذرّيًا كتسجيل الموقع تمامًا، فلا تتجاوز الجلسة سعتها. ولا يمرّ
+ * بشروط الفئة العمرية ولا أسبوع الحمل: هبة هي من تقرّر، وقد عرفت الحالة بنفسها.
+ *
+ * **بلا بريد**: العمود لا يقبل فراغًا في القاعدة فيُحفظ نصًّا فارغًا، وتُعلَّم
+ * علامة التذكير مُرسَلة — وإلا حاول الكرون إرساله كل صباح وفشل كل صباح.
+ * ورابط اللقاء حينها ترسله هبة بنفسها.
+ */
+export async function createManualBooking(
+  input: ManualBookingInput
+): Promise<{ id: string; bookingNumber: string } | BookingError> {
+  const supabase = createAdminClient();
+
+  const { data: slotRaw } = await supabase.from("availability").select("*").eq("id", input.slotId).single();
+  if (!slotRaw) return { error: "الجلسة غير موجودة", status: 404 };
+  const slot = toSlot(slotRaw);
+
+  // مقاعد من تركت الدفع وانتهى حجزها المؤقت تعود أولًا
+  await releaseExpiredSeatHolds();
+
+  const { data: booked } = await supabase.rpc("book_slot", { slot_id: input.slotId });
+  if (!booked) {
+    return { error: "لا مقعد متاح — الجلسة مكتملة أو محجوبة", status: 409 };
+  }
+
+  const email = input.email.trim();
+  const received = Math.max(0, input.received);
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .insert({
+      customer_name: input.name,
+      customer_email: email,
+      customer_phone: input.phone,
+      city: input.city,
+      service_slug: slot.service_slug,
+      service_name: slot.service_name,
+      availability_id: slot.id,
+      date: slot.date,
+      start_time: slot.start_time,
+      end_time: slot.end_time,
+      amount: slot.price,
+      currency: "ILS",
+      charged_amount: slot.price,
+      status: "confirmed",
+      payment_status: received > 0 || slot.price <= 0 ? "paid" : "pending",
+      payment_method: received > 0 ? "manual" : null,
+      // العربون وحده يُحفظ؛ الدفع الكامل لا يحتاج رقمًا ثانيًا
+      deposit_amount: received > 0 && received < slot.price ? received : null,
+      notes: input.notes,
+      baby_birth_date: input.babyBirthDate,
+      baby_name: input.babyName,
+      gestational_weeks: input.gestationalWeeks,
+      pregnancy_week: input.pregnancyWeek,
+      topic: input.topic,
+      admin_notes: "تسجيل يدوي من اللوحة",
+      locale: "ar",
+      seat_held: false,
+      reminder_24h_sent: email === "",
+    })
+    .select("id, booking_number")
+    .single();
+
+  if (error || !booking) {
+    // تراجع: حرّر المقعد كي لا يبقى محجوزًا بلا حجز
+    await supabase.rpc("unbook_slot", { slot_id: input.slotId });
+    return { error: error?.message ?? "فشل إنشاء التسجيل" };
+  }
+
+  return { id: booking.id as string, bookingNumber: booking.booking_number as string };
+}
+
+/**
+ * تحصيل باقي المبلغ — حين تدفع الأم في اللقاء ما تبقّى بعد العربون.
+ * يُساوي المقبوضَ بالمبلغ الكامل فيختفي «يتبقّى»، ويبقى في السجلّ أنّها دفعت على دفعتين.
+ */
+export async function collectBookingRemainder(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+  // العربون يبقى كما هو — التاريخ وحده يقول إن الباقي قُبض، وفي أي يوم
+  await supabase
+    .from("bookings")
+    .update({ remainder_collected_at: now, payment_status: "paid", updated_at: now })
+    .eq("id", id)
+    .is("remainder_collected_at", null);
 }
 
 /* ── الدفع ── */

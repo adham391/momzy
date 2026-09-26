@@ -20,6 +20,7 @@ import {
   countPageViews,
   type BookingLine,
   type BookletStats,
+  type CollectionLine,
   type ReadingLine,
   type SaleLine,
   type SessionLine,
@@ -208,7 +209,7 @@ async function fetchBookingLines(period: StatsPeriod): Promise<BookingLine[]> {
   const rows = await fetchAllRows((from, to) => {
     let query = supabase
       .from("bookings")
-      .select("id, service_slug, service_name, amount, status, payment_status, created_at")
+      .select("id, service_slug, service_name, amount, deposit_amount, status, payment_status, created_at")
       .order("id")
       .range(from, to);
     if (start) query = query.gte("created_at", start);
@@ -219,13 +220,47 @@ async function fetchBookingLines(period: StatsPeriod): Promise<BookingLine[]> {
     const amount = Number(row.amount ?? 0);
     const cancelled = row.status === "cancelled";
     const paymentStatus = String(row.payment_status);
+    const deposit = row.deposit_amount == null ? null : Number(row.deposit_amount);
     return {
       slug: (row.service_slug as string | null) ?? null,
       name: row.service_name ? toLatinDigits(String(row.service_name)) : null,
       amount,
+      // العربون وحده يُحتسب يوم الحجز؛ الباقي يأتي في fetchRemainderCollections
+      received: deposit === null ? amount : Math.min(deposit, amount),
       paid: isSettled(paymentStatus, amount, cancelled),
       pending: isAwaitingPayment(paymentStatus, amount, cancelled),
       at: String(row.created_at),
+    };
+  });
+}
+
+/**
+ * بواقي العُربونات التي حُصّلت داخل الفترة — إيرادها ليوم تحصيلها.
+ * استعلام مستقلّ عن التسجيلات: قد يكون الحجز أقدم من الفترة والتحصيل داخلها.
+ */
+async function fetchRemainderCollections(period: StatsPeriod): Promise<CollectionLine[]> {
+  const supabase = createAdminClient();
+  const start = periodQueryStart(period);
+  const rows = await fetchAllRows((from, to) => {
+    let query = supabase
+      .from("bookings")
+      .select("service_slug, service_name, amount, deposit_amount, remainder_collected_at, status")
+      .not("remainder_collected_at", "is", null)
+      .neq("status", "cancelled")
+      .order("id")
+      .range(from, to);
+    if (start) query = query.gte("remainder_collected_at", start);
+    return query;
+  });
+
+  return rows.map((row) => {
+    const amount = Number(row.amount ?? 0);
+    const deposit = row.deposit_amount == null ? amount : Number(row.deposit_amount);
+    return {
+      slug: (row.service_slug as string | null) ?? null,
+      name: row.service_name ? toLatinDigits(String(row.service_name)) : null,
+      amount: Math.max(0, amount - deposit),
+      at: String(row.remainder_collected_at),
     };
   });
 }
@@ -271,8 +306,9 @@ async function fetchOpenWaitlist(): Promise<WaitlistLine[]> {
 
 /** إحصائيات الورشات واللقاءات */
 export async function getWorkshopStats(period: StatsPeriod): Promise<WorkshopStats> {
-  const [bookings, sessions, waitlist, services, pageViews] = await Promise.all([
+  const [bookings, collections, sessions, waitlist, services, pageViews] = await Promise.all([
     fetchBookingLines(period),
+    fetchRemainderCollections(period),
     fetchUpcomingSessions(),
     fetchOpenWaitlist(),
     getServices(undefined, ADMIN_LOCALE),
@@ -281,6 +317,7 @@ export async function getWorkshopStats(period: StatsPeriod): Promise<WorkshopSta
   return aggregateWorkshops(
     {
       bookings,
+      collections,
       sessions,
       waitlist,
       // خدمات التسجيل عبر واتساب لا تمرّ بنظام الحجز، فلا أرقام لها هنا

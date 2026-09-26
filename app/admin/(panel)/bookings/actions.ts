@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { updateBookingStatus } from "@/lib/db/bookings";
+import { collectBookingRemainder, updateBookingStatus } from "@/lib/db/bookings";
 import type { BookingStatus } from "@/lib/db/bookings";
 import { markWaitlistNotified, removeFromWaitlist } from "@/lib/db/waitlist";
 
@@ -21,6 +21,13 @@ export async function changeBookingStatusAction(formData: FormData) {
   const note = String(formData.get("note") ?? "").trim() || null;
 
   await updateBookingStatus(id, status, note, await currentAdminId());
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin");
+}
+
+/** تحصيل باقي المبلغ بعد العربون — يُساوي المقبوض بالمبلغ الكامل */
+export async function collectRemainderAction(formData: FormData) {
+  await collectBookingRemainder(String(formData.get("bookingId")));
   revalidatePath("/admin/bookings");
   revalidatePath("/admin");
 }

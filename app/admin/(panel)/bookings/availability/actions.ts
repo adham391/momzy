@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { currentAdminId } from "@/lib/admin/currentAdmin";
 import { getService } from "@/lib/services/getService";
+import { createManualBooking } from "@/lib/db/bookings";
 import {
   cancelSession,
   createSessions,
@@ -28,6 +29,11 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
 
 const str = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
+/** عدد صحيح موجب من الحقل — null للفارغ أو غير الرقم (الحقول الاختيارية) */
+const posInt = (fd: FormData, key: string): number | null => {
+  const n = Number(str(fd, key));
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
 function num(fd: FormData, key: string, fallback: number): number {
   const raw = str(fd, key);
   if (raw === "") return fallback;
@@ -120,6 +126,44 @@ export async function createSessionsAction(formData: FormData) {
     return {
       notice: blocked ? `أُضيف ${added} محجوبًا — لا يظهر للزبائن حتى تفتحيه ✓` : `أُضيف ${added} ✓`,
       day: inputs[0].date,
+    };
+  });
+}
+
+/**
+ * تسجيل يدوي في جلسة — لأمٍّ سجّلت على الواتساب أو بالهاتف.
+ * المقعد يُحجز ذرّيًا كتسجيل الموقع، فلا تتجاوز الجلسة سعتها.
+ */
+export async function createManualBookingAction(formData: FormData) {
+  await attempt(formData, async () => {
+    const slotId = str(formData, "id");
+    const name = str(formData, "customer_name");
+    const phone = str(formData, "customer_phone");
+    if (name.length < 2) throw new Error("اكتبي اسم الأم");
+    if (phone.replace(/\D/g, "").length < 8) throw new Error("رقم هاتف غير صحيح");
+
+    const result = await createManualBooking({
+      slotId,
+      name,
+      phone,
+      email: str(formData, "customer_email"),
+      city: str(formData, "city") || null,
+      notes: str(formData, "notes") || null,
+      // تُحفظ كما كتبتها هبة — لا تحقّق عمريّ هنا، فهي عرفت الحالة بنفسها
+      babyBirthDate: DATE_RE.test(str(formData, "baby_birth_date")) ? str(formData, "baby_birth_date") : null,
+      babyName: str(formData, "baby_name") || null,
+      gestationalWeeks: posInt(formData, "gestational_weeks"),
+      pregnancyWeek: str(formData, "stage") === "postpartum" ? null : posInt(formData, "pregnancy_week"),
+      topic: str(formData, "topic") || null,
+      // المقبوض فعلًا: صفر = لم تدفع · أقلّ من السعر = عربون · السعر فأكثر = كامل
+      received: Math.max(0, Number(str(formData, "received")) || 0),
+      createdBy: await currentAdminId(),
+    });
+    if ("error" in result) throw new Error(result.error);
+
+    return {
+      notice: `سُجّلت ${name} في الجلسة (${result.bookingNumber}) ✓`,
+      day: str(formData, "day"),
     };
   });
 }

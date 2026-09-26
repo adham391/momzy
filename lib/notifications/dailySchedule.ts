@@ -1,6 +1,7 @@
 import { listUpcomingSlots } from "@/lib/db/bookings";
 import { getActiveBookingsForSlots } from "@/lib/db/sessions";
 import { canFulfill } from "@/lib/orders/fulfillment";
+import { remainingOf } from "@/lib/bookings/deposit";
 import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
 import { pregnancyWeekAt } from "@/lib/utils/pregnancy";
 import { israelTodayISO, shortTime, weekdayAr } from "@/lib/sessions/time";
@@ -28,6 +29,8 @@ export interface ScheduleAttendee {
   gestationalWeeks: number | null;
   /** أسبوع الحمل يوم الجلسة — للخدمات التي تسبق الولادة (بدل الطفل) */
   pregnancyWeek: number | null;
+  /** ما تبقّى على الأم بعد العربون — تُحصّله هبة في اللقاء */
+  remaining: number;
   /** موضوع اللقاء كما كتبته — للّقاءات الفردية التي تسأل عنه فقط */
   topic: string | null;
 }
@@ -93,7 +96,9 @@ function attendeeText(attendee: ScheduleAttendee, date: string): string {
     : attendee.babyName;
   // الحامل: أسبوعها يوم اللقاء بدل الطفل — لا طفل بعد
   const pregnancy = attendee.pregnancyWeek === null ? null : `حمل أسبوع ${attendee.pregnancyWeek}`;
-  return [attendee.name, attendee.city, attendee.phone, pregnancy ?? baby, shortTopic(attendee.topic)]
+  // ما بقي عليها — أهمّ سطر في يوم اللقاء بعد اسمها
+  const owed = attendee.remaining > 0 ? `يتبقّى ₪${Math.round(attendee.remaining)}` : null;
+  return [attendee.name, attendee.city, attendee.phone, pregnancy ?? baby, owed, shortTopic(attendee.topic)]
     .filter(Boolean)
     .join(" · ");
 }
@@ -153,6 +158,7 @@ export async function sendHebaDailySchedule(today = israelTodayISO()): Promise<{
           b.pregnancy_week === null
             ? null
             : (pregnancyWeekAt(b.pregnancy_week, b.created_at.slice(0, 10), today) ?? b.pregnancy_week),
+        remaining: remainingOf(b),
         topic: b.topic,
       })),
   }));

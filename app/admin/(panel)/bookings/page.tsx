@@ -5,9 +5,10 @@ import { listWaitlist } from "@/lib/db/waitlist";
 import type { BookingRow, BookingStatus } from "@/lib/db/bookings";
 import BookingsFilterBar from "@/components/admin/bookings/BookingsFilterBar";
 import { BookingStatusBadge } from "@/components/admin/StatusBadge";
-import { changeBookingStatusAction } from "./actions";
+import { changeBookingStatusAction, collectRemainderAction } from "./actions";
 import { formatSlotDate, formatTimeShort } from "@/lib/utils/format";
-import { formatCharged } from "@/lib/currency";
+import { formatCharged, formatMoney } from "@/lib/currency";
+import { remainingOf } from "@/lib/bookings/deposit";
 import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
 import { pregnancyWeekAt } from "@/lib/utils/pregnancy";
 
@@ -94,6 +95,8 @@ function babyAgeAtSession(b: BookingRow): string {
 
 function BookingCard({ booking: b }: { booking: BookingRow }) {
   const phone = b.customer_phone.replace(/\D/g, "");
+  // العربون يُحفظ في deposit_amount؛ المتبقّي يظهر حتى تُحصّله هبة
+  const remaining = remainingOf(b);
   const waMessage = encodeURIComponent(
     `مرحبًا ${b.customer_name} 🌸، تذكير بموعدك «${b.service_name ?? ""}» يوم ${formatSlotDate(b.date)} الساعة ${formatTimeShort(b.start_time)} مع Momzy. بانتظارك!`
   );
@@ -110,6 +113,12 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
           </div>
           <div className="font-semibold text-dark text-body-sm">{b.customer_name}</div>
           <div className="text-micro text-light" style={{ direction: "ltr", textAlign: "right" }}>{b.customer_phone}</div>
+          {/* العربون: ما قُبض وما بقي — يُحصَّل يوم اللقاء */}
+          {remaining > 0 && (
+            <div className="text-micro font-bold text-rose mt-0.5">
+              عربون {formatMoney(b.deposit_amount ?? 0, b.currency)} · يتبقّى {formatMoney(remaining, b.currency)}
+            </div>
+          )}
           {/* بلدة الأم — من أين تأتي المسجِّلات */}
           {b.city && <div className="text-micro text-light">📍 {b.city}</div>}
           <div className="text-body-sm text-mid mt-1">
@@ -140,6 +149,18 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
 
         {/* إجراءات */}
         <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {remaining > 0 && (
+            <form action={collectRemainderAction}>
+              <input type="hidden" name="bookingId" value={b.id} />
+              <button
+                type="submit"
+                className="px-3 py-1.5 rounded-lg text-body-sm font-bold border transition"
+                style={{ background: "#DCFCE7", color: "#166534", borderColor: "#BBF7D0" }}
+              >
+                حصّلت الباقي
+              </button>
+            </form>
+          )}
           {!closed && (
             <>
               {b.status !== "confirmed" && (

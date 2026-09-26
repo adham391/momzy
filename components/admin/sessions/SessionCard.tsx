@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Ban, Eye, MapPin, Pencil, Trash2, Video, X } from "lucide-react";
+import { Ban, Eye, MapPin, Pencil, Trash2, UserPlus, Video, X } from "lucide-react";
 import {
   cancelSessionAction,
+  createManualBookingAction,
   deleteSessionAction,
   toggleSessionBlockedAction,
   updateSessionAction,
 } from "@/app/admin/(panel)/bookings/availability/actions";
 import type { SlotRow } from "@/lib/db/bookings";
 import type { SessionBooking } from "@/lib/db/sessions";
+import type { ServiceOption } from "./types";
 import { formatCharged } from "@/lib/currency";
 import { shortTime } from "@/lib/sessions/time";
 import { formatSlotDate } from "@/lib/utils/format";
@@ -18,11 +20,32 @@ import { whatsappLink } from "@/lib/utils/whatsapp";
 const inputCls =
   "w-full px-3 py-2 rounded-xl border border-bord bg-offwh text-body-sm text-dark focus:outline-none focus:border-rose";
 const captionCls = "text-micro text-light font-label";
+const labelCls = "flex flex-col gap-1";
 const smallBtn = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-body-sm font-bold border transition";
 
 /** بطاقة جلسة في لوحة المواعيد — ملخّص، مسجِّلات، تعديل في المكان، حجب، إلغاء */
-export default function SessionCard({ slot, bookings, day }: { slot: SlotRow; bookings: SessionBooking[]; day: string }) {
+export default function SessionCard({
+  slot,
+  bookings,
+  day,
+  service,
+}: {
+  slot: SlotRow;
+  bookings: SessionBooking[];
+  day: string;
+  /** ما تسأله هذه الخدمة — يحدّد حقول التسجيل اليدوي */
+  service: ServiceOption | null;
+}) {
   const [editing, setEditing] = useState(false);
+  /** نموذج التسجيل اليدوي — مطويّ حتى تحتاجه */
+  const [adding, setAdding] = useState(false);
+  /** خدمة ما قبل الولادة: حامل أم بعد الولادة — يحدّد أي حقل يظهر */
+  const [stage, setStage] = useState<"pregnant" | "postpartum">("pregnant");
+  const prenatal = typeof service?.minPregnancyWeek === "number";
+  /** يُسأل عن الطفل: ورشة بفئة عمرية، أو خدمة ما قبل الولادة لأمٍّ ولدت */
+  const asksBaby = prenatal
+    ? stage === "postpartum"
+    : typeof service?.ageMinMonths === "number" || typeof service?.ageMaxMonths === "number";
   const full = slot.booked_count >= slot.capacity;
   const confirmedCount = bookings.filter((b) => b.payment_status === "paid" || b.amount === 0).length;
 
@@ -91,6 +114,10 @@ export default function SessionCard({ slot, bookings, day }: { slot: SlotRow; bo
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" onClick={() => setEditing((v) => !v)} className={`${smallBtn} text-dark border-bord hover:bg-offwh`}>
           {editing ? <X size={14} /> : <Pencil size={14} />} {editing ? "إغلاق" : "تعديل"}
+        </button>
+
+        <button type="button" onClick={() => setAdding((v) => !v)} className={`${smallBtn} text-teal border-bord hover:bg-tealpale`}>
+          {adding ? <X size={14} /> : <UserPlus size={14} />} {adding ? "إغلاق" : "تسجيل يدوي"}
         </button>
 
         <form
@@ -190,6 +217,129 @@ export default function SessionCard({ slot, bookings, day }: { slot: SlotRow; bo
             </p>
             <button type="submit" className="px-5 py-2 rounded-xl bg-dark text-white text-body-sm font-bold hover:brightness-125 transition">
               حفظ التعديل
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* ── تسجيل يدوي — لأمٍّ سجّلت على الواتساب أو بالهاتف ── */}
+      {adding && (
+        <form action={createManualBookingAction} className="mt-3 pt-3 border-t border-bord">
+          <input type="hidden" name="id" value={slot.id} />
+          <input type="hidden" name="day" value={day} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className={labelCls}>
+              <span className={captionCls}>اسم الأم *</span>
+              <input name="customer_name" type="text" required className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={captionCls}>الهاتف *</span>
+              <input name="customer_phone" type="tel" dir="ltr" required className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={captionCls}>البريد (اختياري — بدونه لا يصلها تذكير الرابط)</span>
+              <input name="customer_email" type="email" dir="ltr" className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={captionCls}>البلدة (اختياري)</span>
+              <input name="city" type="text" className={inputCls} />
+            </label>
+{/* حقول التسجيل نفسها التي تسألها هذه الخدمة على الموقع */}
+            {prenatal && (
+              <label className={`${labelCls} sm:col-span-2`}>
+                <span className={captionCls}>حالتها</span>
+                <div className="flex gap-2">
+                  {([
+                    ["pregnant", "حامل"],
+                    ["postpartum", "بعد الولادة"],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setStage(value)}
+                      className={`${smallBtn} ${
+                        stage === value ? "bg-dark text-white border-dark" : "text-mid border-bord hover:bg-offwh"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <input type="hidden" name="stage" value={stage} />
+              </label>
+            )}
+
+            {prenatal && stage === "pregnant" && (
+              <label className={labelCls}>
+                <span className={captionCls}>أسبوع الحمل الآن</span>
+                <input name="pregnancy_week" type="number" min={4} max={42} dir="ltr" className={inputCls} />
+              </label>
+            )}
+
+            {asksBaby && (
+              <>
+                <label className={labelCls}>
+                  <span className={captionCls}>تاريخ ميلاد الطفل</span>
+                  <input name="baby_birth_date" type="date" dir="ltr" className={inputCls} />
+                </label>
+                <label className={labelCls}>
+                  <span className={captionCls}>اسم الطفل</span>
+                  <input name="baby_name" type="text" className={inputCls} />
+                </label>
+              </>
+            )}
+
+            {asksBaby && !prenatal && (
+              <label className={`${labelCls} sm:col-span-2`}>
+                <span className={captionCls}>خديج؟ (اتركيه فارغًا لمن وُلد في موعده)</span>
+                <div className="flex items-center gap-2">
+                  <input
+                    name="gestational_weeks"
+                    type="number"
+                    min={22}
+                    max={36}
+                    dir="ltr"
+                    placeholder="أسبوع الولادة — 32 مثلًا"
+                    className={inputCls}
+                  />
+                </div>
+              </label>
+            )}
+
+            {service?.askTopic && (
+              <label className={`${labelCls} sm:col-span-2`}>
+                <span className={captionCls}>موضوع اللقاء</span>
+                <input name="topic" type="text" className={inputCls} />
+              </label>
+            )}
+
+            <label className={`${labelCls} sm:col-span-2`}>
+              <span className={captionCls}>ملاحظات (اختياري)</span>
+              <textarea name="notes" rows={2} className={inputCls} />
+            </label>
+          </div>
+          {/* المقبوض فعلًا — العربون حالة يومية في اللقاءات التي تُرتَّب مع هبة مباشرةً */}
+          <label className={`${labelCls} mt-3 max-w-[280px]`}>
+            <span className={captionCls}>المبلغ المقبوض ₪</span>
+            <input
+              name="received"
+              type="number"
+              min={0}
+              step={1}
+              dir="ltr"
+              defaultValue={slot.price}
+              className={inputCls}
+            />
+            <span className="text-micro text-light">
+              صفر = لم تدفع بعد · أقلّ من {slot.price} = عربون، ويظهر لكِ المتبقّي
+            </span>
+          </label>
+          <div className="mt-3 flex gap-2">
+            <button type="submit" className={`${smallBtn} bg-dark text-white border-dark`}>
+              حفظ التسجيل
+            </button>
+            <button type="button" onClick={() => setAdding(false)} className={`${smallBtn} text-mid border-bord hover:bg-offwh`}>
+              إلغاء
             </button>
           </div>
         </form>

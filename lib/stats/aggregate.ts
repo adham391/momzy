@@ -247,10 +247,22 @@ export function aggregateReading(
 export interface BookingLine {
   slug: string | null;
   name: string | null;
+  /** سعر الجلسة كاملًا */
   amount: number;
+  /** ما قُبض لحظة الحجز — العربون إن وُجد، وإلا المبلغ كاملًا */
+  received: number;
   paid: boolean;
   pending: boolean;
   /** وقت التسجيل (ISO) */
+  at: string;
+}
+
+/** باقي مبلغٍ حُصّل بعد العربون — إيراد بتاريخ تحصيله */
+export interface CollectionLine {
+  slug: string | null;
+  name: string | null;
+  amount: number;
+  /** لحظة التحصيل (ISO) */
   at: string;
 }
 
@@ -301,6 +313,8 @@ export interface WorkshopStats {
 /** مدخلات تجميع الورشات */
 export interface WorkshopInput {
   bookings: BookingLine[];
+  /** بواقي عُربونات حُصّلت في الفترة — إيرادها ليوم تحصيلها لا يوم حجزها */
+  collections: CollectionLine[];
   sessions: SessionLine[];
   waitlist: WaitlistLine[];
   /** الخدمات القابلة للحجز — تظهر حتى بلا تسجيلات */
@@ -355,8 +369,11 @@ export function aggregateWorkshops(
   for (const booking of paid) {
     const item = itemFor(booking.slug, booking.name);
     item.registrations += 1;
-    item.revenue += booking.amount;
+    // المقبوض وقت الحجز — والباقي يأتي في بند التحصيل بتاريخه
+    item.revenue += booking.received;
   }
+  const collected = input.collections.filter((line) => isInPeriod(line.at, firstDay));
+  for (const line of collected) itemFor(line.slug, line.name).revenue += line.amount;
   for (const session of input.sessions) {
     const item = itemFor(session.slug, session.name);
     item.upcomingSessions += 1;
@@ -375,7 +392,11 @@ export function aggregateWorkshops(
     seatsTotal: sum(list, (item) => item.seatsTotal),
     waitlist: sum(list, (item) => item.waitlist),
     series: buildSeries(
-      paid.map((booking) => ({ at: booking.at, revenue: booking.amount, count: 1 })),
+      [
+        ...paid.map((booking) => ({ at: booking.at, revenue: booking.received, count: 1 })),
+        // التحصيل إيرادٌ بلا تسجيل جديد — فلا يُحتسب في العدّ
+        ...collected.map((line) => ({ at: line.at, revenue: line.amount, count: 0 })),
+      ],
       period,
       now
     ),
