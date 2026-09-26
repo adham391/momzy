@@ -155,21 +155,29 @@ export default function TermsPage() {
             </div>
           </Section>
 
+          {/* الورشات واللقاءات — التأجيل والإلغاء. البندان الأولان (لا إلغاء،
+              والتأجيل قبل 24 ساعة) بنقطة تنبيه: هما ما يغيّر قرار الأم */}
           <Section num="05" title={t("sections.4.title")}>
-            <p>{t.rich("sections.4.intro", { b })}</p>
-            <div className="flex flex-col gap-1 mt-2">
+            <div className="flex flex-col gap-1">
               <Li warn>{t("sections.4.items.0")}</Li>
-              <Li warn>{t("sections.4.items.1")}</Li>
+              <Li>{t("sections.4.items.1")}</Li>
               <Li warn>{t("sections.4.items.2")}</Li>
-              <Li warn>{t("sections.4.items.3")}</Li>
+              <Li>{t("sections.4.items.3")}</Li>
+              <Li>{t("sections.4.items.4")}</Li>
             </div>
-            <p className="mt-3 font-bold" style={{ color: "var(--dark)" }}>
-              {t("sections.4.note")}
-            </p>
           </Section>
 
           <Section num="06" title={t("sections.5.title")}>
-            <p>{t("sections.5.body")}</p>
+            <p>{t.rich("sections.5.intro", { b })}</p>
+            <div className="flex flex-col gap-1 mt-2">
+              <Li warn>{t("sections.5.items.0")}</Li>
+              <Li warn>{t("sections.5.items.1")}</Li>
+              <Li warn>{t("sections.5.items.2")}</Li>
+              <Li warn>{t("sections.5.items.3")}</Li>
+            </div>
+            <p className="mt-3 font-bold" style={{ color: "var(--dark)" }}>
+              {t("sections.5.note")}
+            </p>
           </Section>
 
           <Section num="07" title={t("sections.6.title")}>
@@ -181,8 +189,12 @@ export default function TermsPage() {
           </Section>
 
           <Section num="09" title={t("sections.8.title")}>
+            <p>{t("sections.8.body")}</p>
+          </Section>
+
+          <Section num="10" title={t("sections.9.title")}>
             <p>
-              {t.rich("sections.8.body", {
+              {t.rich("sections.9.body", {
                 link: (chunks) => (
                   <Link href="/contact" style={{ color: "var(--teal)", fontWeight: 600 }}>
                     {chunks}

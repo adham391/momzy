@@ -562,6 +562,16 @@
         }
       },
       "4": {
+        "title": "Workshops and sessions — rescheduling and cancellation",
+        "items": {
+          "0": "Registration for workshops and one-on-one sessions is final: it cannot be cancelled, and the amount paid is non-refundable.",
+          "1": "If something comes up and you cannot attend, you may ask to move your place to another date — provided the request reaches us more than 24 hours before the session begins. We will then hold an alternative date for you from those available, at no extra charge.",
+          "2": "A request that arrives within the last 24 hours before the session — or not showing up without notice — ends the registration for good: no new date and no refund, and attending later requires registering and paying again.",
+          "3": "The 24 hours are counted from the session's scheduled start time, and a rescheduling request is sent by WhatsApp only.",
+          "4": "And if Heba has to cancel a session or change its time, we will let you know as soon as it happens and offer you an alternative date, or refund the full amount if that alternative does not suit you."
+        }
+      },
+      "5": {
         "title": "Digital content rights",
         "intro": "All digital products (the booklets and recorded workshops) are the exclusive intellectual property of <b>Heba Hasan</b>.",
         "items": {
@@ -572,19 +582,19 @@
         },
         "note": "Any violation of these rights exposes the offender to legal liability."
       },
-      "5": {
+      "6": {
         "title": "Disclaimer",
         "body": "The information provided on the site and in the products is of an awareness and educational nature and is not a substitute for consulting a doctor or health professional. Momzy is not responsible for any consequences arising from applying the information provided without consulting a specialist."
       },
-      "6": {
+      "7": {
         "title": "Changes to the terms",
         "body": "We reserve the right to amend these terms at any time. The date of the last update will be published at the top of the page. Your continued use of the site after an update constitutes your acceptance of the new terms."
       },
-      "7": {
+      "8": {
         "title": "Governing law",
         "body": "These terms and conditions are subject to the laws of the State of Israel. Any dispute will be resolved before the competent courts in Israel."
       },
-      "8": {
+      "9": {
         "title": "Contact us",
         "body": "For any question about these terms, contact us through our <link>contact us</link> page."
       }
