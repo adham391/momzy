@@ -12,6 +12,10 @@ export interface WaitlistRow {
   availability_id: string | null;
   /** تاريخ ميلاد الطفل (أو الموعد المتوقّع) — للخدمات ذات الفئة العمرية فقط */
   baby_birth_date: string | null;
+  /** اسم الطفل الكامل — للمولود وحده (الحامل بلا اسم بعد) */
+  baby_name: string | null;
+  /** بلدة الأم — تُسأل عنها كل منتظِرة */
+  city: string | null;
   /** أسبوع ولادة الخديج — منه العمر المصحَّح؛ null = وُلد في موعده */
   gestational_weeks: number | null;
   /** أسبوع الحمل يوم الانضمام — للخدمات التي تسبق الولادة */
@@ -29,6 +33,8 @@ function toWaitlist(r: Record<string, unknown>): WaitlistRow {
     customer_name: toLatinDigits(row.customer_name),
     customer_phone: toLatinDigits(row.customer_phone),
     service_name: row.service_name ? toLatinDigits(row.service_name) : null,
+    baby_name: row.baby_name ? toLatinDigits(row.baby_name) : null,
+    city: row.city ? toLatinDigits(row.city) : null,
     notes: row.notes ? toLatinDigits(row.notes) : null,
   };
 }
@@ -40,8 +46,12 @@ export interface JoinWaitlistInput {
   serviceSlug: string;
   serviceName?: string | null;
   notes?: string;
+  /** بلدة الأم — إلزامية، يتحقّق منها الـ route */
+  city: string;
   /** تاريخ ميلاد الطفل — يصل للخدمات ذات الفئة العمرية (يتحقّق منه الـ route) */
   babyBirthDate?: string | null;
+  /** اسم الطفل — للمولود وحده (يتحقّق منه الـ route) */
+  babyName?: string | null;
   /** أسبوع ولادة الخديج — منه العمر المصحَّح (يتحقّق منه الـ route) */
   gestationalWeeks?: number | null;
   /** أسبوع الحمل — للخدمات التي تسبق الولادة (بلا شرط في الانتظار) */
@@ -62,7 +72,9 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
   const phone = toLatinDigits(input.phone.trim());
   const notes = input.notes?.trim() || null;
 
+  const city = input.city.trim();
   const babyBirthDate = input.babyBirthDate || null;
+  const babyName = input.babyName || null;
   const gestationalWeeks = input.gestationalWeeks ?? null;
   const pregnancyWeek = input.pregnancyWeek ?? null;
 
@@ -72,7 +84,9 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
     customer_phone: phone,
     service_slug: input.serviceSlug,
     service_name: input.serviceName ?? null,
+    city,
     baby_birth_date: babyBirthDate,
+    baby_name: babyName,
     gestational_weeks: gestationalWeeks,
     pregnancy_week: pregnancyWeek,
     notes,
@@ -85,7 +99,16 @@ export async function joinWaitlist(input: JoinWaitlistInput): Promise<{ ok: bool
   if (error.code === "23505") {
     const { error: updateError } = await supabase
       .from("waitlist")
-      .update({ customer_name: name, customer_phone: phone, baby_birth_date: babyBirthDate, gestational_weeks: gestationalWeeks, pregnancy_week: pregnancyWeek, notes })
+      .update({
+        customer_name: name,
+        customer_phone: phone,
+        city,
+        baby_birth_date: babyBirthDate,
+        baby_name: babyName,
+        gestational_weeks: gestationalWeeks,
+        pregnancy_week: pregnancyWeek,
+        notes,
+      })
       .eq("service_slug", input.serviceSlug)
       .eq("customer_email", email);
     return updateError ? { ok: false, error: updateError.message } : { ok: true };

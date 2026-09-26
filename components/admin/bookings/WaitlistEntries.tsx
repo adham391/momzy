@@ -11,6 +11,10 @@ export interface WaitlistEntryView {
   service: string;
   phone: string;
   email: string;
+  /** بلدتها — تُسأل عنها كل منتظِرة (والصفوف القديمة بلا بلدة) */
+  city: string | null;
+  /** اسم الطفل — للمولود وحده */
+  babyName: string | null;
   /** تاريخ الانضمام بصيغة العرض */
   joined: string;
   /** عمر الطفل اليوم — للورشات ذات فئة عمرية فقط */
@@ -70,7 +74,8 @@ export default function WaitlistEntries({ entries, notifyAction, removeAction }:
                   {entry.isNotified && <span className="text-micro text-teal font-normal"> · أُشعِرت</span>}
                 </span>
                 <span className="block text-micro text-light truncate">
-                  {entry.service} · انضمّت {entry.joined}
+                  {entry.service}
+                  {entry.city && ` · ${entry.city}`} · انضمّت {entry.joined}
                 </span>
                 {/* الهاتف والبريد للشاشة الكبيرة — على الهاتف يُقصّان، ومكانهما صندوق التفاصيل */}
                 <span className="hidden md:block text-micro text-light truncate" dir="ltr">
@@ -177,6 +182,8 @@ function DetailsBox({
               {entry.email}
             </a>
           </Field>
+          {entry.city && <Field label="البلدة">{entry.city}</Field>}
+          {entry.babyName && <Field label="اسم الطفل">{entry.babyName}</Field>}
           {entry.babyAge && <Field label="عمر الطفل اليوم">{entry.babyAge}</Field>}
           {entry.correctedAge && <Field label="العمر المصحَّح">{entry.correctedAge}</Field>}
           {entry.pregnancyWeek !== null && <Field label="أسبوع الحمل اليوم">{entry.pregnancyWeek}</Field>}

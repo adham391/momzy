@@ -33,6 +33,8 @@ function toView(entry: WaitlistRow): WaitlistEntryView {
     service: entry.service_name ?? entry.service_slug,
     phone: entry.customer_phone,
     email: entry.customer_email,
+    city: entry.city,
+    babyName: entry.baby_name,
     joined: formatDate(entry.created_at),
     // عمر الطفل اليوم — لا يوم انضمامها: الشهر يمرّ فيتغيّر
     babyAge: entry.baby_birth_date ? babyAgeDetailedLabel(entry.baby_birth_date, israelTodayISO()) : null,

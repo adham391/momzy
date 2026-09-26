@@ -301,8 +301,8 @@ export default function BookingModal({
         )
       : null;
 
-  /** اسم الطفل إلزامي للمولود فقط، وعند الحجز وحده — الانتظار يكفيه العمر */
-  const needsBabyName = step === "form" && needsBabyAge && isBabyBorn(form.babyBirthDate, israelTodayISO());
+  /** اسم الطفل إلزامي للمولود فقط — الموعد المتوقّع (حامل) لا اسم له بعد */
+  const needsBabyName = needsBabyAge && isBabyBorn(form.babyBirthDate, israelTodayISO());
 
   /** عمر مرفوض (وُلد فعلًا) — عنده نقترح ما يناسبه بدل أن نغلق الباب */
   /** عمر الطفل بالتفصيل (أشهر وأيام) عند تاريخ القياس — للعرض في التلميحات */
@@ -345,8 +345,8 @@ export default function BookingModal({
   /** موضوع اللقاء — يُسأل في خطوة الحجز الفعلي فقط، كالفئة العمرية */
   const needsTopic = step === "form" && Boolean(askTopic);
 
-  /** البلدة — في التسجيل الفعلي وحده؛ نموذجا التواصل والانتظار لا يحفظانها */
-  const needsCity = step === "form";
+  /** البلدة — في التسجيل وفي الانتظار؛ نموذج التواصل وحده لا يحفظها */
+  const needsCity = step === "form" || step === "waitlist";
 
   /** لقاء حضوري وزائرة من خارج البلاد — التسجيل من داخل البلاد فقط (السيرفر يرفض أيضًا) */
   const blockedAbroad =
@@ -462,10 +462,12 @@ export default function BookingModal({
           name: form.name,
           email: form.email,
           phone: form.phone,
+          city: normalizeBookingCity(form.city),
           serviceSlug,
           serviceName: serviceTitle,
           notes: form.message,
           babyBirthDate: needsBabyAge ? form.babyBirthDate || null : null,
+          babyName: needsBabyName ? normalizeBabyName(form.babyName) : null,
           gestationalWeeks: needsPreterm ? gestationalWeeks : null,
           pregnancyWeek: needsPregnancyWeek ? Number(form.pregnancyWeek) : null,
         }),
@@ -648,7 +650,7 @@ export default function BookingModal({
                         style={{ ...inputBase, border: `1.5px solid ${borderFor("phone")}`, textAlign: "right" }} onFocus={() => setFocused("phone")} onBlur={() => setFocused(null)} />
                     </div>
                   </div>
-                  {/* البلدة — في التسجيل الفعلي وحده؛ هبة تحتاج أن تعرف من أين تأتي المسجِّلات */}
+                  {/* البلدة — في التسجيل والانتظار؛ هبة تحتاج أن تعرف من أين تأتي كل أم */}
                   {needsCity && (
                     <div>
                       <label style={labelStyle}>{t("modal.cityLabel")}</label>

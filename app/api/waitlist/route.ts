@@ -13,6 +13,8 @@ import {
   isGestationalWeeksValid,
 } from "@/lib/utils/age";
 import { hasPregnancyGate, isPregnancyWeekValid } from "@/lib/utils/pregnancy";
+import { isBabyBorn, isBabyNameValid, normalizeBabyName } from "@/lib/utils/babyName";
+import { isBookingCityValid, normalizeBookingCity } from "@/lib/utils/bookingCity";
 import { israelTodayISO } from "@/lib/sessions/time";
 import { tooManyRequests, withinRateLimit } from "@/lib/security/rateLimit";
 
@@ -22,7 +24,7 @@ function isValidEmail(email: string): boolean {
 
 /**
  * POST /api/waitlist — الانضمام لقائمة انتظار ورشة (عند اكتمال المقاعد).
- * body: { name, email, phone, serviceSlug, serviceName?, notes?, babyBirthDate?, gestationalWeeks? }
+ * body: { name, email, phone, city, serviceSlug, serviceName?, notes?, babyBirthDate?, babyName?, gestationalWeeks? }
  * التسجيل مرتين لا يُنشئ صفًّا مكررًا (upsert).
  */
 export async function POST(request: Request) {
@@ -39,10 +41,12 @@ export async function POST(request: Request) {
     name?: string;
     email?: string;
     phone?: string;
+    city?: string;
     serviceSlug?: string;
     serviceName?: string;
     notes?: string;
     babyBirthDate?: string;
+    babyName?: string;
     gestationalWeeks?: number;
     pregnancyWeek?: number;
   };
@@ -56,6 +60,11 @@ export async function POST(request: Request) {
   if (typeof b.serviceSlug !== "string" || !b.serviceSlug.trim())
     return NextResponse.json({ success: false, error: "الورشة غير محددة" }, { status: 400 });
 
+  // البلدة — كالتسجيل: هبة تتّصل بالمنتظِرات وتحتاج أن تعرف من أين تأتي كلٌّ منهنّ
+  const city = normalizeBookingCity(b.city);
+  if (!isBookingCityValid(city))
+    return NextResponse.json({ success: false, error: "اكتبي اسم بلدتك" }, { status: 400 });
+
   /*
    * الفئة العمرية — كالتسجيل تمامًا، والحكم على السيرفر لا في الواجهة.
    * لا موعد جلسة بعد، فيُقاس العمر **اليوم**: من طفلها خارج الفئة الآن
@@ -63,6 +72,8 @@ export async function POST(request: Request) {
    */
   const service = await getService(b.serviceSlug);
   let babyBirthDate: string | null = null;
+  /** اسم الطفل — للمولود وحده، كالتسجيل تمامًا */
+  let babyName: string | null = null;
   let gestationalWeeks: number | null = null;
 
   /**
@@ -112,16 +123,26 @@ export async function POST(request: Request) {
       );
     }
     babyBirthDate = b.babyBirthDate;
+
+    // الاسم للمولود فقط وإلزامي له — الموعد المتوقّع (حامل) بلا اسم بعد
+    if (isBabyBorn(babyBirthDate, israelTodayISO())) {
+      babyName = normalizeBabyName(b.babyName);
+      if (!isBabyNameValid(babyName)) {
+        return NextResponse.json({ success: false, error: "اكتبي اسم الطفل الكامل" }, { status: 400 });
+      }
+    }
   }
 
   const result = await joinWaitlist({
     name: b.name,
     email: b.email,
     phone: b.phone,
+    city,
     serviceSlug: b.serviceSlug,
     serviceName: b.serviceName ?? null,
     notes: b.notes,
     babyBirthDate,
+    babyName,
     gestationalWeeks,
     pregnancyWeek,
   });
