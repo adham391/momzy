@@ -8,7 +8,8 @@ import { BookingStatusBadge } from "@/components/admin/StatusBadge";
 import { changeBookingStatusAction, collectRemainderAction } from "./actions";
 import { formatSlotDate, formatTimeShort } from "@/lib/utils/format";
 import { formatCharged, formatMoney } from "@/lib/currency";
-import { remainingOf } from "@/lib/bookings/deposit";
+import { receivedAtBooking, remainingOf } from "@/lib/bookings/deposit";
+import BookingEditForm from "@/components/admin/bookings/BookingEditForm";
 import { babyAgeDetailedLabel, correctedAgeLabel } from "@/lib/utils/age";
 import { pregnancyWeekAt } from "@/lib/utils/pregnancy";
 
@@ -180,6 +181,25 @@ function BookingCard({ booking: b }: { booking: BookingRow }) {
           </a>
         </div>
       </div>
+
+      {/* تصحيح البيانات — مطويّ حتى يُحتاج */}
+      <BookingEditForm
+        values={{
+          id: b.id,
+          customerName: b.customer_name,
+          customerPhone: b.customer_phone,
+          customerEmail: b.customer_email,
+          city: b.city,
+          notes: b.notes,
+          topic: b.topic,
+          babyBirthDate: b.baby_birth_date,
+          babyName: b.baby_name ?? null,
+          gestationalWeeks: b.gestational_weeks,
+          pregnancyWeek: b.pregnancy_week,
+          amount: b.amount,
+          received: receivedAtBooking(b) + (b.remainder_collected_at ? remaining : 0),
+        }}
+      />
     </div>
   );
 }

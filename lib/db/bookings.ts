@@ -456,7 +456,23 @@ export async function createManualBooking(
 
   const { data: booked } = await supabase.rpc("book_slot", { slot_id: input.slotId });
   if (!booked) {
-    return { error: "لا مقعد متاح — الجلسة مكتملة أو محجوبة", status: 409 };
+    /*
+     * الحجب يخفي الجلسة عن الزبائن لا عن هبة — و`book_slot` يشترط ألّا تكون محجوبة.
+     * فنأخذ المقعد هنا بمقارنة-وتحديث: يفشل لو تغيّر العدد بيننا، فلا يتجاوز السعة.
+     * أمّا الامتلاء فيمنع يدويًّا كما يمنع إلكترونيًّا — المقعد غير موجود أصلًا.
+     */
+    const free = slot.capacity - slot.booked_count;
+    if (!slot.is_blocked || free <= 0) {
+      return { error: "لا مقعد متاح — الجلسة مكتملة", status: 409 };
+    }
+    const { data: forced } = await supabase
+      .from("availability")
+      .update({ booked_count: slot.booked_count + 1 })
+      .eq("id", slot.id)
+      .eq("booked_count", slot.booked_count)
+      .select("id")
+      .maybeSingle();
+    if (!forced) return { error: "تعذّر حجز المقعد — حدّثي الصفحة وحاولي مجددًا", status: 409 };
   }
 
   const email = input.email.trim();
@@ -518,6 +534,55 @@ export async function collectBookingRemainder(id: string): Promise<void> {
     .update({ remainder_collected_at: now, payment_status: "paid", updated_at: now })
     .eq("id", id)
     .is("remainder_collected_at", null);
+}
+
+/** ما يُصحَّح من بيانات حجز — ما قد يُخطئ فيه من يكتبه */
+export interface BookingDetailsPatch {
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  city: string | null;
+  notes: string | null;
+  topic: string | null;
+  babyBirthDate: string | null;
+  babyName: string | null;
+  gestationalWeeks: number | null;
+  pregnancyWeek: number | null;
+  /** المقبوض فعلًا — منه تُشتقّ حالة الدفع والعربون */
+  received: number;
+}
+
+/**
+ * تصحيح بيانات مسجِّلة من اللوحة — اسمٌ كُتب خطأً أو مبلغٌ سُجّل غلطًا.
+ * المقبوض يُعيد اشتقاق حالة الدفع والعربون، كما في التسجيل اليدوي تمامًا.
+ */
+export async function updateBookingDetails(id: string, patch: BookingDetailsPatch): Promise<void> {
+  const supabase = createAdminClient();
+  const { data: current } = await supabase.from("bookings").select("amount").eq("id", id).maybeSingle();
+  if (!current) return;
+
+  const amount = Number(current.amount ?? 0);
+  const received = Math.max(0, patch.received);
+  const email = patch.customerEmail.trim();
+
+  await supabase
+    .from("bookings")
+    .update({
+      customer_name: patch.customerName,
+      customer_phone: patch.customerPhone,
+      customer_email: email,
+      city: patch.city,
+      notes: patch.notes,
+      topic: patch.topic,
+      baby_birth_date: patch.babyBirthDate,
+      baby_name: patch.babyName,
+      gestational_weeks: patch.gestationalWeeks,
+      pregnancy_week: patch.pregnancyWeek,
+      payment_status: received > 0 || amount <= 0 ? "paid" : "pending",
+      deposit_amount: received > 0 && received < amount ? received : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
 }
 
 /* ── الدفع ── */

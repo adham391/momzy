@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { collectBookingRemainder, updateBookingStatus } from "@/lib/db/bookings";
+import { collectBookingRemainder, updateBookingDetails, updateBookingStatus } from "@/lib/db/bookings";
 import type { BookingStatus } from "@/lib/db/bookings";
 import { markWaitlistNotified, removeFromWaitlist } from "@/lib/db/waitlist";
 
@@ -23,6 +23,32 @@ export async function changeBookingStatusAction(formData: FormData) {
   await updateBookingStatus(id, status, note, await currentAdminId());
   revalidatePath("/admin/bookings");
   revalidatePath("/admin");
+}
+
+/** تصحيح بيانات مسجِّلة — الاسم والهاتف والبريد والمبلغ وما كُتب عن الطفل */
+export async function updateBookingDetailsAction(formData: FormData) {
+  const id = String(formData.get("bookingId"));
+  const text = (key: string) => String(formData.get(key) ?? "").trim();
+  const num = (key: string): number | null => {
+    const n = Number(text(key));
+    return Number.isInteger(n) && n > 0 ? n : null;
+  };
+
+  await updateBookingDetails(id, {
+    customerName: text("customer_name"),
+    customerPhone: text("customer_phone"),
+    customerEmail: text("customer_email"),
+    city: text("city") || null,
+    notes: text("notes") || null,
+    topic: text("topic") || null,
+    babyBirthDate: /^\d{4}-\d{2}-\d{2}$/.test(text("baby_birth_date")) ? text("baby_birth_date") : null,
+    babyName: text("baby_name") || null,
+    gestationalWeeks: num("gestational_weeks"),
+    pregnancyWeek: num("pregnancy_week"),
+    received: Math.max(0, Number(text("received")) || 0),
+  });
+  revalidatePath("/admin/bookings");
+  revalidatePath("/admin/bookings/availability");
 }
 
 /** تحصيل باقي المبلغ بعد العربون — يُساوي المقبوض بالمبلغ الكامل */

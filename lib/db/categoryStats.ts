@@ -6,6 +6,7 @@ import { toLatinDigits } from "@/lib/utils/format";
 import type { GiftOptions } from "@/lib/store/cart";
 import { fetchAllRows } from "./fetchAllRows";
 import {
+  isInPeriod,
   localDayKey,
   periodFirstDay,
   periodQueryStart,
@@ -200,6 +201,78 @@ export async function getBookletStats(period: StatsPeriod): Promise<BookletStats
   };
 }
 
+/* ── الإيرادات حسب النوع ── */
+
+/**
+ * إيراد كل نوع في الفترة، ومجموعها.
+ *
+ * **المجموع نقدٌ لا جمع أرقام التبويبات**: إجمالي الطلبات المدفوعة (بالشحن وبعد
+ * الخصم) + ما قُبض من الحجوزات. أمّا تقسيم المتجر فمن بنود الطلبات — وهي قيمة
+ * البضاعة قبل كوبون الطلب وبلا شحن، فيظهر الفرق سطرًا صريحًا تُغلق به الحسبة.
+ */
+export interface RevenueByKind {
+  products: number;
+  booklets: number;
+  /** الفرق بين إجمالي الطلبات وقيمة بنودها — شحنٌ مضافًا وخصمٌ مطروحًا */
+  shippingAndDiscounts: number;
+  workshops: number;
+  total: number;
+}
+
+/** إجمالي الطلبات المدفوعة في الفترة — المبلغ المخصوم فعلًا */
+async function fetchSettledOrdersTotal(period: StatsPeriod): Promise<number> {
+  const supabase = createAdminClient();
+  const start = periodQueryStart(period);
+  const rows = await fetchAllRows((from, to) => {
+    let query = supabase
+      .from("orders")
+      .select("id, payment_status, order_status, total_amount, created_at")
+      .order("id")
+      .range(from, to);
+    if (start) query = query.gte("created_at", start);
+    return query;
+  });
+
+  return rows.reduce((sum, row) => {
+    const order = row as unknown as EmbeddedOrder;
+    return orderSaleState(order).paid ? sum + Number(order.total_amount ?? 0) : sum;
+  }, 0);
+}
+
+/** إيرادات الفترة موزّعة على أنواعها */
+export async function getRevenueByKind(period: StatsPeriod): Promise<RevenueByKind> {
+  const [ordersTotal, physical, digital, bookings, collections] = await Promise.all([
+    fetchSettledOrdersTotal(period),
+    fetchSaleLines("physical", period),
+    fetchSaleLines("digital", period),
+    fetchBookingLines(period),
+    fetchRemainderCollections(period),
+  ]);
+
+  const firstDay = periodFirstDay(period);
+  const sumPaid = (lines: SaleLine[]) =>
+    lines
+      .filter((line) => line.paid && isInPeriod(line.at, firstDay))
+      .reduce((sum, line) => sum + line.revenue, 0);
+
+  const products = sumPaid(physical);
+  const booklets = sumPaid(digital);
+  // المقبوض من الحجوزات: العربون يوم الحجز، والباقي يوم تحصيله
+  const workshops =
+    bookings
+      .filter((line) => line.paid && isInPeriod(line.at, firstDay))
+      .reduce((sum, line) => sum + line.received, 0) +
+    collections.filter((line) => isInPeriod(line.at, firstDay)).reduce((sum, line) => sum + line.amount, 0);
+
+  return {
+    products,
+    booklets,
+    shippingAndDiscounts: ordersTotal - products - booklets,
+    workshops,
+    total: ordersTotal + workshops,
+  };
+}
+
 /* ── الورشات ── */
 
 /** تسجيلات الفترة */
@@ -265,14 +338,17 @@ async function fetchRemainderCollections(period: StatsPeriod): Promise<Collectio
   });
 }
 
-/** الجلسات القادمة غير المحجوبة — من اليوم بتوقيت إسرائيل */
+/**
+ * الجلسات القادمة من اليوم بتوقيت إسرائيل — **بما فيها المحجوبة**.
+ * الحجب يخفيها عن الزبائن لا عن هبة: هي جلساتها، وقد تحمل تسجيلًا يدويًّا
+ * (كانت تُستثنى، فيظهر مقعد محجوز فعلًا وكأنه صفر).
+ */
 async function fetchUpcomingSessions(): Promise<SessionLine[]> {
   const supabase = createAdminClient();
   const rows = await fetchAllRows((from, to) =>
     supabase
       .from("availability")
       .select("id, service_slug, service_name, capacity, booked_count")
-      .eq("is_blocked", false)
       .gte("date", localDayKey(new Date()))
       .order("id")
       .range(from, to)
