@@ -21,6 +21,11 @@ export interface SiteSettingsSocialLinks {
 export interface SiteSettingsContact {
   email?: string;
   whatsappNumber?: string;
+  /**
+   * رقم واتساب صفحات الخدمات — رقم هبة الشخصي.
+   * الخدمات تُدار على رقمها لا على رقم Momzy؛ الفارغ يعود لرقم التواصل.
+   */
+  servicesWhatsapp?: string;
   address?: string;
 }
 
@@ -161,6 +166,7 @@ export async function getSiteSettings(locale?: string): Promise<SiteSettings> {
     contact {
       email,
       whatsappNumber,
+      servicesWhatsapp,
       ${tf("address")}
     },
     footer {

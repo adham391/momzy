@@ -3,6 +3,7 @@ import { pageSeo } from "@/lib/seo/site";
 import { getTranslations } from "next-intl/server";
 import { getServices } from "@/lib/services/getServices";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
+import { servicesWhatsappNumber } from "@/lib/services/contactLink";
 import Container from "@/components/ui/Container";
 import SectionLabel from "@/components/ui/SectionLabel";
 import PolkaDots from "@/components/ui/PolkaDots";
@@ -23,7 +24,8 @@ export const revalidate = 60;
 export default async function ServicesPage() {
   const t = await getTranslations("services");
   const [allServices, settings] = await Promise.all([getServices(), getSiteSettings()]);
-  const whatsappNumber = settings.contact.whatsappNumber;
+  // كل واتساب في الخدمات رقم هبة — والخدمة ذات الرقم الخاص تتجاوزه في البطاقة
+  const whatsappNumber = servicesWhatsappNumber(settings.contact);
 
   const groupServices      = allServices.filter((s) => s.category === "group");
   const individualServices = allServices.filter((s) => s.category === "individual");

@@ -113,6 +113,14 @@ export const siteSettings = defineType({
           description: "قد يختلف عن رابط السوشيال",
         }),
         defineField({
+          name: "servicesWhatsapp",
+          title: "رقم WhatsApp للخدمات",
+          type: "string",
+          placeholder: "+972546639973",
+          description:
+            "رقم هبة الشخصي — تذهب إليه كل أزرار واتساب في صفحات الخدمات والورشات (الفوتر وبقية الموقع تبقى على رقم التواصل أعلاه). الفارغ يعود لرقم التواصل، ويمكن لأي خدمة أن يكون لها رقمها الخاص من حقلها.",
+        }),
+        defineField({
           name: "address",
           title: "العنوان (اختياري)",
           type: "internationalizedArrayString",

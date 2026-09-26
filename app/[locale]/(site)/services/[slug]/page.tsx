@@ -9,6 +9,7 @@ import { getService } from "@/lib/services/getService";
 import { getServices } from "@/lib/services/getServices";
 import { getAllServiceSlugs } from "@/lib/sanity/queries/services";
 import { getSiteSettings } from "@/lib/sanity/queries/siteSettings";
+import { servicesWhatsappNumber } from "@/lib/services/contactLink";
 import { SEED_SERVICES } from "@/lib/services/seed";
 import ServiceDetailHero from "@/components/services/ServiceDetailHero";
 import ServiceDetailContent from "@/components/services/ServiceDetailContent";
@@ -77,11 +78,10 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
     : service.color === "mint" ? "#6BB5B0"
     : "var(--rose)";
 
-  // رقم واتساب من إعدادات الموقع — نفس مصدر صفحة القائمة والفوتر، وهو ما
-  // يحرّره الأدمن. كان يُقرأ من env فبقي placeholder وأُرسلت العميلات إلى
-  // رابط واتساب فارغ.
-  // رقم الخدمة إن كان لها رقم خاصّ (الزيارة البيتية مثلًا)، وإلا رقم الموقع
-  const whatsapp = service.whatsappNumber || (await getSiteSettings()).contact.whatsappNumber;
+  // رقم واتساب الخدمات — رقم هبة (أو رقم الخدمة الخاصّ إن وُضع لها)، من
+  // إعدادات Studio لا من env: كان يُقرأ من env فبقي placeholder وأُرسلت
+  // العميلات إلى رابط واتساب فارغ.
+  const whatsapp = servicesWhatsappNumber((await getSiteSettings()).contact, service.whatsappNumber);
 
   return (
     <div style={{ background: "var(--offwh)" }}>
