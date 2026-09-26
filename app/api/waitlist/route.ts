@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { joinWaitlist } from "@/lib/db/waitlist";
+import { sendWaitlistNotification } from "@/lib/notifications/waitlist";
 import { getService } from "@/lib/services/getService";
 import {
   MAX_PRETERM_WEEKS,
@@ -60,6 +61,13 @@ export async function POST(request: Request) {
   if (typeof b.serviceSlug !== "string" || !b.serviceSlug.trim())
     return NextResponse.json({ success: false, error: "الورشة غير محددة" }, { status: 400 });
 
+  /* القيم بعد التحقّق — يقرؤها الإشعار المؤجَّل أيضًا (التضييق لا يعبر الـ closure) */
+  const name = b.name.trim();
+  const email = b.email.trim();
+  const phone = b.phone.trim();
+  const serviceSlug = b.serviceSlug.trim();
+  const notes = b.notes?.trim() || null;
+
   // البلدة — كالتسجيل: هبة تتّصل بالمنتظِرات وتحتاج أن تعرف من أين تأتي كلٌّ منهنّ
   const city = normalizeBookingCity(b.city);
   if (!isBookingCityValid(city))
@@ -70,7 +78,7 @@ export async function POST(request: Request) {
    * لا موعد جلسة بعد، فيُقاس العمر **اليوم**: من طفلها خارج الفئة الآن
    * لن يصلح له المقعد حين يُفتح، فانتظاره انتظارٌ بلا جدوى.
    */
-  const service = await getService(b.serviceSlug);
+  const service = await getService(serviceSlug);
   let babyBirthDate: string | null = null;
   /** اسم الطفل — للمولود وحده، كالتسجيل تمامًا */
   let babyName: string | null = null;
@@ -134,13 +142,13 @@ export async function POST(request: Request) {
   }
 
   const result = await joinWaitlist({
-    name: b.name,
-    email: b.email,
-    phone: b.phone,
+    name,
+    email,
+    phone,
     city,
-    serviceSlug: b.serviceSlug,
+    serviceSlug,
     serviceName: b.serviceName ?? null,
-    notes: b.notes,
+    notes: notes ?? undefined,
     babyBirthDate,
     babyName,
     gestationalWeeks,
@@ -151,5 +159,23 @@ export async function POST(request: Request) {
     console.error("[waitlist] فشل التسجيل:", result.error);
     return NextResponse.json({ success: false, error: "تعذّر التسجيل، حاولي مجددًا" }, { status: 500 });
   }
+
+  // إشعار هبة — بعد الرد، فلا ينتظر الإيميلُ الأمَّ ولا يُفشِل انضمامها
+  after(() =>
+    sendWaitlistNotification({
+      name,
+      email,
+      phone,
+      city,
+      serviceName: b.serviceName?.trim() || serviceSlug,
+      babyBirthDate,
+      babyName,
+      gestationalWeeks,
+      pregnancyWeek,
+      notes,
+      todayISO: israelTodayISO(),
+    }),
+  );
+
   return NextResponse.json({ success: true });
 }
