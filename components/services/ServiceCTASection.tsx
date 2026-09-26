@@ -62,7 +62,11 @@ const COLOR_SCHEME: Record<ServiceColor, {
 };
 
 interface ServiceCTASectionProps {
-  serviceTitle: string;
+  /**
+   * اسم الخدمة — يغيب في CTA صفحة الخدمات: هناك لا خدمة بعد، بل أمّ تسأل
+   * أيّها يناسبها، فتصير الرسالة استفسارًا مفتوحًا لا حجزًا لخدمة بعينها.
+   */
+  serviceTitle?: string;
   serviceSlug?: string;
   color?: ServiceColor;
   heading?: React.ReactNode;
@@ -103,11 +107,16 @@ export default function ServiceCTASection({
   const resolvedHeading = heading ?? t("ctaReadyHeading");
   const resolvedSubheading = subheading ?? t("ctaReadySubheading");
 
+  /** بلا خدمة بعينها (CTA صفحة الخدمات) — العنوان والرسالة عن اختيار الخدمة */
+  const title = serviceTitle ?? t("chooseTitle");
+
   const contact = whatsappOnly
-    ? serviceContactTarget(whatsappNumber, t("waArrangeMessage", { title: serviceTitle }))
+    ? serviceContactTarget(whatsappNumber, t("waArrangeMessage", { title }))
     : null;
 
-  const waMessage = encodeURIComponent(t("waBookMessage", { title: serviceTitle }));
+  const waMessage = encodeURIComponent(
+    serviceTitle ? t("waBookMessage", { title: serviceTitle }) : t("waChooseMessage"),
+  );
   const waLink    = whatsappNumber
     ? `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${waMessage}`
     : null;
@@ -278,7 +287,7 @@ export default function ServiceCTASection({
         <BookingModal
           open={open}
           onClose={() => setOpen(false)}
-          serviceTitle={serviceTitle}
+          serviceTitle={title}
           serviceSlug={serviceSlug}
           ageGate={ageGate}
           askTopic={askTopic}

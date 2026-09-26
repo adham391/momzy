@@ -85,8 +85,8 @@ export default async function ServicesPage() {
       />
 
       {/* CTA نهائي — zIndex 4 */}
+      {/* بلا serviceTitle — الأم هنا تسأل أيّ خدمة تناسبها، لا تحجز خدمة بعينها */}
       <ServiceCTASection
-        serviceTitle={t("generalConsultation")}
         heading={t.rich("chooseHeading", { accent: (chunks) => <span style={{ color: "var(--rose)" }}>{chunks}</span> })}
         subheading={t("chooseText")}
         whatsappNumber={whatsappNumber}
